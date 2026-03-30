@@ -1,0 +1,8 @@
+{
+  "clientId": "temiRobot2",
+  "username": "mqtt",
+  "password": "mqtt",
+  "topic": "#",
+  "address": "192.168.188.125",
+  "port": "1883"
+}
