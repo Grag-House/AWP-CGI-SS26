@@ -3,6 +3,6 @@
   "username": "mqtt",
   "password": "mqtt",
   "topic": "#",
-  "address": "192.168.188.125",
+  "address": "127.0.0.1",
   "port": "1883"
 }
