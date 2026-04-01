@@ -1,0 +1,23 @@
+services:
+  mosquitto:
+    container_name: mosquitto
+    image: eclipse-mosquitto:2.1.2-alpine
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    ports:
+      - published: 1883
+        target: 1883
+    volumes:
+      - type: bind
+        source: ./config/mosquitto.conf
+        target: /mosquitto/config/mosquitto.conf
+        read_only: true
+      - type: bind
+        source: ./data
+        target: /mosquitto/data
+      - type: bind
+        source: ./log
+        target: /mosquitto/log
