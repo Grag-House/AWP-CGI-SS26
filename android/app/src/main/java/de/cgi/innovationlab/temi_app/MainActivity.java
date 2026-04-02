@@ -18,8 +18,8 @@ import io.flutter.plugin.common.MethodChannel;
 public class MainActivity extends FlutterActivity implements FlutterPlugin, MethodChannel.MethodCallHandler {
     private static final String CHANNEL_TEMI = "flutter_temi";
     private static final String CHANNEL_TEMI_COMMANDS = CHANNEL_TEMI + "/flutter_temi";
-    private final Robot robot = Robot.getInstance();
-
+//    private final Robot robot = Robot.getInstance();
+    private Robot robot;
     private final GoToLocationStatusChangedImpl goToLocationStatusChanged = new GoToLocationStatusChangedImpl();
     private final TtsListenerImpl ttsListener = new TtsListenerImpl();
     private final AsrImpl asrImpl = new AsrImpl();
@@ -30,6 +30,13 @@ public class MainActivity extends FlutterActivity implements FlutterPlugin, Meth
 
     @Override
     public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
+
+        try {
+            robot = Robot.getInstance();
+        } catch (Exception e) {
+            robot = null;
+        }
+
         System.out.println("configure flutter engine");
         EventChannel onLocationStatusChangeEventChannel = new EventChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), onLocationStatusChangeEventChannelName);
         onLocationStatusChangeEventChannel.setStreamHandler(this.goToLocationStatusChanged);
@@ -40,10 +47,14 @@ public class MainActivity extends FlutterActivity implements FlutterPlugin, Meth
         EventChannel asrEventChannel = new EventChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), asrEventChannelName);
         asrEventChannel.setStreamHandler(this.asrImpl);
 
-        robot.addOnGoToLocationStatusChangedListener(goToLocationStatusChanged);
-        robot.addTtsListener(ttsListener);
-        robot.addAsrListener(asrImpl);
-        robot.requestToBeKioskApp();
+        if (robot != null) {
+            robot.addOnGoToLocationStatusChangedListener(goToLocationStatusChanged);
+            robot.addTtsListener(ttsListener);
+            robot.addAsrListener(asrImpl);
+            robot.requestToBeKioskApp();
+        } else {
+            System.out.println("temi listeners not registered because robot is null");
+        }
 //        robot.addAsrListener(new Robot.AsrListener() {
 //            @Override
 //            public void onAsrResult(@NonNull String s) {
