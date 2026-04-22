@@ -1,4 +1,4 @@
-package hka.awp.temi_cgi_app
+package hka.awp.temi_cgi_app.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ImageNotSupported
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
@@ -27,10 +29,11 @@ import androidx.compose.ui.unit.dp
 fun DashboardCard(
     title: String,
     subtitle: String,
-    icon: ImageVector,
+    icon: ImageVector?,
     bottomText: String? = null,
     overline: String? = null,
-    isTemp: Boolean = false
+    isTemp: Boolean = false,
+    customIcon: @Composable (() -> Unit)? = null,
 ) {
     OutlinedCard(
         modifier = Modifier
@@ -42,19 +45,22 @@ fun DashboardCard(
                 .padding(24.dp)
                 .fillMaxSize()
         ) {
-            // Icon Container mit leichtem Hintergrund
             Box(
                 modifier = Modifier
                     .size(64.dp)
                     .background(Color.White, RoundedCornerShape(16.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    icon,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(32.dp)
-                )
+                if (customIcon == null) {
+                    Icon(
+                        icon ?: Icons.Rounded.ImageNotSupported,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(32.dp)
+                    )
+                } else {
+                    customIcon()
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -69,7 +75,6 @@ fun DashboardCard(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // Flexibler Fußbereich für Status, Temperatur oder Badges
             if (overline != null) {
                 Text(text = overline, fontSize = MaterialTheme.typography.labelSmall.fontSize)
             }
@@ -81,7 +86,6 @@ fun DashboardCard(
                         style = MaterialTheme.typography.headlineMedium
                     )
                 } else {
-                    // Simulierter Badge
                     Text(
                         text = bottomText,
                         color = MaterialTheme.colorScheme.primary,
