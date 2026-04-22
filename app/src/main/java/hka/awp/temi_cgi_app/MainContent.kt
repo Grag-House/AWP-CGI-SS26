@@ -34,7 +34,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun MainContent(modifier: Modifier = Modifier) {
+fun MainContent(
+    modifier: Modifier = Modifier,
+    onOpenSettings: () -> Unit = {}
+) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -137,8 +140,9 @@ fun MainContent(modifier: Modifier = Modifier) {
                 DashboardCard(
                     "Einstellungen",
                     "Routen, Patroullien etc.",
-                    Icons.Default.Settings
-                ) // [cite: 22, 23]
+                    Icons.Default.Settings,
+                    onClick = onOpenSettings
+                )
             }
         }
     }

@@ -34,11 +34,24 @@ fun TemiDashboardScreen() {
                 onMenuSelected = { selectedMenu = it },
                 modifier = Modifier.width(260.dp)
             )
+            // Einstellungen öffnen
+            when (selectedMenu) {
+                "Einstellungen" -> {
+                    SettingsContent(
+                        modifier = Modifier.weight(1f)
+                    )
+                }
 
             // Rechter Hauptbereich
-            MainContent(
-                modifier = Modifier.weight(1f)
-            )
+                else -> {
+                    MainContent(
+                        modifier = Modifier.weight(1f),
+                        onOpenSettings = {
+                            selectedMenu = "Einstellungen"
+                        }
+                    )
+                }
+            }
         }
     }
 }
