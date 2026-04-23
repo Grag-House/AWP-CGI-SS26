@@ -100,7 +100,7 @@ fun Sidebar(
 
             //Help button
             Button(
-                onClick = { TODO() },
+                onClick = {/* //TODO add navigation later on */ },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE0E0E0)),
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier

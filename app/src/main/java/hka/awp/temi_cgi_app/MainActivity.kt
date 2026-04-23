@@ -17,6 +17,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        //TODO use timber for logging instead of default android logging later on
+
         startKoin {
             androidContext(this@MainActivity)
             modules(appModule)

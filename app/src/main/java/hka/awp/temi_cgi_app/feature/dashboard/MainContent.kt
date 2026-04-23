@@ -14,7 +14,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.BatteryFull
-import androidx.compose.material.icons.rounded.Cloud
 import androidx.compose.material.icons.rounded.Navigation
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Settings
@@ -27,16 +26,21 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import hka.awp.temi_cgi_app.R
 import hka.awp.temi_cgi_app.ui.components.DashboardCard
 import hka.awp.temi_cgi_app.ui.components.ModeIcon
+import hka.awp.temi_cgi_app.ui.shell.Screen
 
 @Composable
-fun MainContent(modifier: Modifier = Modifier) {
+fun MainContent(
+    modifier: Modifier = Modifier, selectedRoute: String, onClick: (Screen) -> Unit = {}
+) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -85,9 +89,7 @@ fun MainContent(modifier: Modifier = Modifier) {
                         append("Temi!")
                     }
                     append(" Wie kann ich\ndir helfen?")
-                },
-                style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Bold
+                }, style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold
             )
         }
 
@@ -103,15 +105,23 @@ fun MainContent(modifier: Modifier = Modifier) {
                     "Webserver",
                     "Rufe den Webserver auf",
                     Icons.Rounded.Storage,
-                    "Active 10.0.0.1"
-                )
+                    "Active 10.0.0.1",
+                    onClick = {
+
+                    })
             }
             item {
                 DashboardCard(
-                    "Wetter",
-                    "Wettervorhersagen für den\naktuellen Standort",
-                    Icons.Rounded.Cloud,
-                    "21°C",
+                    title = "Wetter",
+                    subtitle = "Wettervorhersagen für den\naktuellen Standort",
+                    customIcon = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.partly_cloudy_day),
+                            tint = MaterialTheme.colorScheme.primary,
+                            contentDescription = "Sun and cloud symbol for local weather"
+                        )
+                    },
+                    bottomText = "21°C",
                     isTemp = true
                 )
             }
@@ -130,14 +140,11 @@ fun MainContent(modifier: Modifier = Modifier) {
                     null,
                     "SHOWROOM MODE",
                     overline = "Aktueller Modus",
-                    customIcon = { ModeIcon(tint = MaterialTheme.colorScheme.primary) }
-                )
+                    customIcon = { ModeIcon(tint = MaterialTheme.colorScheme.primary) })
             }
             item {
                 DashboardCard(
-                    "Einstellungen",
-                    "Routen, Patroullien etc.",
-                    Icons.Rounded.Settings
+                    "Einstellungen", "Routen, Patroullien etc.", Icons.Rounded.Settings
                 )
             }
         }

@@ -1,6 +1,7 @@
 package hka.awp.temi_cgi_app.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -29,16 +30,18 @@ import androidx.compose.ui.unit.dp
 fun DashboardCard(
     title: String,
     subtitle: String,
-    icon: ImageVector?,
+    icon: ImageVector? = null,
     bottomText: String? = null,
     overline: String? = null,
     isTemp: Boolean = false,
     customIcon: @Composable (() -> Unit)? = null,
+    onClick: () -> Unit = {}
 ) {
     OutlinedCard(
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(0.9f), shape = RoundedCornerShape(24.dp)
+            .aspectRatio(0.9f)
+            .clickable { onClick() }, shape = RoundedCornerShape(24.dp)
     ) {
         Column(
             modifier = Modifier
