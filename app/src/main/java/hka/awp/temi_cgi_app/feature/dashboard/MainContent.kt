@@ -27,11 +27,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import hka.awp.temi_cgi_app.R
 import hka.awp.temi_cgi_app.ui.components.DashboardCard
 import hka.awp.temi_cgi_app.ui.components.ModeIcon
 
@@ -40,7 +42,7 @@ fun MainContent(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(32.dp)
+            .padding(20.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -68,7 +70,7 @@ fun MainContent(modifier: Modifier = Modifier) {
             )
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
@@ -78,38 +80,42 @@ fun MainContent(modifier: Modifier = Modifier) {
                 modifier = Modifier.size(48.dp)
             )
             Spacer(modifier = Modifier.width(16.dp))
+            val robotName = stringResource(id = R.string.robot_name)
+            val welcomeParts = stringResource(R.string.welcome_message, "PLACEHOLDER").split("PLACEHOLDER")
             Text(
                 text = buildAnnotatedString {
-                    append("Hey, Ich bin ")
+                    append(welcomeParts[0])
                     withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
-                        append("Temi!")
+                        append(robotName)
                     }
-                    append(" Wie kann ich\ndir helfen?")
+                    if (welcomeParts.size > 1) {
+                        append(welcomeParts[1])
+                    }
                 },
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold
             )
         }
 
-        Spacer(modifier = Modifier.height(48.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         LazyVerticalGrid(
             columns = GridCells.Fixed(3),
-            horizontalArrangement = Arrangement.spacedBy(24.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
                 DashboardCard(
-                    "Webserver",
-                    "Rufe den Webserver auf",
+                    R.string.webserver,
+                    R.string.webserverSub,
                     Icons.Rounded.Storage,
                     "Active 10.0.0.1"
                 )
             }
             item {
                 DashboardCard(
-                    "Wetter",
-                    "Wettervorhersagen für den\naktuellen Standort",
+                    R.string.wetter,
+                    R.string.wetterSub,
                     Icons.Rounded.Cloud,
                     "21°C",
                     isTemp = true
@@ -117,16 +123,16 @@ fun MainContent(modifier: Modifier = Modifier) {
             }
             item {
                 DashboardCard(
-                    "Navigation",
-                    "Sag mir wo ich dich\nhinbringen soll.",
+                    R.string.navigation,
+                    R.string.navigationSub,
                     Icons.Rounded.Navigation,
                     "FASTEST ROUTE"
                 )
             }
             item {
                 DashboardCard(
-                    "Modus",
-                    "Ändere den Modus",
+                    R.string.modus,
+                    R.string.modusSub,
                     null,
                     "SHOWROOM MODE",
                     overline = "Aktueller Modus",
@@ -135,8 +141,8 @@ fun MainContent(modifier: Modifier = Modifier) {
             }
             item {
                 DashboardCard(
-                    "Einstellungen",
-                    "Routen, Patroullien etc.",
+                    R.string.settings,
+                    R.string.settingsSub,
                     Icons.Rounded.Settings
                 )
             }

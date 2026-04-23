@@ -17,6 +17,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
+import androidx.compose.ui.res.stringResource
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,8 +28,8 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun DashboardCard(
-    title: String,
-    subtitle: String,
+    title: Int,
+    subtitle: Int,
     icon: ImageVector?,
     bottomText: String? = null,
     overline: String? = null,
@@ -38,17 +39,17 @@ fun DashboardCard(
     OutlinedCard(
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(0.9f), shape = RoundedCornerShape(24.dp)
+            .aspectRatio(1.4f), shape = RoundedCornerShape(20.dp)
     ) {
         Column(
             modifier = Modifier
-                .padding(24.dp)
+                .padding(16.dp)
                 .fillMaxSize()
         ) {
             Box(
                 modifier = Modifier
-                    .size(64.dp)
-                    .background(Color.White, RoundedCornerShape(16.dp)),
+                    .size(48.dp)
+                    .background(Color.White, RoundedCornerShape(12.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 if (customIcon == null) {
@@ -63,15 +64,15 @@ fun DashboardCard(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = title,
+                text = stringResource(id = title),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.SemiBold
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(text = subtitle, style = MaterialTheme.typography.bodyMedium)
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(text = stringResource(id = subtitle), style = MaterialTheme.typography.bodyMedium)
 
             Spacer(modifier = Modifier.weight(1f))
 

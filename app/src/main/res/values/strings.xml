@@ -1,3 +1,20 @@
 <resources>
     <string name="app_name">Temi-CGI-App</string>
+    <string name="hauptmenu">Hauptmenü</string>
+    <string name="webserver">Webserver</string>
+    <string name="webserverSub">Rufe den Webserver auf</string>
+    <string name="weather">Wetter</string>
+    <string name="wetter">Wetter</string>
+    <string name="wetterSub">Wettervorhersagen für den aktuellen Standort</string>
+    <string name="navigation">Navigation</string>
+    <string name="navigationSub">Sag mir wo ich dich hin bringen soll.</string>
+    <string name="modus">Modus</string>
+    <string name="modusSub">Ändere den Modus</string>
+    <string name="settings">Settings</string>
+    <string name="settingsSub">Routen, Patroullien etc.</string>
+
+    <string name="welcome_message">Hey, Ich bin %1$s!\nWie kann ich dir helfen?</string>
+    <string name="robot_name">Temi!</string>
+    <string name="sidebar_functions">Funktionen</string>
+    <string name="sidebar_help">Hilfe</string>
 </resources>
