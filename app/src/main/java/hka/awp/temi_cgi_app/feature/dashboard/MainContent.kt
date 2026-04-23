@@ -42,7 +42,7 @@ fun MainContent(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(20.dp)
+            .padding(24.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -70,7 +70,7 @@ fun MainContent(modifier: Modifier = Modifier) {
             )
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
