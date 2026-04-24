@@ -6,7 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 
-class SidebarViewModel : ViewModel() {
+class AppViewModel : ViewModel() {
     var selectedRoute by mutableStateOf(Screen.Dashboard.route)
         private set
 

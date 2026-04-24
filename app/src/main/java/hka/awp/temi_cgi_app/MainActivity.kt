@@ -6,10 +6,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import hka.awp.temi_cgi_app.feature.dashboard.TemiDashboardScreen
 import hka.awp.temi_cgi_app.koin.appModule
-import hka.awp.temi_cgi_app.ui.shell.SidebarViewModel
 import hka.awp.temi_cgi_app.ui.theme.CgiTheme
 import org.koin.android.ext.koin.androidContext
-import org.koin.androidx.viewmodel.ext.android.getViewModel
 import org.koin.core.context.startKoin
 
 
@@ -27,7 +25,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             CgiTheme {
-                TemiDashboardScreen(viewModel = getViewModel<SidebarViewModel>())
+                TemiDashboardScreen()
             }
         }
     }
