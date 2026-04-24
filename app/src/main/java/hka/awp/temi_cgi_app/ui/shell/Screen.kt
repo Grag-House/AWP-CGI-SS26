@@ -16,42 +16,46 @@ sealed class Screen(
     val contentDescription: String,
     val isCustomIcon: Boolean = false
 ) {
-    object Dashboard : Screen(
+    companion object {
+        val navScreens by lazy { listOf(Dashboard, Webserver, Weather, Navigation, Mode, Settings) }
+    }
+
+    data object Dashboard : Screen(
         route = "dashboard",
         title = "Hauptmenü",
         icon = Icons.Rounded.Home,
         contentDescription = "Home icon for the main dashboard"
     )
 
-    object Webserver : Screen(
+    data object Webserver : Screen(
         route = "webserver",
         title = "WebServer",
         icon = Icons.Rounded.Storage,
         contentDescription = "Storage icon representing server status"
     )
 
-    object Weather : Screen(
+    data object Weather : Screen(
         route = "weather",
         title = "Wetter",
         iconRes = R.drawable.partly_cloudy_day,
         contentDescription = "Sun and cloud symbol for local weather"
     )
 
-    object Navigation : Screen(
+    data object Navigation : Screen(
         route = "navigation",
         title = "Navigation",
         icon = Icons.Rounded.Navigation,
         contentDescription = "Arrow icon for robot navigation"
     )
 
-    object Mode : Screen(
+    data object Mode : Screen(
         route = "mode",
         "Modus",
         isCustomIcon = true,
         contentDescription = "Dual toggle switches for operation mode selection"
     )
 
-    object Settings : Screen(
+    data object Settings : Screen(
         route = "settings",
         title = "Settings",
         icon = Icons.Rounded.Settings,

@@ -29,12 +29,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import hka.awp.temi_cgi_app.ui.components.SidebarButton
-import hka.awp.temi_cgi_app.ui.shell.Screen.Dashboard
-import hka.awp.temi_cgi_app.ui.shell.Screen.Mode
-import hka.awp.temi_cgi_app.ui.shell.Screen.Navigation
-import hka.awp.temi_cgi_app.ui.shell.Screen.Settings
-import hka.awp.temi_cgi_app.ui.shell.Screen.Weather
-import hka.awp.temi_cgi_app.ui.shell.Screen.Webserver
+import hka.awp.temi_cgi_app.ui.shell.Screen.Companion.navScreens
 
 @Composable
 fun Sidebar(
@@ -87,7 +82,6 @@ fun Sidebar(
             Spacer(modifier = Modifier.height(16.dp))
 
             // initialize each of the screens in the side panel
-            val navScreens = listOf(Dashboard, Webserver, Weather, Navigation, Mode, Settings)
             navScreens.forEach {
                 SidebarButton(
                     isExpanded = isExpanded,

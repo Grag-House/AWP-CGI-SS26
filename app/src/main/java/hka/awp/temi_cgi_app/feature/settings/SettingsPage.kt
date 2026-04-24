@@ -33,11 +33,11 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import hka.awp.temi_cgi_app.feature.settings.SettingsItem.Companion.settingsItems
 
 @Composable
 fun SettingsContent(
-    modifier: Modifier = Modifier,
-    onItemClick: (SettingsItem) -> Unit
+    modifier: Modifier = Modifier, onItemClick: (SettingsItem) -> Unit
 ) {
     Column(
         modifier = modifier
@@ -63,9 +63,7 @@ fun SettingsContent(
                     withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
                         append("Einstellungen")
                     }
-                },
-                style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Bold
+                }, style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold
             )
         }
 
@@ -79,8 +77,7 @@ fun SettingsContent(
                     title = it.title,
                     subtitle = it.subtitle,
                     icon = it.icon,
-                    onClick = { onItemClick(it) }
-                )
+                    onClick = { onItemClick(it) })
             }
         }
     }
@@ -106,8 +103,7 @@ private fun TopStatusBar() {
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
-            text = "16:29",
-            color = MaterialTheme.colorScheme.primary
+            text = "16:29", color = MaterialTheme.colorScheme.primary
         )
         Spacer(modifier = Modifier.width(16.dp))
         Icon(
@@ -120,10 +116,7 @@ private fun TopStatusBar() {
 
 @Composable
 fun SettingsOptionCard(
-    title: String,
-    subtitle: String,
-    icon: ImageVector,
-    onClick: () -> Unit = {}
+    title: String, subtitle: String, icon: ImageVector, onClick: () -> Unit = {}
 ) {
     Row(
         modifier = Modifier
@@ -132,8 +125,7 @@ fun SettingsOptionCard(
             .background(MaterialTheme.colorScheme.surfaceVariant)
             .clickable { onClick() }
             .padding(horizontal = 24.dp, vertical = 22.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
+        verticalAlignment = Alignment.CenterVertically) {
         Icon(
             imageVector = icon,
             contentDescription = title,

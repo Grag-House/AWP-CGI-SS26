@@ -11,6 +11,14 @@ import androidx.compose.ui.graphics.vector.ImageVector
 sealed class SettingsItem(
     val title: String, val subtitle: String, val icon: ImageVector
 ) {
+    companion object {
+        val settingsItems by lazy {
+            listOf(
+                Notifications, Display, Battery, Location, About
+            )
+        }
+    }
+
     data object Notifications : SettingsItem(
         title = "Benachrichtigungen",
         subtitle = "Töne und Systemmeldungen",
@@ -39,11 +47,3 @@ sealed class SettingsItem(
         title = "Über", subtitle = "Informationen über das System", icon = Icons.Rounded.Info
     )
 }
-
-val settingsItems = listOf(
-    SettingsItem.Notifications,
-    SettingsItem.Display,
-    SettingsItem.Battery,
-    SettingsItem.Location,
-    SettingsItem.About
-)
