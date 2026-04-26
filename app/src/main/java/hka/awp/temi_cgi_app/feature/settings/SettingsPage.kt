@@ -16,10 +16,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BatteryFull
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -35,6 +32,12 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import hka.awp.temi_cgi_app.feature.settings.SettingsItem.Companion.settingsItems
 
+/**
+ * Screen for system settings.
+ *
+ * @param modifier Layout modifier.
+ * @param onItemClick Handler for setting clicks.
+ */
 @Composable
 fun SettingsContent(
     modifier: Modifier = Modifier, onItemClick: (SettingsItem) -> Unit
@@ -45,8 +48,6 @@ fun SettingsContent(
             .verticalScroll(rememberScrollState())
             .padding(start = 32.dp, top = 32.dp, end = 32.dp)
     ) {
-        TopStatusBar()
-
         Spacer(modifier = Modifier.height(24.dp))
 
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -83,36 +84,6 @@ fun SettingsContent(
     }
 }
 
-@Composable
-private fun TopStatusBar() {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.End,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            Icons.Default.Wifi,
-            contentDescription = "WLAN",
-            tint = MaterialTheme.colorScheme.primary
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Icon(
-            Icons.Default.BatteryFull,
-            contentDescription = "Batterie",
-            tint = MaterialTheme.colorScheme.primary
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(
-            text = "16:29", color = MaterialTheme.colorScheme.primary
-        )
-        Spacer(modifier = Modifier.width(16.dp))
-        Icon(
-            Icons.Default.Notifications,
-            contentDescription = "Benachrichtigungen",
-            tint = MaterialTheme.colorScheme.primary
-        )
-    }
-}
 
 @Composable
 fun SettingsOptionCard(

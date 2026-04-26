@@ -8,6 +8,19 @@ import androidx.compose.material.icons.rounded.Storage
 import androidx.compose.ui.graphics.vector.ImageVector
 import hka.awp.temi_cgi_app.R
 
+/**
+ * Represents the different navigation destinations within the application's shell.
+ *
+ * Each screen definition contains the necessary metadata for navigation handling,
+ * UI labeling, and icon rendering.
+ *
+ * @property route The unique identifier used for navigation routing.
+ * @property title The localized display name shown in the UI (e.g., in the navigation drawer or top bar).
+ * @property icon An optional [ImageVector] for standard Material icons.
+ * @property iconRes An optional drawable resource ID for custom graphical icons.
+ * @property contentDescription A localized description of the icon for accessibility services (Screen Readers).
+ * @property isCustomIcon A flag indicating if the icon requires special rendering logic beyond standard vector/resource handling.
+ */
 sealed class Screen(
     val route: String,
     val title: String,

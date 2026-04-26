@@ -1,4 +1,4 @@
-package hka.awp.temi_cgi_app.feature.dashboard
+package hka.awp.temi_cgi_app.ui.shell
 
 import android.util.Log
 import androidx.compose.foundation.layout.Row
@@ -8,22 +8,36 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import hka.awp.temi_cgi_app.feature.dashboard.MainContent
 import hka.awp.temi_cgi_app.feature.settings.SettingsContent
 import hka.awp.temi_cgi_app.feature.settings.SettingsViewModel
-import hka.awp.temi_cgi_app.ui.shell.AppViewModel
-import hka.awp.temi_cgi_app.ui.shell.Screen
-import hka.awp.temi_cgi_app.ui.shell.Sidebar
 import org.koin.compose.viewmodel.koinViewModel
 
+/**
+ * The primary UI shell of the application.
+ *
+ * This component acts as the root container, managing the top-level layout
+ * which includes the [TopStatusBar], the [Sidebar] for navigation,
+ * and the main content area that switches between different screens
+ * based on the current route.
+ *
+ * @param appViewModel The global ViewModel managing the app's state,
+ * navigation routes, and sidebar visibility.
+ * @param settingsViewModel The ViewModel handling logic and interactions
+ * specific to the settings screen.
+ */
 @Composable
-fun TemiDashboardScreen(
+fun MainShell(
     appViewModel: AppViewModel = koinViewModel(),
     settingsViewModel: SettingsViewModel = koinViewModel()
 ) {
     Scaffold(
-        modifier = Modifier.fillMaxSize(), containerColor = MaterialTheme.colorScheme.background
+        modifier = Modifier.fillMaxSize(),
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = { TopStatusBar(wifiLevel = appViewModel.wifiLevel.collectAsState().value) }
     ) { paddingValues ->
         Row(
             modifier = Modifier

@@ -8,6 +8,9 @@ import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.ui.graphics.vector.ImageVector
 
+/**
+ * Represents the possible setting entries.
+ */
 sealed class SettingsItem(
     val title: String, val subtitle: String, val icon: ImageVector
 ) {

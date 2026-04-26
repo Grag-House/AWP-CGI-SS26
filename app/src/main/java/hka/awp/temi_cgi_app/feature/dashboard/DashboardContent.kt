@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -13,13 +12,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.BatteryFull
 import androidx.compose.material.icons.rounded.Navigation
-import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.SmartToy
 import androidx.compose.material.icons.rounded.Storage
-import androidx.compose.material.icons.rounded.Wifi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -37,6 +33,15 @@ import hka.awp.temi_cgi_app.ui.components.DashboardCard
 import hka.awp.temi_cgi_app.ui.components.ModeIcon
 import hka.awp.temi_cgi_app.ui.shell.Screen
 
+/**
+ * The main content view for the Dashboard screen.
+ *
+ * Displays a welcome message and a grid of interactive [DashboardCard] entries
+ *
+ * @param modifier Modifier for layout adjustments within the parent container.
+ * @param selectedRoute The current navigation route
+ * @param onClick Callback triggered when an item that requires navigation is selected.
+ */
 @Composable
 fun MainContent(
     modifier: Modifier = Modifier, selectedRoute: String, onClick: (Screen) -> Unit = {}
@@ -46,34 +51,6 @@ fun MainContent(
             .fillMaxSize()
             .padding(32.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                Icons.Rounded.Wifi,
-                contentDescription = "WLAN",
-                tint = MaterialTheme.colorScheme.primary
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Icon(
-                Icons.Rounded.BatteryFull,
-                contentDescription = "Batterie",
-                tint = MaterialTheme.colorScheme.primary
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(text = "16:29", color = MaterialTheme.colorScheme.primary)
-            Spacer(modifier = Modifier.width(16.dp))
-            Icon(
-                Icons.Rounded.Notifications,
-                contentDescription = "Benachrichtigungen",
-                tint = MaterialTheme.colorScheme.primary
-            )
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
                 Icons.Rounded.SmartToy,
