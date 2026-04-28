@@ -8,9 +8,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import hka.awp.temi_cgi_app.feature.dashboard.MainContent
 import hka.awp.temi_cgi_app.feature.settings.SettingsContent
 import hka.awp.temi_cgi_app.feature.settings.SettingsViewModel
@@ -34,11 +35,15 @@ fun MainShell(
     appViewModel: AppViewModel = koinViewModel(),
     settingsViewModel: SettingsViewModel = koinViewModel()
 ) {
+    val wifiLevel by appViewModel.wifiLevel.collectAsStateWithLifecycle()
+    val currentTime by appViewModel.currentTime.collectAsStateWithLifecycle()
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,
-        topBar = { TopStatusBar(wifiLevel = appViewModel.wifiLevel.collectAsState().value) }
-    ) { paddingValues ->
+        topBar = {
+            TopStatusBar(wifiLevel, currentTime)
+        }) { paddingValues ->
         Row(
             modifier = Modifier
                 .fillMaxSize()
