@@ -18,14 +18,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-// ─── Colors ──────────────────────────────────────────────────────────────────
-val CGIRed      = Color(0xFFCC0033)
-val SidebarBg   = Color(0xFFF0F0F0)
-val CardBg      = Color.White
-val TextPrimary = Color(0xFF1A1A1A)
-val TextMuted   = Color(0xFF888888)
-val ActiveItem  = Color(0xFFDDDDDD)
-
 // ─── Data models ─────────────────────────────────────────────────────────────
 
 enum class WeatherIcon { SUN, CLOUD, SUN_CLOUD, RAIN }
@@ -108,10 +100,9 @@ fun WeatherIconView(icon: WeatherIcon, size: Int = 28) {
 @Composable
 fun WeatherCard(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
     Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = CardBg),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        modifier = modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(16.dp)),
     ) {
         Column(modifier = Modifier.padding(16.dp), content = content)
     }
@@ -130,7 +121,7 @@ fun CurrentWeatherCard() {
                     "Standort: Karlsruhe",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = TextPrimary
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(Modifier.height(12.dp))
                 Text(
@@ -157,7 +148,7 @@ fun HourlyForecastCard() {
             "Täglicher Ausblick",
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
-            color = TextPrimary
+            color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(Modifier.height(12.dp))
         Row(
@@ -169,12 +160,12 @@ fun HourlyForecastCard() {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text(item.label,    color = TextMuted,   fontSize = 10.sp)
+                    Text(item.label,    color = MaterialTheme.colorScheme.onSurfaceVariant,   fontSize = 10.sp)
                     Spacer(Modifier.height(4.dp))
                     WeatherIconView(item.icon, size = 20)
                     Spacer(Modifier.height(4.dp))
-                    Text(item.temp,     color = TextPrimary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                    Text(item.rain,     color = TextMuted,   fontSize = 10.sp)
+                    Text(item.temp,     color = MaterialTheme.colorScheme.onSurface, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    Text(item.rain,     color = MaterialTheme.colorScheme.onSurfaceVariant,   fontSize = 10.sp)
                 }
             }
         }
@@ -188,7 +179,7 @@ fun WeeklyForecastCard() {
             "Nächste Woche",
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
-            color = TextPrimary
+            color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(Modifier.height(12.dp))
         Row(
@@ -200,12 +191,12 @@ fun WeeklyForecastCard() {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text(item.day,  color = TextMuted,   fontSize = 10.sp)
+                    Text(item.day,  color = MaterialTheme.colorScheme.onSurfaceVariant,   fontSize = 10.sp)
                     Spacer(Modifier.height(4.dp))
                     WeatherIconView(item.icon, size = 22)
                     Spacer(Modifier.height(4.dp))
-                    Text(item.high, color = TextPrimary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                    Text(item.low,  color = TextMuted,   fontSize = 10.sp)
+                    Text(item.high, color = MaterialTheme.colorScheme.onSurface, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    Text(item.low,  color = MaterialTheme.colorScheme.onSurfaceVariant,   fontSize = 10.sp)
                 }
             }
         }
@@ -222,12 +213,12 @@ fun WetterTopBar() {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Default.Cloud, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(28.dp))
                 Spacer(Modifier.width(8.dp))
-                Text("Wetter", fontWeight = FontWeight.Bold, fontSize = 22.sp, color = TextPrimary)
+                Text("Wetter", fontWeight = FontWeight.Bold, fontSize = 22.sp, color = MaterialTheme.colorScheme.onSurface)
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White),
         actions = {
-            Icon(Icons.Default.Notifications, contentDescription = null, tint = TextPrimary, modifier = Modifier.padding(end = 16.dp))
+            Icon(Icons.Default.Notifications, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(end = 16.dp))
         }
     )
 }

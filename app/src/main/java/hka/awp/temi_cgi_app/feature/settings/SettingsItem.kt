@@ -47,6 +47,8 @@ sealed class SettingsItem(
     )
 
     data object About : SettingsItem(
-        title = "Über", subtitle = "Informationen über das System", icon = Icons.Rounded.Info
+        title = "Über",
+        subtitle = "Informationen über das System",
+        icon = Icons.Rounded.Info
     )
 }
