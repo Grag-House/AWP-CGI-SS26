@@ -29,13 +29,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import hka.awp.temi_cgi_app.ui.components.SidebarButton
-import hka.awp.temi_cgi_app.ui.shell.Screen.Dashboard
-import hka.awp.temi_cgi_app.ui.shell.Screen.Mode
-import hka.awp.temi_cgi_app.ui.shell.Screen.Navigation
-import hka.awp.temi_cgi_app.ui.shell.Screen.Settings
-import hka.awp.temi_cgi_app.ui.shell.Screen.Weather
-import hka.awp.temi_cgi_app.ui.shell.Screen.Webserver
+import hka.awp.temi_cgi_app.ui.shell.Screen.Companion.navScreens
 
+/**
+ * Main navigation component (sidebar) of the application.
+ *
+ * This component provides primary navigation and supports an animated transition
+ * between an expanded and a collapsed view.
+ *
+ * @param isExpanded Controls whether the sidebar is fully expanded or only visible as a narrow icon bar.
+ * @param selectedRoute The route of the currently active screen for visual highlighting of the corresponding button.
+ * @param onRouteSelected Callback triggered when the user selects a new navigation destination.
+ * @param onSidebarToggle Callback for toggling the [isExpanded] state.
+ * @param modifier Modifier for layout adjustments of the sidebar structure.
+ */
 @Composable
 fun Sidebar(
     isExpanded: Boolean,
@@ -87,7 +94,6 @@ fun Sidebar(
             Spacer(modifier = Modifier.height(16.dp))
 
             // initialize each of the screens in the side panel
-            val navScreens = listOf(Dashboard, Webserver, Weather, Navigation, Mode, Settings)
             navScreens.forEach {
                 SidebarButton(
                     isExpanded = isExpanded,
@@ -100,7 +106,7 @@ fun Sidebar(
 
             //Help button
             Button(
-                onClick = { TODO() },
+                onClick = {/* //TODO add navigation later on */ },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE0E0E0)),
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier
