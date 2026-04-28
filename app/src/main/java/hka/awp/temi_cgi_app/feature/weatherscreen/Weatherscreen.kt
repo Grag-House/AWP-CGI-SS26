@@ -78,112 +78,31 @@ fun WeatherIconView(icon: WeatherIcon, size: Int = 28) {
         WeatherIcon.SUN -> Icon(
             imageVector = Icons.Default.WbSunny,
             contentDescription = "Sunny",
-            tint = CGIRed,
+            tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(sizeDp)
         )
         WeatherIcon.CLOUD -> Icon(
             imageVector = Icons.Default.Cloud,
             contentDescription = "Cloudy",
-            tint = CGIRed,
+            tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(sizeDp)
         )
         WeatherIcon.SUN_CLOUD -> Box(contentAlignment = Alignment.Center) {
             Icon(
                 imageVector = Icons.Default.WbCloudy,
                 contentDescription = "Partly cloudy",
-                tint = CGIRed,
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(sizeDp)
             )
         }
         WeatherIcon.RAIN -> Icon(
             imageVector = Icons.Default.Umbrella,
             contentDescription = "Rain",
-            tint = CGIRed,
+            tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(sizeDp)
         )
     }
 }
-
-// ─── Sidebar ──────────────────────────────────────────────────────────────────
-
-data class SidebarEntry(val label: String, val icon: ImageVector, val active: Boolean = false)
-
-@Composable
-fun Sidebar(modifier: Modifier = Modifier) {
-    val entries = listOf(
-        SidebarEntry("Hauptmenü",   Icons.Default.Home,        active = true),
-        SidebarEntry("Webserver",   Icons.Default.Storage),
-        SidebarEntry("Wetter",      Icons.Default.Cloud,       active = false),
-        SidebarEntry("Navigation",  Icons.Default.Navigation),
-        SidebarEntry("Modus",       Icons.Default.ToggleOn),
-        SidebarEntry("Einstellungen", Icons.Default.Settings),
-    )
-
-    Column(
-        modifier = modifier
-            .fillMaxHeight()
-            .background(SidebarBg)
-            .padding(horizontal = 8.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.SpaceBetween
-    ) {
-        Column {
-            // Brand
-            Text(
-                text = "CGI",
-                color = CGIRed,
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
-                modifier = Modifier.padding(start = 8.dp, bottom = 12.dp)
-            )
-            Text(
-                text = "Funktionen",
-                color = CGIRed,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 13.sp,
-                modifier = Modifier.padding(start = 8.dp, bottom = 8.dp)
-            )
-
-            entries.forEach { entry ->
-                val bg   = if (entry.label == "Hauptmenü") CGIRed
-                else if (entry.label == "Wetter") ActiveItem
-                else Color.Transparent
-                val fg   = if (entry.label == "Hauptmenü") Color.White else TextPrimary
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 2.dp)
-                        .background(bg, RoundedCornerShape(10.dp))
-                        .padding(horizontal = 10.dp, vertical = 10.dp)
-                ) {
-                    Icon(
-                        imageVector = entry.icon,
-                        contentDescription = entry.label,
-                        tint = fg,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(entry.label, color = fg, fontSize = 13.sp, fontWeight = FontWeight.Medium)
-                }
-            }
-        }
-
-        // Help button at bottom
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(ActiveItem, RoundedCornerShape(10.dp))
-                .padding(horizontal = 10.dp, vertical = 10.dp)
-        ) {
-            Icon(Icons.Default.Help, contentDescription = "Hilfe", tint = TextMuted, modifier = Modifier.size(20.dp))
-            Spacer(Modifier.width(8.dp))
-            Text("Hilfe", color = TextMuted, fontSize = 13.sp)
-        }
-    }
-}
-
 // ─── Cards ────────────────────────────────────────────────────────────────────
 
 @Composable
@@ -218,13 +137,13 @@ fun CurrentWeatherCard() {
                     "21°C",
                     fontSize = 48.sp,
                     fontWeight = FontWeight.Bold,
-                    color = CGIRed
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
             Icon(
                 imageVector = Icons.Default.WbSunny,
                 contentDescription = "Sunny",
-                tint = CGIRed,
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(64.dp)
             )
         }
@@ -301,7 +220,7 @@ fun WetterTopBar() {
     TopAppBar(
         title = {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Cloud, contentDescription = null, tint = CGIRed, modifier = Modifier.size(28.dp))
+                Icon(Icons.Default.Cloud, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(28.dp))
                 Spacer(Modifier.width(8.dp))
                 Text("Wetter", fontWeight = FontWeight.Bold, fontSize = 22.sp, color = TextPrimary)
             }
@@ -316,15 +235,12 @@ fun WetterTopBar() {
 // ─── Main screen ─────────────────────────────────────────────────────────────
 
 @Composable
-fun WetterScreen() {
+fun WeatherContent() {
     Row(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF5F5F5))
     ) {
-        // Sidebar
-        Sidebar(modifier = Modifier.width(180.dp))
-
         // Main content
         Column(modifier = Modifier.weight(1f)) {
             WetterTopBar()
@@ -348,8 +264,8 @@ fun WetterScreen() {
 
 @Preview(showBackground = true, widthDp = 800, heightDp = 600)
 @Composable
-fun WetterScreenPreview() {
+fun WeatherContentPreview() {
     MaterialTheme {
-        WetterScreen()
+        WeatherContent()
     }
 }
