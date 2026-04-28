@@ -67,4 +67,7 @@ dependencies {
     // debug depedencies
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    // temi dependency
+    implementation(libs.temi.sdk)
 }
