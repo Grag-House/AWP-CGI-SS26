@@ -88,7 +88,7 @@ fun WeatherIconView(icon: WeatherIcon, size: Int = 28) {
             )
         }
         WeatherIcon.RAIN -> Icon(
-            imageVector = Icons.Default.Umbrella,
+            imageVector = Icons.Default.Umbrella, //TODO: replace icon with raincloud
             contentDescription = "Rain",
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(sizeDp)
