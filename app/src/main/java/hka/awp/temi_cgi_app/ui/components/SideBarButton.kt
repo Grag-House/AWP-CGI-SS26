@@ -24,6 +24,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import hka.awp.temi_cgi_app.ui.shell.Screen
 
+/**
+ * A composable representing an individual navigation button within the sidebar.
+ *
+ * @param isExpanded Boolean flag determining if the sidebar is expanded to show text and icons.
+ * @param screen The [Screen] object containing the metadata (title, icon, etc.) for this navigation item.
+ * @param isSelected Whether this button represents the currently active screen.
+ * @param onClick Callback to be executed when the button is clicked.
+ */
 @Composable
 fun SidebarButton(isExpanded: Boolean, screen: Screen, isSelected: Boolean, onClick: () -> Unit) {
     val backgroundColor = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent
