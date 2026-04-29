@@ -12,6 +12,7 @@ composeBom = "2026.04.01"
 uiTextGoogleFonts = "1.11.0"
 runtime = "1.11.0"
 mokk = "1.14.9"
+desugar_jdk_libs = "2.1.5"
 
 [libraries]
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
@@ -36,6 +37,7 @@ koin-android = { module = "io.insert-koin:koin-android" }
 koin-compose = { module = "io.insert-koin:koin-compose" }
 koin-compose-viewmodel = {module = "io.insert-koin:koin-compose-viewmodel"}
 mokk = { module = "io.mockk:mockk", version.ref = "mokk" }
+android-desugarJdkLibs = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
 
 
 [plugins]
