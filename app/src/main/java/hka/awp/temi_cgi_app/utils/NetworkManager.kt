@@ -41,7 +41,7 @@ data class NetworkManager(
 
     //TODO check for temi android SDK later on, so this can be streamlined (e. g. remove dead paths)
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_NETWORK_STATE, Manifest.permission.ACCESS_WIFI_STATE])
-    fun getWifiSignalLevel(context: Context): Int {
+    fun getWifiSignalLevel(): Int {
         val connectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val wifiManager =
