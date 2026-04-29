@@ -139,6 +139,7 @@ fun CurrentWeatherCard() {
             )
         }
     }
+
 }
 
 @Composable
