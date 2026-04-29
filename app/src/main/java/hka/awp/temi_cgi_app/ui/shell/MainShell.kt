@@ -15,6 +15,7 @@ import hka.awp.temi_cgi_app.feature.dashboard.MainContent
 import hka.awp.temi_cgi_app.feature.settings.SettingsContent
 import hka.awp.temi_cgi_app.feature.settings.SettingsViewModel
 import org.koin.compose.viewmodel.koinViewModel
+import androidx.compose.runtime.getValue
 
 /**
  * The primary UI shell of the application.
@@ -34,10 +35,19 @@ fun MainShell(
     appViewModel: AppViewModel = koinViewModel(),
     settingsViewModel: SettingsViewModel = koinViewModel()
 ) {
+    val wifiLevel by appViewModel.wifiLevel.collectAsState()
+    val batteryLevel by appViewModel.batteryLevel.collectAsState()
+    val isCharging by appViewModel.isCharging.collectAsState()
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,
-        topBar = { TopStatusBar(wifiLevel = appViewModel.wifiLevel.collectAsState().value) }
+        topBar = {
+            TopStatusBar(
+                wifiLevel = wifiLevel,
+                batteryLevel = batteryLevel,
+                isCharging = isCharging
+            )
+        }
     ) { paddingValues ->
         Row(
             modifier = Modifier
