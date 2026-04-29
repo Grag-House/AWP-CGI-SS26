@@ -16,10 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import hka.awp.temi_cgi_app.utils.NetworkManager
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import org.koin.compose.koinInject
-import hka.awp.temi_cgi_app.temi.TemiStatusService
+import hka.awp.temi_cgi_app.ui.components.BatteryIndicator
 
 /**
  * A component that represents the top status bar of the application.
@@ -31,10 +28,9 @@ import hka.awp.temi_cgi_app.temi.TemiStatusService
 fun TopStatusBar(
     modifier: Modifier = Modifier,
     wifiLevel: Int,
-    temiStatusService: TemiStatusService = koinInject()
+    batteryLevel: Int?,
+    isCharging: Boolean
 ) {
-    val batteryLevel by temiStatusService.batteryLevel.collectAsState()
-    val isCharging by temiStatusService.isCharging.collectAsState()
 
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -49,17 +45,9 @@ fun TopStatusBar(
 
         Spacer(modifier = Modifier.width(8.dp))
 
-        Icon(
-            Icons.Default.BatteryFull,
-            contentDescription = "Batterie",
-            tint = MaterialTheme.colorScheme.primary
-        )
-
-        Spacer(modifier = Modifier.width(4.dp))
-
-        Text(
-            text = batteryLevel?.let { "$it%" } ?: "--%",
-            color = MaterialTheme.colorScheme.primary
+        BatteryIndicator(
+            level = batteryLevel,
+            isCharging = isCharging
         )
 
         Spacer(modifier = Modifier.width(8.dp))
