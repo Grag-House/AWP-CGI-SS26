@@ -1,7 +1,6 @@
 package hka.awp.temi_cgi_app.utils
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
@@ -41,38 +40,35 @@ data class NetworkManager(
     }
 
     //TODO check for temi android SDK later on, so this can be streamlined (e. g. remove dead paths)
-    @SuppressLint("NewApi")
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_NETWORK_STATE, Manifest.permission.ACCESS_WIFI_STATE])
-    fun getWifiSignalLevel(): Int {
+    fun getWifiSignalLevel(context: Context): Int {
         val connectivityManager =
-            context.applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val network = connectivityManager.activeNetwork ?: return 0
-        val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return 0
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val wifiManager =
+            context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
 
-        if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
-            val wifiManager =
-                context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+        // Android 10+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val network = connectivityManager.activeNetwork ?: return 0
+            val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return 0
 
-            return if (sdkVersion >= Build.VERSION_CODES.Q) {
+            if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
                 val transportInfo = capabilities.transportInfo
-
                 if (transportInfo is WifiInfo) {
                     val rssi = transportInfo.rssi
-                    if (sdkVersion >= Build.VERSION_CODES.R) {
-                        // Android 11+ (API 30+)
+                    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        // anrdoid sdk 30+
                         wifiManager.calculateSignalLevel(rssi)
                     } else {
-                        // Android 10 (API 29)
-                        WifiManager.calculateSignalLevel(rssi, 5)
+                        // android sdk 29
+                        @Suppress("DEPRECATION") WifiManager.calculateSignalLevel(rssi, 5)
                     }
-                } else {
-                    0
                 }
-            } else {
-                val wifiInfo = wifiManager.connectionInfo
-                val rssi = wifiInfo.rssi
-                WifiManager.calculateSignalLevel(rssi, 5)
             }
+        } else {
+            // 2. Legacy (sdk 24 - 28)
+            @Suppress("DEPRECATION") val wifiInfo = wifiManager.connectionInfo
+            @Suppress("DEPRECATION") return WifiManager.calculateSignalLevel(wifiInfo.rssi, 5)
         }
         return 0
     }
