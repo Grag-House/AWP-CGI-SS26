@@ -11,15 +11,12 @@ fun SettingsScreen(
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = koinViewModel()
 ) {
-    // 1. Daten vom ViewModel abonnieren
     val aboutInfo by viewModel.aboutInfo.collectAsState()
 
-    // 2. Den Content aufrufen und mit Logik füttern
     SettingsContent(
         modifier = modifier,
         aboutInfo = aboutInfo,
         onItemClick = { item ->
-            // Hier entscheidest du, was bei welchem Item passiert
             viewModel.onSettingsItemClick(item)
         },
         onDismissAbout = {
