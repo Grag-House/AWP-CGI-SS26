@@ -5,16 +5,14 @@ plugins {
 
 android {
     namespace = "hka.awp.temi_cgi_app"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
 
     defaultConfig {
         applicationId = "hka.awp.temi_cgi_app"
-        minSdk = 24
+        minSdk = 23
+        //--> The App will only run on sdk 23 due to the limits of TEMI
+        //noinspection OldTargetApi,ExpiredTargetSdkVersion
         targetSdk = 36
+        compileSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -23,10 +21,17 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
             )
+        }
+
+        debug {
+            isMinifyEnabled = false
+            //noinspection NotShrinkingResources
+            isShrinkResources = false
         }
     }
     compileOptions {
