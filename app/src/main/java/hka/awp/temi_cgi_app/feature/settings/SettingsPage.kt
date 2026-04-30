@@ -17,9 +17,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,11 +39,16 @@ import hka.awp.temi_cgi_app.feature.settings.SettingsItem.Companion.settingsItem
  * Screen for system settings.
  *
  * @param modifier Layout modifier.
+ * @param aboutInfo Map of information to show in the "About" dialog, or null if hidden.
  * @param onItemClick Handler for setting clicks.
+ * @param onDismissAbout Handler to close the "About" dialog.
  */
 @Composable
 fun SettingsContent(
-    modifier: Modifier = Modifier, onItemClick: (SettingsItem) -> Unit
+    modifier: Modifier = Modifier,
+    aboutInfo: Map<String, String>? = null,
+    onItemClick: (SettingsItem) -> Unit,
+    onDismissAbout: () -> Unit = {}
 ) {
     Column(
         modifier = modifier
@@ -80,6 +88,47 @@ fun SettingsContent(
                     icon = it.icon,
                     onClick = { onItemClick(it) })
             }
+        }
+
+        // About Dialog
+        if (aboutInfo != null) {
+            AlertDialog(
+                onDismissRequest = onDismissAbout,
+                confirmButton = {
+                    TextButton(onClick = onDismissAbout) {
+                        Text("Schließen")
+                    }
+                },
+                title = {
+                    Text(
+                        text = "System Informationen",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        aboutInfo.forEach { (key, value) ->
+                            Column {
+                                Text(
+                                    text = key,
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Text(
+                                    text = value,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = FontWeight.Medium
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant)
+                            }
+                        }
+                    }
+                },
+                shape = RoundedCornerShape(28.dp),
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+            )
         }
     }
 }
