@@ -25,12 +25,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.res.stringResource
 import hka.awp.temi_cgi_app.R
 import hka.awp.temi_cgi_app.feature.settings.SettingsItem.Companion.settingsItems
 
@@ -63,6 +63,7 @@ fun SettingsContent(
             Text(
                 text = buildAnnotatedString {
                     append(stringResource(R.string.settings_page_prefix))
+                    append(" ")
                     withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
                         append(stringResource(R.string.settings))
                     }

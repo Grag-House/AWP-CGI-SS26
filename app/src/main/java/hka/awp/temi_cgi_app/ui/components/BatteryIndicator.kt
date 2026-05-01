@@ -18,6 +18,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+/**
+ * Compose component that renders the vertical battery icon.
+ *
+ * The indicator dynamically updates its fill level based on the [level] percentage
+ * and displays a charging bolt icon when [isCharging] is true. It includes a text
+ * readout of the battery percentage (unless charging or at 100%) and adapts its
+ * colors based on the current Material Theme.
+ *
+ * @param level The battery percentage (0-100). If null, an empty outline with "--" is shown.
+ * @param isCharging Boolean flag to determine if the charging bolt overlay should be displayed.
+ * @param modifier [Modifier] to be applied to the bounding box of the battery indicator.
+ */
 @Composable
 fun BatteryIndicator(
     level: Int?, isCharging: Boolean, modifier: Modifier = Modifier

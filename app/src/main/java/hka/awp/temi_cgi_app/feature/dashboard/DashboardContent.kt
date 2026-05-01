@@ -22,8 +22,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -34,6 +34,7 @@ import hka.awp.temi_cgi_app.ui.components.DashboardCard
 import hka.awp.temi_cgi_app.ui.components.ModeIcon
 import hka.awp.temi_cgi_app.ui.shell.Screen
 
+//TODO add animation delay so the click animation is ran before the navigation
 /**
  * The main content view for the Dashboard screen.
  *
@@ -61,7 +62,8 @@ fun MainContent(
             )
             Spacer(modifier = Modifier.width(16.dp))
             val robotName = stringResource(id = R.string.robot_name)
-            val welcomeParts = stringResource(R.string.welcome_message, "PLACEHOLDER").split("PLACEHOLDER")
+            val welcomeParts =
+                stringResource(R.string.welcome_message, "PLACEHOLDER").split("PLACEHOLDER")
             Text(
                 text = buildAnnotatedString {
                     append(welcomeParts[0])
@@ -71,7 +73,7 @@ fun MainContent(
                     if (welcomeParts.size > 1) {
                         append(welcomeParts[1])
                     }
-                },  style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold
+                }, style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold
             )
         }
 
@@ -84,18 +86,18 @@ fun MainContent(
         ) {
             item {
                 DashboardCard(
-                    R.string.webserver,
-                    R.string.webserverSub,
+                    stringResource(R.string.webserver),
+                    stringResource(R.string.webserverSub),
                     Icons.Rounded.Storage,
                     stringResource(R.string.active_status, "10.0.0.1"),
                     onClick = {
-
+                        onClick(Screen.Webserver)
                     })
             }
             item {
                 DashboardCard(
-                    title = R.string.wetter,
-                    subtitle = R.string.wetterSub,
+                    title = stringResource(R.string.wetter),
+                    subtitle = stringResource(R.string.wetterSub),
                     customIcon = {
                         Icon(
                             painter = painterResource(id = R.drawable.partly_cloudy_day),
@@ -104,32 +106,35 @@ fun MainContent(
                         )
                     },
                     bottomText = stringResource(R.string.temp_unit, 21),
-                    isTemp = true
-                )
+                    isTemp = true,
+                    onClick = { onClick(Screen.Weather) })
             }
             item {
                 DashboardCard(
-                    R.string.navigation,
-                    R.string.navigationSub,
+                    stringResource(R.string.navigation),
+                    stringResource(R.string.navigationSub),
                     Icons.Rounded.Navigation,
                     stringResource(R.string.fastestroute),
-                )
+                    onClick = { onClick(Screen.Navigation) })
             }
             item {
                 DashboardCard(
-                    R.string.modus,
-                    R.string.modusSub,
+                    stringResource(R.string.modus),
+                    stringResource(R.string.modusSub),
                     null,
                     stringResource(R.string.showroom_mode),
                     overline = stringResource(R.string.current_mode),
-                    customIcon = { ModeIcon(tint = MaterialTheme.colorScheme.primary) })
+                    customIcon = { ModeIcon(tint = MaterialTheme.colorScheme.primary) },
+                    onClick = { onClick(Screen.Mode) })
             }
             item {
                 DashboardCard(
-                    R.string.settings,
-                    R.string.settingsSub,
-                    Icons.Rounded.Settings
-                )
+                    stringResource(R.string.settings),
+                    stringResource(R.string.settingsSub),
+                    Icons.Rounded.Settings,
+                    onClick = {
+                        onClick(Screen.Settings)
+                    })
             }
         }
     }
