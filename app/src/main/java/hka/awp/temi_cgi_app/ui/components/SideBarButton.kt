@@ -61,7 +61,7 @@ fun SidebarButton(isExpanded: Boolean, screen: Screen, isSelected: Boolean, onCl
                             painterResource(id = screen.iconRes)
                         } else {
                             rememberVectorPainter(Icons.Rounded.ImageNotSupported)
-                        }, contentDescription = screen.contentDescription
+                        }, contentDescription = stringResource(id = screen.contentDescription)
                     )
                 } else {
                     ModeIcon()

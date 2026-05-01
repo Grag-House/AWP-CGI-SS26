@@ -1,5 +1,6 @@
 package hka.awp.temi_cgi_app.feature.settings
 
+import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.BatteryFull
 import androidx.compose.material.icons.rounded.Brightness6
@@ -7,12 +8,15 @@ import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.ui.graphics.vector.ImageVector
+import hka.awp.temi_cgi_app.R
 
 /**
  * Represents the possible setting entries.
  */
 sealed class SettingsItem(
-    val title: String, val subtitle: String, val icon: ImageVector
+    @StringRes val titleRes: Int, 
+    @StringRes val subtitleRes: Int,
+    val icon: ImageVector
 ) {
     companion object {
         val settingsItems by lazy {
@@ -23,30 +27,32 @@ sealed class SettingsItem(
     }
 
     data object Notifications : SettingsItem(
-        title = "Benachrichtigungen",
-        subtitle = "Töne und Systemmeldungen",
+        titleRes = R.string.settings_notifications_title,
+        subtitleRes = R.string.settings_notifications_subtitle,
         icon = Icons.Rounded.Notifications
     )
 
     data object Display : SettingsItem(
-        title = "Anzeige",
-        subtitle = "Helligkeit und Bildschirmschoner",
+        titleRes = R.string.settings_display_title,
+        subtitleRes = R.string.settings_display_subtitle,
         icon = Icons.Rounded.Brightness6
     )
 
     data object Battery : SettingsItem(
-        title = "Akku",
-        subtitle = "Energieverbrauch und Akkustatus",
+        titleRes = R.string.settings_battery_title,
+        subtitleRes = R.string.settings_battery_subtitle,
         icon = Icons.Rounded.BatteryFull
     )
 
     data object Location : SettingsItem(
-        title = "Standort",
-        subtitle = "Ortungsdienste und Navigation",
+        titleRes = R.string.settings_location_title,
+        subtitleRes = R.string.settings_location_subtitle,
         icon = Icons.Rounded.LocationOn
     )
 
     data object About : SettingsItem(
-        title = "Über", subtitle = "Informationen über das System", icon = Icons.Rounded.Info
+        titleRes = R.string.settings_about_title,
+        subtitleRes = R.string.settings_about_subtitle,
+        icon = Icons.Rounded.Info
     )
 }

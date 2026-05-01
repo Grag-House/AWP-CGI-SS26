@@ -71,7 +71,7 @@ fun Sidebar(
                 modifier = modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = "CGI",
+                    text = stringResource(R.string.cgi),
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.headlineMedium
@@ -79,7 +79,7 @@ fun Sidebar(
                 IconButton(onClick = { onSidebarToggle() }) {
                     Icon(
                         imageVector = Icons.Rounded.Menu,
-                        "button to toggle or expand the side panel",
+                        contentDescription = stringResource(R.string.toggle_sidebar_description),
                     )
                 }
             }
@@ -132,7 +132,7 @@ fun Sidebar(
         IconButton(onClick = { onSidebarToggle() }) {
             Icon(
                 imageVector = Icons.Rounded.Menu,
-                "button to toggle or expand the side panel",
+                contentDescription = stringResource(R.string.toggle_sidebar_description),
             )
         }
     }

@@ -30,6 +30,8 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import hka.awp.temi_cgi_app.R
 import hka.awp.temi_cgi_app.feature.settings.SettingsItem.Companion.settingsItems
 
 /**
@@ -53,16 +55,16 @@ fun SettingsContent(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
                 Icons.Default.Settings,
-                contentDescription = "Einstellungen",
+                contentDescription = stringResource(R.string.settings),
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(48.dp)
             )
             Spacer(modifier = Modifier.width(16.dp))
             Text(
                 text = buildAnnotatedString {
-                    append("Temi ")
+                    append(stringResource(R.string.settings_page_prefix))
                     withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
-                        append("Einstellungen")
+                        append(stringResource(R.string.settings))
                     }
                 }, style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold
             )
@@ -75,8 +77,8 @@ fun SettingsContent(
         ) {
             settingsItems.forEach {
                 SettingsOptionCard(
-                    title = it.title,
-                    subtitle = it.subtitle,
+                    title = stringResource(it.titleRes),
+                    subtitle = stringResource(it.subtitleRes),
                     icon = it.icon,
                     onClick = { onItemClick(it) })
             }
