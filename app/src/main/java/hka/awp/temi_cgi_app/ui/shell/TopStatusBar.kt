@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringResource
 import hka.awp.temi_cgi_app.R
 import hka.awp.temi_cgi_app.utils.NetworkManager
+import hka.awp.temi_cgi_app.ui.components.BatteryIndicator
 
 /**
  * A component that represents the top status bar of the application.
@@ -27,6 +28,13 @@ import hka.awp.temi_cgi_app.utils.NetworkManager
  */
 @Composable
 fun TopStatusBar(wifiLevel: Int, currentTime: String, modifier: Modifier = Modifier) {
+fun TopStatusBar(
+    modifier: Modifier = Modifier,
+    wifiLevel: Int,
+    batteryLevel: Int?,
+    isCharging: Boolean
+) {
+
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.End,
@@ -37,17 +45,27 @@ fun TopStatusBar(wifiLevel: Int, currentTime: String, modifier: Modifier = Modif
             contentDescription = stringResource(R.string.wifi_description),
             tint = MaterialTheme.colorScheme.primary
         )
+
         Spacer(modifier = Modifier.width(8.dp))
         Icon(
             Icons.Default.BatteryFull,
             contentDescription = stringResource(R.string.battery_description),
             tint = MaterialTheme.colorScheme.primary
+
+        BatteryIndicator(
+            level = batteryLevel,
+            isCharging = isCharging
         )
+
         Spacer(modifier = Modifier.width(8.dp))
+
         Text(
-            text = currentTime, color = MaterialTheme.colorScheme.primary
+            text = currentTime,
+            color = MaterialTheme.colorScheme.primary
         )
+
         Spacer(modifier = Modifier.width(16.dp))
+
         Icon(
             Icons.Default.Notifications,
             contentDescription = stringResource(R.string.notifications_description),
