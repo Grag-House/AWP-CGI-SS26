@@ -7,8 +7,8 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import hka.awp.temi_cgi_app.utils.NetworkManager
-import hka.awp.temi_cgi_app.utils.getLocalTime
 import hka.awp.temi_cgi_app.utils.TemiBatteryMonitor
+import hka.awp.temi_cgi_app.utils.getLocalTime
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,10 +28,10 @@ import java.time.format.DateTimeFormatter
  * @property networkManager The manager used to retrieve network-related information, such as Wi-Fi levels.
  */
 class AppViewModel(
-    networkManager: NetworkManager, clock: Clock, datetimeFormatter: DateTimeFormatter
-) : ViewModel() {
-class AppViewModel(
-    private val networkManager: NetworkManager, temiBatteryMonitor: TemiBatteryMonitor
+    networkManager: NetworkManager,
+    clock: Clock,
+    datetimeFormatter: DateTimeFormatter,
+    temiBatteryMonitor: TemiBatteryMonitor
 ) : ViewModel() {
     var selectedRoute by mutableStateOf(Screen.Dashboard.route)
         private set

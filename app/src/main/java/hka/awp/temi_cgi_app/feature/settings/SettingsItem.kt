@@ -11,10 +11,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import hka.awp.temi_cgi_app.R
 
 /**
- * Represents the possible setting entries.
+ * Represents the possible settings entries.
  */
 sealed class SettingsItem(
-    @StringRes val titleRes: Int, 
+    @StringRes val titleRes: Int,
     @StringRes val subtitleRes: Int,
     val icon: ImageVector
 ) {

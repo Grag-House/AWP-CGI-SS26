@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BatteryFull
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -14,11 +13,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import hka.awp.temi_cgi_app.R
-import hka.awp.temi_cgi_app.utils.NetworkManager
 import hka.awp.temi_cgi_app.ui.components.BatteryIndicator
+import hka.awp.temi_cgi_app.utils.NetworkManager
 
 /**
  * A component that represents the top status bar of the application.
@@ -27,14 +26,13 @@ import hka.awp.temi_cgi_app.ui.components.BatteryIndicator
  * battery status, current time, and notification status.
  */
 @Composable
-fun TopStatusBar(wifiLevel: Int, currentTime: String, modifier: Modifier = Modifier) {
 fun TopStatusBar(
-    modifier: Modifier = Modifier,
     wifiLevel: Int,
+    currentTime: String,
     batteryLevel: Int?,
-    isCharging: Boolean
+    isCharging: Boolean,
+    modifier: Modifier = Modifier
 ) {
-
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.End,
@@ -47,10 +45,6 @@ fun TopStatusBar(
         )
 
         Spacer(modifier = Modifier.width(8.dp))
-        Icon(
-            Icons.Default.BatteryFull,
-            contentDescription = stringResource(R.string.battery_description),
-            tint = MaterialTheme.colorScheme.primary
 
         BatteryIndicator(
             level = batteryLevel,

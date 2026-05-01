@@ -39,8 +39,12 @@ val appModule = module {
     single<TemiBatteryMonitor> { TemiBatteryMonitor(robot = get()) }
 
     viewModel {
-        AppViewModel(networkManager = get(), temiBatteryMonitor = get())
-        AppViewModel(networkManager = get(), clock = get(), datetimeFormatter = get())
+        AppViewModel(
+            networkManager = get(),
+            clock = get(),
+            datetimeFormatter = get(),
+            temiBatteryMonitor = get()
+        )
     }
 
     viewModel {

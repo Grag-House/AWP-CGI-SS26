@@ -1,6 +1,5 @@
 package hka.awp.temi_cgi_app.ui.shell
 
-import android.util.Log
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -16,7 +15,6 @@ import hka.awp.temi_cgi_app.feature.dashboard.MainContent
 import hka.awp.temi_cgi_app.feature.settings.SettingsContent
 import hka.awp.temi_cgi_app.feature.settings.SettingsViewModel
 import org.koin.compose.viewmodel.koinViewModel
-import androidx.compose.runtime.getValue
 
 /**
  * The primary UI shell of the application.
@@ -38,24 +36,20 @@ fun MainShell(
 ) {
     val wifiLevel by appViewModel.wifiLevel.collectAsStateWithLifecycle()
     val currentTime by appViewModel.currentTime.collectAsStateWithLifecycle()
+    val batteryLevel by appViewModel.batteryLevel.collectAsStateWithLifecycle()
+    val isCharging by appViewModel.isCharging.collectAsStateWithLifecycle()
 
-    val wifiLevel by appViewModel.wifiLevel.collectAsState()
-    val batteryLevel by appViewModel.batteryLevel.collectAsState()
-    val isCharging by appViewModel.isCharging.collectAsState()
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopStatusBar(wifiLevel, currentTime)
-        }) { paddingValues ->
-        topBar = {
             TopStatusBar(
                 wifiLevel = wifiLevel,
+                currentTime = currentTime,
                 batteryLevel = batteryLevel,
                 isCharging = isCharging
             )
-        }
-    ) { paddingValues ->
+        }) { paddingValues ->
         Row(
             modifier = Modifier
                 .fillMaxSize()
@@ -76,7 +70,6 @@ fun MainShell(
                     selectedRoute = appViewModel.selectedRoute,
                     onClick = { screen ->
                         appViewModel.onRouteSelect(screen)
-                        Log.d(this.javaClass.simpleName, "Dashboard button pressed!")
                     })
 
                 Screen.Settings.route -> SettingsContent(
@@ -90,7 +83,6 @@ fun MainShell(
                         selectedRoute = appViewModel.selectedRoute,
                         onClick = { screen ->
                             appViewModel.onRouteSelect(screen)
-                            Log.d(this.javaClass.simpleName, "Dashboard button pressed!")
                         })
                 }
             }
