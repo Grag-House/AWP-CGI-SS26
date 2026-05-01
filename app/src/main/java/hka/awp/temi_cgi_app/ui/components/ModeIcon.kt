@@ -15,6 +15,13 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import hka.awp.temi_cgi_app.R
 
+/**
+ * A composable that displays a stacked icon representing a mode switch,
+ * combining both "on" and "off" toggle visual elements.
+ *
+ * @param modifier The [Modifier] to be applied to the layout.
+ * @param tint The [Color] used to tint the icons. If null, [LocalContentColor] is used.
+ */
 @Composable
 fun ModeIcon(modifier: Modifier = Modifier, tint: Color? = null) {
     Box(contentAlignment = Alignment.Center, modifier = modifier.semantics {
