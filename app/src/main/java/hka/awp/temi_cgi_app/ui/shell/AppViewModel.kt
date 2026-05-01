@@ -7,14 +7,12 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import hka.awp.temi_cgi_app.utils.NetworkManager
+import hka.awp.temi_cgi_app.utils.TemiBatteryMonitor
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import com.robotemi.sdk.listeners.OnBatteryStatusChangedListener
-import com.robotemi.sdk.BatteryData
-import com.robotemi.sdk.Robot
 
 /**
  * ViewModel responsible for managing the global application state, including navigation,
@@ -25,7 +23,9 @@ import com.robotemi.sdk.Robot
  *
  * @property networkManager The manager used to retrieve network-related information, such as Wi-Fi levels.
  */
-class AppViewModel(networkManager: NetworkManager) : ViewModel(), OnBatteryStatusChangedListener {
+class AppViewModel(
+    private val networkManager: NetworkManager, temiBatteryMonitor: TemiBatteryMonitor
+) : ViewModel() {
     var selectedRoute by mutableStateOf(Screen.Dashboard.route)
         private set
 
@@ -44,14 +44,6 @@ class AppViewModel(networkManager: NetworkManager) : ViewModel(), OnBatteryStatu
         )
     }
 
-    private val _batteryLevel = MutableStateFlow<Int?>(null)
-    val batteryLevel: StateFlow<Int?> = _batteryLevel
-
-    private val _isCharging = MutableStateFlow(false)
-    val isCharging: StateFlow<Boolean> = _isCharging
-
-    private var robot: Robot? = null
-
     private var _wifiLevel = MutableStateFlow(0)
     val wifiLevel: StateFlow<Int> = _wifiLevel
 
@@ -64,46 +56,10 @@ class AppViewModel(networkManager: NetworkManager) : ViewModel(), OnBatteryStatu
         }
     }
 
-    private fun startBatteryListener() {
-        try {
-            robot = Robot.getInstance()
-            robot?.addOnBatteryStatusChangedListener(this)
-
-            robot?.batteryData?.let { batteryData ->
-                updateBatteryState(batteryData)
-            }
-        } catch (e: Exception) {
-            Log.w(
-                this.javaClass.simpleName,
-                "Temi SDK not available, probably running locally",
-                e
-            )
-            _batteryLevel.value = null
-            _isCharging.value = false
-        }
-    }
-
-    override fun onBatteryStatusChanged(batteryData: BatteryData?) {
-        batteryData?.let { updateBatteryState(it) }
-    }
-
-    private fun updateBatteryState(batteryData: BatteryData) {
-        _batteryLevel.value = batteryData.level
-        _isCharging.value = batteryData.isCharging
-    }
-
-    override fun onCleared() {
-        try {
-            robot?.removeOnBatteryStatusChangedListener(this)
-        } catch (e: Exception) {
-            Log.w(this.javaClass.simpleName, "Could not remove battery listener", e)
-        }
-
-        super.onCleared()
-    }
+    val batteryLevel: StateFlow<Int?> = temiBatteryMonitor.batteryLevel
+    val isCharging: StateFlow<Boolean> = temiBatteryMonitor.isCharging
 
     init {
         startWifiPolling(networkManager)
-        startBatteryListener()
     }
 }
