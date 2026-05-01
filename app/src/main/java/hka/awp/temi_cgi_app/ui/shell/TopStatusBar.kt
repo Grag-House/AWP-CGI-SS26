@@ -26,7 +26,7 @@ import hka.awp.temi_cgi_app.utils.NetworkManager
  * battery status, current time, and notification status.
  */
 @Composable
-fun TopStatusBar(modifier: Modifier = Modifier, wifiLevel: Int) {
+fun TopStatusBar(wifiLevel: Int, currentTime: String, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.End,
@@ -45,7 +45,7 @@ fun TopStatusBar(modifier: Modifier = Modifier, wifiLevel: Int) {
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
-            text = "16:29", color = MaterialTheme.colorScheme.primary
+            text = currentTime, color = MaterialTheme.colorScheme.primary
         )
         Spacer(modifier = Modifier.width(16.dp))
         Icon(
