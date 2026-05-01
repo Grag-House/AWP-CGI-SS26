@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -19,20 +20,18 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun BatteryIndicator(
-    level: Int?,
-    isCharging: Boolean,
-    modifier: Modifier = Modifier
+    level: Int?, isCharging: Boolean, modifier: Modifier = Modifier
 ) {
     val safeLevel = level?.coerceIn(0, 100)
-
     val batteryColor = MaterialTheme.colorScheme.primary
     val textOnFill = MaterialTheme.colorScheme.onPrimary
     val textOnEmpty = MaterialTheme.colorScheme.primary
 
     Box(
-        modifier = modifier.size(width = 15.dp, height = 24.dp),
-        contentAlignment = Alignment.Center
+        modifier = modifier.size(width = 15.dp, height = 24.dp), contentAlignment = Alignment.Center
     ) {
+        val boltPath = remember { Path() }
+
         Canvas(modifier = Modifier.matchParentSize()) {
             val nubHeight = 4.dp.toPx()
             val nubWidth = 9.dp.toPx()
@@ -50,7 +49,7 @@ fun BatteryIndicator(
             val fillHeight = bodyHeight * fillPercent
             val fillTop = bodyTop + bodyHeight - fillHeight
 
-            // Nub oben
+            // Nub top
             drawRoundRect(
                 color = batteryColor,
                 topLeft = Offset((size.width - nubWidth) / 2f, 0f),
@@ -59,7 +58,7 @@ fun BatteryIndicator(
             )
 
             if (safeLevel == null) {
-                // Nur Umriss wenn keine Daten vorhanden
+                // outline in case of no data
                 drawRoundRect(
                     color = batteryColor,
                     topLeft = Offset(bodyLeft, bodyTop),
@@ -68,7 +67,7 @@ fun BatteryIndicator(
                     style = Stroke(width = strokeWidth)
                 )
             } else if (safeLevel >= 95) {
-                // Voll: wie altes Material Icon, komplett gefüllt
+                // just like the material icon, completely filled
                 drawRoundRect(
                     color = batteryColor,
                     topLeft = Offset(bodyLeft, bodyTop),
@@ -76,7 +75,7 @@ fun BatteryIndicator(
                     cornerRadius = CornerRadius(radius, radius)
                 )
             } else {
-                // Umriss
+                // outline
                 drawRoundRect(
                     color = batteryColor,
                     topLeft = Offset(bodyLeft, bodyTop),
@@ -85,7 +84,7 @@ fun BatteryIndicator(
                     style = Stroke(width = strokeWidth)
                 )
 
-                // Füllung von unten nach oben
+                // filling (bottom-up)
                 if (fillHeight > 0f) {
                     drawRoundRect(
                         color = batteryColor,
@@ -97,33 +96,23 @@ fun BatteryIndicator(
             }
 
             if (isCharging) {
-                val bolt = Path().apply {
-                    moveTo(size.width * 0.60f, bodyTop + bodyHeight * 0.22f)
-                    lineTo(size.width * 0.40f, bodyTop + bodyHeight * 0.52f)
-                    lineTo(size.width * 0.53f, bodyTop + bodyHeight * 0.52f)
-                    lineTo(size.width * 0.42f, bodyTop + bodyHeight * 0.82f)
-                    lineTo(size.width * 0.66f, bodyTop + bodyHeight * 0.43f)
-                    lineTo(size.width * 0.52f, bodyTop + bodyHeight * 0.43f)
-                    close()
-                }
-
+                // reset the path to clear the old one from the heap
+                boltPath.reset()
+                // bolt icon
+                boltPath.buildChargingBolt(size, bodyTop, bodyHeight)
                 drawPath(
-                    path = bolt,
-                    color = batteryColor
+                    path = boltPath, color = batteryColor
                 )
             }
         }
 
         if (!isCharging) {
             Text(
-                text = when {
-                    safeLevel == null -> "--"
-                    safeLevel == 100 -> ""
+                text = when (safeLevel) {
+                    null -> "--"
+                    100 -> ""
                     else -> safeLevel.toString()
-                },
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Bold,
-                color = when {
+                }, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = when {
                     safeLevel == null -> textOnEmpty
                     safeLevel >= 45 -> textOnFill
                     else -> textOnEmpty
@@ -131,4 +120,15 @@ fun BatteryIndicator(
             )
         }
     }
+}
+
+// extension function to build the charging bolt
+private fun Path.buildChargingBolt(size: Size, bodyTop: Float, bodyHeight: Float) {
+    moveTo(size.width * 0.60f, bodyTop + bodyHeight * 0.22f)
+    lineTo(size.width * 0.40f, bodyTop + bodyHeight * 0.52f)
+    lineTo(size.width * 0.53f, bodyTop + bodyHeight * 0.52f)
+    lineTo(size.width * 0.42f, bodyTop + bodyHeight * 0.82f)
+    lineTo(size.width * 0.66f, bodyTop + bodyHeight * 0.43f)
+    lineTo(size.width * 0.52f, bodyTop + bodyHeight * 0.43f)
+    close()
 }
