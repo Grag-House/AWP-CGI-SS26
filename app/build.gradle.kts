@@ -6,6 +6,12 @@ plugins {
 android {
     namespace = "hka.awp.temi_cgi_app"
 
+    testOptions {
+        unitTests.all {
+            it.useJUnitPlatform()
+        }
+    }
+
     defaultConfig {
         applicationId = "hka.awp.temi_cgi_app"
         minSdk = 23
@@ -67,8 +73,11 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.extended)
 
     // unit test dependencies
-    testImplementation(libs.junit)
     testImplementation(libs.mokk)
+    testImplementation(libs.junit.jupiter.api)
+    testRuntimeOnly(libs.junit.jupiter.engine)
+    testRuntimeOnly(libs.junit.platform.launcher)
+    testImplementation(libs.junit.jupiter.params)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -80,4 +89,7 @@ dependencies {
 
     // api desugaring
     coreLibraryDesugaring(libs.android.desugarJdkLibs)
+
+    // temi dependency
+    implementation(libs.temi.sdk)
 }
