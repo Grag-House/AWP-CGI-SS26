@@ -27,7 +27,7 @@ sealed class Screen(
     @StringRes val title: Int,
     val icon: ImageVector? = null,
     val iconRes: Int? = null,
-    val contentDescription: String,
+    @StringRes val contentDescription: Int,
     val isCustomIcon: Boolean = false
 ) {
     companion object {
@@ -38,41 +38,41 @@ sealed class Screen(
         route = "dashboard",
         title = R.string.hauptmenu,
         icon = Icons.Rounded.Home,
-        contentDescription = "Home icon for the main dashboard"
+        contentDescription = R.string.home_description
     )
 
     data object Webserver : Screen(
         route = "webserver",
         title = R.string.webserver,
         icon = Icons.Rounded.Storage,
-        contentDescription = "Storage icon representing server status"
+        contentDescription = R.string.webserver_description
     )
 
     data object Weather : Screen(
         route = "weather",
         title = R.string.wetter,
         iconRes = R.drawable.partly_cloudy_day,
-        contentDescription = "Sun and cloud symbol for local weather"
+        contentDescription = R.string.weather_description
     )
 
     data object Navigation : Screen(
         route = "navigation",
         title = R.string.navigation,
         icon = Icons.Rounded.Navigation,
-        contentDescription = "Arrow icon for robot navigation"
+        contentDescription = R.string.navigation_description
     )
 
     data object Mode : Screen(
         route = "mode",
         title = R.string.modus,
         isCustomIcon = true,
-        contentDescription = "Dual toggle switches for operation mode selection"
+        contentDescription = R.string.mode_description
     )
 
     data object Settings : Screen(
         route = "settings",
         title = R.string.settings,
         icon = Icons.Rounded.Settings,
-        contentDescription = "Gear icon for system settings"
+        contentDescription = R.string.settings_description
     )
 }

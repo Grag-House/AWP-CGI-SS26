@@ -55,7 +55,7 @@ fun MainContent(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
                 Icons.Rounded.SmartToy,
-                contentDescription = "Roboter",
+                contentDescription = stringResource(R.string.robot_description),
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(48.dp)
             )
@@ -87,7 +87,7 @@ fun MainContent(
                     R.string.webserver,
                     R.string.webserverSub,
                     Icons.Rounded.Storage,
-                    "Active 10.0.0.1",
+                    stringResource(R.string.active_status, "10.0.0.1"),
                     onClick = {
 
                     })
@@ -100,10 +100,10 @@ fun MainContent(
                         Icon(
                             painter = painterResource(id = R.drawable.partly_cloudy_day),
                             tint = MaterialTheme.colorScheme.primary,
-                            contentDescription = "Sun and cloud symbol for local weather"
+                            contentDescription = stringResource(R.string.weather_icon_description)
                         )
                     },
-                    bottomText = "21°C",
+                    bottomText = stringResource(R.string.temp_unit, 21),
                     isTemp = true
                 )
             }
@@ -112,7 +112,7 @@ fun MainContent(
                     R.string.navigation,
                     R.string.navigationSub,
                     Icons.Rounded.Navigation,
-                    "FASTEST ROUTE"
+                    stringResource(R.string.fastestroute),
                 )
             }
             item {
@@ -120,8 +120,8 @@ fun MainContent(
                     R.string.modus,
                     R.string.modusSub,
                     null,
-                    "SHOWROOM MODE",
-                    overline = "Aktueller Modus",
+                    stringResource(R.string.showroom_mode),
+                    overline = stringResource(R.string.current_mode),
                     customIcon = { ModeIcon(tint = MaterialTheme.colorScheme.primary) })
             }
             item {
