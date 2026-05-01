@@ -22,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -49,79 +50,85 @@ fun MainContent(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(32.dp)
+            .padding(24.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
                 Icons.Rounded.SmartToy,
-                contentDescription = "Roboter",
+                contentDescription = stringResource(R.string.robot_description),
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(48.dp)
             )
             Spacer(modifier = Modifier.width(16.dp))
+            val robotName = stringResource(id = R.string.robot_name)
+            val welcomeParts = stringResource(R.string.welcome_message, "PLACEHOLDER").split("PLACEHOLDER")
             Text(
                 text = buildAnnotatedString {
-                    append("Hey, Ich bin ")
+                    append(welcomeParts[0])
                     withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
-                        append("Temi!")
+                        append(robotName)
                     }
-                    append(" Wie kann ich\ndir helfen?")
-                }, style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold
+                    if (welcomeParts.size > 1) {
+                        append(welcomeParts[1])
+                    }
+                },  style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold
             )
         }
 
-        Spacer(modifier = Modifier.height(48.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         LazyVerticalGrid(
             columns = GridCells.Fixed(3),
-            horizontalArrangement = Arrangement.spacedBy(24.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
                 DashboardCard(
-                    "Webserver",
-                    "Rufe den Webserver auf",
+                    R.string.webserver,
+                    R.string.webserverSub,
                     Icons.Rounded.Storage,
-                    "Active 10.0.0.1",
+                    stringResource(R.string.active_status, "10.0.0.1"),
                     onClick = {
 
                     })
             }
             item {
                 DashboardCard(
-                    title = "Wetter",
-                    subtitle = "Wettervorhersagen für den\naktuellen Standort",
+                    title = R.string.wetter,
+                    subtitle = R.string.wetterSub,
                     customIcon = {
                         Icon(
                             painter = painterResource(id = R.drawable.partly_cloudy_day),
                             tint = MaterialTheme.colorScheme.primary,
-                            contentDescription = "Sun and cloud symbol for local weather"
+                            contentDescription = stringResource(R.string.weather_icon_description)
                         )
                     },
-                    bottomText = "21°C",
+                    bottomText = stringResource(R.string.temp_unit, 21),
                     isTemp = true
                 )
             }
             item {
                 DashboardCard(
-                    "Navigation",
-                    "Sag mir wo ich dich\nhinbringen soll.",
+                    R.string.navigation,
+                    R.string.navigationSub,
                     Icons.Rounded.Navigation,
-                    "FASTEST ROUTE"
+                    stringResource(R.string.fastestroute),
                 )
             }
             item {
                 DashboardCard(
-                    "Modus",
-                    "Ändere den Modus",
+                    R.string.modus,
+                    R.string.modusSub,
                     null,
-                    "SHOWROOM MODE",
-                    overline = "Aktueller Modus",
+                    stringResource(R.string.showroom_mode),
+                    overline = stringResource(R.string.current_mode),
                     customIcon = { ModeIcon(tint = MaterialTheme.colorScheme.primary) })
             }
             item {
                 DashboardCard(
-                    "Einstellungen", "Routen, Patroullien etc.", Icons.Rounded.Settings
+                    R.string.settings,
+                    R.string.settingsSub,
+                    Icons.Rounded.Settings
                 )
             }
         }
