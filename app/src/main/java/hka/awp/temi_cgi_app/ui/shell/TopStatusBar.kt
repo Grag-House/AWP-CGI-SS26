@@ -15,6 +15,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import hka.awp.temi_cgi_app.R
 import hka.awp.temi_cgi_app.utils.NetworkManager
 
 /**
@@ -32,13 +34,13 @@ fun TopStatusBar(wifiLevel: Int, currentTime: String, modifier: Modifier = Modif
     ) {
         Icon(
             NetworkManager.getWifiIconForLevel(wifiLevel),
-            contentDescription = "WLAN",
+            contentDescription = stringResource(R.string.wifi_description),
             tint = MaterialTheme.colorScheme.primary
         )
         Spacer(modifier = Modifier.width(8.dp))
         Icon(
             Icons.Default.BatteryFull,
-            contentDescription = "Batterie",
+            contentDescription = stringResource(R.string.battery_description),
             tint = MaterialTheme.colorScheme.primary
         )
         Spacer(modifier = Modifier.width(8.dp))
@@ -48,7 +50,7 @@ fun TopStatusBar(wifiLevel: Int, currentTime: String, modifier: Modifier = Modif
         Spacer(modifier = Modifier.width(16.dp))
         Icon(
             Icons.Default.Notifications,
-            contentDescription = "Benachrichtigungen",
+            contentDescription = stringResource(R.string.notifications_description),
             tint = MaterialTheme.colorScheme.primary
         )
     }
