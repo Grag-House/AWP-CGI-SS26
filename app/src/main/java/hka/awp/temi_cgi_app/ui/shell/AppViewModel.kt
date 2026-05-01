@@ -27,7 +27,9 @@ import java.time.format.DateTimeFormatter
  * @property networkManager The manager used to retrieve network-related information, such as Wi-Fi levels.
  */
 class AppViewModel(
-    networkManager: NetworkManager, clock: Clock, datetimeFormatter: DateTimeFormatter
+    networkManager: NetworkManager,
+    clock: Clock,
+    datetimeFormatter: DateTimeFormatter
 ) : ViewModel() {
     var selectedRoute by mutableStateOf(Screen.Dashboard.route)
         private set

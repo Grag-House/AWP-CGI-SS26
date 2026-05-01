@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import hka.awp.temi_cgi_app.feature.dashboard.MainContent
+import hka.awp.temi_cgi_app.feature.navigation.NavigationContent
 import hka.awp.temi_cgi_app.feature.settings.SettingsContent
 import hka.awp.temi_cgi_app.feature.settings.SettingsViewModel
 import org.koin.compose.viewmodel.koinViewModel
@@ -69,6 +70,10 @@ fun MainShell(
 
                 Screen.Settings.route -> SettingsContent(
                     onItemClick = settingsViewModel::onSettingsItemClick
+                )
+
+                Screen.Navigation.route -> NavigationContent(
+                    modifier = Modifier.weight(1f)
                 )
 
                 //redundancy
