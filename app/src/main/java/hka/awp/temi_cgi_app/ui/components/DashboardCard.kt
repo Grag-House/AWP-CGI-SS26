@@ -1,6 +1,7 @@
 package hka.awp.temi_cgi_app.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -26,20 +27,34 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
+/**
+ * A customizable dashboard card component used to display information summaries or navigation triggers.
+ *
+ * @param title The primary heading text displayed on the card.
+ * @param subtitle A secondary description or supporting text.
+ * @param icon An optional [ImageVector] to be displayed in the icon box. Defaults to a placeholder if [customIcon] is also null.
+ * @param bottomText Optional text displayed at the bottom of the card.
+ * @param overline Optional small label text displayed directly above the [bottomText].
+ * @param isTemp If true, applies a larger headline style to the [bottomText], typically used for numerical readings like temperature.
+ * @param customIcon An optional composable slot to provide a custom icon or graphic, overriding the [icon] parameter.
+ * @param onClick Callback to be executed when the card is clicked.
+ */
 @Composable
 fun DashboardCard(
     title: Int,
     subtitle: Int,
-    icon: ImageVector?,
+    icon: ImageVector? = null,
     bottomText: String? = null,
     overline: String? = null,
     isTemp: Boolean = false,
     customIcon: @Composable (() -> Unit)? = null,
+    onClick: () -> Unit = {}
 ) {
     OutlinedCard(
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(1.3f), shape = RoundedCornerShape(16.dp)
+            .aspectRatio(1.3f)
+            .clickable { onClick() }, shape = RoundedCornerShape(16.dp)
     ) {
         Column(
             modifier = Modifier

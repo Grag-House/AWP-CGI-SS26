@@ -7,10 +7,11 @@ espressoCore = "3.7.0"
 koin-bom = "4.2.1"
 lifecycleRuntimeKtx = "2.10.0"
 activityCompose = "1.13.0"
-kotlin = "2.3.20"
+kotlin = "2.3.21"
 composeBom = "2026.04.01"
-uiTextGoogleFonts = "1.10.6"
-runtime = "1.10.6"
+uiTextGoogleFonts = "1.11.0"
+runtime = "1.11.0"
+mokk = "1.14.9"
 
 [libraries]
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
@@ -34,6 +35,8 @@ koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin-bom" }
 koin-android = { module = "io.insert-koin:koin-android" }
 koin-compose = { module = "io.insert-koin:koin-compose" }
 koin-compose-viewmodel = {module = "io.insert-koin:koin-compose-viewmodel"}
+mokk = { module = "io.mockk:mockk", version.ref = "mokk" }
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
