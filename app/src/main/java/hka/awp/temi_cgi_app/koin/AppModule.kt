@@ -1,7 +1,7 @@
 package hka.awp.temi_cgi_app.koin
 
-import android.util.Log
 import com.robotemi.sdk.Robot
+import hka.awp.temi_cgi_app.feature.navigation.NavigationViewModel
 import hka.awp.temi_cgi_app.feature.settings.SettingsViewModel
 import hka.awp.temi_cgi_app.ui.shell.AppViewModel
 import hka.awp.temi_cgi_app.utils.NetworkManager
@@ -9,6 +9,7 @@ import hka.awp.temi_cgi_app.utils.TemiBatteryMonitor
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
+import timber.log.Timber
 import java.time.Clock
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -29,16 +30,14 @@ val appModule = module {
         try {
             Robot.getInstance()
         } catch (e: Exception) {
-            Log.d(
-                this.javaClass.simpleName, "Temi SDK not available, probably running locally", e
-            )
+            Timber.e(e, "Temi SDK not available, probably running locally")
             null
         }
     }
 
     single<TemiBatteryMonitor> { TemiBatteryMonitor(robot = get()) }
 
-    viewModel {
+    viewModel<AppViewModel> {
         AppViewModel(
             networkManager = get(),
             clock = get(),
@@ -47,7 +46,9 @@ val appModule = module {
         )
     }
 
-    viewModel {
+    viewModel<SettingsViewModel> {
         SettingsViewModel()
     }
+
+    viewModel<NavigationViewModel> { NavigationViewModel() }
 }

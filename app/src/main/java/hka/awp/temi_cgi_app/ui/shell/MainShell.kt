@@ -9,10 +9,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import hka.awp.temi_cgi_app.feature.dashboard.MainContent
+import hka.awp.temi_cgi_app.feature.navigation.DestinationItems
 import hka.awp.temi_cgi_app.feature.navigation.NavigationContent
+import hka.awp.temi_cgi_app.feature.navigation.NavigationViewModel
 import hka.awp.temi_cgi_app.feature.settings.SettingsContent
 import hka.awp.temi_cgi_app.feature.settings.SettingsViewModel
 import org.koin.compose.viewmodel.koinViewModel
@@ -33,7 +36,8 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun MainShell(
     appViewModel: AppViewModel = koinViewModel(),
-    settingsViewModel: SettingsViewModel = koinViewModel()
+    settingsViewModel: SettingsViewModel = koinViewModel(),
+    navigationViewModel: NavigationViewModel = koinViewModel()
 ) {
     val wifiLevel by appViewModel.wifiLevel.collectAsStateWithLifecycle()
     val currentTime by appViewModel.currentTime.collectAsStateWithLifecycle()
@@ -78,7 +82,9 @@ fun MainShell(
                 )
 
                 Screen.Navigation.route -> NavigationContent(
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f), currentLocation = stringResource(
+                        DestinationItems.Office.stringResource,
+                    ), onDestinationClick = navigationViewModel::onNavigationClick
                 )
 
                 //redundancy

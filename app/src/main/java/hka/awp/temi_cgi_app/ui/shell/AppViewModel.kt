@@ -1,6 +1,5 @@
 package hka.awp.temi_cgi_app.ui.shell
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -15,6 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.time.Clock
 import java.time.format.DateTimeFormatter
 
@@ -38,7 +38,7 @@ class AppViewModel(
 
     fun onRouteSelect(screen: Screen) {
         selectedRoute = screen.route
-        Log.d(this.javaClass.simpleName, "TODO routing")
+        Timber.d("TODO routing")
     }
 
     var isSidebarExpanded by mutableStateOf(true)
@@ -46,9 +46,7 @@ class AppViewModel(
 
     fun onSideBarToggle() {
         isSidebarExpanded = !isSidebarExpanded
-        Log.d(
-            this.javaClass.simpleName, "Sidepanel collapse triggered, currently: $isSidebarExpanded"
-        )
+        Timber.d("Sidepanel collapse triggered, currently: $isSidebarExpanded")
     }
 
     private var _wifiLevel = MutableStateFlow(0)
