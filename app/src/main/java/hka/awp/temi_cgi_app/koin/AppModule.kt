@@ -1,8 +1,11 @@
 package hka.awp.temi_cgi_app.koin
 
+import android.util.Log
+import com.robotemi.sdk.Robot
 import hka.awp.temi_cgi_app.feature.settings.SettingsViewModel
 import hka.awp.temi_cgi_app.ui.shell.AppViewModel
 import hka.awp.temi_cgi_app.utils.NetworkManager
+import hka.awp.temi_cgi_app.utils.TemiBatteryMonitor
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -22,8 +25,26 @@ val appModule = module {
         DateTimeFormatter.ofPattern("HH:mm").withZone(ZoneId.systemDefault())
     }
 
+    single<Robot?> {
+        try {
+            Robot.getInstance()
+        } catch (e: Exception) {
+            Log.d(
+                this.javaClass.simpleName, "Temi SDK not available, probably running locally", e
+            )
+            null
+        }
+    }
+
+    single<TemiBatteryMonitor> { TemiBatteryMonitor(robot = get()) }
+
     viewModel {
-        AppViewModel(networkManager = get(), clock = get(), datetimeFormatter = get())
+        AppViewModel(
+            networkManager = get(),
+            clock = get(),
+            datetimeFormatter = get(),
+            temiBatteryMonitor = get()
+        )
     }
 
     viewModel {

@@ -4,9 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
-import android.os.Build
 import androidx.annotation.RequiresPermission
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.NetworkWifi1Bar
@@ -23,9 +21,13 @@ import androidx.compose.ui.graphics.vector.ImageVector
  *
  * @property context The application context used to access system services like [ConnectivityManager] and [WifiManager].
  */
-data class NetworkManager(
-    val context: Context, private val sdkVersion: Int = Build.VERSION.SDK_INT
-) {
+class NetworkManager(val context: Context) {
+    private val connectivityManager =
+        context.applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    private val wifiManager =
+        context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+
+
     companion object {
         fun getWifiIconForLevel(level: Int): ImageVector {
             return when (level) {
@@ -39,36 +41,16 @@ data class NetworkManager(
         }
     }
 
-    //TODO check for temi android SDK later on, so this can be streamlined (e. g. remove dead paths)
+    // this will only run on android sdk 23, therefore usage of now deprecated methods is fine / necessary
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_NETWORK_STATE, Manifest.permission.ACCESS_WIFI_STATE])
     fun getWifiSignalLevel(): Int {
-        val connectivityManager =
-            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val wifiManager =
-            context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+        val network = connectivityManager.activeNetwork ?: return 0
+        val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return 0
 
-        // Android 10+
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val network = connectivityManager.activeNetwork ?: return 0
-            val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return 0
-
-            if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
-                val transportInfo = capabilities.transportInfo
-                if (transportInfo is WifiInfo) {
-                    val rssi = transportInfo.rssi
-                    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                        // anrdoid sdk 30+
-                        wifiManager.calculateSignalLevel(rssi)
-                    } else {
-                        // android sdk 29
-                        @Suppress("DEPRECATION") WifiManager.calculateSignalLevel(rssi, 5)
-                    }
-                }
-            }
-        } else {
-            // 2. Legacy (sdk 24 - 28)
+        if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
             @Suppress("DEPRECATION") val wifiInfo = wifiManager.connectionInfo
-            @Suppress("DEPRECATION") return WifiManager.calculateSignalLevel(wifiInfo.rssi, 5)
+            val rssi = wifiInfo.rssi
+            @Suppress("DEPRECATION") return WifiManager.calculateSignalLevel(rssi, 5)
         }
         return 0
     }

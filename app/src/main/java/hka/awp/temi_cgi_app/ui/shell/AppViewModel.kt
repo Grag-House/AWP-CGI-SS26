@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import hka.awp.temi_cgi_app.utils.NetworkManager
+import hka.awp.temi_cgi_app.utils.TemiBatteryMonitor
 import hka.awp.temi_cgi_app.utils.getLocalTime
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,7 +30,8 @@ import java.time.format.DateTimeFormatter
 class AppViewModel(
     networkManager: NetworkManager,
     clock: Clock,
-    datetimeFormatter: DateTimeFormatter
+    datetimeFormatter: DateTimeFormatter,
+    temiBatteryMonitor: TemiBatteryMonitor
 ) : ViewModel() {
     var selectedRoute by mutableStateOf(Screen.Dashboard.route)
         private set
@@ -72,6 +74,9 @@ class AppViewModel(
             }
         }
     }
+
+    val batteryLevel: StateFlow<Int?> = temiBatteryMonitor.batteryLevel
+    val isCharging: StateFlow<Boolean> = temiBatteryMonitor.isCharging
 
     init {
         startWifiPolling(networkManager)
