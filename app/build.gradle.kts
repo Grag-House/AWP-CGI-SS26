@@ -12,6 +12,10 @@ android {
         }
     }
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     defaultConfig {
         applicationId = "hka.awp.temi_cgi_app"
         minSdk = 23
@@ -32,12 +36,14 @@ android {
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
             )
+            isDebuggable = false
         }
 
         debug {
             isMinifyEnabled = false
             //noinspection NotShrinkingResources
             isShrinkResources = false
+            isDebuggable = true
         }
     }
     compileOptions {
@@ -77,6 +83,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.text.google.fonts)
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.timber)
 
     // unit test dependencies
     testImplementation(libs.mokk)
