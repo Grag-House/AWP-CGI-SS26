@@ -8,7 +8,6 @@ import hka.awp.temi_cgi_app.ui.shell.MainShell
 import hka.awp.temi_cgi_app.ui.theme.CgiTheme
 import hka.awp.temi_cgi_app.utils.hideTopBar
 
-
 /**
  * The main entry point of the application.
  *
@@ -17,6 +16,7 @@ import hka.awp.temi_cgi_app.utils.hideTopBar
  * - Setting up the Jetpack Compose UI layout within the [CgiTheme].
  */
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

@@ -1,6 +1,5 @@
 package hka.awp.temi_cgi_app.ui.shell
 
-import android.util.Log
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -38,12 +37,19 @@ fun MainShell(
 ) {
     val wifiLevel by appViewModel.wifiLevel.collectAsStateWithLifecycle()
     val currentTime by appViewModel.currentTime.collectAsStateWithLifecycle()
+    val batteryLevel by appViewModel.batteryLevel.collectAsStateWithLifecycle()
+    val isCharging by appViewModel.isCharging.collectAsStateWithLifecycle()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopStatusBar(wifiLevel, currentTime)
+            TopStatusBar(
+                wifiLevel = wifiLevel,
+                currentTime = currentTime,
+                batteryLevel = batteryLevel,
+                isCharging = isCharging
+            )
         }) { paddingValues ->
         Row(
             modifier = Modifier
@@ -65,7 +71,6 @@ fun MainShell(
                     selectedRoute = appViewModel.selectedRoute,
                     onClick = { screen ->
                         appViewModel.onRouteSelect(screen)
-                        Log.d(this.javaClass.simpleName, "Dashboard button pressed!")
                     })
 
                 Screen.Settings.route -> SettingsContent(
@@ -83,7 +88,6 @@ fun MainShell(
                         selectedRoute = appViewModel.selectedRoute,
                         onClick = { screen ->
                             appViewModel.onRouteSelect(screen)
-                            Log.d(this.javaClass.simpleName, "Dashboard button pressed!")
                         })
                 }
             }

@@ -15,24 +15,23 @@ import androidx.compose.material.icons.rounded.SignalWifi4Bar
 import androidx.compose.material.icons.rounded.SignalWifiOff
 import io.mockk.MockKAnnotations
 import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
+import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
-import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Test
-import kotlin.random.Random
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 class NetworkManagerTest {
-    @MockK(relaxed = true)
-    lateinit var context: Context
+    @MockK
+    lateinit var mockContext: Context
 
     @MockK(relaxed = true)
     lateinit var mockConnectivityManager: ConnectivityManager
 
     @MockK(relaxed = true)
-    lateinit var mockNetwork: Network
+    lateinit var mockWifiManager: WifiManager
 
     @MockK(relaxed = true)
     lateinit var mockCapabilities: NetworkCapabilities
@@ -40,21 +39,17 @@ class NetworkManagerTest {
     @MockK(relaxed = true)
     lateinit var mockWifiInfo: WifiInfo
 
-    @MockK(relaxed = true)
-    lateinit var mockWifiManager: WifiManager
-
-    @InjectMockKs
     lateinit var networkManager: NetworkManager
 
-    @Before
-    fun setup() {
+    @BeforeEach
+    fun setUp() {
         MockKAnnotations.init(this)
 
-        every { context.applicationContext } returns context
-        every { context.getSystemService(Context.CONNECTIVITY_SERVICE) } returns mockConnectivityManager
-        every { context.getSystemService(Context.WIFI_SERVICE) } returns mockWifiManager
-        every { mockConnectivityManager.activeNetwork } returns mockNetwork
-        every { mockConnectivityManager.getNetworkCapabilities(mockNetwork) } returns mockCapabilities
+        every { mockContext.applicationContext } returns mockContext
+        every { mockContext.getSystemService(Context.CONNECTIVITY_SERVICE) } returns mockConnectivityManager
+        every { mockContext.getSystemService(Context.WIFI_SERVICE) } returns mockWifiManager
+
+        networkManager = NetworkManager(mockContext)
     }
 
     @Test
@@ -114,12 +109,15 @@ class NetworkManagerTest {
     @Test
     fun getWifiSignalLevel() {
         mockkStatic(WifiManager::class)
+        val mockNetwork = mockk<Network>()
+
+        every { mockConnectivityManager.activeNetwork } returns mockNetwork
+        every { mockConnectivityManager.getNetworkCapabilities(mockNetwork) } returns mockCapabilities
         every { mockCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) } returns true
-        every { mockCapabilities.transportInfo } returns mockWifiInfo
+
         every { mockWifiManager.connectionInfo } returns mockWifiInfo
-        every { mockWifiInfo.rssi } returns Random.nextInt(-100, 100)
-        every { mockWifiManager.calculateSignalLevel(any()) } returns 4
-        every { WifiManager.calculateSignalLevel(any(), 5) } returns 4
+        every { mockWifiInfo.rssi } returns -50
+        every { WifiManager.calculateSignalLevel(any(), any()) } returns 4
 
         val result = networkManager.getWifiSignalLevel()
         assertEquals(4, result)
