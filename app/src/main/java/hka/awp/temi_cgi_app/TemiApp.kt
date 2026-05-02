@@ -4,6 +4,7 @@ import android.app.Application
 import hka.awp.temi_cgi_app.koin.appModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.GlobalContext
+import timber.log.Timber
 
 /**
  * Base [Application] class for the Temi CGI application.
@@ -18,6 +19,22 @@ class TemiApp : Application() {
         GlobalContext.startKoin {
             androidContext(this@TemiApp)
             modules(appModule)
+        }
+
+        if (BuildConfig.DEBUG) {
+            Timber.plant(Timber.DebugTree())
+            Timber.d("Timber initialised: Debug-Logging is enabled!")
+            val oldHandler = Thread.getDefaultUncaughtExceptionHandler()
+
+            Thread.setDefaultUncaughtExceptionHandler { thread, e ->
+                // Use timber to log all uncaught exceptions
+                Timber.e(e, "App crashed in thread: ${thread.name}")
+
+                //return to the old handler
+                oldHandler?.uncaughtException(thread, e)
+            }
+        } else {
+            //TODO specify logging mode for release
         }
     }
 }
