@@ -15,6 +15,7 @@ runtime = "1.11.0"
 mokk = "1.14.9"
 temiSdk = "1.137.1"
 desugar_jdk_libs = "2.1.5"
+timber = "5.0.1"
 
 [libraries]
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
@@ -40,11 +41,11 @@ androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime
 koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin-bom" }
 koin-android = { module = "io.insert-koin:koin-android" }
 koin-compose = { module = "io.insert-koin:koin-compose" }
-koin-compose-viewmodel = {module = "io.insert-koin:koin-compose-viewmodel"}
+koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel" }
 mokk = { module = "io.mockk:mockk", version.ref = "mokk" }
 temi-sdk = { module = "com.robotemi:sdk", version.ref = "temiSdk" }
 android-desugarJdkLibs = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
-
+timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
