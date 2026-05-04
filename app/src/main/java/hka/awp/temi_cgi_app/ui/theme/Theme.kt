@@ -63,7 +63,6 @@ fun CgiTheme(
         )
     }
 }
-// Hilfsobjekt für den einfachen Zugriff im Code
 object AppTheme {
     val customColors: CustomDesignTokens
         @Composable

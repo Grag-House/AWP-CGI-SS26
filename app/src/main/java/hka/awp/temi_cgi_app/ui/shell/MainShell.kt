@@ -1,4 +1,3 @@
-
 package hka.awp.temi_cgi_app.ui.shell
 
 import android.util.Log
@@ -19,20 +18,11 @@ import hka.awp.temi_cgi_app.feature.settings.SettingsNavigationEvent
 import hka.awp.temi_cgi_app.feature.settings.SettingsViewModel
 import hka.awp.temi_cgi_app.feature.settings.about.SettingsScreen
 import hka.awp.temi_cgi_app.feature.settings.display.DisplayScreen
+import hka.awp.temi_cgi_app.feature.settings.notifications.NotificationScreen
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
- * The primary UI shell of the application.
- *
- * This component acts as the root container, managing the top-level layout
- * which includes the [TopStatusBar], the [Sidebar] for navigation,
- * and the main content area that switches between different screens
- * based on the current route.
- *
- * @param appViewModel The global ViewModel managing the app's state,
- * navigation routes, and sidebar visibility.
- * @param settingsViewModel The ViewModel handling logic and interactions
- * specific to the settings screen.
+ * Die primäre UI-Shell der Anwendung.
  */
 @Composable
 fun MainShell(
@@ -79,6 +69,9 @@ fun MainShell(
                                 is SettingsNavigationEvent.NavigateToDisplay -> {
                                     appViewModel.onRouteSelect(Screen.DisplaySettings)
                                 }
+                                is SettingsNavigationEvent.NavigateToNotifications -> {
+                                    appViewModel.onRouteSelect(Screen.NotificationSettings)
+                                }
                             }
                         }
                     }
@@ -92,7 +85,16 @@ fun MainShell(
                 Screen.DisplaySettings.route -> {
                     DisplayScreen(
                         onBackClick = {
-                            appViewModel.onRouteSelect(Screen.DisplaySettings)
+                            // Zurück zur Einstellungs-Übersicht
+                            appViewModel.onRouteSelect(Screen.Settings)
+                        }
+                    )
+                }
+
+                Screen.NotificationSettings.route -> {
+                    NotificationScreen(
+                        onBackClick = {
+                            appViewModel.onRouteSelect(Screen.Settings)
                         }
                     )
                 }

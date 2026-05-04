@@ -161,7 +161,6 @@ fun DarkModeSelector(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                // Wechselt das Icon je nach Zustand
                 imageVector = if (isDark) androidx.compose.material.icons.Icons.Rounded.DarkMode
                 else androidx.compose.material.icons.Icons.Rounded.LightMode,
                 contentDescription = null,

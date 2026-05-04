@@ -3,6 +3,7 @@ package hka.awp.temi_cgi_app.ui.shell
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Navigation
+import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Storage
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -80,5 +81,12 @@ sealed class Screen(
         title = "Anzeige",
         icon = Icons.Rounded.Settings,
         contentDescription = "Display and brightness settings"
+    )
+
+    data object NotificationSettings : Screen(
+        route = "notification_settings",
+        title = "Benachrichtigungen",
+        icon = Icons.Rounded.Notifications,
+        contentDescription = "Notification and sound settings"
     )
 }
