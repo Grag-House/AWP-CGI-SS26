@@ -12,12 +12,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import hka.awp.temi_cgi_app.BuildConfig
 import hka.awp.temi_cgi_app.feature.dashboard.MainContent
 import hka.awp.temi_cgi_app.feature.navigation.DestinationItems
 import hka.awp.temi_cgi_app.feature.navigation.NavigationContent
 import hka.awp.temi_cgi_app.feature.navigation.NavigationViewModel
 import hka.awp.temi_cgi_app.feature.settings.SettingsContent
 import hka.awp.temi_cgi_app.feature.settings.SettingsViewModel
+import hka.awp.temi_cgi_app.feature.webserver.WebViewScreen
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
@@ -77,14 +79,16 @@ fun MainShell(
                         appViewModel.onRouteSelect(screen)
                     })
 
-                Screen.Settings.route -> SettingsContent(
-                    onItemClick = settingsViewModel::onSettingsItemClick
-                )
+                Screen.Webserver.route -> WebViewScreen(BuildConfig.WEBVIEW_URL)
 
                 Screen.Navigation.route -> NavigationContent(
                     modifier = Modifier.weight(1f), currentLocation = stringResource(
                         DestinationItems.Office.stringResource,
                     ), onDestinationClick = navigationViewModel::onNavigationClick
+                )
+
+                Screen.Settings.route -> SettingsContent(
+                    onItemClick = settingsViewModel::onSettingsItemClick
                 )
 
                 //redundancy
