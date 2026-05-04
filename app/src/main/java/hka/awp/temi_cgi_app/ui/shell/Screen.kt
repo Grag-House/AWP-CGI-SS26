@@ -74,4 +74,11 @@ sealed class Screen(
         icon = Icons.Rounded.Settings,
         contentDescription = "Gear icon for system settings"
     )
+
+    data object DisplaySettings : Screen(
+        route = "display_settings",
+        title = "Anzeige",
+        icon = Icons.Rounded.Settings,
+        contentDescription = "Display and brightness settings"
+    )
 }

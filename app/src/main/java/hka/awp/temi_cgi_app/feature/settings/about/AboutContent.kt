@@ -1,4 +1,4 @@
-package hka.awp.temi_cgi_app.feature.settings
+package hka.awp.temi_cgi_app.feature.settings.about
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -33,20 +33,22 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import hka.awp.temi_cgi_app.data.repository.RobotInfo
+import hka.awp.temi_cgi_app.feature.settings.SettingsItem
 import hka.awp.temi_cgi_app.feature.settings.SettingsItem.Companion.settingsItems
 
 /**
  * Screen for system settings.
  *
  * @param modifier Layout modifier.
- * @param aboutInfo Map of information to show in the "About" dialog, or null if hidden.
+ * @param aboutInfo Robot information object to show in the "About" dialog, or null if hidden.
  * @param onItemClick Handler for setting clicks.
  * @param onDismissAbout Handler to close the "About" dialog.
  */
 @Composable
 fun SettingsContent(
     modifier: Modifier = Modifier,
-    aboutInfo: Map<String, String>? = null,
+    aboutInfo: RobotInfo? = null,
     onItemClick: (SettingsItem) -> Unit,
     onDismissAbout: () -> Unit = {}
 ) {
@@ -58,6 +60,7 @@ fun SettingsContent(
     ) {
         Spacer(modifier = Modifier.height(24.dp))
 
+        // Header
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
                 Icons.Default.Settings,
@@ -72,21 +75,25 @@ fun SettingsContent(
                     withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
                         append("Einstellungen")
                     }
-                }, style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold
+                },
+                style = MaterialTheme.typography.headlineLarge,
+                fontWeight = FontWeight.Bold
             )
         }
 
         Spacer(modifier = Modifier.height(48.dp))
 
+        // Settings Options
         Column(
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            settingsItems.forEach {
+            settingsItems.forEach { item ->
                 SettingsOptionCard(
-                    title = it.title,
-                    subtitle = it.subtitle,
-                    icon = it.icon,
-                    onClick = { onItemClick(it) })
+                    title = item.title,
+                    subtitle = item.subtitle,
+                    icon = item.icon,
+                    onClick = { onItemClick(item) }
+                )
             }
         }
 
@@ -108,22 +115,10 @@ fun SettingsContent(
                 },
                 text = {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        aboutInfo.forEach { (key, value) ->
-                            Column {
-                                Text(
-                                    text = key,
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                                Text(
-                                    text = value,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    fontWeight = FontWeight.Medium
-                                )
-                                Spacer(modifier = Modifier.height(4.dp))
-                                HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant)
-                            }
-                        }
+                        InfoItem(label = "Modell Name", value = aboutInfo.ip)
+                        InfoItem(label = "Modell", value = aboutInfo.model)
+                        InfoItem(label = "Seriennummer", value = aboutInfo.serial)
+                        InfoItem(label = "Software Version", value = aboutInfo.appVersion)
                     }
                 },
                 shape = RoundedCornerShape(28.dp),
@@ -133,10 +128,33 @@ fun SettingsContent(
     }
 }
 
+@Composable
+private fun InfoItem(label: String, value: String) {
+    Column {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.primary
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Medium
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        HorizontalDivider(
+            thickness = 0.5.dp,
+            color = MaterialTheme.colorScheme.outlineVariant
+        )
+    }
+}
 
 @Composable
 fun SettingsOptionCard(
-    title: String, subtitle: String, icon: ImageVector, onClick: () -> Unit = {}
+    title: String,
+    subtitle: String,
+    icon: ImageVector,
+    onClick: () -> Unit = {}
 ) {
     Row(
         modifier = Modifier
@@ -145,7 +163,8 @@ fun SettingsOptionCard(
             .background(MaterialTheme.colorScheme.surfaceVariant)
             .clickable { onClick() }
             .padding(horizontal = 24.dp, vertical = 22.dp),
-        verticalAlignment = Alignment.CenterVertically) {
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Icon(
             imageVector = icon,
             contentDescription = title,

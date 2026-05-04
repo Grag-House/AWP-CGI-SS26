@@ -1,9 +1,10 @@
-package hka.awp.temi_cgi_app.feature.settings
+package hka.awp.temi_cgi_app.feature.settings.about
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import hka.awp.temi_cgi_app.feature.settings.SettingsViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable

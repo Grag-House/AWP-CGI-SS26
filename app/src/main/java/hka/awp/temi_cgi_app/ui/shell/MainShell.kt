@@ -9,14 +9,16 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import hka.awp.temi_cgi_app.feature.dashboard.MainContent
-import hka.awp.temi_cgi_app.feature.settings.SettingsContent
-import hka.awp.temi_cgi_app.feature.settings.SettingsScreen
+import hka.awp.temi_cgi_app.feature.settings.SettingsNavigationEvent
 import hka.awp.temi_cgi_app.feature.settings.SettingsViewModel
+import hka.awp.temi_cgi_app.feature.settings.about.SettingsScreen
+import hka.awp.temi_cgi_app.feature.settings.display.DisplayScreen
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
@@ -36,7 +38,6 @@ import org.koin.compose.viewmodel.koinViewModel
 fun MainShell(
     appViewModel: AppViewModel = koinViewModel()
 ) {
-    // Wir beobachten nur noch globale App-Zustände (wie Wifi)
     val wifiLevel by appViewModel.wifiLevel.collectAsState()
 
     Scaffold(
@@ -57,10 +58,8 @@ fun MainShell(
                 modifier = Modifier.width(260.dp)
             )
 
-            // Der Content-Bereich entscheidet nur noch, WELCHEN Screen er anzeigt
             when (appViewModel.selectedRoute) {
                 Screen.Dashboard.route -> {
-                    // Falls du für Dashboard auch einen Wrapper baust: DashboardScreen()
                     MainContent(
                         modifier = Modifier.weight(1f),
                         selectedRoute = appViewModel.selectedRoute,
@@ -72,15 +71,33 @@ fun MainShell(
                 }
 
                 Screen.Settings.route -> {
-                    // Hier rufen wir den neuen Wrapper auf.
-                    // Er kümmert sich selbst um sein SettingsViewModel.
+                    val settingsViewModel: SettingsViewModel = koinViewModel()
+
+                    LaunchedEffect(Unit) {
+                        settingsViewModel.navigationEvent.collect { event ->
+                            when (event) {
+                                is SettingsNavigationEvent.NavigateToDisplay -> {
+                                    appViewModel.onRouteSelect(Screen.DisplaySettings)
+                                }
+                            }
+                        }
+                    }
+
                     SettingsScreen(
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        viewModel = settingsViewModel
+                    )
+                }
+
+                Screen.DisplaySettings.route -> {
+                    DisplayScreen(
+                        onBackClick = {
+                            appViewModel.onRouteSelect(Screen.DisplaySettings)
+                        }
                     )
                 }
 
                 else -> {
-                    // Fallback auf Dashboard
                     MainContent(modifier = Modifier.weight(1f), selectedRoute = appViewModel.selectedRoute)
                 }
             }

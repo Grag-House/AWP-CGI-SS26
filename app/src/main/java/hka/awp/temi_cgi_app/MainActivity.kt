@@ -4,11 +4,15 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import hka.awp.temi_cgi_app.feature.settings.display.DisplayViewModel
 import hka.awp.temi_cgi_app.koin.appModule
 import hka.awp.temi_cgi_app.ui.shell.MainShell
 import hka.awp.temi_cgi_app.ui.theme.CgiTheme
 import hka.awp.temi_cgi_app.utils.hideTopBar
 import org.koin.android.ext.koin.androidContext
+import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.context.startKoin
 
 
@@ -35,7 +39,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            CgiTheme {
+            val displayViewModel: DisplayViewModel = koinViewModel()
+            val isDarkMode by displayViewModel.isDarkMode.collectAsState()
+            CgiTheme(darkTheme = isDarkMode) {
                 MainShell()
             }
         }

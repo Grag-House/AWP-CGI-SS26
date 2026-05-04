@@ -12,6 +12,7 @@ composeBom = "2026.04.01"
 uiTextGoogleFonts = "1.11.0"
 runtime = "1.11.0"
 mokk = "1.14.9"
+ui = "1.11.0"
 
 [libraries]
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
@@ -36,6 +37,7 @@ koin-android = { module = "io.insert-koin:koin-android" }
 koin-compose = { module = "io.insert-koin:koin-compose" }
 koin-compose-viewmodel = {module = "io.insert-koin:koin-compose-viewmodel"}
 mokk = { module = "io.mockk:mockk", version.ref = "mokk" }
+androidx-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "ui" }
 
 
 [plugins]

@@ -39,6 +39,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.ui)
     // runtime dependencies
     implementation(libs.koin.android)
     implementation(platform(libs.koin.bom))

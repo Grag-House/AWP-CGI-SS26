@@ -1,10 +1,26 @@
 package hka.awp.temi_cgi_app.data.repository
 
-import java.net.InetAddress
+import android.content.Context
 import java.net.NetworkInterface
 import java.util.Collections
 
+data class RobotInfo(
+    val ip: String,
+    val model: String,
+    val serial: String,
+    val appVersion: String
+)
+
 class RobotRepository {
+
+    fun getFullDeviceInfo(): RobotInfo {
+        return RobotInfo(
+            ip = "getIpAddress()",
+            model = "getModelName()",
+            serial = "android.os.Build.getSerial()",
+            appVersion = "BuildConfig.VERSION_NAME"
+        )
+    }
 
     fun getIpAddress(): String {
         try {
@@ -26,4 +42,31 @@ class RobotRepository {
     }
 
     fun getModelName(): String = android.os.Build.MODEL
+
+    fun setBrightness(value: Int, context: Context) {
+        try {
+            android.provider.Settings.System.putInt(
+                context.contentResolver,
+                android.provider.Settings.System.SCREEN_BRIGHTNESS,
+                (value * 255)
+            )
+            // TODO = TemiBrightness
+            println("Erfolgreich Brightness verändert.")
+        } catch (e: Exception) {
+            println("Fehler beim Schreiben: ${e.message}")
+        }
+    }
+
+    fun setScreenTimeout(millis: Int, context: Context) {
+        try {
+            android.provider.Settings.System.putInt(
+                context.contentResolver,
+                android.provider.Settings.System.SCREEN_OFF_TIMEOUT,
+                millis
+            )
+            println("Timeout auf $millis ms gesetzt")
+        } catch (e: Exception) {
+            println("Fehler beim Timeout: ${e.message}")
+        }
+    }
 }

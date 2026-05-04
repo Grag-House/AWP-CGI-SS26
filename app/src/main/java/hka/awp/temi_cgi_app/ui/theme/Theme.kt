@@ -1,5 +1,6 @@
 package hka.awp.temi_cgi_app.ui.theme
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
@@ -20,23 +21,41 @@ val LocalCustomColors = staticCompositionLocalOf {
 
 @Composable
 fun CgiTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    // 2. Zuordnung deiner Farben zum Material-Farbschema
-    val colorScheme = lightColorScheme(
-        primary = CgiRed,
-        onPrimary = OnPrimary,
-        background = AppBackground,
-        surface = SidepanelColor, // Sidepanel als Standard-Oberfläche
-        onSurface = OnSurface,
-    )
+    val colorScheme = if (darkTheme) {
+        darkColorScheme(
+            primary = CgiRed,
+            onPrimary = Color.White,
+            background = Color(0xFF121212),
+            surface = Color(0xFF1E1E1E),
+            onSurface = Color.White,
+            surfaceVariant = Color(0xFF2C2C2C)
+        )
+    } else {
+        lightColorScheme(
+            primary = CgiRed,
+            onPrimary = OnPrimary,
+            background = AppBackground,
+            surface = SidepanelColor,
+            onSurface = OnSurface,
+            surfaceVariant = Color(0xFFF5F5F5)
+        )
+    }
 
-    val customColors = CustomDesignTokens(
-        sidepanel = SidepanelColor,
-        sidepanelHighlight = SidepanelHighlight
-    )
+    val customColors = if (darkTheme) {
+        CustomDesignTokens(
+            sidepanel = Color(0xFF1A1A1A),
+            sidepanelHighlight = Color(0xFF333333)
+        )
+    } else {
+        CustomDesignTokens(
+            sidepanel = SidepanelColor,
+            sidepanelHighlight = SidepanelHighlight
+        )
+    }
 
-    // 3. Bereitstellung über den MaterialTheme-Wrapper
     CompositionLocalProvider(LocalCustomColors provides customColors) {
         MaterialTheme(
             colorScheme = colorScheme,
@@ -44,7 +63,6 @@ fun CgiTheme(
         )
     }
 }
-
 // Hilfsobjekt für den einfachen Zugriff im Code
 object AppTheme {
     val customColors: CustomDesignTokens
