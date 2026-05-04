@@ -12,12 +12,17 @@ fun NotificationScreen(
 ) {
     val volume by viewModel.volume.collectAsState()
     val isEnabled by viewModel.notificationsEnabled.collectAsState()
+    val availableLocales by viewModel.availableLocales.collectAsState()
+    val selectedLocale by viewModel.selectedLocale.collectAsState()
 
     NotificationContent(
         volume = volume,
         onVolumeChange = { viewModel.updateVolume(it) },
         isEnabled = isEnabled,
         onEnabledChange = { viewModel.toggleNotifications(it) },
+        availableLocales = availableLocales,
+        selectedLocale = selectedLocale,
+        onLocaleSelect = { viewModel.setLocale(it) },
         onBackClick = onBackClick
     )
 }

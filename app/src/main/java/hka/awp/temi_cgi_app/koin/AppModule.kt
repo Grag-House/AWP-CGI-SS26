@@ -26,5 +26,5 @@ val appModule = module {
     viewModel {
         DisplayViewModel(get())
     }
-    viewModel { NotificationViewModel() }
+    viewModel { NotificationViewModel(get()) }
 }

@@ -25,11 +25,12 @@ import org.koin.core.context.startKoin
  * - Setting up the Jetpack Compose UI layout within the [CgiTheme].
  */
 class MainActivity : ComponentActivity() {
+    //TODO Activity oder Application?
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         startKoin {
-            androidContext(this@MainActivity)
+            androidContext(this@MainActivity.application)
             modules(appModule)
         }
 
