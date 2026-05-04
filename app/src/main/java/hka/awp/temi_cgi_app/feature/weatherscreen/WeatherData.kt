@@ -109,6 +109,7 @@ class WeatherData {
                 "heavysnowandthunder" -> return WeatherIcon.CLOUD//
                 "fog" -> return WeatherIcon.CLOUD//
             }
+            return WeatherIcon.SUN
         }
     }
 }
