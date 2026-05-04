@@ -2,7 +2,6 @@ package hka.awp.temi_cgi_app.feature.weatherscreen
 
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import org.json.JSONException
 import org.json.JSONObject
 
 class WeatherData {
@@ -10,7 +9,7 @@ class WeatherData {
         val time: String,
         val temp: Double,
         val precipitation: Double,
-        val symbol: String
+        val symbol: WeatherIcon
     )
     companion object hourlyDataObject {
         fun getData(): List<WeatherItem> {
@@ -51,21 +50,65 @@ class WeatherData {
                         next1.getJSONObject("details").getDouble("precipitation_amount");
                     val symbolCode = next1.getJSONObject("summary").getString("symbol_code");
 
-                    weatherDatas.add(WeatherItem(time, temperature, precipitation, symbolCode))
+                    weatherDatas.add(WeatherItem(time, temperature, precipitation, convertSymbolToIcon(symbolCode)))
 
-//            println("%-30s %-15s %-20s %s".format(
-//                time,
-//                "%.1f °C".format(temperature),
-//                "%.1f mm".format(precipitation),
-//                symbolCode
-//            ));
                 }
             } catch (e: Exception) {
                 for (i in 0..9) {
-                    weatherDatas.add(WeatherItem("the time", i.toDouble(), i.toDouble(), "SUN"))
+                    weatherDatas.add(WeatherItem("the time", i.toDouble(), i.toDouble(),
+                        WeatherIcon.SUN))
                 }
             }
             return weatherDatas
+        }
+        /**
+         * Converts the symbol codes received from the MET api into WeatherIcons to be displayed
+         * symbol codes taken from: https://github.com/metno/weathericons/blob/main/weather/README.md
+         */
+        fun convertSymbolToIcon(symbol: String): WeatherIcon{
+            when(symbol){
+                "clearsky" -> return WeatherIcon.SUN
+                "fair" -> return WeatherIcon.SUN
+                "partlycloudy" -> return WeatherIcon.SUN_CLOUD
+                "cloudy" -> return WeatherIcon.CLOUD
+                "lightrainshowers" -> return WeatherIcon.RAIN
+                "rainshowers" -> return WeatherIcon.RAIN
+                "heavyrainshowers" -> return WeatherIcon.RAIN
+                "lightrainshowersandthunder" -> return WeatherIcon.CLOUD// for these the icon has to be implemented and then the correct WeatherIon chosen here
+                "rainshowersandthunder" -> return WeatherIcon.CLOUD//
+                "heavyrainshowersandthunder" -> return WeatherIcon.CLOUD//
+                "lightsleetshowers" -> return WeatherIcon.CLOUD//
+                "sleetshowers" -> return WeatherIcon.CLOUD//
+                "heavysleetshowers" -> return WeatherIcon.CLOUD//
+                "lightssleetshowersandthunder" -> return WeatherIcon.CLOUD//
+                "sleetshowersandthunder" -> return WeatherIcon.CLOUD//
+                "heavysleetshowersandthunder" -> return WeatherIcon.CLOUD//
+                "lightsnowshowers" -> return WeatherIcon.CLOUD//
+                "snowshowers" -> return WeatherIcon.CLOUD//
+                "heavysnowshowers" -> return WeatherIcon.CLOUD//
+                "lightssnowshowersandthunder" -> return WeatherIcon.CLOUD//
+                "snowshowersandthunder" -> return WeatherIcon.CLOUD//
+                "heavysnowshowersandthunder" -> return WeatherIcon.CLOUD//
+                "lightrain" -> return WeatherIcon.RAIN
+                "rain" -> return WeatherIcon.RAIN
+                "heavyrain" -> return WeatherIcon.RAIN
+                "lightrainandthunder" -> return WeatherIcon.CLOUD//
+                "rainandthunder" -> return WeatherIcon.CLOUD//
+                "heavyrainandthunder" -> return WeatherIcon.CLOUD//
+                "lightsleet" -> return WeatherIcon.CLOUD//
+                "sleet" -> return WeatherIcon.CLOUD//
+                "heavysleet" -> return WeatherIcon.CLOUD//
+                "lightsleetandthunder" -> return WeatherIcon.CLOUD//
+                "sleetandthunder" -> return WeatherIcon.CLOUD//
+                "heavysleetandthunder" -> return WeatherIcon.CLOUD//
+                "lightsnow" -> return WeatherIcon.CLOUD//
+                "snow" -> return WeatherIcon.CLOUD//
+                "heavysnow" -> return WeatherIcon.CLOUD//
+                "lightsnowandthunder" -> return WeatherIcon.CLOUD//
+                "snowandthunder" -> return WeatherIcon.CLOUD//
+                "heavysnowandthunder" -> return WeatherIcon.CLOUD//
+                "fog" -> return WeatherIcon.CLOUD//
+            }
         }
     }
 }

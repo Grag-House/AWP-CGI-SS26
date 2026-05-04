@@ -20,36 +20,9 @@ import androidx.compose.ui.unit.sp
 
 // ─── Data models ─────────────────────────────────────────────────────────────
 
-enum class WeatherIcon { SUN, CLOUD, SUN_CLOUD, RAIN }
+enum class WeatherIcon { SUN, CLOUD, SUN_CLOUD, RAIN, SNOW, THUNDER, FOG }
 
-data class HourlyItem(
-    val label: String,       // "Jetzt", "t+1", …
-    val icon: WeatherIcon,
-    val temp: String,        // "21°"
-    val rain: String         // "0%"
-)
-
-data class DailyItem(
-    val day: String,         // "Heute", "Do", …
-    val icon: WeatherIcon,
-    val high: String,
-    val low: String
-)
-
-// ─── Sample data ─────────────────────────────────────────────────────────────
-
-private val hourlyData = listOf(
-    HourlyItem("Jetzt", WeatherIcon.SUN,       "21°", "0%"),
-    HourlyItem("t+1",  WeatherIcon.RAIN,       "21°", "80%"),
-    HourlyItem("t+2",  WeatherIcon.CLOUD,      "21°", "10%"),
-    HourlyItem("t+3",  WeatherIcon.SUN_CLOUD,  "21°", "0%"),
-    HourlyItem("t+4",  WeatherIcon.RAIN,       "21°", "75%"),
-    HourlyItem("t+5",  WeatherIcon.RAIN,       "21°", "90%"),
-    HourlyItem("t+6",  WeatherIcon.RAIN,       "21°", "82%"),
-    HourlyItem("t+7",  WeatherIcon.CLOUD,      "5°",  "75%"),
-    HourlyItem("t+8",  WeatherIcon.RAIN,       "21°", "64%"),
-    HourlyItem("t+9",  WeatherIcon.RAIN,       "21°", "66%"),
-)
+private val hourlyData = WeatherCards.setHourlyWeatherCards()
 
 private val dailyData = listOf(
     DailyItem("Heute", WeatherIcon.SUN, "21°", "3°"),
@@ -93,6 +66,9 @@ fun WeatherIconView(icon: WeatherIcon, size: Int = 28) {
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(sizeDp)
         )
+        WeatherIcon.SNOW -> TODO()
+        WeatherIcon.THUNDER -> TODO()
+        WeatherIcon.FOG -> TODO()
     }
 }
 // ─── Cards ────────────────────────────────────────────────────────────────────
@@ -166,7 +142,7 @@ fun HourlyForecastCard() {
                     WeatherIconView(item.icon, size = 20)
                     Spacer(Modifier.height(4.dp))
                     Text(item.temp,     color = MaterialTheme.colorScheme.onSurface, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                    Text(item.rain,     color = MaterialTheme.colorScheme.onSurfaceVariant,   fontSize = 10.sp)
+                    Text(item.precipitation,     color = MaterialTheme.colorScheme.onSurfaceVariant,   fontSize = 10.sp)
                 }
             }
         }
