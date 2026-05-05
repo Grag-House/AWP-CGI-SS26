@@ -12,7 +12,10 @@ Roboter-Funktionen.
 
 ## ✨ Funktionen
 
-- **Dashboard:** Zentrale Anlaufstelle für Informationen, Statusanzeigen und eine Übersicht der einzelnen Seiten.
+- **Dashboard:** Zentrale Anlaufstelle für Informationen, Statusanzeigen (z.B. Webserver-Verbindung)
+  und eine Übersicht der einzelnen Seiten.
+- **Webserver-Integration:** Integration von lokalem Webserver oder Webserver in der IONOS Cloud
+  direkt per WebView.
 - **Navigation:** Anzeige der aktuellen Roboter-Position und der Umgebungskarte & Zielsteuerung: Auswahl von vordefinierten Räumen (z. B. Küche, Kaffeemaschine, Empfang), die der Roboter autonom anfährt.
 - **Modus-Auswahl:** Konfiguration der Hosting-Umgebung (Wechsel zwischen **On-Premise** und **IONOS Cloud**).
 - **Wetter:** Anzeige des örtlichen Wetters direkt in der Anwendung.
@@ -28,13 +31,15 @@ Roboter-Funktionen.
 - **Roboter-Schnittstelle:** [temi SDK](https://github.com/robotemi/sdk) 
 - **Dependency Injection:** [Koin](https://insert-koin.io/)
 - **Architektur:** MVVM (Model-View-ViewModel) mit einer Shell-basierten Navigationsstruktur.
-- **Testing:** [JUnit 4](https://junit.org/junit4/) & [MockK](https://mockk.io/) für Unit-Tests.
+- **Testing:** [JUnit 5](https://junit.org/) & [MockK](https://mockk.io/) für Unit-Tests.
+- **Logging:** [Timber](https://github.com/JakeWharton/timber) für performantes loggen
 - **Design:** Custom "CgiTheme" basierend auf Material Design 3 und der CGi Corporate Identity
 
 ## 📁 Projektstruktur
 
 - `app/src/main/java/hka/awp/temi_cgi_app/`
-    - `feature/`: Enthält die verschiedenen Funktionsbereiche (Dashboard, Settings, Navigation,
+    - `feature/`: Enthält die verschiedenen Funktionsbereiche (Dashboard, Webserver, Settings,
+      Navigation,
       Weather, Modus).
     - `ui/`: UI-Komponenten, Themes und die Shell-Struktur (Sidebar, MainShell).
     - `koin/`: Konfiguration der Dependency Injection.
