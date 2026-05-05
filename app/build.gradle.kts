@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -27,6 +29,19 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        //read from .env file
+        val envFile = rootProject.file(".env")
+        val webviewUrl = if (envFile.exists()) {
+            val props = Properties()
+            envFile.inputStream().use { props.load(it) }
+            props.getProperty("WEBVIEW_URL")
+                ?: throw GradleException("Missing property 'WEBVIEW_URL' in .env")
+        } else {
+            throw GradleException("Missing .env file! please create it and include the 'WEBVIEW_URL")
+        }
+
+        buildConfigField("String", "WEBVIEW_URL", webviewUrl)
     }
 
     buildTypes {
