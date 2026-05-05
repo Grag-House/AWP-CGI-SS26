@@ -27,9 +27,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import hka.awp.temi_cgi_app.R
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import hka.awp.temi_cgi_app.R
 import hka.awp.temi_cgi_app.ui.components.SidebarButton
 import hka.awp.temi_cgi_app.ui.shell.Screen.Companion.navScreens
 
@@ -123,7 +123,11 @@ fun Sidebar(
                     tint = Color(0xFF7B7B7B)
                 )
                 Spacer(modifier = Modifier.width(16.dp))
-                Text(stringResource(R.string.sidebar_help), modifier = Modifier.weight(1f), color = Color(0xFF7B7B7B))
+                Text(
+                    stringResource(R.string.sidebar_help),
+                    modifier = Modifier.weight(1f),
+                    color = Color(0xFF7B7B7B)
+                )
             }
         }
     }

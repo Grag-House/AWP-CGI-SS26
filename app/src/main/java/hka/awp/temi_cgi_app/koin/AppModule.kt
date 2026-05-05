@@ -3,6 +3,7 @@ package hka.awp.temi_cgi_app.koin
 import com.robotemi.sdk.Robot
 import hka.awp.temi_cgi_app.feature.navigation.NavigationViewModel
 import hka.awp.temi_cgi_app.feature.settings.SettingsViewModel
+import hka.awp.temi_cgi_app.feature.webserver.WebserverViewModel
 import hka.awp.temi_cgi_app.ui.shell.AppViewModel
 import hka.awp.temi_cgi_app.utils.NetworkManager
 import hka.awp.temi_cgi_app.utils.TemiBatteryMonitor
@@ -42,7 +43,7 @@ val appModule = module {
             networkManager = get(),
             clock = get(),
             datetimeFormatter = get(),
-            temiBatteryMonitor = get()
+            temiBatteryMonitor = get(),
         )
     }
 
@@ -51,4 +52,6 @@ val appModule = module {
     }
 
     viewModel<NavigationViewModel> { NavigationViewModel() }
+
+    viewModel<WebserverViewModel> { WebserverViewModel() }
 }
