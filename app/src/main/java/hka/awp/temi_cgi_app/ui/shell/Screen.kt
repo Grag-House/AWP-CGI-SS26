@@ -1,6 +1,7 @@
 package hka.awp.temi_cgi_app.ui.shell
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.BatteryFull
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Navigation
 import androidx.compose.material.icons.rounded.Notifications
@@ -88,5 +89,12 @@ sealed class Screen(
         title = "Benachrichtigungen",
         icon = Icons.Rounded.Notifications,
         contentDescription = "Notification and sound settings"
+    )
+
+    data object BatterySettings : Screen(
+        route = "battery_settings",
+        title = "Akku",
+        icon = Icons.Rounded.BatteryFull,
+        contentDescription = "Battery level and energy settings"
     )
 }

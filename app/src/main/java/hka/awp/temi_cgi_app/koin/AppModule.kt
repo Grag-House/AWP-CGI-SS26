@@ -2,6 +2,7 @@ package hka.awp.temi_cgi_app.koin
 
 import hka.awp.temi_cgi_app.data.repository.RobotRepository
 import hka.awp.temi_cgi_app.feature.settings.SettingsViewModel
+import hka.awp.temi_cgi_app.feature.settings.battery.BatteryViewModel
 import hka.awp.temi_cgi_app.feature.settings.display.DisplayViewModel
 import hka.awp.temi_cgi_app.feature.settings.notifications.NotificationViewModel
 import hka.awp.temi_cgi_app.ui.shell.AppViewModel
@@ -26,5 +27,12 @@ val appModule = module {
     viewModel {
         DisplayViewModel(get())
     }
-    viewModel { NotificationViewModel(get()) }
+    viewModel {
+        NotificationViewModel(get())
+    }
+    viewModel {
+        BatteryViewModel()
+    }
+
+
 }

@@ -35,7 +35,11 @@ class SettingsViewModel(private val repository: RobotRepository) : ViewModel() {
                     _navigationEvent.emit(SettingsNavigationEvent.NavigateToNotifications)
                 }
             }
-            SettingsItem.Battery -> { /* TODO */ }
+            SettingsItem.Battery -> {
+                viewModelScope.launch {
+                    _navigationEvent.emit(SettingsNavigationEvent.NavigateToBattery)
+                }
+            }
             SettingsItem.Location -> { /* TODO */ }
         }
     }
@@ -48,4 +52,5 @@ class SettingsViewModel(private val repository: RobotRepository) : ViewModel() {
 sealed class SettingsNavigationEvent {
     data object NavigateToDisplay : SettingsNavigationEvent()
     data object NavigateToNotifications : SettingsNavigationEvent()
+    data object NavigateToBattery : SettingsNavigationEvent()
 }

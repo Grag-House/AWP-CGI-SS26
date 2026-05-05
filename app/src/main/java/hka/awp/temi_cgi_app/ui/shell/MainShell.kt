@@ -17,6 +17,7 @@ import hka.awp.temi_cgi_app.feature.dashboard.MainContent
 import hka.awp.temi_cgi_app.feature.settings.SettingsNavigationEvent
 import hka.awp.temi_cgi_app.feature.settings.SettingsViewModel
 import hka.awp.temi_cgi_app.feature.settings.about.SettingsScreen
+import hka.awp.temi_cgi_app.feature.settings.battery.BatteryScreen
 import hka.awp.temi_cgi_app.feature.settings.display.DisplayScreen
 import hka.awp.temi_cgi_app.feature.settings.notifications.NotificationScreen
 import org.koin.compose.viewmodel.koinViewModel
@@ -72,6 +73,9 @@ fun MainShell(
                                 is SettingsNavigationEvent.NavigateToNotifications -> {
                                     appViewModel.onRouteSelect(Screen.NotificationSettings)
                                 }
+                                is SettingsNavigationEvent.NavigateToBattery -> {
+                                    appViewModel.onRouteSelect(Screen.BatterySettings)
+                                }
                             }
                         }
                     }
@@ -85,7 +89,6 @@ fun MainShell(
                 Screen.DisplaySettings.route -> {
                     DisplayScreen(
                         onBackClick = {
-                            // Zurück zur Einstellungs-Übersicht
                             appViewModel.onRouteSelect(Screen.Settings)
                         }
                     )
@@ -98,6 +101,15 @@ fun MainShell(
                         }
                     )
                 }
+
+                Screen.BatterySettings.route -> {
+                    BatteryScreen(
+                        onBackClick = {
+                            appViewModel.onRouteSelect(Screen.Settings)
+                        }
+                    )
+                }
+
 
                 else -> {
                     MainContent(modifier = Modifier.weight(1f), selectedRoute = appViewModel.selectedRoute)
