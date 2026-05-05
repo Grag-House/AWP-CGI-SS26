@@ -34,7 +34,8 @@ Roboter-Funktionen.
 ## 📁 Projektstruktur
 
 - `app/src/main/java/hka/awp/temi_cgi_app/`
-    - `feature/`: Enthält die verschiedenen Funktionsbereiche (Dashboard, Settings).
+    - `feature/`: Enthält die verschiedenen Funktionsbereiche (Dashboard, Settings, Navigation,
+      Weather, Modus).
     - `ui/`: UI-Komponenten, Themes und die Shell-Struktur (Sidebar, MainShell).
     - `koin/`: Konfiguration der Dependency Injection.
     - `utils/`: Hilfsklassen für Zeit, Netzwerk und System-Interaktionen.
