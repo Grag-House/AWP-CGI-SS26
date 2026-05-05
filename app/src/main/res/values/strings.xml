@@ -1,3 +1,66 @@
 <resources>
     <string name="app_name">Temi-CGI-App</string>
+    <string name="hauptmenu">Hauptmenü</string>
+    <string name="webserver">Webserver</string>
+    <string name="webserverSub">Rufe den Webserver auf</string>
+    <string name="weather">Wetter</string>
+    <string name="wetter">Wetter</string>
+    <string name="wetterSub">Wettervorhersagen für den aktuellen Standort</string>
+    <string name="navigation">Navigation</string>
+    <string name="navigationSub">Sag mir wo ich dich hinbringen soll.</string>
+    <string name="fastestroute">FASTEST ROUTE</string>
+    <string name="modus">Modus</string>
+    <string name="modusSub">Ändere den Modus</string>
+    <string name="settings">Einstellungen</string>
+    <string name="settingsSub">Routen, Patroullien etc.</string>
+    <string name="settings_page_prefix">Temi </string>
+    <string name="status_online">Online</string>
+    <string name="status_offline">Offline</string>
+    <string name="temp_unit">%1$d°C</string>
+    <string name="showroom_mode">SHOWROOM MODE</string>
+    <string name="current_mode">Aktueller Modus</string>
+
+    <string name="welcome_message">Hey, Ich bin %1$s\nWie kann ich dir helfen?</string>
+    <string name="robot_name">Temi!</string>
+    <string name="robot_description">Roboter</string>
+    <string name="weather_icon_description">Sonne und Wolken Symbol für lokales Wetter</string>
+    <string name="sidebar_functions">Funktionen</string>
+    <string name="sidebar_help">Hilfe</string>
+
+    <!-- Settings Items -->
+    <string name="settings_notifications_title">Benachrichtigungen</string>
+    <string name="settings_notifications_subtitle">Töne und Systemmeldungen</string>
+    <string name="settings_display_title">Anzeige</string>
+    <string name="settings_display_subtitle">Helligkeit und Bildschirmschoner</string>
+    <string name="settings_battery_title">Akku</string>
+    <string name="settings_battery_subtitle">Energieverbrauch und Akkustatus</string>
+    <string name="settings_location_title">Standort</string>
+    <string name="settings_location_subtitle">Ortungsdienste und Navigation</string>
+    <string name="settings_about_title">Über</string>
+    <string name="settings_about_subtitle">Informationen über das System</string>
+
+    <string name="home_description">Home icon for the main dashboard</string>
+    <string name="webserver_description">Storage icon representing server status</string>
+    <string name="weather_description">Sun and cloud symbol for local weather</string>
+    <string name="navigation_description">Arrow icon for robot navigation</string>
+    <string name="mode_description">Dual toggle switches for operation mode selection</string>
+    <string name="settings_description">Gear icon for system settings</string>
+    <string name="switch_mode_description">Switch mode</string>
+    <string name="wifi_description">WLAN</string>
+    <string name="battery_description">Batterie</string>
+    <string name="notifications_description">Benachrichtigungen</string>
+    <string name="cgi">CGI</string>
+    <string name="toggle_sidebar_description">button to toggle or expand the side panel</string>
+
+    <!-- Navigation Page -->
+    <string name="navigation_status_label">STATUS</string>
+    <string name="current_location_prefix">Aktueller Standort:</string>
+    <string name="show_map">Karte\nanzeigen</string>
+    <string name="select_destination">ZIEL WÄHLEN</string>
+    <string name="location_office">Büro</string>
+    <string name="location_kitchen">Küche</string>
+    <string name="location_cafe">Café-Bar</string>
+    <string name="location_reception">Empfang</string>
+    <string name="location_wc">WC</string>
+    <string name="location_charging">Laden</string>
 </resources>

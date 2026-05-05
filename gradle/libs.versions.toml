@@ -1,8 +1,9 @@
 [versions]
 agp = "9.1.1"
 coreKtx = "1.18.0"
-junit = "4.13.2"
 junitVersion = "1.3.0"
+junit-jupiter = "6.0.3"
+junit-platform = "6.0.3"
 espressoCore = "3.7.0"
 koin-bom = "4.2.1"
 lifecycleRuntimeKtx = "2.10.0"
@@ -12,12 +13,17 @@ composeBom = "2026.04.01"
 uiTextGoogleFonts = "1.11.0"
 runtime = "1.11.0"
 mokk = "1.14.9"
+temiSdk = "1.137.1"
 desugar_jdk_libs = "2.1.5"
+timber = "5.0.1"
 
 [libraries]
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
-junit = { group = "junit", name = "junit", version.ref = "junit" }
+junit-jupiter-api = { group = "org.junit.jupiter", name = "junit-jupiter-api", version.ref = "junit-jupiter" }
+junit-jupiter-engine = { group = "org.junit.jupiter", name = "junit-jupiter-engine", version.ref = "junit-jupiter" }
+junit-jupiter-params = { group = "org.junit.jupiter", name = "junit-jupiter-params", version.ref = "junit-jupiter" }
+junit-platform-launcher = { group = "org.junit.platform", name = "junit-platform-launcher", version.ref = "junit-platform" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
@@ -35,10 +41,11 @@ androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime
 koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin-bom" }
 koin-android = { module = "io.insert-koin:koin-android" }
 koin-compose = { module = "io.insert-koin:koin-compose" }
-koin-compose-viewmodel = {module = "io.insert-koin:koin-compose-viewmodel"}
+koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel" }
 mokk = { module = "io.mockk:mockk", version.ref = "mokk" }
+temi-sdk = { module = "com.robotemi:sdk", version.ref = "temiSdk" }
 android-desugarJdkLibs = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
-
+timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

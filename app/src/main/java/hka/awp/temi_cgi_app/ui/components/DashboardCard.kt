@@ -52,18 +52,18 @@ fun DashboardCard(
     OutlinedCard(
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(0.9f)
-            .clickable { onClick() }, shape = RoundedCornerShape(24.dp)
+            .aspectRatio(1.3f)
+            .clickable { onClick() }, shape = RoundedCornerShape(16.dp)
     ) {
         Column(
             modifier = Modifier
-                .padding(24.dp)
+                .padding(16.dp)
                 .fillMaxSize()
         ) {
             Box(
                 modifier = Modifier
-                    .size(64.dp)
-                    .background(Color.White, RoundedCornerShape(16.dp)),
+                    .size(48.dp)
+                    .background(Color.White, RoundedCornerShape(12.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 if (customIcon == null) {
@@ -71,22 +71,22 @@ fun DashboardCard(
                         icon ?: Icons.Rounded.ImageNotSupported,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(24.dp)
                     )
                 } else {
                     customIcon()
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(text = subtitle, style = MaterialTheme.typography.bodyMedium)
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(text = subtitle, style = MaterialTheme.typography.bodySmall)
 
             Spacer(modifier = Modifier.weight(1f))
 
