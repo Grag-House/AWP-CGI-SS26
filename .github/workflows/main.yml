@@ -34,15 +34,15 @@ jobs:
 
       # linting
       - name: Run Android Lint
-        run: ./gradlew lintDebug --stacktrace
+        run: ./gradlew lintDebug --stacktrace --build-cache --parallel
 
       # check if the code compiles
       - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace
+        run: ./gradlew assembleDebug --stacktrace --build-cache --parallel
 
       # run unit tests
       - name: Run Unit Tests
-        run: ./gradlew testDebugUnitTest --stacktrace
+        run: ./gradlew testDebugUnitTest --stacktrace --build-cache --parallel
 
       # upload results (on failure)
       - name: Upload Reports (Lint & Tests)
