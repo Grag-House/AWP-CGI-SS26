@@ -27,6 +27,11 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x gradlew
 
+      # create .env file
+      - name: Create .env for BuildConfig
+        run: echo "SERVER_URL=https://example.com/" > .env
+
+
       # linting
       - name: Run Android Lint
         run: ./gradlew lintDebug --stacktrace
