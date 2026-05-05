@@ -1,7 +1,7 @@
 # Temi-CGI-App
 
-Dieses Projekt ist eine Android-Anwendung für den **Temi-Roboter**, entwickelt für den Kunden **CGI
-** im Rahmen des
+Dieses Projekt ist eine Android-Anwendung für den **Temi-Roboter**, entwickelt für den Kunden 
+**CGI** im Rahmen des
 Anwendungsprojektes an der **Hochschule Karlsruhe (HKA)** im Sommersemester 2026.
 
 ## 🚀 Überblick
@@ -12,10 +12,12 @@ Roboter-Funktionen.
 
 ## ✨ Funktionen
 
-- **Dashboard:** Zentrale Anlaufstelle für Informationen und Statusanzeigen.
+- **Dashboard:** Zentrale Anlaufstelle für Informationen, Statusanzeigen und eine Übersicht der einzelnen Seiten.
+- **Navigation:** Anzeige der aktuellen Roboter-Position und der Umgebungskarte & Zielsteuerung: Auswahl von vordefinierten Räumen (z. B. Küche, Kaffeemaschine, Empfang), die der Roboter autonom anfährt.
+- **Modus-Auswahl:** Konfiguration der Hosting-Umgebung (Wechsel zwischen **On-Premise** und **IONOS Cloud**).
+- **Wetter:** Anzeige des örtlichen Wetters direkt in der Anwendung.
 - **Einstellungen:** Konfiguration der Anwendung und Einblick in Systemparameter.
-- **Sidebar Navigation:** Einfacher Wechsel zwischen den verschiedenen Screens (Dashboard, Settings,
-  etc.).
+- **Sidebar Navigation:** Einfacher Wechsel zwischen den verschiedenen Screens (Dashboard, Settings, Navigation, etc.).
 - **Netzwerk-Status:** Anzeige der WLAN-Signalstärke und Verbindungsinformationen.
 - **Vollbild-Modus:** Optimierte UI für den Temi-Bildschirm durch Ausblenden der Systemleisten.
 
@@ -23,6 +25,7 @@ Roboter-Funktionen.
 
 - **Sprache:** [Kotlin](https://kotlinlang.org/)
 - **UI-Framework:** [Jetpack Compose](https://developer.android.com/jetpack/compose)
+- **Roboter-Schnittstelle:** [temi SDK](https://github.com/robotemi/sdk) 
 - **Dependency Injection:** [Koin](https://insert-koin.io/)
 - **Architektur:** MVVM (Model-View-ViewModel) mit einer Shell-basierten Navigationsstruktur.
 - **Testing:** [JUnit 4](https://junit.org/junit4/) & [MockK](https://mockk.io/) für Unit-Tests.
