@@ -41,7 +41,7 @@ android {
             throw GradleException("Missing .env file! please create it and include the 'WEBVIEW_URL")
         }
 
-        buildConfigField("String", "WEBVIEW_URL", webviewUrl)
+        buildConfigField("String", "WEBVIEW_URL", "\"$webviewUrl\"")
     }
 
     buildTypes {
