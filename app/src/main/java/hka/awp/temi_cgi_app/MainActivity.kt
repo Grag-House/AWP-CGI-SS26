@@ -20,7 +20,6 @@ import org.koin.core.context.startKoin
  * The main entry point of the application.
  *
  * This activity is responsible for:
- * - Initializing the Koin dependency injection framework with the application context and modules.
  * - Configuring system UI visibility, such as hiding the status bar for a full-screen experience.
  * - Setting up the Jetpack Compose UI layout within the [CgiTheme].
  */

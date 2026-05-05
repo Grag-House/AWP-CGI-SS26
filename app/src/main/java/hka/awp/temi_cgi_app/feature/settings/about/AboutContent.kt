@@ -28,11 +28,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import hka.awp.temi_cgi_app.R
 import hka.awp.temi_cgi_app.data.repository.RobotInfo
 import hka.awp.temi_cgi_app.feature.settings.SettingsItem
 import hka.awp.temi_cgi_app.feature.settings.SettingsItem.Companion.settingsItems
@@ -64,16 +66,17 @@ fun SettingsContent(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
                 Icons.Default.Settings,
-                contentDescription = "Einstellungen",
+                contentDescription = stringResource(R.string.settings),
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(48.dp)
             )
             Spacer(modifier = Modifier.width(16.dp))
             Text(
                 text = buildAnnotatedString {
-                    append("Temi ")
+                    append(stringResource(R.string.settings_page_prefix))
+                    append(" ")
                     withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
-                        append("Einstellungen")
+                        append(stringResource(R.string.settings))
                     }
                 },
                 style = MaterialTheme.typography.headlineLarge,
@@ -89,11 +92,10 @@ fun SettingsContent(
         ) {
             settingsItems.forEach { item ->
                 SettingsOptionCard(
-                    title = item.title,
-                    subtitle = item.subtitle,
+                    title = stringResource(item.titleRes),
+                    subtitle = stringResource(item.subtitleRes),
                     icon = item.icon,
-                    onClick = { onItemClick(item) }
-                )
+                    onClick = { onItemClick(item) })
             }
         }
 

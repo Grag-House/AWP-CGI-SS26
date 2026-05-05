@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -5,36 +7,77 @@ plugins {
 
 android {
     namespace = "hka.awp.temi_cgi_app"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
+
+    testOptions {
+        unitTests.all {
+            it.useJUnitPlatform()
         }
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     defaultConfig {
         applicationId = "hka.awp.temi_cgi_app"
-        minSdk = 24
+        minSdk = 23
+        //--> The App will only run on sdk 23 due to the limits of TEMI
+        //noinspection OldTargetApi,ExpiredTargetSdkVersion
         targetSdk = 36
+        compileSdk = 36
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        //read from .env file
+        val envFile = rootProject.file(".env")
+        val webviewUrl = if (envFile.exists()) {
+            val props = Properties()
+            envFile.inputStream().use { props.load(it) }
+            props.getProperty("WEBVIEW_URL")
+                ?: throw GradleException("Missing property 'WEBVIEW_URL' in .env")
+        } else {
+            throw GradleException("Missing .env file! please create it and include the 'WEBVIEW_URL")
+        }
+
+        buildConfigField("String", "WEBVIEW_URL", webviewUrl)
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
             )
+            isDebuggable = false
+        }
+
+        debug {
+            isMinifyEnabled = false
+            //noinspection NotShrinkingResources
+            isShrinkResources = false
+            isDebuggable = true
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+        isCoreLibraryDesugaringEnabled = true
     }
     buildFeatures {
         compose = true
+    }
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
+    }
+}
+
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.add("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
     }
 }
 
@@ -56,10 +99,14 @@ dependencies {
     implementation(libs.androidx.compose.ui.text.google.fonts)
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.timber)
 
     // unit test dependencies
-    testImplementation(libs.junit)
     testImplementation(libs.mokk)
+    testImplementation(libs.junit.jupiter.api)
+    testRuntimeOnly(libs.junit.jupiter.engine)
+    testRuntimeOnly(libs.junit.platform.launcher)
+    testImplementation(libs.junit.jupiter.params)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -68,4 +115,10 @@ dependencies {
     // debug depedencies
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    // api desugaring
+    coreLibraryDesugaring(libs.android.desugarJdkLibs)
+
+    // temi dependency
+    implementation(libs.temi.sdk)
 }

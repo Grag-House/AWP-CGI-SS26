@@ -23,16 +23,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import hka.awp.temi_cgi_app.R
+import hka.awp.temi_cgi_app.feature.webserver.ServerState
 import hka.awp.temi_cgi_app.ui.components.DashboardCard
 import hka.awp.temi_cgi_app.ui.components.ModeIcon
 import hka.awp.temi_cgi_app.ui.shell.Screen
 
+//TODO add animation delay so the click animation is ran before the navigation
 /**
  * The main content view for the Dashboard screen.
  *
@@ -44,85 +47,102 @@ import hka.awp.temi_cgi_app.ui.shell.Screen
  */
 @Composable
 fun MainContent(
-    modifier: Modifier = Modifier, selectedRoute: String, onClick: (Screen) -> Unit = {}
+    modifier: Modifier = Modifier,
+    selectedRoute: String,
+    onClick: (Screen) -> Unit = {},
+    serverState: ServerState
 ) {
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(32.dp)
+            .padding(24.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
                 Icons.Rounded.SmartToy,
-                contentDescription = "Roboter",
+                contentDescription = stringResource(R.string.robot_description),
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(48.dp)
             )
             Spacer(modifier = Modifier.width(16.dp))
+            val robotName = stringResource(id = R.string.robot_name)
+            val welcomeParts =
+                stringResource(R.string.welcome_message, "PLACEHOLDER").split("PLACEHOLDER")
             Text(
                 text = buildAnnotatedString {
-                    append("Hey, Ich bin ")
+                    append(welcomeParts[0])
                     withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
-                        append("Temi!")
+                        append(robotName)
                     }
-                    append(" Wie kann ich\ndir helfen?")
+                    if (welcomeParts.size > 1) {
+                        append(welcomeParts[1])
+                    }
                 }, style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold
             )
         }
 
-        Spacer(modifier = Modifier.height(48.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         LazyVerticalGrid(
             columns = GridCells.Fixed(3),
-            horizontalArrangement = Arrangement.spacedBy(24.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
                 DashboardCard(
-                    "Webserver",
-                    "Rufe den Webserver auf",
-                    Icons.Rounded.Storage,
-                    "Active 10.0.0.1",
+                    title = stringResource(R.string.webserver),
+                    subtitle = stringResource(R.string.webserverSub),
+                    icon = Icons.Rounded.Storage,
+                    bottomText = if (serverState.isReachable) {
+                        "${stringResource(R.string.status_online)} (${serverState.ipAddress})"
+                    } else {
+                        stringResource(R.string.status_offline)
+                    },
                     onClick = {
-
+                        onClick(Screen.Webserver)
                     })
             }
             item {
                 DashboardCard(
-                    title = "Wetter",
-                    subtitle = "Wettervorhersagen für den\naktuellen Standort",
+                    title = stringResource(R.string.wetter),
+                    subtitle = stringResource(R.string.wetterSub),
                     customIcon = {
                         Icon(
                             painter = painterResource(id = R.drawable.partly_cloudy_day),
                             tint = MaterialTheme.colorScheme.primary,
-                            contentDescription = "Sun and cloud symbol for local weather"
+                            contentDescription = stringResource(R.string.weather_icon_description)
                         )
                     },
-                    bottomText = "21°C",
-                    isTemp = true
-                )
+                    bottomText = stringResource(R.string.temp_unit, 21),
+                    isTemp = true,
+                    onClick = { onClick(Screen.Weather) })
             }
             item {
                 DashboardCard(
-                    "Navigation",
-                    "Sag mir wo ich dich\nhinbringen soll.",
+                    stringResource(R.string.navigation),
+                    stringResource(R.string.navigationSub),
                     Icons.Rounded.Navigation,
-                    "FASTEST ROUTE"
-                )
+                    stringResource(R.string.fastestroute),
+                    onClick = { onClick(Screen.Navigation) })
             }
             item {
                 DashboardCard(
-                    "Modus",
-                    "Ändere den Modus",
+                    stringResource(R.string.modus),
+                    stringResource(R.string.modusSub),
                     null,
-                    "SHOWROOM MODE",
-                    overline = "Aktueller Modus",
-                    customIcon = { ModeIcon(tint = MaterialTheme.colorScheme.primary) })
+                    stringResource(R.string.showroom_mode),
+                    overline = stringResource(R.string.current_mode),
+                    customIcon = { ModeIcon(tint = MaterialTheme.colorScheme.primary) },
+                    onClick = { onClick(Screen.Mode) })
             }
             item {
                 DashboardCard(
-                    "Einstellungen", "Routen, Patroullien etc.", Icons.Rounded.Settings
-                )
+                    stringResource(R.string.settings),
+                    stringResource(R.string.settingsSub),
+                    Icons.Rounded.Settings,
+                    onClick = {
+                        onClick(Screen.Settings)
+                    })
             }
         }
     }
