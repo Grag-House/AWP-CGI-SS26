@@ -32,7 +32,7 @@ class WeatherCards {
 
     companion object {
         fun setHourlyWeatherCards(): MutableList<HourlyItem> {
-            val data = WeatherData.getData()
+            val data = WeatherData.getHourlyData()
 
             val hourlyData = mutableListOf<HourlyItem>()
 
@@ -47,6 +47,24 @@ class WeatherCards {
                 )
             }
             return hourlyData
+        }
+
+        fun setDailyWeatherCards(): MutableList<DailyItem>{
+            val data = WeatherData.getWeeklyData()
+
+            val dailyData = mutableListOf<DailyItem>()
+
+            for (i in 0..(data.size - 1)) {
+                dailyData.add(
+                    DailyItem(
+                        data.get(i).weekday,
+                        data.get(i).symbol,
+                        data.get(i).maxTemp.toString(),
+                        data.get(i).minTemp.toString()
+                    )
+                )
+            }
+            return dailyData
         }
     }
 

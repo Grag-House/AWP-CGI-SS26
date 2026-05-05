@@ -12,7 +12,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -24,15 +23,7 @@ enum class WeatherIcon { SUN, CLOUD, SUN_CLOUD, RAIN, SNOW, THUNDER, FOG }
 
 private val hourlyData = WeatherCards.setHourlyWeatherCards()
 
-private val dailyData = listOf(
-    DailyItem("Heute", WeatherIcon.SUN, "21°", "3°"),
-    DailyItem("Do",    WeatherIcon.SUN, "21°", "3°"),
-    DailyItem("Fr",    WeatherIcon.SUN, "21°", "3°"),
-    DailyItem("Sa",    WeatherIcon.SUN, "21°", "3°"),
-    DailyItem("So",    WeatherIcon.SUN, "21°", "3°"),
-    DailyItem("Mo",    WeatherIcon.SUN, "21°", "3°"),
-    DailyItem("Di",    WeatherIcon.SUN, "21°", "3°"),
-)
+private val dailyData = WeatherCards.setDailyWeatherCards()
 
 // ─── Weather icon helper ──────────────────────────────────────────────────────
 
@@ -54,7 +45,7 @@ fun WeatherIconView(icon: WeatherIcon, size: Int = 28) {
         )
         WeatherIcon.SUN_CLOUD -> Box(contentAlignment = Alignment.Center) {
             Icon(
-                imageVector = Icons.Default.WbCloudy,
+                imageVector = Icons.Default.WbCloudy, //TODO: besseres Icon finden, im Moment nur eine Wolke ohne Sonne
                 contentDescription = "Partly cloudy",
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(sizeDp)
@@ -66,9 +57,24 @@ fun WeatherIconView(icon: WeatherIcon, size: Int = 28) {
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(sizeDp)
         )
-        WeatherIcon.SNOW -> TODO()
-        WeatherIcon.THUNDER -> TODO()
-        WeatherIcon.FOG -> TODO()
+        WeatherIcon.SNOW -> Icon(
+            imageVector = Icons.Default.AcUnit, //TODO: nach passenderem Icon schauen
+            contentDescription = "Snow",
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(sizeDp)
+        )
+        WeatherIcon.THUNDER -> Icon(
+            imageVector = Icons.Default.Bolt,
+            contentDescription = "Thunder",
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(sizeDp)
+        )
+        WeatherIcon.FOG -> Icon(
+            imageVector = Icons.Default.BlurOn, //TODO: nach passenderem Icon schauen
+            contentDescription = "Fog",
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(sizeDp)
+        )
     }
 }
 // ─── Cards ────────────────────────────────────────────────────────────────────
