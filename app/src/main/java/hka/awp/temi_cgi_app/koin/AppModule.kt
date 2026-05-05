@@ -51,8 +51,8 @@ val appModule = module {
         )
     }
 
-    viewModel<SettingsViewModel> {
-        SettingsViewModel()
+    viewModel {
+        SettingsViewModel(get())
     }
     viewModel {
         DisplayViewModel(get())

@@ -24,23 +24,16 @@ import org.koin.core.context.startKoin
  * - Setting up the Jetpack Compose UI layout within the [CgiTheme].
  */
 class MainActivity : ComponentActivity() {
-    //TODO Activity oder Application?
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        startKoin {
-            androidContext(this@MainActivity.application)
-            modules(appModule)
-        }
-
-        // this will hide the android topBar and only show if in case the user swipes down
         hideTopBar(window)
-
         enableEdgeToEdge()
 
         setContent {
             val displayViewModel: DisplayViewModel = koinViewModel()
             val isDarkMode by displayViewModel.isDarkMode.collectAsState()
+
             CgiTheme(darkTheme = isDarkMode) {
                 MainShell()
             }

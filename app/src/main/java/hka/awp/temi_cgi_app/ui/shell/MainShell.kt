@@ -1,5 +1,6 @@
 package hka.awp.temi_cgi_app.ui.shell
 
+import android.util.Log
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -7,9 +8,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -20,15 +19,14 @@ import hka.awp.temi_cgi_app.feature.dashboard.MainContent
 import hka.awp.temi_cgi_app.feature.navigation.DestinationItems
 import hka.awp.temi_cgi_app.feature.navigation.NavigationContent
 import hka.awp.temi_cgi_app.feature.navigation.NavigationViewModel
-import hka.awp.temi_cgi_app.feature.settings.SettingsContent
 import hka.awp.temi_cgi_app.feature.settings.SettingsNavigationEvent
 import hka.awp.temi_cgi_app.feature.settings.SettingsViewModel
-import hka.awp.temi_cgi_app.feature.webserver.WebViewScreen
-import hka.awp.temi_cgi_app.feature.webserver.WebserverViewModel
 import hka.awp.temi_cgi_app.feature.settings.about.SettingsScreen
 import hka.awp.temi_cgi_app.feature.settings.battery.BatteryScreen
 import hka.awp.temi_cgi_app.feature.settings.display.DisplayScreen
 import hka.awp.temi_cgi_app.feature.settings.notifications.NotificationScreen
+import hka.awp.temi_cgi_app.feature.webserver.WebViewScreen
+import hka.awp.temi_cgi_app.feature.webserver.WebserverViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
@@ -123,11 +121,6 @@ fun MainShell(
                     SettingsScreen(
                         modifier = Modifier.weight(1f),
                         viewModel = settingsViewModel,
-                        selectedRoute = appViewModel.selectedRoute,
-                        onClick = { screen ->
-                            appViewModel.onRouteSelect(screen)
-                        },
-                        serverState = serverState
                     )
                 }
                 Screen.DisplaySettings.route -> {
@@ -156,7 +149,14 @@ fun MainShell(
 
 
                 else -> {
-                    MainContent(modifier = Modifier.weight(1f), selectedRoute = appViewModel.selectedRoute)
+                    MainContent(
+                        modifier = Modifier.weight(1f),
+                        selectedRoute = appViewModel.selectedRoute,
+                        onClick = { screen ->
+                            appViewModel.onRouteSelect(screen)
+                        },
+                        serverState = serverState
+                    )
                 }
             }
         }

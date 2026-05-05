@@ -80,22 +80,22 @@ sealed class Screen(
 
     data object DisplaySettings : Screen(
         route = "display_settings",
-        title = "Anzeige",
+        title = R.string.settings_display_title,
         icon = Icons.Rounded.Settings,
-        contentDescription = "Display and brightness settings"
+        contentDescription = R.string.settings_display_subtitle
     )
 
     data object NotificationSettings : Screen(
         route = "notification_settings",
-        title = "Benachrichtigungen",
+        title = R.string.settings_notifications_title,
         icon = Icons.Rounded.Notifications,
-        contentDescription = "Notification and sound settings"
+        contentDescription = R.string.settings_notifications_subtitle
     )
 
     data object BatterySettings : Screen(
         route = "battery_settings",
-        title = "Akku",
+        title = R.string.settings_battery_title,
         icon = Icons.Rounded.BatteryFull,
-        contentDescription = "Battery level and energy settings"
+        contentDescription = R.string.settings_battery_subtitle
     )
 }
