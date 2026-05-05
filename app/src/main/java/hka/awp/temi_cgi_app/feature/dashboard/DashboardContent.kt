@@ -30,6 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import hka.awp.temi_cgi_app.R
+import hka.awp.temi_cgi_app.feature.webserver.ServerState
 import hka.awp.temi_cgi_app.ui.components.DashboardCard
 import hka.awp.temi_cgi_app.ui.components.ModeIcon
 import hka.awp.temi_cgi_app.ui.shell.Screen
@@ -46,7 +47,10 @@ import hka.awp.temi_cgi_app.ui.shell.Screen
  */
 @Composable
 fun MainContent(
-    modifier: Modifier = Modifier, selectedRoute: String, onClick: (Screen) -> Unit = {}
+    modifier: Modifier = Modifier,
+    selectedRoute: String,
+    onClick: (Screen) -> Unit = {},
+    serverState: ServerState
 ) {
     Column(
         modifier = modifier
@@ -86,10 +90,14 @@ fun MainContent(
         ) {
             item {
                 DashboardCard(
-                    stringResource(R.string.webserver),
-                    stringResource(R.string.webserverSub),
-                    Icons.Rounded.Storage,
-                    stringResource(R.string.active_status, "10.0.0.1"),
+                    title = stringResource(R.string.webserver),
+                    subtitle = stringResource(R.string.webserverSub),
+                    icon = Icons.Rounded.Storage,
+                    bottomText = if (serverState.isReachable) {
+                        "${stringResource(R.string.status_online)} (${serverState.ipAddress})"
+                    } else {
+                        stringResource(R.string.status_offline)
+                    },
                     onClick = {
                         onClick(Screen.Webserver)
                     })
