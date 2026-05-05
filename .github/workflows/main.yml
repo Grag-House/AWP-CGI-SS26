@@ -29,7 +29,7 @@ jobs:
 
       # create .env file
       - name: Create .env for BuildConfig
-        run: echo "SERVER_URL=https://example.com/" > .env
+        run: echo "WEBVIEW_URL=https://example.com/" > .env
 
 
       # linting
