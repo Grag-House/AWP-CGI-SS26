@@ -58,7 +58,7 @@ fun WeatherIconView(icon: WeatherIcon, size: Int = 28) {
             modifier = Modifier.size(sizeDp)
         )
         WeatherIcon.SNOW -> Icon(
-            imageVector = Icons.Default.AcUnit, //TODO: nach passenderem Icon schauen
+            imageVector = Icons.Default.AcUnit,
             contentDescription = "Snow",
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(sizeDp)
@@ -107,18 +107,13 @@ fun CurrentWeatherCard() {
                 )
                 Spacer(Modifier.height(12.dp))
                 Text(
-                    "21°C",
+                    hourlyData[0].temp + "°C",
                     fontSize = 48.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
                 )
             }
-            Icon(
-                imageVector = Icons.Default.WbSunny,
-                contentDescription = "Sunny",
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(64.dp)
-            )
+            WeatherIconView(hourlyData[0].icon, 80)
         }
     }
 
@@ -147,8 +142,8 @@ fun HourlyForecastCard() {
                     Spacer(Modifier.height(4.dp))
                     WeatherIconView(item.icon, size = 20)
                     Spacer(Modifier.height(4.dp))
-                    Text(item.temp,     color = MaterialTheme.colorScheme.onSurface, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                    Text(item.precipitation,     color = MaterialTheme.colorScheme.onSurfaceVariant,   fontSize = 10.sp)
+                    Text(item.temp + "°",     color = MaterialTheme.colorScheme.onSurface, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    Text(item.precipitation + "%",     color = MaterialTheme.colorScheme.onSurfaceVariant,   fontSize = 10.sp)
                 }
             }
         }
@@ -178,8 +173,8 @@ fun WeeklyForecastCard() {
                     Spacer(Modifier.height(4.dp))
                     WeatherIconView(item.icon, size = 22)
                     Spacer(Modifier.height(4.dp))
-                    Text(item.high, color = MaterialTheme.colorScheme.onSurface, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                    Text(item.low,  color = MaterialTheme.colorScheme.onSurfaceVariant,   fontSize = 10.sp)
+                    Text(item.high + "°", color = MaterialTheme.colorScheme.onSurface, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    Text(item.low + "°",  color = MaterialTheme.colorScheme.onSurfaceVariant,   fontSize = 10.sp)
                 }
             }
         }

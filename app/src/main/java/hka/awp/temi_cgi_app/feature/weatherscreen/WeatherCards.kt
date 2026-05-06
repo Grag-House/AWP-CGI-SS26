@@ -22,13 +22,22 @@ class WeatherCards {
 
             val hourlyData = mutableListOf<HourlyItem>()
 
-            for (i in 0..(data.size - 1)) {
+            hourlyData.add(
+                HourlyItem(
+                    "Jetzt",
+                    data[0].symbol,
+                    data[0].temp.toString(),
+                    data[0].precipitation.toString()
+                )
+            )
+
+            for (i in 1..(data.size - 1)) {
                 hourlyData.add(
                     HourlyItem(
-                        data.get(i).time,
-                        data.get(i).symbol,
-                        data.get(i).temp.toString(),
-                        data.get(i).precipitation.toString()
+                        data[i].time,
+                        data[i].symbol,
+                        data[i].temp.toString(),
+                        data[i].precipitation.toString()
                     )
                 )
             }
@@ -40,13 +49,22 @@ class WeatherCards {
 
             val dailyData = mutableListOf<DailyItem>()
 
-            for (i in 0..(data.size - 1)) {
+            dailyData.add(
+                DailyItem(
+                    "Heute",
+                    data[0].symbol,
+                    data[0].maxTemp.toString(),
+                    data[0].minTemp.toString()
+                )
+            )
+
+            for (i in 1..minOf(6,(data.size - 1))) {
                 dailyData.add(
                     DailyItem(
-                        data.get(i).weekday,
-                        data.get(i).symbol,
-                        data.get(i).maxTemp.toString(),
-                        data.get(i).minTemp.toString()
+                        data[i].weekday,
+                        data[i].symbol,
+                        data[i].maxTemp.toString(),
+                        data[i].minTemp.toString()
                     )
                 )
             }

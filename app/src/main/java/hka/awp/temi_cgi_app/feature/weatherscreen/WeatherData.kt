@@ -14,44 +14,44 @@ class WeatherData {
         val precipitation: Double,
         val symbol: WeatherIcon
     )
-    companion object getDataObject {
+    companion object GetDataObject {
         fun getHourlyData(): List<WeatherItemHour> {
-            val lat = 49.0138; //only 4 decimal places as recommended by the MET
-            val lon = 8.3573;
+            val lat = 49.0138 //only 4 decimal places as recommended by the MET
+            val lon = 8.3573
 
-            val client = OkHttpClient();
+            val client = OkHttpClient()
 
             val request = Request.Builder()
                 .url("https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=$lat&lon=$lon")
-                .header("User-Agent", "https://github.com/Grag-House/AWP-CGI-SS26") //has to be an email-adress or github repo per MET regulations
+                .header("User-Agent", "https://github.com/Grag-House/AWP-CGI-SS26") //has to be an email-address or GitHub repo per MET regulations
                 .get()
-                .build();
+                .build()
 
             val weatherDatas =
                 mutableListOf<WeatherItemHour>() //list that will contain the received weather data for the next 10 hours
 
             try {
-                val response = client.newCall(request).execute();
-                val json = JSONObject(response.body.string());
+                val response = client.newCall(request).execute()
+                val json = JSONObject(response.body.string())
                 val timeseries = json
                     .getJSONObject("properties")
-                    .getJSONArray("timeseries");
+                    .getJSONArray("timeseries")
 
                 for (i in 0 until minOf(10, timeseries.length())) {
-                    val entry = timeseries.getJSONObject(i);
-                    val time = entry.getString("time");
+                    val entry = timeseries.getJSONObject(i)
+                    val time = entry.getString("time")
 
-                    val data = entry.getJSONObject("data");
+                    val data = entry.getJSONObject("data")
 
                     val temperature = data
                         .getJSONObject("instant")
                         .getJSONObject("details")
-                        .getDouble("air_temperature");
+                        .getDouble("air_temperature")
 
-                    val next1 = data.getJSONObject("next_1_hours");
+                    val next1 = data.getJSONObject("next_1_hours")
                     val precipitation =
-                        next1.getJSONObject("details").getDouble("precipitation_amount");
-                    val symbolCode = next1.getJSONObject("summary").getString("symbol_code");
+                        next1.getJSONObject("details").getDouble("precipitation_amount")
+                    val symbolCode = next1.getJSONObject("summary").getString("symbol_code")
 
                     weatherDatas.add(WeatherItemHour(time, temperature, precipitation, convertSymbolToIcon(symbolCode)))
 
@@ -61,7 +61,7 @@ class WeatherData {
                     weatherDatas.add(WeatherItemHour("the time", i.toDouble(), i.toDouble(),
                         WeatherIcon.SUN))
                 }
-//                weatherDatas.add((WeatherItemHour("jetzt", 1.0,1.0, WeatherIcon.SUN))) // for icon testing
+//                weatherDatas.add((WeatherItemHour("jetzt", 1.0,1.0, WeatherIcon.THUNDER))) // for icon testing
 //                weatherDatas.add((WeatherItemHour("2 Uhr", 2.0,1.0, WeatherIcon.THUNDER)))
 //                weatherDatas.add((WeatherItemHour("3 Uhr", 3.0,1.0, WeatherIcon.SNOW)))
 //                weatherDatas.add((WeatherItemHour("4 Uhr", 4.0,1.0, WeatherIcon.FOG)))
@@ -106,7 +106,7 @@ class WeatherData {
 
             try {
                 val response = client.newCall(request).execute()
-                val json = JSONObject(response.body!!.string())
+                val json = JSONObject(response.body.string())
                 val timeseries = json
                     .getJSONObject("properties")
                     .getJSONArray("timeseries")
