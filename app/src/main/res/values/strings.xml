@@ -79,7 +79,6 @@
     <string name="degree">°</string>
     <string name="percent">%</string>
     <string name="weekly_outlook">Nächste Woche</string>
-    <string name="weather">Wetter</string>
     <string name="now">Jetzt</string>
     <string name="today">Heute</string>
 </resources>
