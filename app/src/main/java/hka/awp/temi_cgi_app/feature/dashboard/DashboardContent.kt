@@ -94,7 +94,11 @@ fun MainContent(
                     subtitle = stringResource(R.string.webserverSub),
                     icon = Icons.Rounded.Storage,
                     bottomText = if (serverState.isReachable) {
-                        "${stringResource(R.string.status_online)} (${serverState.ipAddress})"
+                        "${stringResource(R.string.status_online)} (${
+                            serverState.ipAddress ?: stringResource(
+                                R.string.unknown_host_address
+                            )
+                        })"
                     } else {
                         stringResource(R.string.status_offline)
                     },
