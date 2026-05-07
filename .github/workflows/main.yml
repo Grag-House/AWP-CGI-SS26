@@ -29,7 +29,8 @@ jobs:
 
       # create .env file
       - name: Create .env for BuildConfig
-        run: echo "WEBVIEW_URL=https://example.com/" > .env
+        run: echo "WEBVIEW_URL=https://example.com/" >> .env |
+             echo "HTTP_ALLOWED_IP=127.0.0.0" >> .env
 
 
       # linting
