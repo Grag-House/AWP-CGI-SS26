@@ -1,5 +1,6 @@
 package hka.awp.temi_cgi_app.feature.webserver
 
+import android.annotation.SuppressLint
 import android.webkit.WebView
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -15,6 +16,7 @@ import hka.awp.temi_cgi_app.utils.isUrlBlocked
  *
  * @param url The string URL of the web page to be loaded and displayed.
  */
+@SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun WebViewScreen(url: String) {
     val context = LocalContext.current
@@ -26,6 +28,8 @@ fun WebViewScreen(url: String) {
             )
 
             webViewClient = TemiWebViewClient()
+            //this is needed for the webserver backend to work
+            settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
 
             if (!isUrlBlocked(url)) {
