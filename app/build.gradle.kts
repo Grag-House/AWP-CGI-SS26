@@ -32,16 +32,23 @@ android {
 
         //read from .env file
         val envFile = rootProject.file(".env")
-        val webviewUrl = if (envFile.exists()) {
+        if (envFile.exists()) {
             val props = Properties()
             envFile.inputStream().use { props.load(it) }
-            props.getProperty("WEBVIEW_URL")
+
+            val webViewUrl = props.getProperty("WEBVIEW_URL")
                 ?: throw GradleException("Missing property 'WEBVIEW_URL' in .env")
+            buildConfigField("String", "WEBVIEW_URL", "\"$webViewUrl\"")
+
+            val httpEnabledIpAddress = props.getProperty("HTTP_ALLOWED_IP")
+                ?: throw GradleException("Missing property 'HTTP_ALLOWED_IP' in .env")
+            buildConfigField("String", "HTTP_ALLOWED_IP", "\"$httpEnabledIpAddress\"")
+
         } else {
             throw GradleException("Missing .env file! please create it and include the 'WEBVIEW_URL")
         }
 
-        buildConfigField("String", "WEBVIEW_URL", "\"$webviewUrl\"")
+
     }
 
     buildTypes {
