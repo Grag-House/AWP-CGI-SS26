@@ -24,12 +24,17 @@ class WebserverViewModel : ViewModel() {
                 try {
                     // DNS Query
                     val address = InetAddress.getByName(hostname)
-                    val ip = address.hostAddress ?: "Unbekannte Host Adresse!"
+                    val ip = address.hostAddress
 
                     // ping
                     val reachable = address.isReachable(2000)
 
-                    _serverState.value = ServerState(ip, reachable)
+                    if (ip == null) {
+                        _serverState.value = ServerState(isReachable = reachable)
+                    } else {
+                        _serverState.value = ServerState(ipAddress = ip, isReachable = reachable)
+                    }
+
                 } catch (_: Exception) {
                     _serverState.value = ServerState()
                 }
