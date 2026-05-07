@@ -6,6 +6,7 @@ import hka.awp.temi_cgi_app.feature.settings.SettingsViewModel
 import hka.awp.temi_cgi_app.ui.shell.AppViewModel
 import hka.awp.temi_cgi_app.utils.NetworkManager
 import hka.awp.temi_cgi_app.utils.TemiBatteryMonitor
+import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -50,5 +51,10 @@ val appModule = module {
         SettingsViewModel()
     }
 
-    viewModel<NavigationViewModel> { NavigationViewModel() }
+    viewModel<NavigationViewModel> {
+        NavigationViewModel(
+            robot = get()!!,
+            application = androidApplication()
+        )
+    }
 }

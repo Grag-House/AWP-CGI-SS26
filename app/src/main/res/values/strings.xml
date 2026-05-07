@@ -57,6 +57,8 @@
     <string name="current_location_prefix">Aktueller Standort:</string>
     <string name="show_map">Karte\nanzeigen</string>
     <string name="select_destination">ZIEL WÄHLEN</string>
+    <string name="location_status_locating">Lokalisiere...</string>
+    <string name="location_status_none">Keine Orte gespeichert</string>
     <string name="location_office">Büro</string>
     <string name="location_kitchen">Küche</string>
     <string name="location_cafe">Café-Bar</string>
