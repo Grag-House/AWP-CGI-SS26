@@ -169,6 +169,7 @@ obj/
 .idea/jarRepositories.xml
 .idea/navEditor.xml
 .idea/studiobot.xml
+.idea/deploymentTargetSelector.xml
 
 # Legacy Eclipse project files
 .classpath
@@ -208,3 +209,5 @@ fabric.properties
 !/gradle/wrapper/gradle-wrapper.jar
 
 # End of https://www.toptal.com/developers/gitignore/api/linux,androidstudio,windows,macos
+/.idea/androidTestResultsUserPreferences.xml
+/.env

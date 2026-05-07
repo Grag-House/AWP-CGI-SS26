@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BatteryFull
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -14,7 +13,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import hka.awp.temi_cgi_app.R
+import hka.awp.temi_cgi_app.ui.components.BatteryIndicator
 import hka.awp.temi_cgi_app.utils.NetworkManager
 
 /**
@@ -24,7 +26,13 @@ import hka.awp.temi_cgi_app.utils.NetworkManager
  * battery status, current time, and notification status.
  */
 @Composable
-fun TopStatusBar(modifier: Modifier = Modifier, wifiLevel: Int) {
+fun TopStatusBar(
+    wifiLevel: Int,
+    currentTime: String,
+    batteryLevel: Int?,
+    isCharging: Boolean,
+    modifier: Modifier = Modifier
+) {
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.End,
@@ -32,23 +40,29 @@ fun TopStatusBar(modifier: Modifier = Modifier, wifiLevel: Int) {
     ) {
         Icon(
             NetworkManager.getWifiIconForLevel(wifiLevel),
-            contentDescription = "WLAN",
+            contentDescription = stringResource(R.string.wifi_description),
             tint = MaterialTheme.colorScheme.primary
         )
+
         Spacer(modifier = Modifier.width(8.dp))
-        Icon(
-            Icons.Default.BatteryFull,
-            contentDescription = "Batterie",
-            tint = MaterialTheme.colorScheme.primary
+
+        BatteryIndicator(
+            level = batteryLevel,
+            isCharging = isCharging
         )
+
         Spacer(modifier = Modifier.width(8.dp))
+
         Text(
-            text = "16:29", color = MaterialTheme.colorScheme.primary
+            text = currentTime,
+            color = MaterialTheme.colorScheme.primary
         )
+
         Spacer(modifier = Modifier.width(16.dp))
+
         Icon(
             Icons.Default.Notifications,
-            contentDescription = "Benachrichtigungen",
+            contentDescription = stringResource(R.string.notifications_description),
             tint = MaterialTheme.colorScheme.primary
         )
     }
