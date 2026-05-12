@@ -63,10 +63,7 @@ fun MainShell(
         }
     ) { paddingValues ->
         Row(
-            modifier =
-            Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
+            modifier = Modifier.fillMaxSize()
         ) {
             Sidebar(
                 isExpanded = appViewModel.isSidebarExpanded,
@@ -76,42 +73,45 @@ fun MainShell(
                 modifier = Modifier.width(260.dp)
             )
 
-            when (appViewModel.selectedRoute) {
-                Screen.Dashboard.route ->
-                    MainContent(
-                        modifier = Modifier.weight(1f),
-                        onClick = { screen ->
-                            appViewModel.onRouteSelect(screen)
-                        },
-                        serverState = serverState
-                    )
+            Row(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(paddingValues)
+            ) {
+                when (appViewModel.selectedRoute) {
+                    Screen.Dashboard.route ->
+                        MainContent(
+                            modifier = Modifier.weight(1f),
+                            onClick = { screen ->
+                                appViewModel.onRouteSelect(screen)
+                            },
+                            serverState = serverState
+                        )
 
-                Screen.Webserver.route -> WebViewScreen(BuildConfig.WEBVIEW_URL)
+                    Screen.Webserver.route ->
+                        WebViewScreen(BuildConfig.WEBVIEW_URL)
 
-                Screen.Navigation.route ->
-                    NavigationContent(
-                        modifier = Modifier.weight(1f),
-                        currentLocation =
-                        stringResource(
-                            DestinationItems.Office.stringResource
-                        ),
-                        onDestinationClick = navigationViewModel::onNavigationClick
-                    )
+                    Screen.Navigation.route ->
+                        NavigationContent(
+                            modifier = Modifier.weight(1f),
+                            currentLocation = stringResource(DestinationItems.Office.stringResource),
+                            onDestinationClick = navigationViewModel::onNavigationClick
+                        )
 
-                Screen.Settings.route ->
-                    SettingsContent(
-                        onItemClick = settingsViewModel::onSettingsItemClick
-                    )
+                    Screen.Settings.route ->
+                        SettingsContent(
+                            onItemClick = settingsViewModel::onSettingsItemClick
+                        )
 
-                // redundancy
-                else -> {
-                    MainContent(
-                        modifier = Modifier.weight(1f),
-                        onClick = { screen ->
-                            appViewModel.onRouteSelect(screen)
-                        },
-                        serverState = serverState
-                    )
+                    // redundancy
+                    else ->
+                        MainContent(
+                            modifier = Modifier.weight(1f),
+                            onClick = { screen ->
+                                appViewModel.onRouteSelect(screen)
+                            },
+                            serverState = serverState
+                        )
                 }
             }
         }

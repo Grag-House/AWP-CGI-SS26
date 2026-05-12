@@ -63,13 +63,13 @@ fun Sidebar(
             modifier
                 .fillMaxHeight()
                 .width(sidebarWidth)
-                .padding(12.dp)
                 .background(MaterialTheme.colorScheme.surface)
+                .padding(12.dp)
         ) {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
                     text = stringResource(R.string.cgi),
