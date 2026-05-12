@@ -4,11 +4,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -63,7 +65,9 @@ fun MainShell(
         }
     ) { paddingValues ->
         Row(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
         ) {
             Sidebar(
                 isExpanded = appViewModel.isSidebarExpanded,
@@ -76,7 +80,8 @@ fun MainShell(
             Row(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(paddingValues)
+                    .padding(top = 12.dp, bottom = 12.dp, end = 12.dp)
+                    .clip(RoundedCornerShape(24.dp))
             ) {
                 when (appViewModel.selectedRoute) {
                     Screen.Dashboard.route ->
