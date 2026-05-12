@@ -19,9 +19,9 @@ import hka.awp.cgi.temi.app.feature.navigation.NavigationContent
 import hka.awp.cgi.temi.app.feature.navigation.NavigationViewModel
 import hka.awp.cgi.temi.app.feature.settings.SettingsContent
 import hka.awp.cgi.temi.app.feature.settings.SettingsViewModel
+import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherContent
 import hka.awp.cgi.temi.app.feature.webserver.WebViewScreen
 import hka.awp.cgi.temi.app.feature.webserver.WebserverViewModel
-import hka.awp.temi_cgi_app.feature.weatherscreen.WeatherContent
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
@@ -104,10 +104,7 @@ fun MainShell(
                         onItemClick = settingsViewModel::onSettingsItemClick
                     )
 
-                Screen.Weather.route -> WeatherContent(
-
-                )
-
+                Screen.Weather.route -> WeatherContent()
 
                 // redundancy
                 else -> {

@@ -1,14 +1,38 @@
-package hka.awp.temi_cgi_app.feature.weatherscreen
+package hka.awp.cgi.temi.app.feature.weatherscreen
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.AcUnit
+import androidx.compose.material.icons.filled.BlurOn
+import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.Cloud
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Umbrella
+import androidx.compose.material.icons.filled.WbCloudy
+import androidx.compose.material.icons.filled.WbSunny
+import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -17,7 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import hka.awp.temi_cgi_app.R
+import hka.awp.cgi.temi.app.R
 
 // ─── Data models ─────────────────────────────────────────────────────────────
 
@@ -39,40 +63,46 @@ fun WeatherIconView(icon: WeatherIcon, size: Int = 28) {
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(sizeDp)
         )
+
         WeatherIcon.CLOUD -> Icon(
             imageVector = Icons.Default.Cloud,
             contentDescription = stringResource(R.string.icon_cloudy),
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(sizeDp)
         )
+
         WeatherIcon.SUN_CLOUD -> Box(contentAlignment = Alignment.Center) {
             Icon(
-                imageVector = Icons.Default.WbCloudy, //TODO: besseres Icon finden, im Moment nur eine Wolke ohne Sonne
+                imageVector = Icons.Default.WbCloudy, // TODO: besseres Icon finden, im Moment nur eine Wolke ohne Sonne
                 contentDescription = stringResource(R.string.icon_partlycloudy),
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(sizeDp)
             )
         }
+
         WeatherIcon.RAIN -> Icon(
-            imageVector = Icons.Default.Umbrella, //TODO: replace icon with raincloud
+            imageVector = Icons.Default.Umbrella, // TODO: replace icon with raincloud
             contentDescription = stringResource(R.string.icon_rain),
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(sizeDp)
         )
+
         WeatherIcon.SNOW -> Icon(
             imageVector = Icons.Default.AcUnit,
             contentDescription = stringResource(R.string.icon_snow),
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(sizeDp)
         )
+
         WeatherIcon.THUNDER -> Icon(
             imageVector = Icons.Default.Bolt,
             contentDescription = stringResource(R.string.icon_thunder),
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(sizeDp)
         )
+
         WeatherIcon.FOG -> Icon(
-            imageVector = Icons.Default.BlurOn, //TODO: nach passenderem Icon schauen
+            imageVector = Icons.Default.BlurOn, // TODO: nach passenderem Icon schauen
             contentDescription = stringResource(R.string.icon_fog),
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(sizeDp)
@@ -115,10 +145,10 @@ fun CurrentWeatherCard() {
                     color = MaterialTheme.colorScheme.primary
                 )
             }
+
             WeatherIconView(hourlyData[0].icon, 80)
         }
     }
-
 }
 
 @Composable
@@ -141,12 +171,21 @@ fun HourlyForecastCard() {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text(item.label,    color = MaterialTheme.colorScheme.onSurfaceVariant,   fontSize = 10.sp)
+                    Text(item.label, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 10.sp)
                     Spacer(Modifier.height(4.dp))
                     WeatherIconView(item.icon, size = 20)
                     Spacer(Modifier.height(4.dp))
-                    Text(item.temp + stringResource(R.string.degree),     color = MaterialTheme.colorScheme.onSurface, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                    Text(item.precipitation + stringResource(R.string.percent),     color = MaterialTheme.colorScheme.onSurfaceVariant,   fontSize = 10.sp)
+                    Text(
+                        item.temp + stringResource(R.string.degree),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        item.precipitation + stringResource(R.string.percent),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 10.sp
+                    )
                 }
             }
         }
@@ -173,12 +212,21 @@ fun WeeklyForecastCard() {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text(item.day,  color = MaterialTheme.colorScheme.onSurfaceVariant,   fontSize = 10.sp)
+                    Text(item.day, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 10.sp)
                     Spacer(Modifier.height(4.dp))
                     WeatherIconView(item.icon, size = 22)
                     Spacer(Modifier.height(4.dp))
-                    Text(item.high + stringResource(R.string.degree), color = MaterialTheme.colorScheme.onSurface, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                    Text(item.low + stringResource(R.string.degree),  color = MaterialTheme.colorScheme.onSurfaceVariant,   fontSize = 10.sp)
+                    Text(
+                        item.high + stringResource(R.string.degree),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        item.low + stringResource(R.string.degree),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 10.sp
+                    )
                 }
             }
         }
@@ -193,14 +241,29 @@ fun WetterTopBar() {
     TopAppBar(
         title = {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Cloud, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(28.dp))
+                Icon(
+                    Icons.Default.Cloud,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(28.dp)
+                )
                 Spacer(Modifier.width(8.dp))
-                Text(stringResource(R.string.weather), fontWeight = FontWeight.Bold, fontSize = 22.sp, color = MaterialTheme.colorScheme.onSurface)
+                Text(
+                    stringResource(R.string.weather),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 22.sp,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White),
         actions = {
-            Icon(Icons.Default.Notifications, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(end = 16.dp))
+            Icon(
+                Icons.Default.Notifications,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(end = 16.dp)
+            )
         }
     )
 }
@@ -212,7 +275,7 @@ fun WeatherContent() {
     Row(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF5F5F5))
+            .background(Color(color = 0xFFF5F5F5))
     ) {
         // Main content
         Column(modifier = Modifier.weight(1f)) {

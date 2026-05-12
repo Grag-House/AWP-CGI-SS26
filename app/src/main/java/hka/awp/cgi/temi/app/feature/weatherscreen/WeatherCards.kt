@@ -1,18 +1,14 @@
-package hka.awp.temi_cgi_app.feature.weatherscreen
-
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.stringResource
-import hka.awp.temi_cgi_app.R
+package hka.awp.cgi.temi.app.feature.weatherscreen
 
 data class HourlyItem(
-    var label: String,       // "Jetzt", "t+1", …
+    var label: String, // "Jetzt", "t+1", …
     val icon: WeatherIcon,
-    val temp: String,        // "21°"
-    val precipitation: String         // "0%"
+    val temp: String, // "21°"
+    val precipitation: String // "0%"
 )
 
 data class DailyItem(
-    var day: String,         // "Heute", "Do", …
+    var day: String, // "Heute", "Do", …
     val icon: WeatherIcon,
     val high: String,
     val low: String
@@ -36,7 +32,7 @@ class WeatherCards {
 //                )
 //            )
 
-            for (i in 0..(data.size - 1)) {
+            for (i in 0..<data.size) {
                 hourlyData.add(
                     HourlyItem(
                         data[i].time,
@@ -49,8 +45,7 @@ class WeatherCards {
             return hourlyData
         }
 
-
-        fun setDailyWeatherCards(): MutableList<DailyItem>{
+        fun setDailyWeatherCards(): MutableList<DailyItem> {
             val data = WeatherData.getWeeklyData()
 
             val dailyData = mutableListOf<DailyItem>()
@@ -64,7 +59,7 @@ class WeatherCards {
 //                )
 //            )
 
-            for (i in 0..minOf(6,(data.size - 1))) {
+            for (i in 0..minOf(6, (data.size - 1))) {
                 dailyData.add(
                     DailyItem(
                         data[i].weekday,
@@ -77,5 +72,4 @@ class WeatherCards {
             return dailyData
         }
     }
-
 }
