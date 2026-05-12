@@ -1,10 +1,12 @@
-package hka.awp.temi_cgi_app.feature.weatherscreen
+package hka.awp.cgi.temi.app.feature.weatherscreen
 
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 class WeatherData {
 
@@ -16,19 +18,22 @@ class WeatherData {
     )
     companion object GetDataObject {
         fun getHourlyData(): List<WeatherItemHour> {
-            val lat = 49.0138 //only 4 decimal places as recommended by the MET
+            val lat = 49.0138 // only 4 decimal places as recommended by the MET
             val lon = 8.3573
 
             val client = OkHttpClient()
 
             val request = Request.Builder()
                 .url("https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=$lat&lon=$lon")
-                .header("User-Agent", "https://github.com/Grag-House/AWP-CGI-SS26") //has to be an email-address or GitHub repo per MET regulations
+                .header(
+                    "User-Agent",
+                    "https://github.com/Grag-House/AWP-CGI-SS26"
+                ) // has to be an email-address or GitHub repo per MET regulations
                 .get()
                 .build()
 
             val weatherDatas =
-                mutableListOf<WeatherItemHour>() //list that will contain the received weather data for the next 10 hours
+                mutableListOf<WeatherItemHour>() // list that will contain the received weather data for the next 10 hours
 
             try {
                 val response = client.newCall(request).execute()
@@ -54,12 +59,17 @@ class WeatherData {
                     val symbolCode = next1.getJSONObject("summary").getString("symbol_code")
 
                     weatherDatas.add(WeatherItemHour(time, temperature, precipitation, convertSymbolToIcon(symbolCode)))
-
                 }
             } catch (e: Exception) {
                 for (i in 0..9) {
-                    weatherDatas.add(WeatherItemHour("the time", i.toDouble(), i.toDouble(),
-                        WeatherIcon.SUN))
+                    weatherDatas.add(
+                        WeatherItemHour(
+                            "the time",
+                            i.toDouble(),
+                            i.toDouble(),
+                            WeatherIcon.SUN
+                        )
+                    )
                 }
 //                weatherDatas.add((WeatherItemHour("jetzt", 1.0,1.0, WeatherIcon.THUNDER))) // for icon testing
 //                weatherDatas.add((WeatherItemHour("2 Uhr", 2.0,1.0, WeatherIcon.THUNDER)))
@@ -71,7 +81,6 @@ class WeatherData {
 //                weatherDatas.add((WeatherItemHour("8 Uhr", 8.0,1.0, WeatherIcon.SUN)))
 //                weatherDatas.add((WeatherItemHour("9 Uhr", 9.0,1.0, WeatherIcon.SUN)))
 //                weatherDatas.add((WeatherItemHour("10 Uhr", 10.0,1.0, WeatherIcon.SUN)))
-
             }
             return weatherDatas
         }
@@ -125,21 +134,26 @@ class WeatherData {
                         .getDouble("air_temperature")
 
                     val symbolCode = (
-                            data.optJSONObject("next_1_hours")
-                                ?: data.optJSONObject("next_6_hours")
-                                ?: data.optJSONObject("next_12_hours")
-                            )?.getJSONObject("summary")?.getString("symbol_code")
+                        data.optJSONObject("next_1_hours")
+                            ?: data.optJSONObject("next_6_hours")
+                            ?: data.optJSONObject("next_12_hours")
+                        )?.getJSONObject("summary")?.getString("symbol_code")
 
                     dailyEntries.getOrPut(date) { mutableListOf() }
                         .add(Pair(temperature, symbolCode))
                 }
-
             } catch (e: Exception) {
                 e.printStackTrace()
                 val dailyDatas = mutableListOf<WeatherItemDay>()
                 for (i in 0..9) {
-                    dailyDatas.add(WeatherItemDay("the day", i.toDouble(), i.toDouble(),
-                        WeatherIcon.SUN))
+                    dailyDatas.add(
+                        WeatherItemDay(
+                            "the day",
+                            i.toDouble(),
+                            i.toDouble(),
+                            WeatherIcon.SUN
+                        )
+                    )
                 }
                 return dailyDatas
             }
@@ -151,12 +165,14 @@ class WeatherData {
                     val symbol = entries.mapNotNull { it.second }
                         .groupingBy { it }.eachCount()
                         .maxByOrNull { it.value }
-                        .let { it?.key ?: "clearsky" } //clearsky is a fallback if the string would be null so that at least any icon is displayed
+                        .let {
+                            it?.key ?: "clearsky"
+                        } // clearsky is a fallback if the string would be null so that at least any icon is displayed
 
                     WeatherItemDay(
-                        weekday        = getGermanWeekday(dateStr, dateFormat),
-                        minTemp        = temps.min(),
-                        maxTemp        = temps.max(),
+                        weekday = getGermanWeekday(dateStr, dateFormat),
+                        minTemp = temps.min(),
+                        maxTemp = temps.max(),
                         symbol = convertSymbolToIcon(symbol)
                     )
                 }
@@ -169,13 +185,12 @@ class WeatherData {
             return weekdays[cal.get(Calendar.DAY_OF_WEEK) - 1]
         }
 
-
         /**
          * Converts the symbol codes received from the MET api into WeatherIcons to be displayed
          * symbol codes taken from: https://github.com/metno/weathericons/blob/main/weather/README.md
          */
-        fun convertSymbolToIcon(symbol: String): WeatherIcon{
-            when(symbol){
+        fun convertSymbolToIcon(symbol: String): WeatherIcon {
+            when (symbol) {
                 "clearsky" -> return WeatherIcon.SUN
                 "fair" -> return WeatherIcon.SUN
                 "partlycloudy" -> return WeatherIcon.SUN_CLOUD
@@ -220,6 +235,5 @@ class WeatherData {
             }
             return WeatherIcon.SUN
         }
-
     }
 }
