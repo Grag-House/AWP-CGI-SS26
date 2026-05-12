@@ -30,16 +30,24 @@ jobs:
       # create .env file
       - name: Create .env for BuildConfig
         run: echo "WEBVIEW_URL=https://example.com/" >> .env |
-             echo "HTTP_ALLOWED_IP=127.0.0.0" >> .env
+          echo "HTTP_ALLOWED_IP=127.0.0.0" >> .env
 
 
-      # linting
+      # android specific linting
       - name: Run Android Lint
         run: ./gradlew lintDebug --stacktrace --build-cache --parallel
 
-      # check if the code compiles
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace --build-cache --parallel
+
+      # detekt linter + dokka
+      - name: Run Code Analysis
+        run: ./gradlew qualityCheck
+
+      - name: Upload HTML Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Detekt-Report
+          path: app/build/reports/detekt/detekt-report.html
 
       # run unit tests
       - name: Run Unit Tests
@@ -54,3 +62,10 @@ jobs:
           path: |
             app/build/reports/tests/testDebugUnitTest/
             app/build/reports/lint-results-debug.html
+
+      - name: Upload Dokka Documentation
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: Dokka-Docs
+          path: app/build/dokka/html
