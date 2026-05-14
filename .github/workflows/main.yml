@@ -29,9 +29,14 @@ jobs:
 
       # create .env file
       - name: Create .env for BuildConfig
-        run: echo "WEBVIEW_URL=https://example.com/" >> .env |
-          echo "HTTP_ALLOWED_IP=127.0.0.0" >> .env
-
+        run: |
+          echo "WEBVIEW_URL=${{ vars.WEBVIEW_URL }}" >> .env
+          echo "HTTP_ALLOWED_IP=${{ vars.127.0.0.0 }}" >> .env
+          echo "RELEASE_STORE_PASSWORD=${{ secrets.RELEASE_STORE_PASSWORD }}" >> .env
+          echo "RELEASE_KEY_ALIAS"=${{ secrets.RELEASE_KEY_ALIAS }}" >> .env
+          echo "RELEASE_KEY_PASSWORD=${{ secrets.RELEASE_KEY_PASSWORD }}" >> .env
+      
+      
 
       # android specific linting
       - name: Run Android Lint
