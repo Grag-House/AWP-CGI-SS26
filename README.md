@@ -37,7 +37,7 @@ Roboter-Funktionen.
 
 ## 📁 Projektstruktur
 
-- `app/src/main/java/hka/awp/temi_cgi_app/`
+- `app/src/main/java/hka/awp/cgi/temi/app`
     - `feature/`: Enthält die verschiedenen Funktionsbereiche (Dashboard, Webserver, Settings,
       Navigation,
       Weather, Modus).
