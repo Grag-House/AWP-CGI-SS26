@@ -1,12 +1,29 @@
+import io.gitlab.arturbosch.detekt.Detekt
 import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.detekt)
+    alias(libs.plugins.dokka)
 }
 
 android {
-    namespace = "hka.awp.temi_cgi_app"
+    signingConfigs {
+        create("release") {
+            val props = Properties()
+            val envFile = rootProject.file(".env")
+            if (envFile.exists()) {
+                envFile.inputStream().use { props.load(it) }
+                storeFile = file("$rootDir/release-key.jks")
+                storePassword = props.getProperty("RELEASE_STORE_PASSWORD")
+                keyAlias = props.getProperty("RELEASE_KEY_ALIAS")
+                keyPassword = props.getProperty("RELEASE_KEY_PASSWORD")
+            }
+        }
+    }
+
+    namespace = "hka.awp.cgi.temi.app"
 
     testOptions {
         unitTests.all {
@@ -19,9 +36,9 @@ android {
     }
 
     defaultConfig {
-        applicationId = "hka.awp.temi_cgi_app"
+        applicationId = "hka.awp.cgi.temi.app"
         minSdk = 23
-        //--> The App will only run on sdk 23 due to the limits of TEMI
+        // --> The App will only run on sdk 23 due to the limits of TEMI
         //noinspection OldTargetApi,ExpiredTargetSdkVersion
         targetSdk = 36
         compileSdk = 36
@@ -30,18 +47,24 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        //read from .env file
+        // read from .env file
         val envFile = rootProject.file(".env")
-        val webviewUrl = if (envFile.exists()) {
+        if (envFile.exists()) {
             val props = Properties()
             envFile.inputStream().use { props.load(it) }
-            props.getProperty("WEBVIEW_URL")
-                ?: throw GradleException("Missing property 'WEBVIEW_URL' in .env")
-        } else {
-            throw GradleException("Missing .env file! please create it and include the 'WEBVIEW_URL")
-        }
 
-        buildConfigField("String", "WEBVIEW_URL", webviewUrl)
+            val webViewUrl =
+                props.getProperty("WEBVIEW_URL") ?: throw GradleException("Missing property 'WEBVIEW_URL' in .env")
+            buildConfigField("String", "WEBVIEW_URL", "\"$webViewUrl\"")
+
+            val httpEnabledIpAddress = props.getProperty("HTTP_ALLOWED_IP")
+                ?: throw GradleException("Missing property 'HTTP_ALLOWED_IP' in .env")
+            buildConfigField("String", "HTTP_ALLOWED_IP", "\"$httpEnabledIpAddress\"")
+        } else {
+            throw GradleException(
+                "Missing .env file! please create it and include the 'WEBVIEW_URL"
+            )
+        }
     }
 
     buildTypes {
@@ -49,9 +72,12 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
             )
             isDebuggable = false
+
+            signingConfig = signingConfigs.getByName("release")
         }
 
         debug {
@@ -75,6 +101,27 @@ android {
     }
 }
 
+detekt {
+    buildUponDefaultConfig = true
+    allRules = false
+    autoCorrect = false
+    config.setFrom(files("$rootDir/config/detekt/detekt.yml"))
+}
+
+tasks.withType<Detekt>().configureEach {
+    reports {
+        html.required.set(true)
+        html.outputLocation.set(layout.buildDirectory.file("reports/detekt/detekt-report.html"))
+
+        xml.required.set(true)
+        xml.outputLocation.set(layout.buildDirectory.file("reports/detekt/detekt-report.xml"))
+
+        txt.required.set(false)
+        sarif.required.set(false)
+        md.required.set(false)
+    }
+}
+
 kotlin {
     compilerOptions {
         freeCompilerArgs.add("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
@@ -83,6 +130,7 @@ kotlin {
 
 dependencies {
     implementation(libs.androidx.ui)
+    implementation(libs.firebase.annotations)
     // runtime dependencies
     implementation(libs.koin.android)
     implementation(platform(libs.koin.bom))
@@ -100,6 +148,8 @@ dependencies {
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.timber)
+    // temi dependency
+    implementation(libs.temi.sdk)
 
     // unit test dependencies
     testImplementation(libs.mokk)
@@ -108,9 +158,7 @@ dependencies {
     testRuntimeOnly(libs.junit.platform.launcher)
     testImplementation(libs.junit.jupiter.params)
     androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
 
     // debug depedencies
     debugImplementation(libs.androidx.compose.ui.tooling)
@@ -119,6 +167,26 @@ dependencies {
     // api desugaring
     coreLibraryDesugaring(libs.android.desugarJdkLibs)
 
-    // temi dependency
-    implementation(libs.temi.sdk)
+    // linting and formatting
+    detektPlugins(libs.detekt.ktlint)
+    detektPlugins(libs.detekt.compose)
+}
+
+tasks.withType<Detekt>().configureEach {
+    if (project.hasProperty("autoFormat")) {
+        autoCorrect = true
+        println("🛠️ Detekt Auto-Correct enabled!")
+    } else {
+        println("🔍 Detekt running in read only mode!")
+    }
+}
+
+tasks.register("qualityCheck") {
+    group = "verification"
+    description = "Run detect analysis and create dokka-documentation."
+
+    dependsOn("detekt")
+    dependsOn("dokkaGenerate")
+
+    tasks.findByName("dokkaGenerate")?.mustRunAfter("detekt")
 }
