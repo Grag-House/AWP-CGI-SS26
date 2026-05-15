@@ -1,7 +1,7 @@
 package hka.awp.cgi.temi.app.koin
 
-import hka.awp.cgi.temi.app.data.repository.RobotRepository
 import com.robotemi.sdk.Robot
+import hka.awp.cgi.temi.app.data.repository.RobotRepository
 import hka.awp.cgi.temi.app.feature.navigation.NavigationViewModel
 import hka.awp.cgi.temi.app.feature.settings.SettingsViewModel
 import hka.awp.cgi.temi.app.feature.settings.battery.BatteryViewModel
@@ -34,8 +34,8 @@ val appModule = module {
     single<Robot?> {
         try {
             Robot.getInstance()
-        } catch (e: Exception) {
-            Timber.e(e, "Temi SDK not available, probably running locally")
+        } catch (exception: IllegalStateException) {
+            Timber.e(exception, "Temi SDK not available")
             null
         }
     }
@@ -67,6 +67,4 @@ val appModule = module {
     viewModel {
         BatteryViewModel()
     }
-
-
 }

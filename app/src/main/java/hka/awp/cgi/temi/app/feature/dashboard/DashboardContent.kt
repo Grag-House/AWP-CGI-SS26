@@ -48,7 +48,6 @@ import hka.awp.cgi.temi.app.ui.shell.Screen
 fun DashboardContent(
     modifier: Modifier = Modifier,
     onClick: (Screen) -> Unit = {},
-    selectedRoute: String,
     serverState: ServerState
 ) {
     Column(

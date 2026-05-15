@@ -11,24 +11,23 @@ private val allowedIp: String
     get() = BuildConfig.HTTP_ALLOWED_IP
 
 fun isUrlBlocked(checkUrl: String?): Boolean {
-    if (checkUrl == null) return true
+    val uri = checkUrl?.toUri()
 
-    if (allowedIp.isBlank()) {
-        Timber.e(MISSING_ALLOWED_IP_MESSAGE)
-        return true
+    return when {
+        uri == null -> true
+
+        allowedIp.isBlank() -> {
+            Timber.e(MISSING_ALLOWED_IP_MESSAGE)
+            true
+        }
+
+        uri.host == allowedIp -> false
+
+        uri.scheme == "http" -> {
+            Timber.w("$checkUrl was blocked!")
+            true
+        }
+
+        else -> false
     }
-
-    val uri = checkUrl.toUri()
-    val host = uri.host
-
-    if (host == allowedIp) {
-        return false
-    }
-
-    if (uri.scheme == "http") {
-        Timber.w("$checkUrl was blocked!")
-        return true
-    }
-
-    return false
 }

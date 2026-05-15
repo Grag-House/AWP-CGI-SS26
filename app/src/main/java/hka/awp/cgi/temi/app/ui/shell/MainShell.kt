@@ -15,19 +15,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import hka.awp.cgi.temi.app.BuildConfig
 import hka.awp.cgi.temi.app.feature.dashboard.DashboardContent
 import hka.awp.cgi.temi.app.feature.navigation.DestinationItems
 import hka.awp.cgi.temi.app.feature.navigation.NavigationContent
 import hka.awp.cgi.temi.app.feature.navigation.NavigationViewModel
-import hka.awp.cgi.temi.app.feature.settings.SettingsViewModel
-import hka.awp.cgi.temi.app.feature.webserver.WebViewScreen
-import hka.awp.cgi.temi.app.feature.webserver.WebserverViewModel
-import hka.awp.cgi.temi.app.BuildConfig
 import hka.awp.cgi.temi.app.feature.settings.SettingsNavigationEvent
+import hka.awp.cgi.temi.app.feature.settings.SettingsViewModel
 import hka.awp.cgi.temi.app.feature.settings.about.SettingsScreen
 import hka.awp.cgi.temi.app.feature.settings.battery.BatteryScreen
 import hka.awp.cgi.temi.app.feature.settings.display.DisplayScreen
 import hka.awp.cgi.temi.app.feature.settings.notifications.NotificationScreen
+import hka.awp.cgi.temi.app.feature.webserver.WebViewScreen
+import hka.awp.cgi.temi.app.feature.webserver.WebserverViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
@@ -43,6 +43,8 @@ import org.koin.compose.viewmodel.koinViewModel
  * @param settingsViewModel The ViewModel handling logic and interactions
  * specific to the settings screen.
  */
+
+@Suppress("LongMethod")
 @Composable
 fun MainShell(
     modifier: Modifier = Modifier,
@@ -73,31 +75,31 @@ fun MainShell(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-           ) {
+        ) {
             Sidebar(
                 isExpanded = appViewModel.isSidebarExpanded,
                 selectedRoute = appViewModel.selectedRoute,
                 onRouteSelected = { screen -> appViewModel.onRouteSelect(screen) },
                 onSidebarToggle = { appViewModel.onSideBarToggle() },
                 modifier = Modifier.width(260.dp)
-                   )
+            )
 
             Row(
                 modifier = Modifier
                     .weight(1f)
                     .padding(top = 12.dp, bottom = 12.dp, end = 12.dp)
                     .clip(RoundedCornerShape(24.dp))
-               ) {
+            ) {
                 when (appViewModel.selectedRoute) {
                     Screen.Dashboard.route ->
                         DashboardContent(
                             modifier = Modifier.weight(1f),
-                            selectedRoute = appViewModel.selectedRoute,
+//                            selectedRoute = appViewModel.selectedRoute,
                             onClick = { screen ->
                                 appViewModel.onRouteSelect(screen)
                             },
                             serverState = serverState
-                                        )
+                        )
 
                     Screen.Webserver.route ->
                         WebViewScreen(BuildConfig.WEBVIEW_URL)
@@ -107,7 +109,7 @@ fun MainShell(
                             modifier = Modifier.weight(1f),
                             currentLocation = stringResource(DestinationItems.Office.stringResource),
                             onDestinationClick = navigationViewModel::onNavigationClick
-                                         )
+                        )
 
                     Screen.Settings.route -> {
                         val settingsViewModel: SettingsViewModel = koinViewModel()
@@ -133,7 +135,7 @@ fun MainShell(
                         SettingsScreen(
                             modifier = Modifier.weight(1f),
                             viewModel = settingsViewModel,
-                                      )
+                        )
                     }
 
                     Screen.DisplaySettings.route -> {
@@ -141,7 +143,7 @@ fun MainShell(
                             onBackClick = {
                                 appViewModel.onRouteSelect(Screen.Settings)
                             }
-                                     )
+                        )
                     }
 
                     Screen.NotificationSettings.route -> {
@@ -149,7 +151,7 @@ fun MainShell(
                             onBackClick = {
                                 appViewModel.onRouteSelect(Screen.Settings)
                             }
-                                          )
+                        )
                     }
 
                     Screen.BatterySettings.route -> {
@@ -157,19 +159,19 @@ fun MainShell(
                             onBackClick = {
                                 appViewModel.onRouteSelect(Screen.Settings)
                             }
-                                     )
+                        )
                     }
 
                     // redundancy
                     else -> {
                         DashboardContent(
                             modifier = Modifier.weight(1f),
-                            selectedRoute = appViewModel.selectedRoute,
+//                            selectedRoute = appViewModel.selectedRoute,
                             onClick = { screen ->
                                 appViewModel.onRouteSelect(screen)
                             },
                             serverState = serverState
-                                        )
+                        )
                     }
                 }
             }

@@ -1,8 +1,8 @@
 package hka.awp.cgi.temi.app.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -10,9 +10,11 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
-// 1. Eigene Struktur für Farben, die nicht im Standard-Material-Satz sind
 @Immutable
-data class CustomDesignTokens(val sidepanel: Color, val sidepanelHighlight: Color)
+data class CustomDesignTokens(
+    val sidepanel: Color,
+    val sidepanelHighlight: Color
+)
 
 val LocalCustomColors =
     staticCompositionLocalOf {
@@ -27,37 +29,39 @@ fun CgiTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val colorScheme = if (darkTheme) {
-        darkColorScheme(
-            primary = CgiRed,
-            onPrimary = Color.White,
-            background = Color(0xFF121212),
-            surface = Color(0xFF1E1E1E),
-            onSurface = Color.White,
-            surfaceVariant = Color(0xFF2C2C2C)
-        )
-    } else {
-        lightColorScheme(
-            primary = CgiRed,
-            onPrimary = OnPrimary,
-            background = AppBackground,
-            surface = SidepanelColor,
-            onSurface = OnSurface,
-            surfaceVariant = Color(0xFFF5F5F5)
-        )
-    }
+    val colorScheme =
+        if (darkTheme) {
+            darkColorScheme(
+                primary = CgiRed,
+                onPrimary = Color.White,
+                background = DarkBackground,
+                surface = DarkSurface,
+                onSurface = Color.White,
+                surfaceVariant = DarkSurfaceVariant
+            )
+        } else {
+            lightColorScheme(
+                primary = CgiRed,
+                onPrimary = OnPrimary,
+                background = AppBackground,
+                surface = SidepanelColor,
+                onSurface = OnSurface,
+                surfaceVariant = LightSurfaceVariant
+            )
+        }
 
-    val customColors = if (darkTheme) {
-        CustomDesignTokens(
-            sidepanel = Color(0xFF1A1A1A),
-            sidepanelHighlight = Color(0xFF333333)
-        )
-    } else {
-        CustomDesignTokens(
-            sidepanel = SidepanelColor,
-            sidepanelHighlight = SidepanelHighlight
-        )
-    }
+    val customColors =
+        if (darkTheme) {
+            CustomDesignTokens(
+                sidepanel = DarkSidepanel,
+                sidepanelHighlight = DarkSidepanelHighlight
+            )
+        } else {
+            CustomDesignTokens(
+                sidepanel = SidepanelColor,
+                sidepanelHighlight = SidepanelHighlight
+            )
+        }
 
     CompositionLocalProvider(LocalCustomColors provides customColors) {
         MaterialTheme(
@@ -66,6 +70,7 @@ fun CgiTheme(
         )
     }
 }
+
 object AppTheme {
     val customColors: CustomDesignTokens
         @Composable

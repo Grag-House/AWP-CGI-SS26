@@ -27,7 +27,7 @@ class DisplayViewModel(private val repository: RobotRepository) : ViewModel() {
     fun updateBrightness(newValue: Float, context: Context) {
         _brightness.value = newValue
         val brightnessPercent = (newValue * 100).toInt()
-        repository.setBrightness( brightnessPercent,context)
+        repository.setBrightness(brightnessPercent, context)
     }
 
     fun updateTimeout(option: Pair<String, Int>, context: Context) {

@@ -3,8 +3,15 @@ package hka.awp.cgi.temi.app.data.repository
 import android.content.Context
 import android.os.Build
 import android.provider.Settings
+import hka.awp.cgi.temi.app.BuildConfig
+import timber.log.Timber
 import java.net.NetworkInterface
+import java.net.SocketException
 import java.util.Collections
+
+private const val FALLBACK_IP_ADDRESS = "0.0.0.0"
+private const val NO_IP_FOUND_MESSAGE = "Keine IP gefunden"
+private const val MAX_BRIGHTNESS = 255
 
 data class RobotInfo(
     val ip: String,
@@ -17,30 +24,36 @@ class RobotRepository {
 
     fun getFullDeviceInfo(): RobotInfo {
         return RobotInfo(
-            ip = "getIpAddress()",
-            model = "getModelName()",
-            serial = "android.os.Build.getSerial()",
-            appVersion = "BuildConfig.VERSION_NAME"
+            ip = getIpAddress(),
+            model = getModelName(),
+            serial = Build.SERIAL,
+            appVersion = BuildConfig.VERSION_NAME
         )
     }
 
     fun getIpAddress(): String {
-        try {
-            val interfaces = Collections.list(NetworkInterface.getNetworkInterfaces())
-            for (intf in interfaces) {
-                val addrs = Collections.list(intf.inetAddresses)
-                for (addr in addrs) {
-                    if (!addr.isLoopbackAddress) {
-                        val sAddr = addr.hostAddress
-                        val isIPv4 = sAddr.indexOf(':') < 0
-                        if (isIPv4) return sAddr
-                    }
-                }
-            }
-        } catch (ex: Exception) {
-            return "0.0.0.0"
+        return try {
+            findIpv4Address() ?: NO_IP_FOUND_MESSAGE
+        } catch (exception: SocketException) {
+            Timber.e(exception, "Failed to read network interfaces")
+            FALLBACK_IP_ADDRESS
+        } catch (exception: SecurityException) {
+            Timber.e(exception, "Missing permission to read network interfaces")
+            FALLBACK_IP_ADDRESS
         }
-        return "Keine IP gefunden"
+    }
+
+    private fun findIpv4Address(): String? {
+        val interfaces = Collections.list(NetworkInterface.getNetworkInterfaces())
+
+        return interfaces
+            .flatMap { networkInterface ->
+                Collections.list(networkInterface.inetAddresses)
+            }
+            .firstOrNull { address ->
+                !address.isLoopbackAddress && address.hostAddress?.contains(":") == false
+            }
+            ?.hostAddress
     }
 
     fun getModelName(): String = Build.MODEL
@@ -50,12 +63,13 @@ class RobotRepository {
             Settings.System.putInt(
                 context.contentResolver,
                 Settings.System.SCREEN_BRIGHTNESS,
-                (value * 255)
-                                  )
-            // TODO = TemiBrightness
-            println("Erfolgreich Brightness verändert.")
-        } catch (e: Exception) {
-            println("Fehler beim Schreiben: ${e.message}")
+                value * MAX_BRIGHTNESS
+            )
+            Timber.d("Brightness changed successfully")
+        } catch (exception: SecurityException) {
+            Timber.e(exception, "Missing permission to change brightness")
+        } catch (exception: IllegalArgumentException) {
+            Timber.e(exception, "Invalid brightness value")
         }
     }
 
@@ -65,10 +79,12 @@ class RobotRepository {
                 context.contentResolver,
                 Settings.System.SCREEN_OFF_TIMEOUT,
                 millis
-                                  )
-            println("Timeout auf $millis ms gesetzt")
-        } catch (e: Exception) {
-            println("Fehler beim Timeout: ${e.message}")
+            )
+            Timber.d("Screen timeout changed to $millis ms")
+        } catch (exception: SecurityException) {
+            Timber.e(exception, "Missing permission to change screen timeout")
+        } catch (exception: IllegalArgumentException) {
+            Timber.e(exception, "Invalid screen timeout value")
         }
     }
 }

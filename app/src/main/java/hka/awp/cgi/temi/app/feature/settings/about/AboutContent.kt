@@ -1,4 +1,4 @@
-package hka.awp.cgi.temi.app.feature.settings
+package hka.awp.cgi.temi.app.feature.settings.about
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -36,6 +36,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import hka.awp.cgi.temi.app.R
 import hka.awp.cgi.temi.app.data.repository.RobotInfo
+import hka.awp.cgi.temi.app.feature.settings.SettingsItem
 
 /**
  * Screen for system settings.
@@ -50,7 +51,8 @@ fun AboutContent(
     modifier: Modifier = Modifier,
     onItemClick: (SettingsItem) -> Unit,
     aboutInfo: RobotInfo? = null,
-    onDismissAbout: () -> Unit = {}) {
+    onDismissAbout: () -> Unit = {}
+) {
     Column(
         modifier =
         modifier

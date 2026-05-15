@@ -1,9 +1,19 @@
 package hka.awp.cgi.temi.app.feature.settings.display
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.*
-import androidx.compose.material3.*
+import androidx.compose.material.icons.rounded.Brightness6
+import androidx.compose.material.icons.rounded.DarkMode
+import androidx.compose.material.icons.rounded.LightMode
+import androidx.compose.material.icons.rounded.Timer
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -13,7 +23,7 @@ import hka.awp.cgi.temi.app.ui.components.SettingsCard
 import hka.awp.cgi.temi.app.ui.components.SettingsHeader
 import hka.awp.cgi.temi.app.ui.components.SettingsRow
 
-
+@Suppress("LongParameterList")
 @Composable
 fun DisplayContent(
     brightness: Float,

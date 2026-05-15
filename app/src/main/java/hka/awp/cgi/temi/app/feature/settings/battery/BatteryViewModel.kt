@@ -22,7 +22,6 @@ class BatteryViewModel : ViewModel() {
 
     private fun observeBattery() {
         viewModelScope.launch {
-
         }
     }
 }
