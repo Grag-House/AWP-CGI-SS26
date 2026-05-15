@@ -32,7 +32,6 @@ import androidx.compose.ui.unit.dp
 import hka.awp.cgi.temi.app.R
 import hka.awp.cgi.temi.app.feature.webserver.ServerState
 import hka.awp.cgi.temi.app.ui.components.DashboardCard
-import hka.awp.cgi.temi.app.ui.components.ModeIcon
 import hka.awp.cgi.temi.app.ui.shell.Screen
 
 // TODO add animation delay so the click animation is ran before the navigation
@@ -53,8 +52,7 @@ fun DashboardContent(
     serverState: ServerState
 ) {
     Column(
-        modifier =
-        modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(24.dp)
     ) {
@@ -67,11 +65,9 @@ fun DashboardContent(
             )
             Spacer(modifier = Modifier.width(16.dp))
             val robotName = stringResource(id = R.string.robot_name)
-            val welcomeParts =
-                stringResource(R.string.welcome_message, "PLACEHOLDER").split("PLACEHOLDER")
+            val welcomeParts = stringResource(R.string.welcome_message, "PLACEHOLDER").split("PLACEHOLDER")
             Text(
-                text =
-                buildAnnotatedString {
+                text = buildAnnotatedString {
                     append(welcomeParts[0])
                     withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
                         append(robotName)
@@ -103,8 +99,7 @@ private fun ContentGrid(serverState: ServerState, onClick: (Screen) -> Unit) {
                 title = stringResource(R.string.webserver),
                 subtitle = stringResource(R.string.webserverSub),
                 icon = Icons.Rounded.Storage,
-                bottomText =
-                if (serverState.isReachable) {
+                bottomText = if (serverState.isReachable) {
                     "${stringResource(R.string.status_online)} (${
                         serverState.ipAddress ?: stringResource(
                             R.string.unknown_host_address
@@ -142,17 +137,6 @@ private fun ContentGrid(serverState: ServerState, onClick: (Screen) -> Unit) {
                 Icons.Rounded.Navigation,
                 stringResource(R.string.fastestroute),
                 onClick = { onClick(Screen.Navigation) }
-            )
-        }
-        item {
-            DashboardCard(
-                stringResource(R.string.modus),
-                stringResource(R.string.modusSub),
-                null,
-                stringResource(R.string.showroom_mode),
-                overline = stringResource(R.string.current_mode),
-                customIcon = { ModeIcon(tint = MaterialTheme.colorScheme.primary) },
-                onClick = { onClick(Screen.Mode) }
             )
         }
         item {
