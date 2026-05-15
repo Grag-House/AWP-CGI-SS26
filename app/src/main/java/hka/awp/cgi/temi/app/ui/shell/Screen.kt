@@ -32,7 +32,7 @@ sealed class Screen(
     val isCustomIcon: Boolean = false
 ) {
     companion object {
-        val navScreens by lazy { listOf(Dashboard, Webserver, Weather, Navigation, Mode, Settings) }
+        val navScreens by lazy { listOf(Dashboard, Webserver, Weather, Navigation, Settings) }
     }
 
     data object Dashboard : Screen(
@@ -61,13 +61,6 @@ sealed class Screen(
         title = R.string.navigation,
         icon = Icons.Rounded.Navigation,
         contentDescription = R.string.navigation_description
-    )
-
-    data object Mode : Screen(
-        route = "mode",
-        title = R.string.modus,
-        isCustomIcon = true,
-        contentDescription = R.string.mode_description
     )
 
     data object Settings : Screen(
