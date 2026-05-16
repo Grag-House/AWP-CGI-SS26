@@ -14,11 +14,12 @@
     <string name="settings">Einstellungen</string>
     <string name="settingsSub">Routen, Patroullien etc.</string>
     <string name="settings_page_prefix">Temi </string>
-
-    <string name="active_status">Active %1$s</string>
+    <string name="status_online">Online</string>
+    <string name="status_offline">Offline</string>
     <string name="temp_unit">%1$d°C</string>
     <string name="showroom_mode">SHOWROOM MODE</string>
     <string name="current_mode">Aktueller Modus</string>
+    <string name="unknown_host_address">Unbekannte Host Adresse!</string>
 
     <string name="welcome_message">Hey, Ich bin %1$s\nWie kann ich dir helfen?</string>
     <string name="robot_name">Temi!</string>
