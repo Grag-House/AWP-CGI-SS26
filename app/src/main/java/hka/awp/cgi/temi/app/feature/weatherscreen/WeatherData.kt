@@ -3,10 +3,14 @@ package hka.awp.cgi.temi.app.feature.weatherscreen
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
+import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
 
 class WeatherData {
 
@@ -17,11 +21,30 @@ class WeatherData {
         val symbol: WeatherIcon
     )
     companion object GetDataObject {
+
+        private fun createClient(): OkHttpClient {
+            return try {
+                val trustAllCerts = arrayOf<TrustManager>(object : X509TrustManager {
+                    override fun checkClientTrusted(chain: Array<java.security.cert.X509Certificate>, authType: String) {}
+                    override fun checkServerTrusted(chain: Array<java.security.cert.X509Certificate>, authType: String) {}
+                    override fun getAcceptedIssuers(): Array<java.security.cert.X509Certificate> = arrayOf()
+                })
+                val sslContext = SSLContext.getInstance("SSL")
+                sslContext.init(null, trustAllCerts, java.security.SecureRandom())
+                OkHttpClient.Builder()
+                    .sslSocketFactory(sslContext.socketFactory, trustAllCerts[0] as X509TrustManager)
+                    .hostnameVerifier { _, _ -> true }
+                    .build()
+            } catch (e: Exception) {
+                OkHttpClient()
+            }
+        }
         fun getHourlyData(): List<WeatherItemHour> {
             val lat = 49.0138 // only 4 decimal places as recommended by the MET
             val lon = 8.3573
 
-            val client = OkHttpClient()
+            //val client = OkHttpClient()
+            val client = createClient()
 
             val request = Request.Builder()
                 .url("https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=$lat&lon=$lon")
@@ -58,9 +81,10 @@ class WeatherData {
                         next1.getJSONObject("details").getDouble("precipitation_amount")
                     val symbolCode = next1.getJSONObject("summary").getString("symbol_code")
 
-                    weatherDatas.add(WeatherItemHour(time, temperature, precipitation, convertSymbolToIcon(symbolCode)))
+                    weatherDatas.add(WeatherItemHour(time.substring(11, 16), temperature, precipitation, convertSymbolToIcon(symbolCode)))
                 }
             } catch (e: Exception) {
+                Timber.e("API call failed: ${e.stackTraceToString()}")
                 for (i in 0..9) {
                     weatherDatas.add(
                         WeatherItemHour(
@@ -96,7 +120,8 @@ class WeatherData {
             val lat = 49.0138
             val lon = 8.3573
 
-            val client = OkHttpClient()
+            //val client = OkHttpClient()
+            val client = createClient()
 
             val request = Request.Builder()
                 .url("https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=$lat&lon=$lon")
