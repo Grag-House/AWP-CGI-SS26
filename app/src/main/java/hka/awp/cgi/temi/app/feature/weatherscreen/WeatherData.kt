@@ -190,50 +190,61 @@ class WeatherData {
          * symbol codes taken from: https://github.com/metno/weathericons/blob/main/weather/README.md
          */
         fun convertSymbolToIcon(symbol: String): WeatherIcon {
-            when (symbol) {
-                "clearsky" -> return WeatherIcon.SUN
-                "fair" -> return WeatherIcon.SUN
-                "partlycloudy" -> return WeatherIcon.SUN_CLOUD
-                "cloudy" -> return WeatherIcon.CLOUD
-                "lightrainshowers" -> return WeatherIcon.RAIN
-                "rainshowers" -> return WeatherIcon.RAIN
-                "heavyrainshowers" -> return WeatherIcon.RAIN
-                "lightrainshowersandthunder" -> return WeatherIcon.THUNDER
-                "rainshowersandthunder" -> return WeatherIcon.THUNDER
-                "heavyrainshowersandthunder" -> return WeatherIcon.THUNDER
-                "lightsleetshowers" -> return WeatherIcon.SNOW
-                "sleetshowers" -> return WeatherIcon.SNOW
-                "heavysleetshowers" -> return WeatherIcon.SNOW
-                "lightssleetshowersandthunder" -> return WeatherIcon.THUNDER
-                "sleetshowersandthunder" -> return WeatherIcon.THUNDER
-                "heavysleetshowersandthunder" -> return WeatherIcon.THUNDER
-                "lightsnowshowers" -> return WeatherIcon.SNOW
-                "snowshowers" -> return WeatherIcon.SNOW
-                "heavysnowshowers" -> return WeatherIcon.SNOW
-                "lightssnowshowersandthunder" -> return WeatherIcon.THUNDER
-                "snowshowersandthunder" -> return WeatherIcon.THUNDER
-                "heavysnowshowersandthunder" -> return WeatherIcon.THUNDER
-                "lightrain" -> return WeatherIcon.RAIN
-                "rain" -> return WeatherIcon.RAIN
-                "heavyrain" -> return WeatherIcon.RAIN
-                "lightrainandthunder" -> return WeatherIcon.THUNDER
-                "rainandthunder" -> return WeatherIcon.THUNDER
-                "heavyrainandthunder" -> return WeatherIcon.THUNDER
-                "lightsleet" -> return WeatherIcon.SNOW
-                "sleet" -> return WeatherIcon.SNOW
-                "heavysleet" -> return WeatherIcon.SNOW
-                "lightsleetandthunder" -> return WeatherIcon.THUNDER
-                "sleetandthunder" -> return WeatherIcon.THUNDER
-                "heavysleetandthunder" -> return WeatherIcon.THUNDER
-                "lightsnow" -> return WeatherIcon.SNOW
-                "snow" -> return WeatherIcon.SNOW
-                "heavysnow" -> return WeatherIcon.SNOW
-                "lightsnowandthunder" -> return WeatherIcon.THUNDER
-                "snowandthunder" -> return WeatherIcon.THUNDER
-                "heavysnowandthunder" -> return WeatherIcon.THUNDER
-                "fog" -> return WeatherIcon.FOG
+            val base = symbol.substringBefore("_")
+            return when {
+                base == "clearsky" || base == "fair" -> WeatherIcon.SUN
+                base == "partlycloudy" -> WeatherIcon.SUN_CLOUD
+                base == "cloudy" -> WeatherIcon.CLOUD
+                base == "fog" -> WeatherIcon.FOG
+                base.contains("thunder") -> WeatherIcon.THUNDER
+                base.contains("sleet") || base.contains("snow") -> WeatherIcon.SNOW
+                base.contains("rain") -> WeatherIcon.RAIN
+                else -> WeatherIcon.SUN
             }
-            return WeatherIcon.SUN
+//            when (symbol) {
+//                "clearsky" -> return WeatherIcon.SUN
+//                "fair" -> return WeatherIcon.SUN
+//                "partlycloudy" -> return WeatherIcon.SUN_CLOUD
+//                "cloudy" -> return WeatherIcon.CLOUD
+//                "lightrainshowers" -> return WeatherIcon.RAIN
+//                "rainshowers" -> return WeatherIcon.RAIN
+//                "heavyrainshowers" -> return WeatherIcon.RAIN
+//                "lightrainshowersandthunder" -> return WeatherIcon.THUNDER
+//                "rainshowersandthunder" -> return WeatherIcon.THUNDER
+//                "heavyrainshowersandthunder" -> return WeatherIcon.THUNDER
+//                "lightsleetshowers" -> return WeatherIcon.SNOW
+//                "sleetshowers" -> return WeatherIcon.SNOW
+//                "heavysleetshowers" -> return WeatherIcon.SNOW
+//                "lightssleetshowersandthunder" -> return WeatherIcon.THUNDER
+//                "sleetshowersandthunder" -> return WeatherIcon.THUNDER
+//                "heavysleetshowersandthunder" -> return WeatherIcon.THUNDER
+//                "lightsnowshowers" -> return WeatherIcon.SNOW
+//                "snowshowers" -> return WeatherIcon.SNOW
+//                "heavysnowshowers" -> return WeatherIcon.SNOW
+//                "lightssnowshowersandthunder" -> return WeatherIcon.THUNDER
+//                "snowshowersandthunder" -> return WeatherIcon.THUNDER
+//                "heavysnowshowersandthunder" -> return WeatherIcon.THUNDER
+//                "lightrain" -> return WeatherIcon.RAIN
+//                "rain" -> return WeatherIcon.RAIN
+//                "heavyrain" -> return WeatherIcon.RAIN
+//                "lightrainandthunder" -> return WeatherIcon.THUNDER
+//                "rainandthunder" -> return WeatherIcon.THUNDER
+//                "heavyrainandthunder" -> return WeatherIcon.THUNDER
+//                "lightsleet" -> return WeatherIcon.SNOW
+//                "sleet" -> return WeatherIcon.SNOW
+//                "heavysleet" -> return WeatherIcon.SNOW
+//                "lightsleetandthunder" -> return WeatherIcon.THUNDER
+//                "sleetandthunder" -> return WeatherIcon.THUNDER
+//                "heavysleetandthunder" -> return WeatherIcon.THUNDER
+//                "lightsnow" -> return WeatherIcon.SNOW
+//                "snow" -> return WeatherIcon.SNOW
+//                "heavysnow" -> return WeatherIcon.SNOW
+//                "lightsnowandthunder" -> return WeatherIcon.THUNDER
+//                "snowandthunder" -> return WeatherIcon.THUNDER
+//                "heavysnowandthunder" -> return WeatherIcon.THUNDER
+//                "fog" -> return WeatherIcon.FOG
+//            }
+//            return WeatherIcon.SUN
         }
     }
 }
