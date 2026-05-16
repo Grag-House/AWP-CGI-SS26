@@ -254,5 +254,4 @@ class NavigationViewModel(
         _isMapLoading.value = false
         _hasMapError.value = false
     }
-
 }
