@@ -13,7 +13,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import hka.awp.temi_cgi_app.feature.dashboard.MainContent
 import hka.awp.temi_cgi_app.feature.navigation.NavigationContent
-import hka.awp.temi_cgi_app.feature.navigation.NavigationViewModel
 import hka.awp.temi_cgi_app.feature.settings.SettingsContent
 import hka.awp.temi_cgi_app.feature.settings.SettingsViewModel
 import org.koin.compose.viewmodel.koinViewModel
@@ -34,14 +33,12 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun MainShell(
     appViewModel: AppViewModel = koinViewModel(),
-    settingsViewModel: SettingsViewModel = koinViewModel(),
-    navigationViewModel: NavigationViewModel = koinViewModel()
+    settingsViewModel: SettingsViewModel = koinViewModel()
 ) {
     val wifiLevel by appViewModel.wifiLevel.collectAsStateWithLifecycle()
     val currentTime by appViewModel.currentTime.collectAsStateWithLifecycle()
     val batteryLevel by appViewModel.batteryLevel.collectAsStateWithLifecycle()
     val isCharging by appViewModel.isCharging.collectAsStateWithLifecycle()
-    val currentLocation by navigationViewModel.currentLocation.collectAsStateWithLifecycle()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -81,10 +78,7 @@ fun MainShell(
                 )
 
                 Screen.Navigation.route -> NavigationContent(
-                    modifier = Modifier.weight(1f),
-                    currentLocation = currentLocation,
-                    onDestinationClick = { resId -> navigationViewModel.goToLocationByResId(resId) },
-                    onShowMapClick = { navigationViewModel.showMap() }
+                    modifier = Modifier.weight(1f)
                 )
 
                 //redundancy

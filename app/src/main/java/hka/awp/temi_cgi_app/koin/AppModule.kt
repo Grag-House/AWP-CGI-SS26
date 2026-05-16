@@ -1,6 +1,7 @@
 package hka.awp.temi_cgi_app.koin
 
 import com.robotemi.sdk.Robot
+import hka.awp.temi_cgi_app.R
 import hka.awp.temi_cgi_app.feature.navigation.NavigationViewModel
 import hka.awp.temi_cgi_app.feature.settings.SettingsViewModel
 import hka.awp.temi_cgi_app.ui.shell.AppViewModel
@@ -31,7 +32,7 @@ val appModule = module {
         try {
             Robot.getInstance()
         } catch (e: Exception) {
-            Timber.e(e, "Temi SDK not available, probably running locally")
+            Timber.e(e, androidContext().getString(R.string.log_temi_sdk_unavailable))
             null
         }
     }
@@ -53,7 +54,7 @@ val appModule = module {
 
     viewModel<NavigationViewModel> {
         NavigationViewModel(
-            robot = get()!!,
+            robot = get(),
             application = androidApplication()
         )
     }
