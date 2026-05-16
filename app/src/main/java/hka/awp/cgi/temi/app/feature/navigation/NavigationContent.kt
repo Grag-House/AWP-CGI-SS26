@@ -2,27 +2,36 @@ package hka.awp.cgi.temi.app.feature.navigation
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.items as gridItems
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Map
 import androidx.compose.material.icons.rounded.NearMe
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,6 +44,8 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.robotemi.sdk.navigation.model.Position
 import hka.awp.cgi.temi.app.R
 import hka.awp.cgi.temi.app.ui.components.NavigationCard
 import hka.awp.cgi.temi.app.ui.theme.CgiRed
@@ -49,15 +60,40 @@ private const val GRIDCELL_COUNT = 3
  * and a fixed layout that fits on a single screen without scrolling.
  *
  * @param modifier The [Modifier] to be applied to the root layout.
- * @param currentLocation The name of the robot's current location to be displayed in the status card.
- * @param onDestinationClick Callback invoked when a [DestinationItems] card is selected.
  */
 @Composable
 fun NavigationContent(
     modifier: Modifier = Modifier,
-    currentLocation: String,
-    onDestinationClick: (DestinationItems) -> Unit
+    viewModel: NavigationViewModel
 ) {
+    val locationState by viewModel.currentLocation.collectAsStateWithLifecycle()
+    val isMapLoading by viewModel.isMapLoading.collectAsStateWithLifecycle()
+    val hasMapError by viewModel.hasMapError.collectAsStateWithLifecycle()
+    val mapLocations by viewModel.mapLocations.collectAsStateWithLifecycle()
+    val robotPosition by viewModel.robotPosition.collectAsStateWithLifecycle()
+    val savedLocations by viewModel.savedLocations.collectAsStateWithLifecycle()
+
+    val currentLocation = when (val state = locationState) {
+        is LocationState.Resource -> stringResource(state.resId)
+        is LocationState.Custom -> state.name
+    }
+
+    if (isMapLoading || hasMapError || mapLocations.isNotEmpty()) {
+        MapDialog(
+            isLoading = isMapLoading,
+            hasError = hasMapError,
+            locations = mapLocations,
+            savedLocations = savedLocations,
+            robotPosition = robotPosition,
+            onDismiss = viewModel::dismissMap,
+            onRetry = viewModel::showMap,
+            onNavigateTo = { name ->
+                viewModel.goToLocation(name)
+                viewModel.dismissMap()
+            }
+        )
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -67,28 +103,115 @@ fun NavigationContent(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Status Card Section
         SectionLabel(text = stringResource(R.string.navigation_status_label))
         Spacer(modifier = Modifier.height(4.dp))
 
         CurrentLocationStatus(
             currentLocation = currentLocation,
-            onMapClick = {
-                TODO("Implement Map Action")
-            }
+            onMapClick = viewModel::showMap
         )
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        // Destination Selection Label
         SectionLabel(text = stringResource(R.string.select_destination))
         Spacer(modifier = Modifier.height(8.dp))
 
         DestinationsGrid(
             destinations = DestinationItems.all,
-            onDestinationClick = onDestinationClick
+            onDestinationClick = viewModel::onNavigationClick
         )
     }
+}
+
+@Composable
+private fun MapDialog(
+    isLoading: Boolean,
+    hasError: Boolean,
+    locations: List<LocationMarker>,
+    savedLocations: List<String>,
+    robotPosition: Position?,
+    onDismiss: () -> Unit,
+    onRetry: () -> Unit,
+    onNavigateTo: (String) -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = { if (!isLoading) onDismiss() },
+        title = { Text(stringResource(R.string.show_map)) },
+        text = {
+            when {
+                isLoading -> Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = CgiRed)
+                }
+                hasError -> Text(
+                    text = stringResource(R.string.show_map_failed),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                else -> Column {
+                    Text(
+                        text = stringResource(R.string.saved_locations, locations.size),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.Gray,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    LazyColumn(modifier = Modifier.heightIn(max = 300.dp)) {
+                        items(locations) { marker ->
+                            Column {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = marker.name,
+                                        modifier = Modifier.weight(1f),
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                    TextButton(onClick = { onNavigateTo(marker.name) }) {
+                                        Text(stringResource(R.string.go_to))
+                                    }
+                                }
+                                HorizontalDivider()
+                            }
+                        }
+                    }
+                    robotPosition?.let { pos ->
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "x=%.2f, y=%.2f".format(pos.x, pos.y),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.Gray
+                        )
+                    }
+                    if (savedLocations.isNotEmpty() && locations.isEmpty()) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = savedLocations.joinToString(", "),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.Gray
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss, enabled = !isLoading) {
+                Text(stringResource(R.string.close))
+            }
+        },
+        dismissButton = if (hasError) {
+            {
+                TextButton(onClick = onRetry) {
+                    Text(stringResource(R.string.map_retry))
+                }
+            }
+        } else null
+    )
 }
 
 @Composable
@@ -205,12 +328,12 @@ private fun DestinationsGrid(
         columns = GridCells.Fixed(GRIDCELL_COUNT),
         horizontalArrangement = Arrangement.spacedBy(32.dp),
         verticalArrangement = Arrangement.spacedBy(32.dp),
-        userScrollEnabled = false, // Keep it fixed on one page
+        userScrollEnabled = false,
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 120.dp)
     ) {
-        items(destinations) { destination ->
+        gridItems(destinations) { destination ->
             NavigationCard(
                 label = stringResource(destination.stringResource),
                 icon = destination.icon,

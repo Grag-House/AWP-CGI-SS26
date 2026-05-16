@@ -119,20 +119,11 @@ class NavigationViewModel(
         }
     }
 
-    /** Navigiert zu einem Zielort anhand der String-Ressourcen-ID des Anzeigenamens. */
-    fun goToLocationByResId(resId: Int) {
-        val destination = DestinationItems.fromResId(resId) ?: return
-        goToLocation(destination.systemName)
-    }
-
     /** Schickt den Roboter zum angegebenen Wegpunkt-Namen. */
     fun goToLocation(name: String) {
         Timber.d(application.getString(R.string.log_navigating_to, name))
-        try {
-            robot?.goTo(name)
-        } catch (t: Throwable) {
-            Timber.e(t, application.getString(R.string.navigation_failed_with_name, name))
-        }
+        runCatching { robot?.goTo(name) }
+            .onFailure { Timber.e(it, application.getString(R.string.navigation_failed_with_name, name)) }
     }
 
     /** Startet den Ladevorgang der Karte und setzt den Dialog-Zustand zurück. */
@@ -153,7 +144,7 @@ class NavigationViewModel(
         }
     }
 
-    /** Versucht Markierungen direkt zu laden; fällt auf explizites Kartenladen zurück falls nötig. */
+    /** Versucht Markierungen direkt zu laden; fällt auf explizites Kartenladen zurück, falls nötig. */
     private suspend fun fetchMarkersWithFallback(): List<LocationMarker>? {
         fetchMarkers()?.let { return it }
         Timber.w(application.getString(R.string.log_get_map_data_null_retry))
@@ -162,9 +153,9 @@ class NavigationViewModel(
         return fetchMarkers()
     }
 
-    /** Liest Ortsmarkierungen aus den aktuellen Kartendaten. Gibt null zurück wenn keine vorhanden sind. */
+    /** Liest Ortsmarkierungen aus den aktuellen Kartendaten. Gibt null zurück, wenn keine vorhanden sind. */
     private suspend fun fetchMarkers(): List<LocationMarker>? = withContext(Dispatchers.IO) {
-        try {
+        runCatching {
             Timber.d(application.getString(R.string.log_fetch_map_data, Thread.currentThread().name))
             val mapData = robot?.getMapData()
             Timber.d(application.getString(R.string.log_get_map_data_is_null, mapData == null))
@@ -196,10 +187,8 @@ class NavigationViewModel(
                 Timber.w(application.getString(R.string.log_no_location_layers))
                 null
             }
-        } catch (e: Exception) {
-            Timber.e(e, application.getString(R.string.log_error_fetch_map_data))
-            null
-        }
+        }.onFailure { Timber.e(it, application.getString(R.string.log_error_fetch_map_data)) }
+            .getOrNull()
     }
 
     /**
@@ -210,12 +199,9 @@ class NavigationViewModel(
      */
     private suspend fun awaitMapLoad(): Boolean {
         val maps = withContext(Dispatchers.IO) {
-            try {
-                robot?.getMapList().orEmpty()
-            } catch (e: Exception) {
-                Timber.e(e, application.getString(R.string.log_error_fetch_map_list))
-                emptyList()
-            }
+            runCatching { robot?.getMapList().orEmpty() }
+                .onFailure { Timber.e(it, application.getString(R.string.log_error_fetch_map_list)) }
+                .getOrElse { emptyList() }
         }
         Timber.d(application.getString(R.string.log_available_maps, maps.map { "${it.id}:${it.name}" }.toString()))
         val target = maps.firstOrNull { it.name == application.getString(R.string.default_map_name) }

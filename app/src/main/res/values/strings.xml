@@ -72,6 +72,7 @@
     <string name="saved_locations">Gespeicherte Orte (%1$d)</string>
     <string name="go_to">Anfahren</string>
     <string name="close">Schließen</string>
+    <string name="map_retry">Erneut laden</string>
 
     <!-- Logging & Errors for Navigation -->
     <string name="log_robot_ready">Robot ready, gespeicherte Orte: %1$s</string>
