@@ -55,7 +55,12 @@ val appModule =
             SettingsViewModel()
         }
 
-        viewModel<NavigationViewModel> { NavigationViewModel() }
+        viewModel<NavigationViewModel> {
+            NavigationViewModel(
+                robot = get(),
+                application = get()
+            )
+        }
 
         viewModel<WebserverViewModel> { WebserverViewModel() }
     }

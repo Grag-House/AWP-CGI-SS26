@@ -2,7 +2,12 @@ package hka.awp.cgi.temi.app.feature.navigation
 
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.*
+import androidx.compose.material.icons.rounded.Coffee
+import androidx.compose.material.icons.rounded.EvStation
+import androidx.compose.material.icons.rounded.Kitchen
+import androidx.compose.material.icons.rounded.Laptop
+import androidx.compose.material.icons.rounded.MeetingRoom
+import androidx.compose.material.icons.rounded.Wc
 import androidx.compose.ui.graphics.vector.ImageVector
 import hka.awp.cgi.temi.app.R
 
