@@ -85,7 +85,7 @@ fun NavigationContent(
         Spacer(modifier = Modifier.height(8.dp))
 
         DestinationsGrid(
-            destinations = DestinationItems.destinations,
+            destinations = DestinationItems.all,
             onDestinationClick = onDestinationClick
         )
     }

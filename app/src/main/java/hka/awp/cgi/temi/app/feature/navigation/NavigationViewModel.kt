@@ -11,8 +11,7 @@ import com.robotemi.sdk.map.OnLoadMapStatusChangedListener
 import com.robotemi.sdk.navigation.listener.OnCurrentPositionChangedListener
 import com.robotemi.sdk.navigation.listener.OnDistanceToLocationChangedListener
 import com.robotemi.sdk.navigation.model.Position
-import hka.awp.temi_cgi_app.R
-import kotlin.coroutines.resume
+import hka.awp.cgi.temi.app.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,6 +21,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import kotlin.coroutines.resume
 
 /** Repräsentiert einen Ort auf der Karte mit Name und X/Y-Koordinaten aus den Temi-Kartendaten. */
 data class LocationMarker(val name: String, val x: Float, val y: Float)
@@ -171,14 +171,25 @@ class NavigationViewModel(
             if (mapData == null) return@withContext null
             Timber.d(application.getString(R.string.log_layers_total, mapData.locations.size))
             mapData.locations.forEach { layer ->
-                Timber.d(application.getString(R.string.log_layer_info, layer.layerId, layer.layerCategory, layer.layerPoses?.size ?: 0))
+                Timber.d(
+                    application.getString(
+                        R.string.log_layer_info,
+                        layer.layerId,
+                        layer.layerCategory,
+                        layer.layerPoses?.size ?: 0
+                    )
+                )
             }
             val markers = mapData.locations
                 .filter { it.layerCategory == LOCATION }
                 .mapNotNull { layer ->
                     val pose = layer.layerPoses?.firstOrNull() ?: return@mapNotNull null
                     LocationMarker(layer.layerId, pose.x, pose.y)
-                        .also { Timber.d(application.getString(R.string.log_marker_info, layer.layerId, pose.x, pose.y)) }
+                        .also {
+                            Timber.d(
+                                application.getString(R.string.log_marker_info, layer.layerId, pose.x, pose.y)
+                            )
+                        }
                 }
             Timber.d(application.getString(R.string.log_markers_after_filter, LOCATION, markers.size))
             markers.ifEmpty {
@@ -225,6 +236,7 @@ class NavigationViewModel(
                             robot?.removeOnLoadMapStatusChangedListener(this)
                             if (cont.isActive) cont.resume(true)
                         }
+
                         OnLoadMapStatusChangedListener.START -> Unit
                         else -> {
                             Timber.w(application.getString(R.string.log_load_map_failed_status, status))
@@ -255,5 +267,10 @@ class NavigationViewModel(
         _mapLocations.value = emptyList()
         _isMapLoading.value = false
         _hasMapError.value = false
+    }
+
+    // TODO refactor
+    fun onNavigationClick(destinationItems: DestinationItems) {
+        goToLocation(destinationItems.systemName)
     }
 }
