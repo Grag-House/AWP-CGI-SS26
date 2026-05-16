@@ -20,6 +20,7 @@ import hka.awp.cgi.temi.app.feature.navigation.NavigationViewModel
 import hka.awp.cgi.temi.app.feature.settings.SettingsContent
 import hka.awp.cgi.temi.app.feature.settings.SettingsViewModel
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherContent
+import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherViewModel
 import hka.awp.cgi.temi.app.feature.webserver.WebViewScreen
 import hka.awp.cgi.temi.app.feature.webserver.WebserverViewModel
 import org.koin.compose.viewmodel.koinViewModel
@@ -43,7 +44,8 @@ fun MainShell(
     appViewModel: AppViewModel = koinViewModel(),
     settingsViewModel: SettingsViewModel = koinViewModel(),
     navigationViewModel: NavigationViewModel = koinViewModel(),
-    webserverViewModel: WebserverViewModel = koinViewModel()
+    webserverViewModel: WebserverViewModel = koinViewModel(),
+    weatherViewModel: WeatherViewModel = koinViewModel()
 ) {
     val wifiLevel by appViewModel.wifiLevel.collectAsStateWithLifecycle()
     val currentTime by appViewModel.currentTime.collectAsStateWithLifecycle()
@@ -104,7 +106,10 @@ fun MainShell(
                         onItemClick = settingsViewModel::onSettingsItemClick
                     )
 
-                Screen.Weather.route -> WeatherContent()
+                Screen.Weather.route ->
+                    WeatherContent(
+                        viewModel = weatherViewModel
+                                  )
 
                 // redundancy
                 else -> {

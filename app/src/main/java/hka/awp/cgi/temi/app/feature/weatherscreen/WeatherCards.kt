@@ -1,14 +1,14 @@
 package hka.awp.cgi.temi.app.feature.weatherscreen
 
 data class HourlyItem(
-    var label: String, // "Jetzt", "t+1", …
+    var label: String,
     val icon: WeatherIcon,
-    val temp: String, // "21°"
-    val precipitation: String // "0%"
+    val temp: String,
+    val precipitation: String
 )
 
 data class DailyItem(
-    var day: String, // "Heute", "Do", …
+    var day: String,
     val icon: WeatherIcon,
     val high: String,
     val low: String
@@ -22,15 +22,6 @@ class WeatherCards {
             val data = WeatherData.getHourlyData()
 
             val hourlyData = mutableListOf<HourlyItem>()
-
-//            hourlyData.add(
-//                HourlyItem(
-//                    stringResource(R.string.now),
-//                    data[0].symbol,
-//                    data[0].temp.toString(),
-//                    data[0].precipitation.toString()
-//                )
-//            )
 
             for (i in 0..<data.size) {
                 hourlyData.add(
@@ -49,15 +40,6 @@ class WeatherCards {
             val data = WeatherData.getWeeklyData()
 
             val dailyData = mutableListOf<DailyItem>()
-
-//            dailyData.add(
-//                DailyItem(
-//                    stringResource(R.string.today),
-//                    data[0].symbol,
-//                    data[0].maxTemp.toString(),
-//                    data[0].minTemp.toString()
-//                )
-//            )
 
             for (i in 0..minOf(6, (data.size - 1))) {
                 dailyData.add(
