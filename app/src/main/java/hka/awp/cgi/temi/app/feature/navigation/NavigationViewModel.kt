@@ -255,8 +255,4 @@ class NavigationViewModel(
         _hasMapError.value = false
     }
 
-    // TODO refactor
-    fun onNavigationClick(destinationItems: DestinationItems) {
-        goToLocation(destinationItems.systemName)
-    }
 }

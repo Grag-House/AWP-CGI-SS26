@@ -14,10 +14,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items as gridItems
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Map
@@ -49,6 +48,7 @@ import com.robotemi.sdk.navigation.model.Position
 import hka.awp.cgi.temi.app.R
 import hka.awp.cgi.temi.app.ui.components.NavigationCard
 import hka.awp.cgi.temi.app.ui.theme.CgiRed
+import androidx.compose.foundation.lazy.grid.items as gridItems
 
 private const val GRIDCELL_COUNT = 3
 
@@ -80,11 +80,13 @@ fun NavigationContent(
 
     if (isMapLoading || hasMapError || mapLocations.isNotEmpty()) {
         MapDialog(
-            isLoading = isMapLoading,
-            hasError = hasMapError,
-            locations = mapLocations,
-            savedLocations = savedLocations,
-            robotPosition = robotPosition,
+            state = MapDialogState(
+                isLoading = isMapLoading,
+                hasError = hasMapError,
+                locations = mapLocations,
+                savedLocations = savedLocations,
+                robotPosition = robotPosition
+            ),
             onDismiss = viewModel::dismissMap,
             onRetry = viewModel::showMap,
             onNavigateTo = { name ->
@@ -118,40 +120,44 @@ fun NavigationContent(
 
         DestinationsGrid(
             destinations = DestinationItems.all,
-            onDestinationClick = viewModel::onNavigationClick
+            onDestinationClick = { destination -> viewModel.goToLocation(destination.systemName) }
         )
     }
 }
 
+private data class MapDialogState(
+    val isLoading: Boolean,
+    val hasError: Boolean,
+    val locations: List<LocationMarker>,
+    val savedLocations: List<String>,
+    val robotPosition: Position?
+)
+
 @Composable
 private fun MapDialog(
-    isLoading: Boolean,
-    hasError: Boolean,
-    locations: List<LocationMarker>,
-    savedLocations: List<String>,
-    robotPosition: Position?,
+    state: MapDialogState,
     onDismiss: () -> Unit,
     onRetry: () -> Unit,
     onNavigateTo: (String) -> Unit
 ) {
     AlertDialog(
-        onDismissRequest = { if (!isLoading) onDismiss() },
+        onDismissRequest = { if (!state.isLoading) onDismiss() },
         title = { Text(stringResource(R.string.show_map)) },
         text = {
             when {
-                isLoading -> Box(
+                state.isLoading -> Box(
                     modifier = Modifier.fillMaxWidth(),
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator(color = CgiRed)
                 }
-                hasError -> Text(
+                state.hasError -> Text(
                     text = stringResource(R.string.show_map_failed),
                     style = MaterialTheme.typography.bodyMedium
                 )
                 else -> Column {
                     Text(
-                        text = stringResource(R.string.saved_locations, locations.size),
+                        text = stringResource(R.string.saved_locations, state.locations.size),
                         style = MaterialTheme.typography.labelSmall,
                         color = Color.Gray,
                         fontWeight = FontWeight.Bold,
@@ -159,7 +165,7 @@ private fun MapDialog(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     LazyColumn(modifier = Modifier.heightIn(max = 300.dp)) {
-                        items(locations) { marker ->
+                        items(state.locations) { marker ->
                             Column {
                                 Row(
                                     modifier = Modifier
@@ -180,7 +186,7 @@ private fun MapDialog(
                             }
                         }
                     }
-                    robotPosition?.let { pos ->
+                    state.robotPosition?.let { pos ->
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = "x=%.2f, y=%.2f".format(pos.x, pos.y),
@@ -188,10 +194,10 @@ private fun MapDialog(
                             color = Color.Gray
                         )
                     }
-                    if (savedLocations.isNotEmpty() && locations.isEmpty()) {
+                    if (state.savedLocations.isNotEmpty() && state.locations.isEmpty()) {
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = savedLocations.joinToString(", "),
+                            text = state.savedLocations.joinToString(", "),
                             style = MaterialTheme.typography.bodySmall,
                             color = Color.Gray
                         )
@@ -200,17 +206,19 @@ private fun MapDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss, enabled = !isLoading) {
+            TextButton(onClick = onDismiss, enabled = !state.isLoading) {
                 Text(stringResource(R.string.close))
             }
         },
-        dismissButton = if (hasError) {
+        dismissButton = if (state.hasError) {
             {
                 TextButton(onClick = onRetry) {
                     Text(stringResource(R.string.map_retry))
                 }
             }
-        } else null
+        } else {
+            null
+        }
     )
 }
 
