@@ -7,7 +7,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import hka.awp.temi_cgi_app.R
 
 /**
- * Represents the available navigation destinations within the application.
+ * Alle verfügbaren Navigationsziele des Roboters.
+ * [systemName] muss exakt dem auf dem Roboter gespeicherten Wegpunkt-Namen entsprechen.
  */
 sealed class DestinationItems(
     @StringRes val stringResource: Int,
@@ -23,8 +24,11 @@ sealed class DestinationItems(
 
     companion object {
         val all = listOf(Kitchen, Cafe, Reception, Office, WC, Charging)
-        
+
+        /** Gibt das Ziel zurück dessen [systemName] mit dem SDK-Wegpunkt-Namen übereinstimmt. */
         fun fromSystemName(name: String): DestinationItems? = all.find { it.systemName == name }
+
+        /** Gibt das Ziel zurück dessen [stringResource] mit der übergebenen ID übereinstimmt. */
         fun fromResId(resId: Int): DestinationItems? = all.find { it.stringResource == resId }
     }
 }

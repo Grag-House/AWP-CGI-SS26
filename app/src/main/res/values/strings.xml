@@ -55,9 +55,9 @@
     <!-- Navigation Page -->
     <string name="navigation_status_label">STATUS</string>
     <string name="current_location_prefix">Aktueller Standort:</string>
-    <string name="show_map">Karte\nanzeigen</string>
+    <string name="show_map">Orte\nanzeigen</string>
     <string name="select_destination">ZIEL WÄHLEN</string>
-    <string name="location_status_locating">Lokalisiere...</string>
+    <string name="location_status_locating">Lokalisiere</string>
     <string name="location_status_none">Keine Orte gespeichert</string>
     <string name="location_office">Büro</string>
     <string name="location_kitchen">Küche</string>
@@ -65,4 +65,33 @@
     <string name="location_reception">Empfang</string>
     <string name="location_wc">WC</string>
     <string name="location_charging">Laden</string>
+    <string name="show_map_failed">Keine Locations gefunden.\nSind Wegpunkte auf dem Roboter gespeichert?</string>
+    <string name="navigation_failed">Fehler bei Navigation zu:</string>
+    <string name="navigation_failed_with_name">Fehler bei Navigation zu: %1$s</string>
+    <string name="saved_locations">Gespeicherte Orte (%1$d)</string>
+    <string name="go_to">Anfahren</string>
+    <string name="close">Schließen</string>
+
+    <!-- Logging & Errors for Navigation -->
+    <string name="log_robot_ready">Robot ready, gespeicherte Orte: %1$s</string>
+    <string name="log_position">Position: x=%1$f, y=%2$f</string>
+    <string name="log_location_distance">Standort: %1$s (%2$.2f m)</string>
+    <string name="log_map_status_changed">onLoadMapStatusChanged: status=%1$d</string>
+    <string name="log_load_map_failed_status">Karte laden fehlgeschlagen: status=%1$d</string>
+    <string name="log_navigating_to">Navigation zu: %1$s</string>
+    <string name="log_show_map">showMap() – robot=%1$s, locations=%2$s</string>
+    <string name="log_fetch_map_data">fetchMapData() – rufe getMapData() auf (Thread: %1$s)</string>
+    <string name="log_get_map_data_is_null">getMapData() → null? %1$b</string>
+    <string name="log_layers_total">Layers gesamt: %1$d</string>
+    <string name="log_layer_info">Layer: id=\'%1$s\', category=%2$d, poses=%3$d</string>
+    <string name="log_marker_info">Marker: \'%1$s\' → (%2$f, %3$f)</string>
+    <string name="log_markers_after_filter">Marker nach Filter (category=%1$d): %2$d</string>
+    <string name="log_no_location_layers">Keine Location-Layer gefunden → tryLoadMap()</string>
+    <string name="log_get_map_data_null_retry">getMapData() lieferte null → tryLoadMap()</string>
+    <string name="log_error_fetch_map_data">Fehler beim Laden der Kartendaten</string>
+    <string name="log_available_maps">Verfügbare Karten: %1$s</string>
+    <string name="log_loading_map">Lade Karte: id=%1$s, name=%2$s</string>
+    <string name="log_no_maps_found">Keine Karten auf dem Roboter gefunden</string>
+    <string name="log_error_fetch_map_list">Fehler beim Laden der Kartenliste</string>
+    <string name="default_map_name">3_3</string>
 </resources>
