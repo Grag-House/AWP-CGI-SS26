@@ -33,7 +33,7 @@ class WeatherData {
                 .build()
 
             val weatherDatas =
-                mutableListOf<WeatherItemHour>() // list that will contain the received weather data for the next 10 hours
+                mutableListOf<WeatherItemHour>()
 
             try {
                 val response = client.newCall(request).execute()

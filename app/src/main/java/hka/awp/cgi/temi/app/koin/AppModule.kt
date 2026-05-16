@@ -3,6 +3,7 @@ package hka.awp.cgi.temi.app.koin
 import com.robotemi.sdk.Robot
 import hka.awp.cgi.temi.app.feature.navigation.NavigationViewModel
 import hka.awp.cgi.temi.app.feature.settings.SettingsViewModel
+import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherViewModel
 import hka.awp.cgi.temi.app.feature.webserver.WebserverViewModel
 import hka.awp.cgi.temi.app.ui.shell.AppViewModel
 import hka.awp.cgi.temi.app.utils.NetworkManager
@@ -58,4 +59,6 @@ val appModule =
         viewModel<NavigationViewModel> { NavigationViewModel() }
 
         viewModel<WebserverViewModel> { WebserverViewModel() }
+
+        viewModel<WeatherViewModel> { WeatherViewModel() }
     }

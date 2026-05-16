@@ -33,23 +33,18 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import hka.awp.cgi.temi.app.R
 
-// ─── Data models ─────────────────────────────────────────────────────────────
-
 enum class WeatherIcon { SUN, CLOUD, SUN_CLOUD, RAIN, SNOW, THUNDER, FOG }
-
-private val hourlyData = WeatherCards.setHourlyWeatherCards()
-
-private val dailyData = WeatherCards.setDailyWeatherCards()
 
 // ─── Weather icon helper ──────────────────────────────────────────────────────
 
@@ -123,8 +118,11 @@ fun WeatherCard(modifier: Modifier = Modifier, content: @Composable ColumnScope.
 }
 
 @Composable
-fun CurrentWeatherCard() {
+fun CurrentWeatherCard(viewModel: WeatherViewModel) {
+    val hourlyData by viewModel.hourlyData.collectAsStateWithLifecycle()
     WeatherCard {
+        if (hourlyData.isEmpty()) return@WeatherCard
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -152,7 +150,10 @@ fun CurrentWeatherCard() {
 }
 
 @Composable
-fun HourlyForecastCard() {
+fun HourlyForecastCard(viewModel: WeatherViewModel) {
+
+    val hourlyData by viewModel.hourlyData.collectAsStateWithLifecycle()
+
     WeatherCard {
         Text(
             stringResource(R.string.daily_outlook),
@@ -161,6 +162,7 @@ fun HourlyForecastCard() {
             color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(Modifier.height(12.dp))
+        if (hourlyData.isEmpty()) return@WeatherCard
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
@@ -193,7 +195,9 @@ fun HourlyForecastCard() {
 }
 
 @Composable
-fun WeeklyForecastCard() {
+fun WeeklyForecastCard(viewModel: WeatherViewModel) {
+    val dailyData by viewModel.dailyData.collectAsStateWithLifecycle()
+
     WeatherCard {
         Text(
             stringResource(R.string.weekly_outlook),
@@ -202,6 +206,7 @@ fun WeeklyForecastCard() {
             color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(Modifier.height(12.dp))
+        if (dailyData.isEmpty()) return@WeatherCard
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
@@ -271,7 +276,7 @@ fun WetterTopBar() {
 // ─── Main screen ─────────────────────────────────────────────────────────────
 
 @Composable
-fun WeatherContent() {
+fun WeatherContent(viewModel: WeatherViewModel) {
     Row(
         modifier = Modifier
             .fillMaxSize()
@@ -288,20 +293,10 @@ fun WeatherContent() {
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                CurrentWeatherCard()
-                HourlyForecastCard()
-                WeeklyForecastCard()
+                CurrentWeatherCard(viewModel)
+                HourlyForecastCard(viewModel)
+                WeeklyForecastCard(viewModel)
             }
         }
-    }
-}
-
-// ─── Preview ──────────────────────────────────────────────────────────────────
-
-@Preview(showBackground = true, widthDp = 800, heightDp = 600)
-@Composable
-fun WeatherContentPreview() {
-    MaterialTheme {
-        WeatherContent()
     }
 }
