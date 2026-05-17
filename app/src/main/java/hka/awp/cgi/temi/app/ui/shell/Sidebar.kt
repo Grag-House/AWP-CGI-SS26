@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -59,19 +60,20 @@ fun Sidebar(
 
     if (isExpanded) {
         Column(
-            modifier =
-            modifier
+            modifier = modifier
                 .fillMaxHeight()
-                .width(sidebarWidth)
                 .padding(12.dp)
+                .clip(RoundedCornerShape((24.dp)))
+                .width(sidebarWidth)
                 .background(MaterialTheme.colorScheme.surface)
         ) {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
+                    modifier = Modifier.padding(start = 8.dp),
                     text = stringResource(R.string.cgi),
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold,
@@ -88,6 +90,7 @@ fun Sidebar(
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
+                modifier = Modifier.padding(start = 8.dp),
                 text = stringResource(R.string.sidebar_functions),
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold,
@@ -113,8 +116,7 @@ fun Sidebar(
                 onClick = { /* //TODO add navigation later on */ },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(color = 0xFFE0E0E0)),
                 shape = RoundedCornerShape(12.dp),
-                modifier =
-                Modifier
+                modifier = Modifier
                     .fillMaxWidth()
                     .padding(
                         12.dp

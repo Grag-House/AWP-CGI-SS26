@@ -4,11 +4,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -66,8 +68,7 @@ fun MainShell(
         }
     ) { paddingValues ->
         Row(
-            modifier =
-            Modifier
+            modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
@@ -79,47 +80,51 @@ fun MainShell(
                 modifier = Modifier.width(260.dp)
             )
 
-            when (appViewModel.selectedRoute) {
-                Screen.Dashboard.route ->
-                    MainContent(
-                        modifier = Modifier.weight(1f),
-                        onClick = { screen ->
-                            appViewModel.onRouteSelect(screen)
-                        },
-                        serverState = serverState
-                    )
+            Row(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(top = 12.dp, bottom = 12.dp, end = 12.dp)
+                    .clip(RoundedCornerShape(24.dp))
+            ) {
+                when (appViewModel.selectedRoute) {
+                    Screen.Dashboard.route ->
+                        MainContent(
+                            modifier = Modifier.weight(1f),
+                            onClick = { screen ->
+                                appViewModel.onRouteSelect(screen)
+                            },
+                            serverState = serverState
+                        )
 
-                Screen.Webserver.route -> WebViewScreen(BuildConfig.WEBVIEW_URL)
+                    Screen.Webserver.route ->
+                        WebViewScreen(BuildConfig.WEBVIEW_URL)
 
-                Screen.Navigation.route ->
-                    NavigationContent(
-                        modifier = Modifier.weight(1f),
-                        currentLocation =
-                        stringResource(
-                            DestinationItems.Office.stringResource
-                        ),
-                        onDestinationClick = navigationViewModel::onNavigationClick
-                    )
+                    Screen.Navigation.route ->
+                        NavigationContent(
+                            modifier = Modifier.weight(1f),
+                            currentLocation = stringResource(DestinationItems.Office.stringResource),
+                            onDestinationClick = navigationViewModel::onNavigationClick
+                        )
 
-                Screen.Settings.route ->
-                    SettingsContent(
-                        onItemClick = settingsViewModel::onSettingsItemClick
-                    )
+                    Screen.Settings.route ->
+                        SettingsContent(
+                            onItemClick = settingsViewModel::onSettingsItemClick
+                        )
 
-                Screen.Weather.route ->
+                    Screen.Weather.route ->
                     WeatherContent(
                         viewModel = weatherViewModel
                                   )
 
                 // redundancy
-                else -> {
-                    MainContent(
-                        modifier = Modifier.weight(1f),
-                        onClick = { screen ->
-                            appViewModel.onRouteSelect(screen)
-                        },
-                        serverState = serverState
-                    )
+                else ->
+                        MainContent(
+                            modifier = Modifier.weight(1f),
+                            onClick = { screen ->
+                                appViewModel.onRouteSelect(screen)
+                            },
+                            serverState = serverState
+                        )
                 }
             }
         }
