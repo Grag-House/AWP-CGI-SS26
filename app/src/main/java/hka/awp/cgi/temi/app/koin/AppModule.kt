@@ -3,11 +3,13 @@ package hka.awp.cgi.temi.app.koin
 import com.robotemi.sdk.Robot
 import hka.awp.cgi.temi.app.feature.navigation.NavigationViewModel
 import hka.awp.cgi.temi.app.feature.settings.SettingsViewModel
+import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherRepository
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherViewModel
 import hka.awp.cgi.temi.app.feature.webserver.WebserverViewModel
 import hka.awp.cgi.temi.app.ui.shell.AppViewModel
 import hka.awp.cgi.temi.app.utils.NetworkManager
 import hka.awp.cgi.temi.app.utils.TemiBatteryMonitor
+import okhttp3.OkHttpClient
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -43,6 +45,12 @@ val appModule =
 
         single<TemiBatteryMonitor> { TemiBatteryMonitor(robot = get()) }
 
+        single<OkHttpClient> {
+            OkHttpClient()
+        }
+
+        single<WeatherRepository> { WeatherRepository(client = get()) }
+
         viewModel<AppViewModel> {
             AppViewModel(
                 networkManager = get(),
@@ -60,5 +68,5 @@ val appModule =
 
         viewModel<WebserverViewModel> { WebserverViewModel() }
 
-        viewModel<WeatherViewModel> { WeatherViewModel() }
+        viewModel<WeatherViewModel> { WeatherViewModel(repository = get()) }
     }

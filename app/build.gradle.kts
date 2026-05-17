@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.detekt)
     alias(libs.plugins.dokka)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -173,6 +174,7 @@ dependencies {
 
     // api call dependencies
     implementation(libs.okhttp)
+    implementation(libs.kotlinx.serialization.json)
 }
 
 tasks.withType<Detekt>().configureEach {

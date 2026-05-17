@@ -44,31 +44,37 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import hka.awp.cgi.temi.app.R
 
-enum class WeatherIcon { SUN, CLOUD, SUN_CLOUD, RAIN, SNOW, THUNDER, FOG }
-
-// ─── Weather icon helper ──────────────────────────────────────────────────────
-
+/**
+ * A Composable that displays a weather icon based on the provided [WeatherIcon] type.
+ *
+ * This view maps internal weather states to specific Material Design icons, applying
+ * a consistent tint and size.
+ *
+ * @param icon The [WeatherIcon] enum value representing the weather condition to display.
+ * @param modifier The [Modifier] to be applied to the icon or its container.
+ * @param size The size of the icon in density-independent pixels (dp). Defaults to 28.
+ */
 @Composable
-fun WeatherIconView(icon: WeatherIcon, size: Int = 28) {
+fun WeatherIconView(icon: WeatherIcon, modifier: Modifier = Modifier, size: Int = 28) {
     val sizeDp = size.dp
     when (icon) {
         WeatherIcon.SUN -> Icon(
             imageVector = Icons.Default.WbSunny,
             contentDescription = stringResource(R.string.icon_sun),
             tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(sizeDp)
+            modifier = modifier.size(sizeDp)
         )
 
         WeatherIcon.CLOUD -> Icon(
             imageVector = Icons.Default.Cloud,
             contentDescription = stringResource(R.string.icon_cloudy),
             tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(sizeDp)
+            modifier = modifier.size(sizeDp)
         )
 
-        WeatherIcon.SUN_CLOUD -> Box(contentAlignment = Alignment.Center) {
+        WeatherIcon.SUN_CLOUD -> Box(contentAlignment = Alignment.Center, modifier = modifier) {
             Icon(
-                imageVector = Icons.Default.WbCloudy, // TODO: besseres Icon finden, im Moment nur eine Wolke ohne Sonne
+                imageVector = Icons.Default.WbCloudy,
                 contentDescription = stringResource(R.string.icon_partlycloudy),
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(sizeDp)
@@ -76,36 +82,43 @@ fun WeatherIconView(icon: WeatherIcon, size: Int = 28) {
         }
 
         WeatherIcon.RAIN -> Icon(
-            imageVector = Icons.Default.Umbrella, // TODO: replace icon with raincloud
+            imageVector = Icons.Default.Umbrella,
             contentDescription = stringResource(R.string.icon_rain),
             tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(sizeDp)
+            modifier = modifier.size(sizeDp)
         )
 
         WeatherIcon.SNOW -> Icon(
             imageVector = Icons.Default.AcUnit,
             contentDescription = stringResource(R.string.icon_snow),
             tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(sizeDp)
+            modifier = modifier.size(sizeDp)
         )
 
         WeatherIcon.THUNDER -> Icon(
             imageVector = Icons.Default.Bolt,
             contentDescription = stringResource(R.string.icon_thunder),
             tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(sizeDp)
+            modifier = modifier.size(sizeDp)
         )
 
         WeatherIcon.FOG -> Icon(
-            imageVector = Icons.Default.BlurOn, // TODO: nach passenderem Icon schauen
+            imageVector = Icons.Default.BlurOn,
             contentDescription = stringResource(R.string.icon_fog),
             tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(sizeDp)
+            modifier = modifier.size(sizeDp)
         )
     }
 }
 // ─── Cards ────────────────────────────────────────────────────────────────────
 
+/**
+ * A reusable container component that provides a consistent layout and styling for weather-related information.
+ * It wraps content in a [Card] with a specific background color, rounded corners, and internal padding.
+ *
+ * @param modifier The [Modifier] to be applied to the card.
+ * @param content The composable content to be displayed inside the card's column layout.
+ */
 @Composable
 fun WeatherCard(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
     Card(
@@ -117,11 +130,16 @@ fun WeatherCard(modifier: Modifier = Modifier, content: @Composable ColumnScope.
     }
 }
 
+/**
+ * Displays a card with current weather information for a given location.
+ *
+ * @param location The name of the location to display.
+ * @param currentHour The [HourlyItem] containing current temperature and weather icon.
+ */
 @Composable
-fun CurrentWeatherCard(viewModel: WeatherViewModel) {
-    val hourlyData by viewModel.hourlyData.collectAsStateWithLifecycle()
+fun CurrentWeatherCard(location: String, currentHour: HourlyItem?) {
     WeatherCard {
-        if (hourlyData.isEmpty()) return@WeatherCard
+        if (currentHour == null) return@WeatherCard
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -130,30 +148,32 @@ fun CurrentWeatherCard(viewModel: WeatherViewModel) {
         ) {
             Column {
                 Text(
-                    stringResource(R.string.location_kalrsruhe),
+                    location,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(Modifier.height(12.dp))
                 Text(
-                    hourlyData[0].temp + stringResource(R.string.temp_celsius),
+                    currentHour.temp + stringResource(R.string.temp_celsius),
                     fontSize = 48.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
                 )
             }
 
-            WeatherIconView(hourlyData[0].icon, 80)
+            WeatherIconView(currentHour.icon, size = 80)
         }
     }
 }
 
+/**
+ * Displays a card with a horizontal forecast for the upcoming hours.
+ *
+ * @param hourlyData A list of [HourlyItem] representing the hourly weather forecast.
+ */
 @Composable
-fun HourlyForecastCard(viewModel: WeatherViewModel) {
-
-    val hourlyData by viewModel.hourlyData.collectAsStateWithLifecycle()
-
+fun HourlyForecastCard(hourlyData: List<HourlyItem>) {
     WeatherCard {
         Text(
             stringResource(R.string.daily_outlook),
@@ -167,13 +187,13 @@ fun HourlyForecastCard(viewModel: WeatherViewModel) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            hourlyData[0].label = stringResource(R.string.now)
-            hourlyData.forEach { item ->
+            hourlyData.forEachIndexed { index, item ->
+                val label = if (index == 0) stringResource(R.string.now) else item.label
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text(item.label, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 10.sp)
+                    Text(label, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 10.sp)
                     Spacer(Modifier.height(4.dp))
                     WeatherIconView(item.icon, size = 20)
                     Spacer(Modifier.height(4.dp))
@@ -194,10 +214,13 @@ fun HourlyForecastCard(viewModel: WeatherViewModel) {
     }
 }
 
+/**
+ * Displays a card with a weekly weather outlook.
+ *
+ * @param dailyData A list of [DailyItem] representing the daily weather forecast for the week.
+ */
 @Composable
-fun WeeklyForecastCard(viewModel: WeatherViewModel) {
-    val dailyData by viewModel.dailyData.collectAsStateWithLifecycle()
-
+fun WeeklyForecastCard(dailyData: List<DailyItem>) {
     WeatherCard {
         Text(
             stringResource(R.string.weekly_outlook),
@@ -211,13 +234,13 @@ fun WeeklyForecastCard(viewModel: WeatherViewModel) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            dailyData[0].day = stringResource(R.string.today)
-            dailyData.forEach { item ->
+            dailyData.forEachIndexed { index, item ->
+                val dayLabel = if (index == 0) stringResource(R.string.today) else item.day
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text(item.day, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 10.sp)
+                    Text(dayLabel, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 10.sp)
                     Spacer(Modifier.height(4.dp))
                     WeatherIconView(item.icon, size = 22)
                     Spacer(Modifier.height(4.dp))
@@ -240,6 +263,9 @@ fun WeeklyForecastCard(viewModel: WeatherViewModel) {
 
 // ─── Top bar ──────────────────────────────────────────────────────────────────
 
+/**
+ * Composable for the top app bar of the weather screen.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WetterTopBar() {
@@ -275,14 +301,20 @@ fun WetterTopBar() {
 
 // ─── Main screen ─────────────────────────────────────────────────────────────
 
+/**
+ * Main content composable for the weather screen.
+ *
+ * @param viewModel The [WeatherViewModel] that provides the UI state.
+ */
 @Composable
 fun WeatherContent(viewModel: WeatherViewModel) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
     Row(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(color = 0xFFF5F5F5))
     ) {
-        // Main content
         Column(modifier = Modifier.weight(1f)) {
             WetterTopBar()
 
@@ -293,9 +325,12 @@ fun WeatherContent(viewModel: WeatherViewModel) {
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                CurrentWeatherCard(viewModel)
-                HourlyForecastCard(viewModel)
-                WeeklyForecastCard(viewModel)
+                CurrentWeatherCard(
+                    location = uiState.location,
+                    currentHour = uiState.hourlyForecast.firstOrNull()
+                )
+                HourlyForecastCard(hourlyData = uiState.hourlyForecast)
+                WeeklyForecastCard(dailyData = uiState.weeklyForecast)
             }
         }
     }
