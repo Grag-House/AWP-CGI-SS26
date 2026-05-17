@@ -112,12 +112,12 @@ fun MainShell(
                         )
 
                     Screen.Weather.route ->
-                    WeatherContent(
-                        viewModel = weatherViewModel
-                                  )
+                        WeatherContent(
+                            viewModel = weatherViewModel
+                        )
 
-                // redundancy
-                else ->
+                    // redundancy
+                    else ->
                         MainContent(
                             modifier = Modifier.weight(1f),
                             onClick = { screen ->
