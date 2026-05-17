@@ -19,3 +19,10 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# --- TEMI ROBOT SDK ---
+# keep proguard from touching the Temi SDK
+-keep class com.robotemi.sdk.** { *; }
+-keep interface com.robotemi.sdk.** { *; }
+-keep enum com.robotemi.sdk.** { *; }
+

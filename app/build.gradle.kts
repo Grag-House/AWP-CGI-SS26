@@ -9,6 +9,20 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        create("release") {
+            val props = Properties()
+            val envFile = rootProject.file(".env")
+            if (envFile.exists()) {
+                envFile.inputStream().use { props.load(it) }
+                storeFile = file("$rootDir/release-key.jks")
+                storePassword = props.getProperty("RELEASE_STORE_PASSWORD")
+                keyAlias = props.getProperty("RELEASE_KEY_ALIAS")
+                keyPassword = props.getProperty("RELEASE_KEY_PASSWORD")
+            }
+        }
+    }
+
     namespace = "hka.awp.cgi.temi.app"
 
     testOptions {
@@ -62,6 +76,8 @@ android {
                 "proguard-rules.pro"
             )
             isDebuggable = false
+
+            signingConfig = signingConfigs.getByName("release")
         }
 
         debug {
@@ -142,9 +158,7 @@ dependencies {
     testRuntimeOnly(libs.junit.platform.launcher)
     testImplementation(libs.junit.jupiter.params)
     androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
 
     // debug depedencies
     debugImplementation(libs.androidx.compose.ui.tooling)
