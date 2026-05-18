@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.detekt)
     alias(libs.plugins.dokka)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -148,6 +149,8 @@ dependencies {
     implementation(libs.timber)
     // temi dependency
     implementation(libs.temi.sdk)
+    implementation(libs.androidx.compose.ui.text)
+    implementation(libs.androidx.material.icons.extended)
 
     // unit test dependencies
     testImplementation(libs.mokk)
@@ -168,6 +171,10 @@ dependencies {
     // linting and formatting
     detektPlugins(libs.detekt.ktlint)
     detektPlugins(libs.detekt.compose)
+
+    // api call dependencies
+    implementation(libs.okhttp)
+    implementation(libs.kotlinx.serialization.json)
 }
 
 tasks.withType<Detekt>().configureEach {
