@@ -1,6 +1,6 @@
 name: Android CI with Gradle
 
-# Trigger for pushes and merge requests on main and dev
+# Trigger for pushes und merge requests on main and dev
 on:
   push:
     branches: [ "main", "dev" ]
@@ -10,17 +10,8 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    
-    # Permissions required for deploying to GitHub Pages
     permissions:
       contents: read
-      pages: write
-      id-token: write
-
-    # Avoid concurrency conflicts between parallel page deployments
-    concurrency:
-      group: "pages"
-      cancel-in-progress: false
 
     steps:
       - name: Checkout Code
@@ -36,7 +27,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
 
-      # Create .env file for BuildConfig variables
+      # create .env file
       - name: Create .env for BuildConfig
         run: |
           echo "WEBVIEW_URL=${{ vars.WEBVIEW_URL }}" >> .env
@@ -44,58 +35,18 @@ jobs:
           echo "RELEASE_STORE_PASSWORD=${{ secrets.RELEASE_STORE_PASSWORD }}" >> .env
           echo "RELEASE_KEY_ALIAS=${{ secrets.RELEASE_KEY_ALIAS }}" >> .env
           echo "RELEASE_KEY_PASSWORD=${{ secrets.RELEASE_KEY_PASSWORD }}" >> .env
+      
+      
 
-      # Run Android specific linting
+      # android specific linting
       - name: Run Android Lint
         run: ./gradlew lintDebug --stacktrace --build-cache --parallel
 
-      # Run Detekt static code analysis and Dokka documentation generation
-      # Note: If Gradle throws Configuration Cache issues, append '--no-configuration-cache' here
+
+      # detekt linter + dokka
       - name: Run Code Analysis
         run: ./gradlew qualityCheck
 
-      # Run unit tests
-      - name: Run Unit Tests
-        run: ./gradlew testDebugUnitTest --stacktrace --build-cache --parallel
-
-      # ------------------------------------------------------------
-      # GITHUB PAGES DEPLOYMENT STEPS
-      # ------------------------------------------------------------
-
-      # Assemble the directory structure required for GitHub Pages
-      # Dokka will be at the root level, Detekt report will be in /reports
-      - name: Structure Documentation Folder
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev'
-        run: |
-          mkdir -p public
-          
-          # Copy Dokka HTML output to the root public folder
-          if [ -d "app/build/dokka/html" ]; then
-            cp -r app/build/dokka/html/* public/
-          fi
-          
-          # Copy Detekt report to /reports/index.html
-          mkdir -p public/reports
-          if [ -f "app/build/reports/detekt/detekt-report.html" ]; then
-            cp app/build/reports/detekt/detekt-report.html public/reports/index.html
-          fi
-
-      # Package the public folder as an official GitHub Pages artifact
-      - name: Upload Pages Artifact
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev'
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: 'public'
-
-      # Trigger the live deployment to GitHub Pages hosting
-      - name: Deploy to GitHub Pages
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev'
-        id: deployment
-        uses: actions/deploy-pages@v4
-
-      # ------------------------------------------------------------
-      # STANDARD ARTIFACT UPLOADS (BACKUP / ACTION LOGS)
-      # ------------------------------------------------------------
       - name: Upload HTML Report
         uses: actions/upload-artifact@v4
         if: always()
@@ -103,7 +54,11 @@ jobs:
           name: Detekt-Report
           path: app/build/reports/detekt/detekt-report.html
 
-      # Upload test and lint results only if the build failed
+      # run unit tests
+      - name: Run Unit Tests
+        run: ./gradlew testDebugUnitTest --stacktrace --build-cache --parallel
+
+      # upload results (on failure)
       - name: Upload Reports (Lint & Tests)
         if: failure()
         uses: actions/upload-artifact@v4
@@ -113,7 +68,6 @@ jobs:
             app/build/reports/tests/testDebugUnitTest/
             app/build/reports/lint-results-debug.html
 
-      # Upload generated Dokka files on successful builds
       - name: Upload Dokka Documentation
         uses: actions/upload-artifact@v4
         if: success()
