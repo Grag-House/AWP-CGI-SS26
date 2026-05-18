@@ -9,7 +9,10 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import timber.log.Timber
 import java.net.UnknownHostException
+import java.time.Instant.parse
 import java.time.LocalDate
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.math.roundToInt
@@ -26,7 +29,8 @@ import kotlin.math.roundToInt
  */
 class WeatherRepository(
     private val client: OkHttpClient,
-    private val json: Json = Json { ignoreUnknownKeys = true }
+    private val json: Json = Json { ignoreUnknownKeys = true },
+    private val hourlyFormatter: DateTimeFormatter
 ) {
     companion object {
         // TODO replace with CGI specific user agent
@@ -38,66 +42,70 @@ class WeatherRepository(
 
         @Suppress("MagicNumber")
         val LONGITUDE: Double by lazy { 8.3573 }
-        private const val MET_API_ENDPOINT =
-            "https://api.met.no/weatherapi/locationforecast/2.0/compact"
+        private const val MET_API_ENDPOINT = "https://api.met.no/weatherapi/locationforecast/2.0/compact"
 
         private val API_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd")
     }
 
     private val weekdayFormatter = DateTimeFormatter.ofPattern("EEEE", Locale.getDefault())
 
-    suspend fun getWeatherData(): Result<WeatherState> =
-        withContext(Dispatchers.IO) {
-            return@withContext try {
-                val request = Request.Builder()
-                    .url("$MET_API_ENDPOINT?lat=$LATITUDE&lon=$LONGITUDE")
-                    .header("User-Agent", USER_AGENT)
-                    .get()
-                    .build()
+    suspend fun getWeatherData(): Result<WeatherState> = withContext(Dispatchers.IO) {
+        return@withContext try {
+            val request =
+                Request.Builder().url("$MET_API_ENDPOINT?lat=$LATITUDE&lon=$LONGITUDE").header("User-Agent", USER_AGENT)
+                    .get().build()
 
-                val response = client.newCall(request).execute()
-                if (!response.isSuccessful) {
-                    return@withContext Result.failure(
-                        WeatherApiException(response.code, "API Error: ${response.code}")
-                    )
-                }
-
-                val body = response.body.string()
-                val metResponse = json.decodeFromString<MetResponse>(body)
-                Result.success(transformToState(metResponse))
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: UnknownHostException) {
-                Timber.e("Possibly no internet connection: ${e.message}")
-                Result.failure(Exception("Check your internet connection"))
-            } catch (e: SerializationException) {
-                Timber.e("Error during JSON deserialization occured: ${e.message}")
-                Result.failure(Exception("An Error occurred while parsing the JSON data"))
-            } catch (
-                @Suppress("TooGenericExceptionCaught")
-                e: Exception
-            ) {
-                Timber.e(e, "Unknown error during the weather API call")
-                Result.failure(e)
+            val response = client.newCall(request).execute()
+            if (!response.isSuccessful) {
+                return@withContext Result.failure(
+                    WeatherApiException(response.code, "API Error: ${response.code}")
+                )
             }
+
+            val body = response.body.string()
+            val metResponse = json.decodeFromString<MetResponse>(body)
+            Result.success(transformToState(metResponse))
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: UnknownHostException) {
+            Timber.e("Possibly no internet connection: ${e.message}")
+            Result.failure(Exception("Check your internet connection"))
+        } catch (e: SerializationException) {
+            Timber.e("Error during JSON deserialization occured: ${e.message}")
+            Result.failure(Exception("An Error occurred while parsing the JSON data"))
+        } catch (
+            @Suppress("TooGenericExceptionCaught") e: Exception
+        ) {
+            Timber.e(e, "Unknown error during the weather API call")
+            Result.failure(e)
         }
+    }
 
     private fun transformToState(response: MetResponse): WeatherState {
         val timeseries = response.properties.timeseries
         val today = LocalDate.now()
-        // end of the week
+        val now = ZonedDateTime.now(ZoneId.systemDefault())
 
         @Suppress("MagicNumber")
         val endDate = today.plusDays(7)
 
-        // take entries for the next 10 hours
-        @Suppress("MagicNumber")
-        val hourly = timeseries.take(10).map { entry ->
+        val hourly = timeseries.filter {
+            val entryTime = parse(it.time)
+                .atZone(ZoneId.systemDefault())
+
+            @Suppress("MagicNumber")
+            entryTime.isAfter(now.minusMinutes(59))
+        }.take(
+            @Suppress("MagicNumber")
+            10
+        ).map {
+            val localTime = parse(it.time).atZone(ZoneId.systemDefault()).toLocalTime()
+
             HourlyItem(
-                label = entry.time.substring(11, 16),
-                icon = convertSymbolToIcon(entry.data.next1Hours?.summary?.symbolCode ?: "clearsky"),
-                temp = entry.data.instant.details.airTemperature.roundToInt().toString(),
-                precipitation = entry.data.next1Hours?.details?.precipitationAmount?.toString() ?: "0.0"
+                label = localTime.format(hourlyFormatter),
+                icon = convertSymbolToIcon(it.data.next1Hours?.summary?.symbolCode ?: "clearsky"),
+                temp = it.data.instant.details.airTemperature.roundToInt().toString(),
+                precipitation = it.data.next1Hours?.details?.precipitationAmount?.toString() ?: "0.0"
             )
         }
 
@@ -110,8 +118,7 @@ class WeatherRepository(
 
             if ((date.isEqual(today) || date.isAfter(today)) && date.isBefore(endDate)) {
                 val temp = entry.data.instant.details.airTemperature
-                val symbol = entry.data.next1Hours?.summary?.symbolCode
-                    ?: entry.data.next6Hours?.summary?.symbolCode
+                val symbol = entry.data.next1Hours?.summary?.symbolCode ?: entry.data.next6Hours?.summary?.symbolCode
                     ?: entry.data.next12Hours?.summary?.symbolCode
                 dailyEntries.getOrPut(date) { mutableListOf() }.add(temp to symbol)
             }
@@ -119,9 +126,9 @@ class WeatherRepository(
 
         val weekly = dailyEntries.entries.sortedBy { it.key }.map { (date, entries) ->
             val temps = entries.map { it.first }
-            val dominantSymbol = entries.mapNotNull { it.second }
-                .groupingBy { it }.eachCount()
-                .maxByOrNull { it.value }?.key ?: "clearsky"
+            val dominantSymbol =
+                entries.mapNotNull { it.second }.groupingBy { it }.eachCount().maxByOrNull { it.value }?.key
+                    ?: "clearsky"
 
             DailyItem(
                 day = date.format(weekdayFormatter),

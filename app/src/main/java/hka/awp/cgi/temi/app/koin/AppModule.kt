@@ -49,7 +49,7 @@ val appModule =
             OkHttpClient()
         }
 
-        single<WeatherRepository> { WeatherRepository(client = get()) }
+        single<WeatherRepository> { WeatherRepository(client = get(), hourlyFormatter = get()) }
 
         viewModel<AppViewModel> {
             AppViewModel(
