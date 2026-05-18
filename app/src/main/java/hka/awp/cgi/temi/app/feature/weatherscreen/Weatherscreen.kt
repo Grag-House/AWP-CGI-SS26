@@ -126,8 +126,8 @@ fun WeatherCard(modifier: Modifier = Modifier, content: @Composable ColumnScope.
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
-                                        )
-        ) {
+        )
+    ) {
         Column(modifier = Modifier.padding(16.dp), content = content)
     }
 }
