@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.Umbrella
 import androidx.compose.material.icons.filled.WbCloudy
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -36,7 +37,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -122,9 +122,11 @@ fun WeatherIconView(icon: WeatherIcon, modifier: Modifier = Modifier, size: Int 
 @Composable
 fun WeatherCard(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
     Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(16.dp)),
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
     ) {
         Column(modifier = Modifier.padding(16.dp), content = content)
     }
@@ -287,7 +289,7 @@ fun WetterTopBar() {
                 )
             }
         },
-        colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White),
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
         actions = {
             Icon(
                 Icons.Default.Notifications,
@@ -313,7 +315,7 @@ fun WeatherContent(viewModel: WeatherViewModel) {
     Row(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(color = 0xFFF5F5F5))
+            .background(MaterialTheme.colorScheme.background)
     ) {
         Column(modifier = Modifier.weight(1f)) {
             WetterTopBar()
