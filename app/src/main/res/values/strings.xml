@@ -66,6 +66,24 @@
     <string name="location_reception">Empfang</string>
     <string name="location_wc">WC</string>
     <string name="location_charging">Laden</string>
+
+    <!-- Weather Page -->
+    <string name="icon_sun">Sonnig</string>
+    <string name="icon_cloudy">Wolkig</string>
+    <string name="icon_partlycloudy">Teilweise bewölkt</string>
+    <string name="icon_rain">Regnerisch</string>
+    <string name="icon_snow">Es Schneit</string>
+    <string name="icon_thunder">Es Gewittert</string>
+    <string name="icon_fog">Nebelig</string>
+
+    <string name="location_kalrsruhe">Standort: Kalrsruhe</string>
+    <string name="temp_celsius">°C</string>
+    <string name="daily_outlook">Täglicher Ausblick</string>
+    <string name="degree">°</string>
+    <string name="percent">%</string>
+    <string name="weekly_outlook">Nächste Woche</string>
+    <string name="now">Jetzt</string>
+    <string name="today">Heute</string>
     <string name="show_map_failed">Keine Locations gefunden.\nSind Wegpunkte auf dem Roboter gespeichert?</string>
     <string name="navigation_failed">Fehler bei Navigation zu:</string>
     <string name="navigation_failed_with_name">Fehler bei Navigation zu: %1$s</string>
