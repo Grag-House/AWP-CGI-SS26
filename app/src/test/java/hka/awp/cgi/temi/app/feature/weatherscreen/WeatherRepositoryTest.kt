@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.format.DateTimeFormatter
 
 class WeatherRepositoryTest {
 
@@ -18,9 +19,11 @@ class WeatherRepositoryTest {
     private val mockClient = mockk<OkHttpClient>()
     private val mockCall = mockk<Call>()
 
+    private val mockFormatter = mockk<DateTimeFormatter>()
+
     @BeforeEach
     fun setup() {
-        repository = WeatherRepository(client = mockClient)
+        repository = WeatherRepository(client = mockClient, hourlyFormatter = mockFormatter)
     }
 
     @Test
