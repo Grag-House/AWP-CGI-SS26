@@ -34,7 +34,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -47,7 +46,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.robotemi.sdk.navigation.model.Position
 import hka.awp.cgi.temi.app.R
 import hka.awp.cgi.temi.app.ui.components.NavigationCard
-import hka.awp.cgi.temi.app.ui.theme.CgiRed
 import androidx.compose.foundation.lazy.grid.items as gridItems
 
 private const val GRIDCELL_COUNT = 3
@@ -145,7 +143,7 @@ private fun MapDialog(
                     modifier = Modifier.fillMaxWidth(),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(color = CgiRed)
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                 }
                 state.hasError -> Text(
                     text = stringResource(R.string.show_map_failed),
@@ -155,7 +153,7 @@ private fun MapDialog(
                     Text(
                         text = stringResource(R.string.saved_locations, state.locations.size),
                         style = MaterialTheme.typography.labelSmall,
-                        color = Color.Gray,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 1.sp
                     )
@@ -187,7 +185,7 @@ private fun MapDialog(
                         Text(
                             text = "x=%.2f, y=%.2f".format(pos.x, pos.y),
                             style = MaterialTheme.typography.labelSmall,
-                            color = Color.Gray
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     if (state.savedLocations.isNotEmpty() && state.locations.isEmpty()) {
@@ -195,7 +193,7 @@ private fun MapDialog(
                         Text(
                             text = state.savedLocations.joinToString(", "),
                             style = MaterialTheme.typography.bodySmall,
-                            color = Color.Gray
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -224,7 +222,7 @@ private fun NavigationHeader() {
         Icon(
             Icons.Rounded.NearMe,
             contentDescription = null,
-            tint = CgiRed,
+            tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(32.dp)
         )
         Spacer(modifier = Modifier.width(12.dp))
@@ -241,7 +239,7 @@ private fun SectionLabel(text: String) {
     Text(
         text = text,
         style = MaterialTheme.typography.labelSmall,
-        color = Color.LightGray,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
         fontWeight = FontWeight.Bold,
         letterSpacing = 1.sp
     )
@@ -253,13 +251,14 @@ private fun CurrentLocationStatus(
     onMapClick: () -> Unit
 ) {
     val prefix = stringResource(R.string.current_location_prefix)
+    val primaryColor = MaterialTheme.colorScheme.primary
     val annotatedLocation = remember(currentLocation, prefix) {
         buildAnnotatedString {
             append(prefix)
             append(" ")
             withStyle(
                 style = SpanStyle(
-                    color = CgiRed,
+                    color = primaryColor,
                     textDecoration = TextDecoration.Underline,
                     fontWeight = FontWeight.Bold
                 )
@@ -272,8 +271,8 @@ private fun CurrentLocationStatus(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        color = Color.White,
-        border = BorderStroke(1.dp, Color(color = 0xFFEEEEEE)),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         shadowElevation = 0.dp
     ) {
         Row(
@@ -299,7 +298,7 @@ private fun MapButton(onClick: () -> Unit) {
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(8.dp),
-        color = Color(color = 0xFFF3F5F7)
+        color = MaterialTheme.colorScheme.surfaceVariant
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 7.dp, vertical = 7.dp),
