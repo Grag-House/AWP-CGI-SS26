@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 class WeatherRepositoryTest {
@@ -19,22 +20,24 @@ class WeatherRepositoryTest {
     private val mockClient = mockk<OkHttpClient>()
     private val mockCall = mockk<Call>()
 
-    private val mockFormatter = mockk<DateTimeFormatter>()
+    private val formatter = DateTimeFormatter.ofPattern("HH:mm").withZone(ZoneId.systemDefault())
 
     @BeforeEach
     fun setup() {
-        repository = WeatherRepository(client = mockClient, hourlyFormatter = mockFormatter)
+        repository = WeatherRepository(client = mockClient, hourlyFormatter = formatter)
     }
 
     @Test
     fun `getWeatherData returns success when API call is successful`() = runBlocking {
+        val now = java.time.Instant.now().toString()
+
         // Arrange
         val jsonResponse = """
             {
                 "properties": {
                     "timeseries": [
                         {
-                            "time": "2024-05-20T12:00:00Z",
+                            "time": "$now",
                             "data": {
                                 "instant": { "details": { "air_temperature": 20.5 } },
                                 "next_1_hours": {
