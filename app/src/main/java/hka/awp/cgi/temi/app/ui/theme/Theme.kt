@@ -29,7 +29,11 @@ fun CgiTheme(content: @Composable () -> Unit) {
             onPrimary = OnPrimary,
             background = AppBackground,
             surface = SidepanelColor, // Sidepanel als Standard-Oberfläche
-            onSurface = OnSurface
+            onSurface = OnSurface,
+            surfaceVariant = SidepanelHighlight,
+            onSurfaceVariant = OnSurface,
+            outlineVariant = SidepanelHighlight
+
         )
 
     val customColors =
