@@ -60,32 +60,28 @@ private const val GRIDCELL_COUNT = 3
  * and a fixed layout that fits on a single screen without scrolling.
  *
  * @param modifier The [Modifier] to be applied to the root layout.
+ * @param viewModel The [NavigationViewModel] used to manage the state and actions of this screen.
  */
 @Composable
 fun NavigationContent(
     modifier: Modifier = Modifier,
     viewModel: NavigationViewModel
 ) {
-    val locationState by viewModel.currentLocation.collectAsStateWithLifecycle()
-    val isMapLoading by viewModel.isMapLoading.collectAsStateWithLifecycle()
-    val hasMapError by viewModel.hasMapError.collectAsStateWithLifecycle()
-    val mapLocations by viewModel.mapLocations.collectAsStateWithLifecycle()
-    val robotPosition by viewModel.robotPosition.collectAsStateWithLifecycle()
-    val savedLocations by viewModel.savedLocations.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    val currentLocation = when (val state = locationState) {
+    val currentLocation = when (val state = uiState.currentLocation) {
         is LocationState.Resource -> stringResource(state.resId)
         is LocationState.Custom -> state.name
     }
 
-    if (isMapLoading || hasMapError || mapLocations.isNotEmpty()) {
+    if (uiState.isMapLoading || uiState.hasMapError || uiState.mapLocations.isNotEmpty()) {
         MapDialog(
             state = MapDialogState(
-                isLoading = isMapLoading,
-                hasError = hasMapError,
-                locations = mapLocations,
-                savedLocations = savedLocations,
-                robotPosition = robotPosition
+                isLoading = uiState.isMapLoading,
+                hasError = uiState.hasMapError,
+                locations = uiState.mapLocations,
+                savedLocations = uiState.savedLocations,
+                robotPosition = uiState.robotPosition
             ),
             onDismiss = viewModel::dismissMap,
             onRetry = viewModel::showMap,

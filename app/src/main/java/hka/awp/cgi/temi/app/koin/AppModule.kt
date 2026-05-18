@@ -1,6 +1,7 @@
 package hka.awp.cgi.temi.app.koin
 
 import com.robotemi.sdk.Robot
+import hka.awp.cgi.temi.app.R
 import hka.awp.cgi.temi.app.feature.navigation.NavigationViewModel
 import hka.awp.cgi.temi.app.feature.settings.SettingsViewModel
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherRepository
@@ -36,7 +37,7 @@ val appModule =
                 Robot.getInstance()
             } catch (
                 @Suppress("TooGenericExceptionCaught")
-                e: Exception
+                e: Exception,
             ) {
                 Timber.e(e, "Temi SDK not available, probably running locally")
                 null
@@ -67,7 +68,7 @@ val appModule =
         viewModel<NavigationViewModel> {
             NavigationViewModel(
                 robot = get(),
-                application = get()
+                defaultMapName = androidContext().getString(R.string.default_map_name)
             )
         }
 
