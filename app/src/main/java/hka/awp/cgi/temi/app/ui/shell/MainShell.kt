@@ -52,6 +52,7 @@ fun MainShell(
     val batteryLevel by appViewModel.batteryLevel.collectAsStateWithLifecycle()
     val isCharging by appViewModel.isCharging.collectAsStateWithLifecycle()
     val serverState by webserverViewModel.serverState.collectAsStateWithLifecycle()
+    val currentTemperatureState by weatherViewModel.uiState.collectAsStateWithLifecycle()
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -91,7 +92,8 @@ fun MainShell(
                             onClick = { screen ->
                                 appViewModel.onRouteSelect(screen)
                             },
-                            serverState = serverState
+                            serverState = serverState,
+                            currentTemperatureState.hourlyForecast[0].temp
                         )
 
                     Screen.Webserver.route ->
@@ -120,7 +122,8 @@ fun MainShell(
                             onClick = { screen ->
                                 appViewModel.onRouteSelect(screen)
                             },
-                            serverState = serverState
+                            serverState = serverState,
+                            currentTemperatureState.hourlyForecast[0].temp
                         )
                 }
             }
