@@ -34,6 +34,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -46,6 +47,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.robotemi.sdk.navigation.model.Position
 import hka.awp.cgi.temi.app.R
 import hka.awp.cgi.temi.app.ui.components.NavigationCard
+import hka.awp.cgi.temi.app.ui.theme.CgiRed
 import androidx.compose.foundation.lazy.grid.items as gridItems
 
 private const val GRIDCELL_COUNT = 3
@@ -66,7 +68,6 @@ fun NavigationContent(
     viewModel: NavigationViewModel
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
     val currentLocation = when (val state = uiState.currentLocation) {
         is LocationState.Resource -> stringResource(state.resId)
         is LocationState.Custom -> state.name
@@ -96,9 +97,7 @@ fun NavigationContent(
             .padding(24.dp)
     ) {
         NavigationHeader()
-
         Spacer(modifier = Modifier.height(24.dp))
-
         SectionLabel(text = stringResource(R.string.navigation_status_label))
         Spacer(modifier = Modifier.height(4.dp))
 
@@ -108,7 +107,6 @@ fun NavigationContent(
         )
 
         Spacer(modifier = Modifier.height(4.dp))
-
         SectionLabel(text = stringResource(R.string.select_destination))
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -139,64 +137,16 @@ private fun MapDialog(
         title = { Text(stringResource(R.string.show_map)) },
         text = {
             when {
-                state.isLoading -> Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-                }
-                state.hasError -> Text(
-                    text = stringResource(R.string.show_map_failed),
-                    style = MaterialTheme.typography.bodyMedium
+                state.isLoading -> MapDialogLoadingContent()
+                state.hasError -> MapDialogErrorContent(
+                    savedLocations = state.savedLocations,
+                    onNavigateTo = onNavigateTo
                 )
-                else -> Column {
-                    Text(
-                        text = stringResource(R.string.saved_locations, state.locations.size),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.sp
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    LazyColumn(modifier = Modifier.heightIn(max = 300.dp)) {
-                        items(state.locations) { marker ->
-                            Column {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 4.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = marker.name,
-                                        modifier = Modifier.weight(1f),
-                                        style = MaterialTheme.typography.bodyMedium
-                                    )
-                                    TextButton(onClick = { onNavigateTo(marker.name) }) {
-                                        Text(stringResource(R.string.go_to))
-                                    }
-                                }
-                                HorizontalDivider()
-                            }
-                        }
-                    }
-                    state.robotPosition?.let { pos ->
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "x=%.2f, y=%.2f".format(pos.x, pos.y),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    if (state.savedLocations.isNotEmpty() && state.locations.isEmpty()) {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = state.savedLocations.joinToString(", "),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
+                else -> MapDialogSuccessContent(
+                    locations = state.locations,
+                    robotPosition = state.robotPosition,
+                    onNavigateTo = onNavigateTo
+                )
             }
         },
         confirmButton = {
@@ -205,15 +155,100 @@ private fun MapDialog(
             }
         },
         dismissButton = if (state.hasError) {
-            {
-                TextButton(onClick = onRetry) {
-                    Text(stringResource(R.string.map_retry))
-                }
-            }
+            { TextButton(onClick = onRetry) { Text(stringResource(R.string.map_retry)) } }
         } else {
             null
         }
     )
+}
+
+@Composable
+private fun MapDialogLoadingContent() {
+    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+    }
+}
+
+@Composable
+private fun MapDialogErrorContent(savedLocations: List<String>, onNavigateTo: (String) -> Unit) {
+    Column {
+        if (savedLocations.isEmpty()) {
+            Text(text = stringResource(R.string.show_map_failed), style = MaterialTheme.typography.bodyMedium)
+        }
+        if (savedLocations.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = stringResource(R.string.saved_locations, savedLocations.size),
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.Gray,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.sp
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            LazyColumn(modifier = Modifier.heightIn(max = 300.dp)) {
+                items(savedLocations) { location ->
+                    Column {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = location,
+                                modifier = Modifier.weight(1f),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            TextButton(onClick = { onNavigateTo(location) }) { Text(stringResource(R.string.go_to)) }
+                        }
+                        HorizontalDivider()
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun MapDialogSuccessContent(
+    locations: List<LocationMarker>,
+    robotPosition: Position?,
+    onNavigateTo: (String) -> Unit
+) {
+    Column {
+        Text(
+            text = stringResource(R.string.saved_locations, locations.size),
+            style = MaterialTheme.typography.labelSmall,
+            color = Color.Gray,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 1.sp
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        LazyColumn(modifier = Modifier.heightIn(max = 300.dp)) {
+            items(locations) { marker ->
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = marker.name,
+                            modifier = Modifier.weight(1f),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        TextButton(onClick = { onNavigateTo(marker.name) }) { Text(stringResource(R.string.go_to)) }
+                    }
+                    HorizontalDivider()
+                }
+            }
+        }
+        robotPosition?.let { pos ->
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "x=%.2f, y=%.2f".format(pos.x, pos.y),
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.Gray
+            )
+        }
+    }
 }
 
 @Composable
@@ -222,7 +257,7 @@ private fun NavigationHeader() {
         Icon(
             Icons.Rounded.NearMe,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
+            tint = CgiRed,
             modifier = Modifier.size(32.dp)
         )
         Spacer(modifier = Modifier.width(12.dp))
@@ -239,7 +274,7 @@ private fun SectionLabel(text: String) {
     Text(
         text = text,
         style = MaterialTheme.typography.labelSmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        color = Color.LightGray,
         fontWeight = FontWeight.Bold,
         letterSpacing = 1.sp
     )
@@ -251,14 +286,13 @@ private fun CurrentLocationStatus(
     onMapClick: () -> Unit
 ) {
     val prefix = stringResource(R.string.current_location_prefix)
-    val primaryColor = MaterialTheme.colorScheme.primary
     val annotatedLocation = remember(currentLocation, prefix) {
         buildAnnotatedString {
             append(prefix)
             append(" ")
             withStyle(
                 style = SpanStyle(
-                    color = primaryColor,
+                    color = CgiRed,
                     textDecoration = TextDecoration.Underline,
                     fontWeight = FontWeight.Bold
                 )
@@ -271,8 +305,8 @@ private fun CurrentLocationStatus(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        color = Color.White,
+        border = BorderStroke(1.dp, Color(color = 0xFFEEEEEE)),
         shadowElevation = 0.dp
     ) {
         Row(
@@ -298,7 +332,7 @@ private fun MapButton(onClick: () -> Unit) {
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(8.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant
+        color = Color(color = 0xFFF3F5F7)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 7.dp, vertical = 7.dp),
