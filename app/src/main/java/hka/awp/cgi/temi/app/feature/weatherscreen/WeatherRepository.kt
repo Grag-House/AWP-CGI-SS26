@@ -90,14 +90,12 @@ class WeatherRepository(
         val endDate = today.plusDays(7)
 
         val hourly = timeseries.filter {
-            val entryTime = parse(it.time)
-                .atZone(ZoneId.systemDefault())
+            val entryTime = parse(it.time).atZone(ZoneId.systemDefault())
 
             @Suppress("MagicNumber")
             entryTime.isAfter(now.minusMinutes(59))
         }.take(
-            @Suppress("MagicNumber")
-            10
+            @Suppress("MagicNumber") 10
         ).map {
             val localTime = parse(it.time).atZone(ZoneId.systemDefault()).toLocalTime()
 

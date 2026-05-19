@@ -2,6 +2,7 @@ package hka.awp.cgi.temi.app
 
 import android.app.Application
 import hka.awp.cgi.temi.app.koin.appModule
+import hka.awp.cgi.temi.app.koin.weatherModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.GlobalContext
 import timber.log.Timber
@@ -18,7 +19,7 @@ class TemiApp : Application() {
         super.onCreate()
         GlobalContext.startKoin {
             androidContext(this@TemiApp)
-            modules(appModule)
+            modules(appModule, weatherModule)
         }
 
         if (BuildConfig.DEBUG) {
