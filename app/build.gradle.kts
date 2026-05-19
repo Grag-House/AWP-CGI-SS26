@@ -174,6 +174,7 @@ dependencies {
 
     // api call dependencies
     implementation(libs.okhttp)
+    implementation(libs.okhttp.tls)
     implementation(libs.kotlinx.serialization.json)
 }
 
