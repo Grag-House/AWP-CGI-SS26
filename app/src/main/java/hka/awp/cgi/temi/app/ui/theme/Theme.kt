@@ -25,7 +25,7 @@ fun CgiTheme(content: @Composable () -> Unit) {
     // 2. Zuordnung deiner Farben zum Material-Farbschema
     val colorScheme =
         lightColorScheme(
-            primary = CgiRed,
+            primary = primary,
             onPrimary = OnPrimary,
             background = AppBackground,
             surface = SidepanelColor, // Sidepanel als Standard-Oberfläche
