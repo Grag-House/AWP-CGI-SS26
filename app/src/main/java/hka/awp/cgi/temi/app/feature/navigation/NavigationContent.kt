@@ -47,7 +47,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.robotemi.sdk.navigation.model.Position
 import hka.awp.cgi.temi.app.R
 import hka.awp.cgi.temi.app.ui.components.NavigationCard
-import hka.awp.cgi.temi.app.ui.theme.CgiRed
 import androidx.compose.foundation.lazy.grid.items as gridItems
 
 private const val GRIDCELL_COUNT = 3
@@ -142,6 +141,7 @@ private fun MapDialog(
                     savedLocations = state.savedLocations,
                     onNavigateTo = onNavigateTo
                 )
+
                 else -> MapDialogSuccessContent(
                     locations = state.locations,
                     robotPosition = state.robotPosition,
@@ -189,7 +189,9 @@ private fun MapDialogErrorContent(savedLocations: List<String>, onNavigateTo: (S
                 items(savedLocations) { location ->
                     Column {
                         Row(
-                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
@@ -226,7 +228,9 @@ private fun MapDialogSuccessContent(
             items(locations) { marker ->
                 Column {
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
@@ -257,7 +261,7 @@ private fun NavigationHeader() {
         Icon(
             Icons.Rounded.NearMe,
             contentDescription = null,
-            tint = CgiRed,
+            tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(32.dp)
         )
         Spacer(modifier = Modifier.width(12.dp))
@@ -286,13 +290,14 @@ private fun CurrentLocationStatus(
     onMapClick: () -> Unit
 ) {
     val prefix = stringResource(R.string.current_location_prefix)
+    val primaryColor = MaterialTheme.colorScheme.primary
     val annotatedLocation = remember(currentLocation, prefix) {
         buildAnnotatedString {
             append(prefix)
             append(" ")
             withStyle(
                 style = SpanStyle(
-                    color = CgiRed,
+                    color = primaryColor,
                     textDecoration = TextDecoration.Underline,
                     fontWeight = FontWeight.Bold
                 )
@@ -306,7 +311,7 @@ private fun CurrentLocationStatus(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         color = Color.White,
-        border = BorderStroke(1.dp, Color(color = 0xFFEEEEEE)),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         shadowElevation = 0.dp
     ) {
         Row(
