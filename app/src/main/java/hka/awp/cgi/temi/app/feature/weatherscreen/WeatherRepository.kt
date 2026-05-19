@@ -33,8 +33,7 @@ class WeatherRepository(
     private val hourlyFormatter: DateTimeFormatter
 ) {
     companion object {
-        // TODO replace with CGI specific user agent
-        private const val USER_AGENT = "https://github.com/Grag-House/AWP-CGI-SS26"
+        private const val USER_AGENT = "jonas.mueller@cgi.com"
 
         // TODO move  to  method which reads the current location from temi
         @Suppress("MagicNumber")

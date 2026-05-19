@@ -9,7 +9,16 @@ enum class WeatherIcon { SUN, CLOUD, SUN_CLOUD, RAIN, SNOW, THUNDER, FOG }
 
 data class WeatherState(
     val location: String = "Karlsruhe",
-    val hourlyForecast: List<HourlyItem> = emptyList(),
+    val hourlyForecast: List<HourlyItem> =
+        // TODO this is so the app does not crash while trying to access this value before fetching it
+        listOf(
+            HourlyItem(
+                label = "N/A",
+                icon = WeatherIcon.SUN,
+                temp = "0",
+                precipitation = "N/A"
+            )
+        ),
     val weeklyForecast: List<DailyItem> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null
