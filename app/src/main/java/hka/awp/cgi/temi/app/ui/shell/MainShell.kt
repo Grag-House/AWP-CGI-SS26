@@ -86,45 +86,41 @@ fun MainShell(
                     .clip(RoundedCornerShape(24.dp))
             ) {
                 when (appViewModel.selectedRoute) {
-                    Screen.Dashboard.route ->
-                        MainContent(
-                            modifier = Modifier.weight(1f),
-                            onClick = { screen ->
-                                appViewModel.onRouteSelect(screen)
-                            },
-                            serverState = serverState,
-                            currentTemperatureState.hourlyForecast[0].temp
-                        )
+                    Screen.Dashboard.route -> MainContent(
+                        modifier = Modifier.weight(1f),
+                        onClick = { screen ->
+                            appViewModel.onRouteSelect(screen)
+                        },
+                        serverState = serverState,
+                        // TODO add utility method or catch the exception
+                        Integer.parseInt(currentTemperatureState.hourlyForecast[0].temp)
+                    )
 
-                    Screen.Webserver.route ->
-                        WebViewScreen(BuildConfig.WEBVIEW_URL)
+                    Screen.Webserver.route -> WebViewScreen(BuildConfig.WEBVIEW_URL)
 
-                    Screen.Navigation.route ->
-                        NavigationContent(
-                            modifier = Modifier.weight(1f),
-                            viewModel = navigationViewModel
-                        )
+                    Screen.Navigation.route -> NavigationContent(
+                        modifier = Modifier.weight(1f),
+                        viewModel = navigationViewModel
+                    )
 
-                    Screen.Settings.route ->
-                        SettingsContent(
-                            onItemClick = settingsViewModel::onSettingsItemClick
-                        )
+                    Screen.Settings.route -> SettingsContent(
+                        onItemClick = settingsViewModel::onSettingsItemClick
+                    )
 
-                    Screen.Weather.route ->
-                        WeatherContent(
-                            viewModel = weatherViewModel
-                        )
+                    Screen.Weather.route -> WeatherContent(
+                        viewModel = weatherViewModel
+                    )
 
                     // redundancy
-                    else ->
-                        MainContent(
-                            modifier = Modifier.weight(1f),
-                            onClick = { screen ->
-                                appViewModel.onRouteSelect(screen)
-                            },
-                            serverState = serverState,
-                            currentTemperatureState.hourlyForecast[0].temp
-                        )
+                    else -> MainContent(
+                        modifier = Modifier.weight(1f),
+                        onClick = { screen ->
+                            appViewModel.onRouteSelect(screen)
+                        },
+                        serverState = serverState,
+                        // TODO add utility method or catch the exception
+                        Integer.parseInt(currentTemperatureState.hourlyForecast[0].temp)
+                    )
                 }
             }
         }

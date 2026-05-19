@@ -49,7 +49,7 @@ fun MainContent(
     modifier: Modifier = Modifier,
     onClick: (Screen) -> Unit = {},
     serverState: ServerState,
-    currentTemperatureState: String
+    currentTemperatureState: Int
 ) {
     Column(
         modifier = modifier
@@ -88,7 +88,7 @@ fun MainContent(
 }
 
 @Composable
-private fun ContentGrid(serverState: ServerState, onClick: (Screen) -> Unit, currentTemperatureState: String) {
+private fun ContentGrid(serverState: ServerState, onClick: (Screen) -> Unit, currentTemperatureState: Int) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(GRIDCELL_COUNT),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
