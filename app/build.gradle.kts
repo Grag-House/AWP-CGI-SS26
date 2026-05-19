@@ -146,6 +146,7 @@ dependencies {
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.timber)
+    implementation(libs.hivemq)
     // temi dependency
     implementation(libs.temi.sdk)
 
