@@ -48,7 +48,8 @@ import hka.awp.cgi.temi.app.ui.shell.Screen
 fun MainContent(
     modifier: Modifier = Modifier,
     onClick: (Screen) -> Unit = {},
-    serverState: ServerState
+    serverState: ServerState,
+    currentTemperatureState: Int
 ) {
     Column(
         modifier = modifier
@@ -82,12 +83,12 @@ fun MainContent(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        ContentGrid(serverState, onClick)
+        ContentGrid(serverState, onClick, currentTemperatureState)
     }
 }
 
 @Composable
-private fun ContentGrid(serverState: ServerState, onClick: (Screen) -> Unit) {
+private fun ContentGrid(serverState: ServerState, onClick: (Screen) -> Unit, currentTemperatureState: Int) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(GRIDCELL_COUNT),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -124,7 +125,7 @@ private fun ContentGrid(serverState: ServerState, onClick: (Screen) -> Unit) {
                         contentDescription = stringResource(R.string.weather_icon_description)
                     )
                 },
-                bottomText = stringResource(R.string.temp_unit, 21),
+                bottomText = stringResource(R.string.temp_unit, currentTemperatureState),
                 isTemp = true,
                 onClick = { onClick(Screen.Weather) }
             )

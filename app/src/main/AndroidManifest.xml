@@ -16,6 +16,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TemiCGIApp"
         android:usesCleartextTraffic="true">
+        <meta-data
+            android:name="com.robotemi.sdk.metadata.SKILL_API_LEVEL"
+            android:value="2" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
