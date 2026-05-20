@@ -2,6 +2,7 @@ package hka.awp.cgi.temi.app.koin
 
 import com.hivemq.client.mqtt.mqtt5.Mqtt5Client
 import com.hivemq.client.mqtt.mqtt5.message.auth.Mqtt5SimpleAuth
+import hka.awp.cgi.temi.app.BuildConfig
 import hka.awp.cgi.temi.app.R
 import hka.awp.cgi.temi.app.feature.mqtt.MqttManager
 import hka.awp.cgi.temi.app.feature.navigation.NavigationViewModel
@@ -15,23 +16,17 @@ import java.util.UUID
  */
 val navigationModule = module {
     single {
-        // FIXME replace with correct IP
-        val brokerHost = "192.168.178.31"
-        val port = 1883
-
         val client = Mqtt5Client.builder()
             .identifier("temi-android-${UUID.randomUUID()}")
-            .serverHost(brokerHost)
-            .serverPort(port)
+            .serverHost(BuildConfig.MQTT_HOST)
+            .serverPort(BuildConfig.MQTT_PORT)
             .simpleAuth(
                 Mqtt5SimpleAuth.builder()
-                    // TODO move to .env
-                    .username("mqtt")
-                    .password("jch4ftjvgswzswirhzbojxgFGD".toByteArray())
+                    .username(BuildConfig.MQTT_USERNAME)
+                    .password(BuildConfig.MQTT_PASSWORD.toByteArray())
                     .build()
             )
             .buildBlocking()
-
         return@single client
     }
 

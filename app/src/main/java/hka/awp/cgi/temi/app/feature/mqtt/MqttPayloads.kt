@@ -18,7 +18,7 @@ data class MqttCommand(
 @Serializable
 data class MqttStatus(
     val status: String,
-    val text: String? = null
+    val location: String? = null
 )
 
 /**

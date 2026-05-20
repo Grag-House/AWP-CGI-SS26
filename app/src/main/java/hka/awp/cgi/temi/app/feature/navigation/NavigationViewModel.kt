@@ -57,6 +57,7 @@ data class NavigationUiState(
  *
  * This class tracks the robot's real-time position, determines the nearest saved location
  */
+@Suppress("TooManyFunctions")
 class NavigationViewModel(
     private val robot: Robot?,
     private val mqttManager: MqttManager,
@@ -75,7 +76,10 @@ class NavigationViewModel(
     private var loadingJob: Job? = null
     private var lastPublishedNavEvent: String? = null
     private var pendingTerminalPublishJob: Job? = null
-    private var navStatusCounter: Long = 0L
+
+    companion object {
+        private const val ABORT_DEBOUNCE_MS = 1500L
+    }
 
     init {
         robot?.addOnRobotReadyListener(this)
@@ -151,7 +155,6 @@ class NavigationViewModel(
     /** Updates the robot position on every change. */
     override fun onCurrentPositionChanged(position: Position) {
         _uiState.update { it.copy(robotPosition = position) }
-        Timber.v("Position changed: x=${position.x}, y=${position.y}")
     }
 
     /** Determines the nearest location based on distances and updates the displayed state. */
@@ -173,14 +176,13 @@ class NavigationViewModel(
     fun goToLocation(name: String) {
         Timber.d("Navigating to: $name")
         viewModelScope.launch {
-            Timber.d("Publish immediate nav ack: status=going location='%s'", name)
-            mqttManager.publishStatus(status = "going", text = name)
+            mqttManager.publishStatus(status = "going", location = name)
         }
         runCatching { robot?.goTo(name) }
             .onFailure {
                 Timber.e(it, "Navigation failed to: $name")
                 viewModelScope.launch {
-                    mqttManager.publishStatus(status = "failed", text = name)
+                    mqttManager.publishStatus(status = "failed", location = name)
                 }
             }
     }
@@ -194,7 +196,23 @@ class NavigationViewModel(
                 it.copy(isMapLoading = true, hasMapError = false, mapLocations = emptyList())
             }
 
-            val markers = fetchMarkersWithFallback()
+            suspend fun fetch(): List<LocationMarker>? = withContext(Dispatchers.IO) {
+                runCatching {
+                    val mapData = robot?.getMapData() ?: return@runCatching null
+                    mapData.locations
+                        .filter { it.layerCategory == LOCATION }
+                        .mapNotNull { layer ->
+                            val pose = layer.layerPoses?.firstOrNull() ?: return@mapNotNull null
+                            LocationMarker(layer.layerId, pose.x, pose.y)
+                        }
+                        .ifEmpty { null }
+                }.onFailure { Timber.e(it, "Error fetching map data") }.getOrNull()
+            }
+
+            val markers = fetch() ?: run {
+                Timber.w("Direct marker fetch failed, attempting explicit map load...")
+                if (awaitMapLoad()) fetch() else null
+            }
 
             _uiState.update {
                 it.copy(
@@ -204,31 +222,6 @@ class NavigationViewModel(
                 )
             }
         }
-    }
-
-    /** Attempts to fetch markers directly; falls back to explicit map loading if needed. */
-    private suspend fun fetchMarkersWithFallback(): List<LocationMarker>? {
-        fetchMarkers()?.let { return it }
-        Timber.w("Direct marker fetch failed, attempting explicit map load...")
-        return if (awaitMapLoad()) fetchMarkers() else null
-    }
-
-    /** Reads location markers from current map data. Returns null if none are found. */
-    private suspend fun fetchMarkers(): List<LocationMarker>? = withContext(Dispatchers.IO) {
-        runCatching {
-            val mapData = robot?.getMapData() ?: return@runCatching null
-
-            mapData.locations
-                .filter { it.layerCategory == LOCATION }
-                .mapNotNull { layer ->
-                    val pose = layer.layerPoses?.firstOrNull() ?: return@mapNotNull null
-                    LocationMarker(layer.layerId, pose.x, pose.y).also {
-                        Timber.v("Found marker: ${it.name} at (${it.x}, ${it.y})")
-                    }
-                }
-                .ifEmpty { null }
-        }.onFailure { Timber.e(it, "Error fetching map data") }
-            .getOrNull()
     }
 
     /**
@@ -299,76 +292,42 @@ class NavigationViewModel(
         descriptionId: Int,
         description: String
     ) {
-        navStatusCounter += 1
-        val statusEventId = navStatusCounter
         val normalizedStatus = status.lowercase()
         val normalizedLocation = location.trim()
-        Timber.d(
-            "[NavStatus #%d] location='%s' status='%s' descriptionId=%d description='%s'",
-            statusEventId,
-            normalizedLocation,
-            normalizedStatus,
-            descriptionId,
-            description
-        )
 
-        // Any progress-like status invalidates a previously queued abort/cancel publish.
-        // IMPORTANT: This must happen BEFORE checking for empty location.
-        if (normalizedStatus in setOf("start", "calculating", "reposing", "going")) {
-            Timber.d(
-                "[NavStatus #%d] progress status '%s' -> cancel pending terminal publish",
-                statusEventId,
-                normalizedStatus
-            )
+        if (normalizedStatus in setOf("start", "going", "calculating", "reposing")) {
             pendingTerminalPublishJob?.cancel()
             pendingTerminalPublishJob = null
-            if (normalizedLocation.isEmpty()) return
+            if (normalizedLocation.isNotEmpty()) {
+                viewModelScope.launch {
+                    mqttManager.publishStatus(status = normalizedStatus, location = normalizedLocation)
+                }
+            }
+            return
         }
 
-        // Ignore SDK noise without concrete destination for non-progress statuses.
-        if (normalizedLocation.isEmpty()) {
-            Timber.d("[NavStatus #%d] ignored: empty location for status '%s'", statusEventId, normalizedStatus)
-            return
+        if (normalizedLocation.isEmpty()) return
+
+        fun publishIfNew(s: String, l: String) {
+            val key = "$l|$s"
+            if (lastPublishedNavEvent == key) return
+            lastPublishedNavEvent = key
+            viewModelScope.launch { mqttManager.publishStatus(status = s, location = l) }
         }
 
         if (normalizedStatus == "complete") {
-            Timber.d("[NavStatus #%d] complete received -> publish immediately", statusEventId)
             pendingTerminalPublishJob?.cancel()
             pendingTerminalPublishJob = null
-            publishTerminalStatus(normalizedLocation, normalizedStatus)
+            publishIfNew(normalizedStatus, normalizedLocation)
             return
         }
 
-        if (normalizedStatus !in setOf("abort", "cancel", "cancelled")) {
-            Timber.d("[NavStatus #%d] ignored: non-terminal status '%s'", statusEventId, normalizedStatus)
-            return
-        }
+        if (normalizedStatus !in setOf("abort", "cancel", "cancelled")) return
 
-        // Temi may emit transient abort/cancel before continuing. Delay publish briefly.
-        Timber.d(
-            "[NavStatus #%d] queue delayed terminal publish: status='%s' delayMs=1500",
-            statusEventId,
-            normalizedStatus
-        )
         pendingTerminalPublishJob?.cancel()
         pendingTerminalPublishJob = viewModelScope.launch {
-            delay(1500)
-            Timber.d("[NavStatus #%d] delayed terminal publish fired", statusEventId)
-            publishTerminalStatus(normalizedLocation, normalizedStatus)
-        }
-    }
-
-    private fun publishTerminalStatus(location: String, status: String) {
-        val eventKey = "$location|$status"
-        if (lastPublishedNavEvent == eventKey) {
-            Timber.d("[NavStatus publish] deduplicated eventKey='%s'", eventKey)
-            return
-        }
-        lastPublishedNavEvent = eventKey
-        Timber.d("[NavStatus publish] sending status='%s' location='%s'", status, location)
-
-        viewModelScope.launch {
-            mqttManager.publishStatus(status = status, text = location)
+            delay(ABORT_DEBOUNCE_MS)
+            publishIfNew(normalizedStatus, normalizedLocation)
         }
     }
 }
