@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.robotemi.sdk.Robot
 import com.robotemi.sdk.SttLanguage
 import com.robotemi.sdk.TtsRequest
+import com.robotemi.sdk.listeners.OnGoToLocationStatusChangedListener
 import com.robotemi.sdk.listeners.OnRobotReadyListener
 import com.robotemi.sdk.map.LOCATION
 import com.robotemi.sdk.map.OnLoadMapStatusChangedListener
@@ -16,6 +17,7 @@ import hka.awp.cgi.temi.app.R
 import hka.awp.cgi.temi.app.feature.mqtt.MqttManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -62,19 +64,26 @@ class NavigationViewModel(
 ) : ViewModel(),
     OnRobotReadyListener,
     OnDistanceToLocationChangedListener,
+    OnGoToLocationStatusChangedListener,
     OnCurrentPositionChangedListener,
-    Robot.AsrListener {
+    Robot.AsrListener,
+    Robot.TtsListener {
 
     private val _uiState = MutableStateFlow(NavigationUiState())
     val uiState: StateFlow<NavigationUiState> = _uiState.asStateFlow()
 
     private var loadingJob: Job? = null
+    private var lastPublishedNavEvent: String? = null
+    private var pendingTerminalPublishJob: Job? = null
+    private var navStatusCounter: Long = 0L
 
     init {
         robot?.addOnRobotReadyListener(this)
         robot?.addOnDistanceToLocationChangedListener(this)
         robot?.addOnCurrentPositionChangedListener(this)
+        robot?.addOnGoToLocationStatusChangedListener(this)
         robot?.addAsrListener(this)
+        robot?.addTtsListener(this)
         viewModelScope.launch {
             mqttManager.connect()
         }
@@ -82,14 +91,19 @@ class NavigationViewModel(
 
     override fun onCleared() {
         super.onCleared()
+        pendingTerminalPublishJob?.cancel()
+        pendingTerminalPublishJob = null
         robot?.removeOnRobotReadyListener(this)
         robot?.removeOnDistanceToLocationChangedListener(this)
         robot?.removeOnCurrentPositionChangedListener(this)
+        robot?.removeOnGoToLocationStatusChangedListener(this)
         robot?.removeAsrListener(this)
+        robot?.removeTtsListener(this)
         mqttManager.disconnect()
     }
 
     override fun onAsrResult(asrResult: String, sttLanguage: SttLanguage) {
+        robot?.finishConversation()
         Timber.d("ASR Result: $asrResult ($sttLanguage)")
 
         viewModelScope.launch {
@@ -103,6 +117,14 @@ class NavigationViewModel(
             if (location.isNotEmpty()) {
                 robot?.speak(TtsRequest.create(speech = "Ich fahre zu $location", isShowOnConversationLayer = false))
                 goToLocation(location)
+            }
+        }
+    }
+
+    override fun onTtsStatusChanged(ttsRequest: TtsRequest) {
+        if (ttsRequest.status == TtsRequest.Status.COMPLETED) {
+            viewModelScope.launch {
+                mqttManager.publishTtsStatus(status = "completed")
             }
         }
     }
@@ -144,9 +166,6 @@ class NavigationViewModel(
         if (_uiState.value.currentLocation != newState) {
             _uiState.update { it.copy(currentLocation = newState) }
             Timber.d("Current location updated to: $systemName (distance: $distance)")
-            viewModelScope.launch {
-                mqttManager.publishStatus(status = "at", text = systemName)
-            }
         }
     }
 
@@ -154,6 +173,7 @@ class NavigationViewModel(
     fun goToLocation(name: String) {
         Timber.d("Navigating to: $name")
         viewModelScope.launch {
+            Timber.d("Publish immediate nav ack: status=going location='%s'", name)
             mqttManager.publishStatus(status = "going", text = name)
         }
         runCatching { robot?.goTo(name) }
@@ -270,6 +290,85 @@ class NavigationViewModel(
         loadingJob = null
         _uiState.update {
             it.copy(mapLocations = emptyList(), isMapLoading = false, hasMapError = false)
+        }
+    }
+
+    override fun onGoToLocationStatusChanged(
+        location: String,
+        status: String,
+        descriptionId: Int,
+        description: String
+    ) {
+        navStatusCounter += 1
+        val statusEventId = navStatusCounter
+        val normalizedStatus = status.lowercase()
+        val normalizedLocation = location.trim()
+        Timber.d(
+            "[NavStatus #%d] location='%s' status='%s' descriptionId=%d description='%s'",
+            statusEventId,
+            normalizedLocation,
+            normalizedStatus,
+            descriptionId,
+            description
+        )
+
+        // Any progress-like status invalidates a previously queued abort/cancel publish.
+        // IMPORTANT: This must happen BEFORE checking for empty location.
+        if (normalizedStatus in setOf("start", "calculating", "reposing", "going")) {
+            Timber.d(
+                "[NavStatus #%d] progress status '%s' -> cancel pending terminal publish",
+                statusEventId,
+                normalizedStatus
+            )
+            pendingTerminalPublishJob?.cancel()
+            pendingTerminalPublishJob = null
+            if (normalizedLocation.isEmpty()) return
+        }
+
+        // Ignore SDK noise without concrete destination for non-progress statuses.
+        if (normalizedLocation.isEmpty()) {
+            Timber.d("[NavStatus #%d] ignored: empty location for status '%s'", statusEventId, normalizedStatus)
+            return
+        }
+
+        if (normalizedStatus == "complete") {
+            Timber.d("[NavStatus #%d] complete received -> publish immediately", statusEventId)
+            pendingTerminalPublishJob?.cancel()
+            pendingTerminalPublishJob = null
+            publishTerminalStatus(normalizedLocation, normalizedStatus)
+            return
+        }
+
+        if (normalizedStatus !in setOf("abort", "cancel", "cancelled")) {
+            Timber.d("[NavStatus #%d] ignored: non-terminal status '%s'", statusEventId, normalizedStatus)
+            return
+        }
+
+        // Temi may emit transient abort/cancel before continuing. Delay publish briefly.
+        Timber.d(
+            "[NavStatus #%d] queue delayed terminal publish: status='%s' delayMs=1500",
+            statusEventId,
+            normalizedStatus
+        )
+        pendingTerminalPublishJob?.cancel()
+        pendingTerminalPublishJob = viewModelScope.launch {
+            delay(1500)
+            Timber.d("[NavStatus #%d] delayed terminal publish fired", statusEventId)
+            publishTerminalStatus(normalizedLocation, normalizedStatus)
+        }
+    }
+
+    private fun publishTerminalStatus(location: String, status: String) {
+        val eventKey = "$location|$status"
+        if (lastPublishedNavEvent == eventKey) {
+            Timber.d("[NavStatus publish] deduplicated eventKey='%s'", eventKey)
+            return
+        }
+        lastPublishedNavEvent = eventKey
+        Timber.d("[NavStatus publish] sending status='%s' location='%s'", status, location)
+
+        viewModelScope.launch {
+            mqttManager.publishStatus(status = status, text = location)
         }
     }
 }

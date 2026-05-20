@@ -19,6 +19,10 @@
         <meta-data
             android:name="com.robotemi.sdk.metadata.SKILL_API_LEVEL"
             android:value="2" />
+        <meta-data
+            android:name="com.robotemi.sdk.metadata.OVERRIDE_NLU"
+            android:value="true" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

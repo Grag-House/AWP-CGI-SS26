@@ -27,14 +27,19 @@
 -keep enum com.robotemi.sdk.** { *; }
 
 
-# --- HiveMQ ---
-# suppress netty warnings
+# HiveMQ & Netty exceptions for release mode
+# Prevents R8 from removing methods that are accessed via reflection
+# ------------------------------------------------------------------
+# Keep Netty (the network foundation) completely intact
+-keep class io.netty.** { *; }
 -dontwarn io.netty.**
-# supress log4j warnings
--dontwarn org.apache.log4j.**
--dontwarn org.apache.logging.log4j.**
--dontwarn org.slf4j.**
-# supress jetty warnings
--dontwarn org.eclipse.jetty.**
-# supress blockhound warnings
--dontwarn reactor.blockhound.**
+# Protect the HiveMQ client from obfuscation as well
+-keep class com.hivemq.client.** { *; }
+-dontwarn com.hivemq.client.**
+# JCTools is used internally by HiveMQ and resolves fields by exact name via Unsafe.
+# Do not obfuscate/shrink it, otherwise release builds can crash with NoSuchFieldException.
+-keep class org.jctools.** { *; }
+-keepnames class org.jctools.**
+-dontwarn org.jctools.**
+-keep class hka.awp.cgi.temi.app.feature.mqtt.MqttCommand { *; }
+-keep class hka.awp.cgi.temi.app.feature.mqtt.MqttStatus { *; }

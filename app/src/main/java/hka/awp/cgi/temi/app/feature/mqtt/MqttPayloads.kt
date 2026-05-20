@@ -28,3 +28,11 @@ data class MqttStatus(
 data class MqttAsr(
     val text: String
 )
+
+/**
+ * Represents a list response sent via MQTT.
+ */
+@Serializable
+data class MqttLocations(
+    val payloadObject: List<String>
+)
