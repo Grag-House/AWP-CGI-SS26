@@ -1,8 +1,6 @@
 package hka.awp.cgi.temi.app.koin
 
 import com.robotemi.sdk.Robot
-import hka.awp.cgi.temi.app.R
-import hka.awp.cgi.temi.app.feature.navigation.NavigationViewModel
 import hka.awp.cgi.temi.app.feature.settings.SettingsViewModel
 import hka.awp.cgi.temi.app.feature.webserver.WebserverViewModel
 import hka.awp.cgi.temi.app.ui.shell.AppViewModel
@@ -54,13 +52,6 @@ val appModule =
 
         viewModel<SettingsViewModel> {
             SettingsViewModel()
-        }
-
-        viewModel<NavigationViewModel> {
-            NavigationViewModel(
-                robot = get(),
-                defaultMapName = androidContext().getString(R.string.default_map_name)
-            )
         }
 
         viewModel<WebserverViewModel> { WebserverViewModel() }
