@@ -40,7 +40,7 @@ class TemiApp : Application() {
             Timber.plant(object : Timber.DebugTree() {
                 override fun isLoggable(tag: String?, priority: Int): Boolean {
                     // only log error or higher
-                    return priority >= Log.DEBUG
+                    return priority >= Log.ERROR
                 }
             })
         }
