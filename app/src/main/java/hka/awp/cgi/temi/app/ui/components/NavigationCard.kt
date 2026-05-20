@@ -19,13 +19,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import hka.awp.cgi.temi.app.ui.theme.CgiRed
 
 /**
  * A composable component that displays a card used for navigation within the application.
@@ -45,10 +43,14 @@ fun NavigationCard(label: String, icon: ImageVector, onClick: () -> Unit) {
         Modifier
             .fillMaxWidth()
             .aspectRatio(0.95f),
-        // Vertical square-like proportions from the image
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.outlinedCardColors(containerColor = Color.White),
-        border = BorderStroke(1.dp, Color(color = 0xFFEEEEEE))
+        colors = CardDefaults.outlinedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        ),
+        border = BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.outlineVariant
+        )
     ) {
         Column(
             modifier =
@@ -62,13 +64,14 @@ fun NavigationCard(label: String, icon: ImageVector, onClick: () -> Unit) {
                 icon,
                 contentDescription = null,
                 modifier = Modifier.size(66.dp),
-                tint = CgiRed
+                tint = MaterialTheme.colorScheme.primary
             )
             Spacer(modifier = Modifier.height(24.dp))
             Text(
                 text = label,
                 style = MaterialTheme.typography.titleSmall.copy(fontSize = 18.sp),
                 fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center
             )
         }
