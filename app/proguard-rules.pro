@@ -26,3 +26,15 @@
 -keep interface com.robotemi.sdk.** { *; }
 -keep enum com.robotemi.sdk.** { *; }
 
+
+# --- HiveMQ ---
+# suppress netty warnings
+-dontwarn io.netty.**
+# supress log4j warnings
+-dontwarn org.apache.log4j.**
+-dontwarn org.apache.logging.log4j.**
+-dontwarn org.slf4j.**
+# supress jetty warnings
+-dontwarn org.eclipse.jetty.**
+# supress blockhound warnings
+-dontwarn reactor.blockhound.**

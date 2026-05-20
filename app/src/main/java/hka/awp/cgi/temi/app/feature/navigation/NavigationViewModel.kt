@@ -4,6 +4,8 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.robotemi.sdk.Robot
+import com.robotemi.sdk.SttLanguage
+import com.robotemi.sdk.TtsRequest
 import com.robotemi.sdk.listeners.OnRobotReadyListener
 import com.robotemi.sdk.map.LOCATION
 import com.robotemi.sdk.map.OnLoadMapStatusChangedListener
@@ -11,6 +13,7 @@ import com.robotemi.sdk.navigation.listener.OnCurrentPositionChangedListener
 import com.robotemi.sdk.navigation.listener.OnDistanceToLocationChangedListener
 import com.robotemi.sdk.navigation.model.Position
 import hka.awp.cgi.temi.app.R
+import hka.awp.cgi.temi.app.feature.mqtt.MqttManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -44,7 +47,7 @@ data class NavigationUiState(
     val isMapLoading: Boolean = false,
     val hasMapError: Boolean = false,
     val robotPosition: Position? = null,
-    val savedLocations: List<String> = emptyList()
+    val savedLocations: List<String> = emptyList(),
 )
 
 /**
@@ -54,11 +57,13 @@ data class NavigationUiState(
  */
 class NavigationViewModel(
     private val robot: Robot?,
+    private val mqttManager: MqttManager,
     private val defaultMapName: String
 ) : ViewModel(),
     OnRobotReadyListener,
     OnDistanceToLocationChangedListener,
-    OnCurrentPositionChangedListener {
+    OnCurrentPositionChangedListener,
+    Robot.AsrListener {
 
     private val _uiState = MutableStateFlow(NavigationUiState())
     val uiState: StateFlow<NavigationUiState> = _uiState.asStateFlow()
@@ -69,6 +74,10 @@ class NavigationViewModel(
         robot?.addOnRobotReadyListener(this)
         robot?.addOnDistanceToLocationChangedListener(this)
         robot?.addOnCurrentPositionChangedListener(this)
+        robot?.addAsrListener(this)
+        viewModelScope.launch {
+            mqttManager.connect()
+        }
     }
 
     override fun onCleared() {
@@ -76,6 +85,26 @@ class NavigationViewModel(
         robot?.removeOnRobotReadyListener(this)
         robot?.removeOnDistanceToLocationChangedListener(this)
         robot?.removeOnCurrentPositionChangedListener(this)
+        robot?.removeAsrListener(this)
+        mqttManager.disconnect()
+    }
+
+    override fun onAsrResult(asrResult: String, sttLanguage: SttLanguage) {
+        Timber.d("ASR Result: $asrResult ($sttLanguage)")
+
+        viewModelScope.launch {
+            mqttManager.publishAsr(asrResult)
+        }
+
+        // Simple local NLP example: "Go to [Location]"
+        val textLower = asrResult.lowercase()
+        if (textLower.contains("gehe zu") || textLower.contains("go to")) {
+            val location = textLower.split("gehe zu", "go to").last().trim()
+            if (location.isNotEmpty()) {
+                robot?.speak(TtsRequest.create(speech = "Ich fahre zu $location", isShowOnConversationLayer = false))
+                goToLocation(location)
+            }
+        }
     }
 
     /** Loads saved locations and sets the initial robot position once the robot is ready. */
@@ -115,14 +144,25 @@ class NavigationViewModel(
         if (_uiState.value.currentLocation != newState) {
             _uiState.update { it.copy(currentLocation = newState) }
             Timber.d("Current location updated to: $systemName (distance: $distance)")
+            viewModelScope.launch {
+                mqttManager.publishStatus(status = "at", text = systemName)
+            }
         }
     }
 
     /** Navigates the robot to the specified waypoint. */
     fun goToLocation(name: String) {
         Timber.d("Navigating to: $name")
+        viewModelScope.launch {
+            mqttManager.publishStatus(status = "going", text = name)
+        }
         runCatching { robot?.goTo(name) }
-            .onFailure { Timber.e(it, "Navigation failed to: $name") }
+            .onFailure {
+                Timber.e(it, "Navigation failed to: $name")
+                viewModelScope.launch {
+                    mqttManager.publishStatus(status = "failed", text = name)
+                }
+            }
     }
 
     /** Starts loading the map and resets the dialog state. */

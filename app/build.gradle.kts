@@ -100,6 +100,17 @@ android {
         includeInApk = false
         includeInBundle = false
     }
+
+    // this is to exclude unwanted files from the resulting package
+    packaging {
+        resources {
+            // Schließt die Dateien aus, die den Konflikt verursachen
+            excludes += "META-INF/INDEX.LIST"
+            // Oft sinnvoll bei Netty/HiveMQ auch diese auszuschließen:
+            excludes += "META-INF/io.netty.versions.properties"
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+    }
 }
 
 detekt {
