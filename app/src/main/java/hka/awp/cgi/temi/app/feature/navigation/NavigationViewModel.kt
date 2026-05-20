@@ -4,6 +4,9 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.robotemi.sdk.Robot
+import com.robotemi.sdk.SttLanguage
+import com.robotemi.sdk.TtsRequest
+import com.robotemi.sdk.listeners.OnGoToLocationStatusChangedListener
 import com.robotemi.sdk.listeners.OnRobotReadyListener
 import com.robotemi.sdk.map.LOCATION
 import com.robotemi.sdk.map.OnLoadMapStatusChangedListener
@@ -11,8 +14,10 @@ import com.robotemi.sdk.navigation.listener.OnCurrentPositionChangedListener
 import com.robotemi.sdk.navigation.listener.OnDistanceToLocationChangedListener
 import com.robotemi.sdk.navigation.model.Position
 import hka.awp.cgi.temi.app.R
+import hka.awp.cgi.temi.app.feature.mqtt.MqttManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -44,7 +49,7 @@ data class NavigationUiState(
     val isMapLoading: Boolean = false,
     val hasMapError: Boolean = false,
     val robotPosition: Position? = null,
-    val savedLocations: List<String> = emptyList()
+    val savedLocations: List<String> = emptyList(),
 )
 
 /**
@@ -52,30 +57,80 @@ data class NavigationUiState(
  *
  * This class tracks the robot's real-time position, determines the nearest saved location
  */
+@Suppress("TooManyFunctions")
 class NavigationViewModel(
     private val robot: Robot?,
+    private val mqttManager: MqttManager,
     private val defaultMapName: String
 ) : ViewModel(),
     OnRobotReadyListener,
     OnDistanceToLocationChangedListener,
-    OnCurrentPositionChangedListener {
+    OnGoToLocationStatusChangedListener,
+    OnCurrentPositionChangedListener,
+    Robot.AsrListener,
+    Robot.TtsListener {
 
     private val _uiState = MutableStateFlow(NavigationUiState())
     val uiState: StateFlow<NavigationUiState> = _uiState.asStateFlow()
 
     private var loadingJob: Job? = null
+    private var lastPublishedNavEvent: String? = null
+    private var pendingTerminalPublishJob: Job? = null
+
+    companion object {
+        private const val ABORT_DEBOUNCE_MS = 1500L
+    }
 
     init {
         robot?.addOnRobotReadyListener(this)
         robot?.addOnDistanceToLocationChangedListener(this)
         robot?.addOnCurrentPositionChangedListener(this)
+        robot?.addOnGoToLocationStatusChangedListener(this)
+        robot?.addAsrListener(this)
+        robot?.addTtsListener(this)
+        viewModelScope.launch {
+            mqttManager.connect()
+        }
     }
 
     override fun onCleared() {
         super.onCleared()
+        pendingTerminalPublishJob?.cancel()
+        pendingTerminalPublishJob = null
         robot?.removeOnRobotReadyListener(this)
         robot?.removeOnDistanceToLocationChangedListener(this)
         robot?.removeOnCurrentPositionChangedListener(this)
+        robot?.removeOnGoToLocationStatusChangedListener(this)
+        robot?.removeAsrListener(this)
+        robot?.removeTtsListener(this)
+        mqttManager.disconnect()
+    }
+
+    override fun onAsrResult(asrResult: String, sttLanguage: SttLanguage) {
+        robot?.finishConversation()
+        Timber.d("ASR Result: $asrResult ($sttLanguage)")
+
+        viewModelScope.launch {
+            mqttManager.publishAsr(asrResult)
+        }
+
+        // Simple local NLP example: "Go to [Location]"
+        val textLower = asrResult.lowercase()
+        if (textLower.contains("gehe zu") || textLower.contains("go to")) {
+            val location = textLower.split("gehe zu", "go to").last().trim()
+            if (location.isNotEmpty()) {
+                robot?.speak(TtsRequest.create(speech = "Ich fahre zu $location", isShowOnConversationLayer = false))
+                goToLocation(location)
+            }
+        }
+    }
+
+    override fun onTtsStatusChanged(ttsRequest: TtsRequest) {
+        if (ttsRequest.status == TtsRequest.Status.COMPLETED) {
+            viewModelScope.launch {
+                mqttManager.publishTtsStatus(status = "completed")
+            }
+        }
     }
 
     /** Loads saved locations and sets the initial robot position once the robot is ready. */
@@ -100,7 +155,6 @@ class NavigationViewModel(
     /** Updates the robot position on every change. */
     override fun onCurrentPositionChanged(position: Position) {
         _uiState.update { it.copy(robotPosition = position) }
-        Timber.v("Position changed: x=${position.x}, y=${position.y}")
     }
 
     /** Determines the nearest location based on distances and updates the displayed state. */
@@ -121,8 +175,16 @@ class NavigationViewModel(
     /** Navigates the robot to the specified waypoint. */
     fun goToLocation(name: String) {
         Timber.d("Navigating to: $name")
+        viewModelScope.launch {
+            mqttManager.publishStatus(status = "going", location = name)
+        }
         runCatching { robot?.goTo(name) }
-            .onFailure { Timber.e(it, "Navigation failed to: $name") }
+            .onFailure {
+                Timber.e(it, "Navigation failed to: $name")
+                viewModelScope.launch {
+                    mqttManager.publishStatus(status = "failed", location = name)
+                }
+            }
     }
 
     /** Starts loading the map and resets the dialog state. */
@@ -134,7 +196,23 @@ class NavigationViewModel(
                 it.copy(isMapLoading = true, hasMapError = false, mapLocations = emptyList())
             }
 
-            val markers = fetchMarkersWithFallback()
+            suspend fun fetch(): List<LocationMarker>? = withContext(Dispatchers.IO) {
+                runCatching {
+                    val mapData = robot?.getMapData() ?: return@runCatching null
+                    mapData.locations
+                        .filter { it.layerCategory == LOCATION }
+                        .mapNotNull { layer ->
+                            val pose = layer.layerPoses?.firstOrNull() ?: return@mapNotNull null
+                            LocationMarker(layer.layerId, pose.x, pose.y)
+                        }
+                        .ifEmpty { null }
+                }.onFailure { Timber.e(it, "Error fetching map data") }.getOrNull()
+            }
+
+            val markers = fetch() ?: run {
+                Timber.w("Direct marker fetch failed, attempting explicit map load...")
+                if (awaitMapLoad()) fetch() else null
+            }
 
             _uiState.update {
                 it.copy(
@@ -144,31 +222,6 @@ class NavigationViewModel(
                 )
             }
         }
-    }
-
-    /** Attempts to fetch markers directly; falls back to explicit map loading if needed. */
-    private suspend fun fetchMarkersWithFallback(): List<LocationMarker>? {
-        fetchMarkers()?.let { return it }
-        Timber.w("Direct marker fetch failed, attempting explicit map load...")
-        return if (awaitMapLoad()) fetchMarkers() else null
-    }
-
-    /** Reads location markers from current map data. Returns null if none are found. */
-    private suspend fun fetchMarkers(): List<LocationMarker>? = withContext(Dispatchers.IO) {
-        runCatching {
-            val mapData = robot?.getMapData() ?: return@runCatching null
-
-            mapData.locations
-                .filter { it.layerCategory == LOCATION }
-                .mapNotNull { layer ->
-                    val pose = layer.layerPoses?.firstOrNull() ?: return@mapNotNull null
-                    LocationMarker(layer.layerId, pose.x, pose.y).also {
-                        Timber.v("Found marker: ${it.name} at (${it.x}, ${it.y})")
-                    }
-                }
-                .ifEmpty { null }
-        }.onFailure { Timber.e(it, "Error fetching map data") }
-            .getOrNull()
     }
 
     /**
@@ -230,6 +283,51 @@ class NavigationViewModel(
         loadingJob = null
         _uiState.update {
             it.copy(mapLocations = emptyList(), isMapLoading = false, hasMapError = false)
+        }
+    }
+
+    override fun onGoToLocationStatusChanged(
+        location: String,
+        status: String,
+        descriptionId: Int,
+        description: String
+    ) {
+        val normalizedStatus = status.lowercase()
+        val normalizedLocation = location.trim()
+
+        if (normalizedStatus in setOf("start", "going", "calculating", "reposing")) {
+            pendingTerminalPublishJob?.cancel()
+            pendingTerminalPublishJob = null
+            if (normalizedLocation.isNotEmpty()) {
+                viewModelScope.launch {
+                    mqttManager.publishStatus(status = normalizedStatus, location = normalizedLocation)
+                }
+            }
+            return
+        }
+
+        if (normalizedLocation.isEmpty()) return
+
+        fun publishIfNew(s: String, l: String) {
+            val key = "$l|$s"
+            if (lastPublishedNavEvent == key) return
+            lastPublishedNavEvent = key
+            viewModelScope.launch { mqttManager.publishStatus(status = s, location = l) }
+        }
+
+        if (normalizedStatus == "complete") {
+            pendingTerminalPublishJob?.cancel()
+            pendingTerminalPublishJob = null
+            publishIfNew(normalizedStatus, normalizedLocation)
+            return
+        }
+
+        if (normalizedStatus !in setOf("abort", "cancel", "cancelled")) return
+
+        pendingTerminalPublishJob?.cancel()
+        pendingTerminalPublishJob = viewModelScope.launch {
+            delay(ABORT_DEBOUNCE_MS)
+            publishIfNew(normalizedStatus, normalizedLocation)
         }
     }
 }

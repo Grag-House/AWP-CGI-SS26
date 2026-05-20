@@ -1,7 +1,9 @@
 package hka.awp.cgi.temi.app
 
 import android.app.Application
+import android.util.Log
 import hka.awp.cgi.temi.app.koin.appModule
+import hka.awp.cgi.temi.app.koin.navigationModule
 import hka.awp.cgi.temi.app.koin.weatherModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.GlobalContext
@@ -19,7 +21,7 @@ class TemiApp : Application() {
         super.onCreate()
         GlobalContext.startKoin {
             androidContext(this@TemiApp)
-            modules(appModule, weatherModule)
+            modules(appModule, weatherModule, navigationModule)
         }
 
         if (BuildConfig.DEBUG) {
@@ -35,7 +37,12 @@ class TemiApp : Application() {
                 oldHandler?.uncaughtException(thread, e)
             }
         } else {
-            // TODO specify logging mode for release
+            Timber.plant(object : Timber.DebugTree() {
+                override fun isLoggable(tag: String?, priority: Int): Boolean {
+                    // only log error or higher
+                    return priority >= Log.ERROR
+                }
+            })
         }
     }
 }
