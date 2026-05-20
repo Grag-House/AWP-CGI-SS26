@@ -12,6 +12,8 @@ import java.util.Collections
 private const val FALLBACK_IP_ADDRESS = "0.0.0.0"
 private const val NO_IP_FOUND_MESSAGE = "Keine IP gefunden"
 private const val MAX_BRIGHTNESS = 255
+private const val PREFS_NAME = "settings"
+private const val DARK_MODE_KEY = "dark_mode"
 
 data class RobotInfo(
     val ip: String,
@@ -71,6 +73,32 @@ class RobotRepository {
         } catch (exception: IllegalArgumentException) {
             Timber.e(exception, "Invalid brightness value")
         }
+    }
+
+    fun saveDarkMode(
+        enabled: Boolean,
+        context: Context
+                    ) {
+        context.getSharedPreferences(
+            PREFS_NAME,
+            Context.MODE_PRIVATE
+                                    )
+            .edit()
+            .putBoolean(DARK_MODE_KEY, enabled)
+            .apply()
+    }
+
+    fun getDarkMode(
+        context: Context
+                   ): Boolean {
+        return context.getSharedPreferences(
+            PREFS_NAME,
+            Context.MODE_PRIVATE
+                                           )
+            .getBoolean(
+                DARK_MODE_KEY,
+                false
+                       )
     }
 
     fun setScreenTimeout(millis: Int, context: Context) {

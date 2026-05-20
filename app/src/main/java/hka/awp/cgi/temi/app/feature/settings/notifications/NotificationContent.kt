@@ -29,8 +29,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import hka.awp.cgi.temi.app.R
 import hka.awp.cgi.temi.app.ui.components.ExpandableSettingsCard
 import hka.awp.cgi.temi.app.ui.components.SettingsCard
 import hka.awp.cgi.temi.app.ui.components.SettingsHeader
@@ -48,101 +50,155 @@ fun NotificationContent(
     selectedLocale: Locale,
     onLocaleSelect: (Locale) -> Unit,
     onBackClick: () -> Unit
-) {
+                       ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(32.dp)
-    ) {
-        // 1. Header
+          ) {
         SettingsHeader(
-            title = "Benachrichtigungen & Stimme",
+            title = stringResource(
+                R.string.notifications_voice
+                                  ),
             onBackClick = onBackClick
-        )
+                      )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(
+            modifier = Modifier.height(32.dp)
+              )
 
-        // 2. Card
         SettingsCard {
             SettingsRow(
                 icon = Icons.Rounded.Notifications,
-                title = "Töne & Systemmeldungen",
-                subtitle = if (isEnabled) "Eingeschaltet" else "Stummgeschaltet",
+                title = stringResource(
+                    R.string.settings_notifications_subtitle
+                                      ),
+                subtitle =
+                    if (isEnabled) {
+                        stringResource(
+                            R.string.enabled
+                                      )
+                    } else {
+                        stringResource(
+                            R.string.muted
+                                      )
+                    },
                 action = {
                     Switch(
                         checked = isEnabled,
                         onCheckedChange = onEnabledChange
-                    )
+                          )
                 }
-            )
+                       )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(
+            modifier = Modifier.height(16.dp)
+              )
 
-        // 3. Card
         SettingsCard {
             Text(
-                text = "Lautstärke",
+                text = stringResource(
+                    R.string.volume
+                                     ),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
-            )
+                )
 
             Slider(
                 value = volume,
                 onValueChange = onVolumeChange,
                 enabled = isEnabled,
                 valueRange = 0f..1f
-            )
+                  )
 
             Text(
                 text = "${(volume * 100).toInt()}%",
-                modifier = Modifier.align(Alignment.End),
+                modifier = Modifier.align(
+                    Alignment.End
+                                         ),
                 style = MaterialTheme.typography.bodyMedium
-            )
+                )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-        // 4. expandable Settings card
+        Spacer(
+            modifier = Modifier.height(16.dp)
+              )
+
         ExpandableSettingsCard(
             icon = Icons.Rounded.RecordVoiceOver,
-            title = "Sprecher auswählen",
-            subtitle = "Aktuelle Sprache: ${selectedLocale.displayName}"
-        ) {
+            title = stringResource(
+                R.string.select_speaker
+                                  ),
+            subtitle = stringResource(
+                R.string.current_language,
+                selectedLocale.displayName
+                                     )
+                              ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(max = 350.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f))
-            ) {
-                LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                    .clip(
+                        RoundedCornerShape(12.dp)
+                         )
+                    .background(
+                        MaterialTheme.colorScheme.surface
+                            .copy(alpha = 0.5f)
+                               )
+               ) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth()
+                          ) {
                     items(availableLocales) { locale ->
-                        val isSelected = locale == selectedLocale
+
+                        val isSelected =
+                            locale == selectedLocale
 
                         SettingsRow(
-                            icon = if (isSelected) Icons.Rounded.CheckCircle else Icons.Rounded.Language,
+                            icon =
+                                if (isSelected) {
+                                    Icons.Rounded.CheckCircle
+                                } else {
+                                    Icons.Rounded.Language
+                                },
                             title = locale.displayName,
                             modifier = Modifier
-                                .clip(RoundedCornerShape(8.dp))
-                                .clickable { onLocaleSelect(locale) }
-                                .padding(vertical = 4.dp), // Etwas mehr Platz zwischen den Items
+                                .clip(
+                                    RoundedCornerShape(8.dp)
+                                     )
+                                .clickable {
+                                    onLocaleSelect(locale)
+                                }
+                                .padding(vertical = 4.dp),
                             action = {
                                 if (isSelected) {
                                     Icon(
-                                        imageVector = Icons.Rounded.Check,
+                                        imageVector =
+                                            Icons.Rounded.Check,
                                         contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary
-                                    )
+                                        tint =
+                                            MaterialTheme
+                                                .colorScheme
+                                                .primary
+                                        )
                                 }
                             }
-                        )
+                                   )
 
                         if (locale != availableLocales.last()) {
                             HorizontalDivider(
-                                modifier = Modifier.padding(horizontal = 48.dp),
+                                modifier =
+                                    Modifier.padding(
+                                        horizontal = 48.dp
+                                                    ),
                                 thickness = 0.5.dp,
-                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-                            )
+                                color =
+                                    MaterialTheme
+                                        .colorScheme
+                                        .outlineVariant
+                                        .copy(alpha = 0.5f)
+                                             )
                         }
                     }
                 }

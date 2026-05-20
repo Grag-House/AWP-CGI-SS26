@@ -3,11 +3,16 @@ package hka.awp.cgi.temi.app.feature.settings.notifications
 import android.app.Application
 import android.speech.tts.TextToSpeech
 import androidx.lifecycle.AndroidViewModel
+import com.robotemi.sdk.Robot
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import timber.log.Timber
 import java.util.Locale
 
-class NotificationViewModel(application: Application) : AndroidViewModel(application) {
+class NotificationViewModel(
+    application: Application,
+    private val robot: Robot?
+                           ) : AndroidViewModel(application) {
 
     private var tts: TextToSpeech? = null
 
@@ -17,12 +22,12 @@ class NotificationViewModel(application: Application) : AndroidViewModel(applica
     private val _notificationsEnabled = MutableStateFlow(true)
     val notificationsEnabled = _notificationsEnabled.asStateFlow()
 
-    // Neue States für die Sprache
     private val _availableLocales = MutableStateFlow<List<Locale>>(emptyList())
     val availableLocales = _availableLocales.asStateFlow()
 
     private val _selectedLocale = MutableStateFlow(Locale.getDefault())
     val selectedLocale = _selectedLocale.asStateFlow()
+    private var previousVolume = 5
 
     init {
         tts = TextToSpeech(application) { status ->
@@ -37,20 +42,39 @@ class NotificationViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
+    init {
+        loadCurrentVolume()
+    }
+
+    private fun loadCurrentVolume() {
+        robot?.let {
+            val currentVolume = it.volume
+            Timber.d("Current temi volume: $currentVolume")
+            _volume.value = currentVolume / 10f
+        }
+    }
+
     fun updateVolume(newVolume: Float) {
         _volume.value = newVolume
+
+        val temiVolume = (newVolume * 10).toInt()
+
+        robot?.volume = temiVolume
     }
 
     fun toggleNotifications(enabled: Boolean) {
         _notificationsEnabled.value = enabled
-    }
 
+        if (!enabled) {
+            previousVolume = (_volume.value * 10).toInt()
+            robot?.volume = 0
+        } else {
+            robot?.volume = previousVolume
+        }
+    }
     fun setLocale(locale: Locale) {
         _selectedLocale.value = locale
         tts?.language = locale
-        if (_notificationsEnabled.value) {
-            tts?.speak("Stimme geändert", TextToSpeech.QUEUE_FLUSH, null, null)
-        }
     }
 
     override fun onCleared() {

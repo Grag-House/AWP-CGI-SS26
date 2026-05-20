@@ -14,7 +14,7 @@ fun BatteryScreen(
     val isCharging by viewModel.isCharging.collectAsState()
 
     BatteryContent(
-        batteryLevel = batteryLevel,
+        batteryLevel =  batteryLevel,
         isCharging = isCharging,
         onBackClick = onBackClick
     )

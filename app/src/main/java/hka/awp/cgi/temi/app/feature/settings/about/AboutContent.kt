@@ -41,10 +41,10 @@ import hka.awp.cgi.temi.app.feature.settings.SettingsItem
 /**
  * Screen for system settings.
  *
- * @param modifier Layout modifier.
- * @param aboutInfo Robot information object to show in the "About" dialog, or null if hidden.
- * @param onItemClick Handler for setting clicks.
- * @param onDismissAbout Handler to close the "About" dialog.
+ * @param modifier Layout modifier
+ * @param aboutInfo Robot information object to show in the dialog
+ * @param onItemClick Handler for settings clicks
+ * @param onDismissAbout Handler to close the dialog
  */
 @Composable
 fun AboutContent(
@@ -52,104 +52,172 @@ fun AboutContent(
     onItemClick: (SettingsItem) -> Unit,
     aboutInfo: RobotInfo? = null,
     onDismissAbout: () -> Unit = {}
-) {
+                ) {
     Column(
-        modifier =
-        modifier
+        modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(start = 32.dp, top = 32.dp, end = 32.dp)
-    ) {
-        Spacer(modifier = Modifier.height(24.dp))
+            .padding(
+                start = 32.dp,
+                top = 32.dp,
+                end = 32.dp
+                    )
+          ) {
+        Spacer(
+            modifier = Modifier.height(24.dp)
+              )
 
-        // Header
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+           ) {
             Icon(
-                Icons.Default.Settings,
-                contentDescription = stringResource(R.string.settings),
+                imageVector = Icons.Default.Settings,
+                contentDescription = stringResource(
+                    R.string.settings
+                                                   ),
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(48.dp)
-            )
-            Spacer(modifier = Modifier.width(16.dp))
+                )
+
+            Spacer(
+                modifier = Modifier.width(16.dp)
+                  )
+
             Text(
-                text =
-                buildAnnotatedString {
-                    append(stringResource(R.string.settings_page_prefix))
+                text = buildAnnotatedString {
+                    append(
+                        stringResource(
+                            R.string.settings_page_prefix
+                                      )
+                          )
+
                     append(" ")
-                    withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
-                        append(stringResource(R.string.settings))
+
+                    withStyle(
+                        SpanStyle(
+                            color = MaterialTheme.colorScheme.primary
+                                 )
+                             ) {
+                        append(
+                            stringResource(
+                                R.string.settings
+                                          )
+                              )
                     }
                 },
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold
-            )
+                )
         }
 
-        Spacer(modifier = Modifier.height(48.dp))
+        Spacer(
+            modifier = Modifier.height(48.dp)
+              )
 
-        // Settings Options
         Column(
             verticalArrangement = Arrangement.spacedBy(20.dp)
-        ) {
-            SettingsItem.settingsItems.forEach {
+              ) {
+            SettingsItem.settingsItems.forEach { item ->
                 SettingsOptionCard(
-                    title = stringResource(it.titleRes),
-                    subtitle = stringResource(it.subtitleRes),
-                    icon = it.icon,
-                    onClick = { onItemClick(it) }
-                )
+                    title = stringResource(item.titleRes),
+                    subtitle = stringResource(item.subtitleRes),
+                    icon = item.icon,
+                    onClick = { onItemClick(item) }
+                                  )
             }
         }
 
-        // About Dialog
         if (aboutInfo != null) {
             AlertDialog(
                 onDismissRequest = onDismissAbout,
                 confirmButton = {
-                    TextButton(onClick = onDismissAbout) {
-                        Text("Schließen")
+                    TextButton(
+                        onClick = onDismissAbout
+                              ) {
+                        Text(
+                            text = stringResource(
+                                R.string.close
+                                                 )
+                            )
                     }
                 },
                 title = {
                     Text(
-                        text = "System Informationen",
+                        text = stringResource(
+                            R.string.system_information
+                                             ),
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
-                    )
+                        )
                 },
                 text = {
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        InfoItem(label = "Modell Name", value = aboutInfo.ip)
-                        InfoItem(label = "Modell", value = aboutInfo.model)
-                        InfoItem(label = "Seriennummer", value = aboutInfo.serial)
-                        InfoItem(label = "Software Version", value = aboutInfo.appVersion)
+                    Column(
+                        verticalArrangement =
+                            Arrangement.spacedBy(12.dp)
+                          ) {
+                        InfoItem(
+                            label = stringResource(
+                                R.string.ip_address
+                                                  ),
+                            value = aboutInfo.ip
+                                )
+
+                        InfoItem(
+                            label = stringResource(
+                                R.string.model
+                                                  ),
+                            value = aboutInfo.model
+                                )
+
+                        InfoItem(
+                            label = stringResource(
+                                R.string.serial_number
+                                                  ),
+                            value = aboutInfo.serial
+                                )
+
+                        InfoItem(
+                            label = stringResource(
+                                R.string.software_version
+                                                  ),
+                            value = aboutInfo.appVersion
+                                )
                     }
                 },
                 shape = RoundedCornerShape(28.dp),
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-            )
+                containerColor =
+                    MaterialTheme.colorScheme.surfaceContainerHigh
+                       )
         }
     }
 }
 
 @Composable
-private fun InfoItem(label: String, value: String) {
+private fun InfoItem(
+    label: String,
+    value: String
+                    ) {
     Column {
         Text(
             text = label,
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.primary
-        )
+            )
+
         Text(
             text = value,
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Medium
-        )
-        Spacer(modifier = Modifier.height(4.dp))
+            )
+
+        Spacer(
+            modifier = Modifier.height(4.dp)
+              )
+
         HorizontalDivider(
             thickness = 0.5.dp,
             color = MaterialTheme.colorScheme.outlineVariant
-        )
+                         )
     }
 }
 
@@ -159,25 +227,35 @@ fun SettingsOptionCard(
     subtitle: String,
     icon: ImageVector,
     onClick: () -> Unit = {}
-) {
+                      ) {
     Row(
-        modifier =
-        Modifier
+        modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(24.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .clickable { onClick() }
-            .padding(horizontal = 24.dp, vertical = 22.dp),
+            .clip(
+                RoundedCornerShape(24.dp)
+                 )
+            .background(
+                MaterialTheme.colorScheme.surfaceVariant
+                       )
+            .clickable {
+                onClick()
+            }
+            .padding(
+                horizontal = 24.dp,
+                vertical = 22.dp
+                    ),
         verticalAlignment = Alignment.CenterVertically
-    ) {
+       ) {
         Icon(
             imageVector = icon,
             contentDescription = title,
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(32.dp)
-        )
+            )
 
-        Spacer(modifier = Modifier.width(20.dp))
+        Spacer(
+            modifier = Modifier.width(20.dp)
+              )
 
         Column {
             Text(
@@ -185,13 +263,17 @@ fun SettingsOptionCard(
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.height(4.dp))
+                )
+
+            Spacer(
+                modifier = Modifier.height(4.dp)
+                  )
+
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+                )
         }
     }
 }

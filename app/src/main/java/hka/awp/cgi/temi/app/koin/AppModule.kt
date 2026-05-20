@@ -1,5 +1,6 @@
 package hka.awp.cgi.temi.app.koin
 
+import android.app.Application
 import com.robotemi.sdk.Robot
 import hka.awp.cgi.temi.app.data.repository.RobotRepository
 import hka.awp.cgi.temi.app.feature.navigation.NavigationViewModel
@@ -55,16 +56,20 @@ val appModule = module {
         SettingsViewModel(get())
     }
     viewModel {
-        DisplayViewModel(get())
+        DisplayViewModel(
+            application = androidContext() as Application,
+            get())
     }
     viewModel {
-        NotificationViewModel(get())
+        NotificationViewModel(
+            application = androidContext() as Application,
+            get())
     }
 
     viewModel<NavigationViewModel> { NavigationViewModel() }
 
     viewModel<WebserverViewModel> { WebserverViewModel() }
     viewModel {
-        BatteryViewModel()
+        BatteryViewModel(get())
     }
 }

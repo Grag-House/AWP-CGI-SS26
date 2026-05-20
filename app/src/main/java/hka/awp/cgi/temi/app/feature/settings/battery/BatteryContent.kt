@@ -15,7 +15,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import hka.awp.cgi.temi.app.R
 import hka.awp.cgi.temi.app.ui.components.SettingsCard
 import hka.awp.cgi.temi.app.ui.components.SettingsHeader
 import hka.awp.cgi.temi.app.ui.components.SettingsRow
@@ -25,51 +27,92 @@ fun BatteryContent(
     batteryLevel: Int,
     isCharging: Boolean,
     onBackClick: () -> Unit
-) {
+                  ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(32.dp)
-    ) {
-        // 1. Dein Header
+          ) {
         SettingsHeader(
-            title = "Akku",
+            title = stringResource(
+                R.string.battery
+                                  ),
             onBackClick = onBackClick
-        )
+                      )
 
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(
+            modifier = Modifier.height(40.dp)
+              )
 
         SettingsCard {
             SettingsRow(
                 icon = Icons.Rounded.BatteryFull,
-                title = "Akkustatus",
-                subtitle = if (isCharging) "Wird geladen..." else "Wird aktuell nicht geladen.",
+                title = stringResource(
+                    R.string.battery_status
+                                      ),
+                subtitle =
+                    if (isCharging) {
+                        stringResource(
+                            R.string.battery_charging
+                                      )
+                    } else {
+                        stringResource(
+                            R.string.battery_not_charging
+                                      )
+                    },
                 action = {
                     Text(
                         text = "$batteryLevel%",
                         style = MaterialTheme.typography.headlineSmall,
-                        color = if (batteryLevel < 20) Color.Red else MaterialTheme.colorScheme.primary
-                    )
+                        color =
+                            if (batteryLevel < 20) {
+                                Color.Red
+                            } else {
+                                MaterialTheme.colorScheme.primary
+                            }
+                        )
                 }
-            )
+                       )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(
+                modifier = Modifier.height(16.dp)
+                  )
+
             LinearProgressIndicator(
                 progress = { batteryLevel / 100f },
                 modifier = Modifier.fillMaxWidth(),
-                color = if (batteryLevel < 20) Color.Red else MaterialTheme.colorScheme.primary,
-                trackColor = MaterialTheme.colorScheme.outlineVariant
-            )
+                color =
+                    if (batteryLevel < 20) {
+                        Color.Red
+                    } else {
+                        MaterialTheme.colorScheme.primary
+                    },
+                trackColor =
+                    MaterialTheme.colorScheme.outlineVariant
+                                   )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(
+            modifier = Modifier.height(16.dp)
+              )
 
         SettingsCard {
             SettingsRow(
                 icon = Icons.Rounded.Bolt,
-                title = "Energieverbrauch",
-                subtitle = "Aktuelle Nutzung wird vom System optimiert"
-            )
+                title = stringResource(
+                    R.string.power_status
+                                      ),
+                subtitle =
+                    if (isCharging) {
+                        stringResource(
+                            R.string.currently_charging
+                                      )
+                    } else {
+                        stringResource(
+                            R.string.battery_mode_active
+                                      )
+                    }
+                       )
         }
     }
 }

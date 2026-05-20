@@ -112,22 +112,17 @@ fun MainShell(
                         )
 
                     Screen.Settings.route -> {
-                        val settingsViewModel: SettingsViewModel = koinViewModel()
-
                         LaunchedEffect(Unit) {
                             settingsViewModel.navigationEvent.collect { event ->
                                 when (event) {
-                                    is SettingsNavigationEvent.NavigateToDisplay -> {
+                                    is SettingsNavigationEvent.NavigateToDisplay ->
                                         appViewModel.onRouteSelect(Screen.DisplaySettings)
-                                    }
 
-                                    is SettingsNavigationEvent.NavigateToNotifications -> {
+                                    is SettingsNavigationEvent.NavigateToNotifications ->
                                         appViewModel.onRouteSelect(Screen.NotificationSettings)
-                                    }
 
-                                    is SettingsNavigationEvent.NavigateToBattery -> {
+                                    is SettingsNavigationEvent.NavigateToBattery ->
                                         appViewModel.onRouteSelect(Screen.BatterySettings)
-                                    }
                                 }
                             }
                         }
@@ -135,7 +130,7 @@ fun MainShell(
                         SettingsScreen(
                             modifier = Modifier.weight(1f),
                             viewModel = settingsViewModel,
-                        )
+                                      )
                     }
 
                     Screen.DisplaySettings.route -> {

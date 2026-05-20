@@ -1,27 +1,26 @@
 package hka.awp.cgi.temi.app.feature.settings.battery
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.MutableStateFlow
+import hka.awp.cgi.temi.app.utils.TemiBatteryMonitor
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.SharingStarted
 
-class BatteryViewModel : ViewModel() {
+class BatteryViewModel(
+    private val batteryMonitor: TemiBatteryMonitor
+                      ) : ViewModel() {
 
-    // TODO Temi anbinden
-    private val _batteryLevel = MutableStateFlow(85)
-    val batteryLevel: StateFlow<Int> = _batteryLevel.asStateFlow()
+    val batteryLevel: StateFlow<Int> =
+        batteryMonitor.batteryLevel
+            .map { it ?: 0 }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = 0
+                    )
 
-    private val _isCharging = MutableStateFlow(false)
-    val isCharging: StateFlow<Boolean> = _isCharging.asStateFlow()
-
-    init {
-        observeBattery()
-    }
-
-    private fun observeBattery() {
-        viewModelScope.launch {
-        }
-    }
+    val isCharging: StateFlow<Boolean> =
+        batteryMonitor.isCharging
 }
