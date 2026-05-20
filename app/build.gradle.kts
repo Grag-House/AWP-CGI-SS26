@@ -61,6 +61,22 @@ android {
             val httpEnabledIpAddress = props.getProperty("HTTP_ALLOWED_IP")
                 ?: throw GradleException("Missing property 'HTTP_ALLOWED_IP' in .env")
             buildConfigField("String", "HTTP_ALLOWED_IP", "\"$httpEnabledIpAddress\"")
+
+            val mqttHost = props.getProperty("MQTT_HOST")
+                ?: throw GradleException("Missing property 'MQTT_HOST' in .env")
+            buildConfigField("String", "MQTT_HOST", "\"$mqttHost\"")
+
+            val mqttPort = props.getProperty("MQTT_PORT")
+                ?: throw GradleException("Missing property 'MQTT_PORT' in .env")
+            buildConfigField("Integer", "MQTT_PORT", mqttPort)
+
+            val mqttUsername = props.getProperty("MQTT_USERNAME")
+                ?: throw GradleException("Missing property 'MQTT_USERNAME' in .env")
+            buildConfigField("String", "MQTT_USERNAME", "\"$mqttUsername\"")
+
+            val mqttPassword = props.getProperty("MQTT_PASSWORD")
+                ?: throw GradleException("Missing property 'MQTT_PASSWORD' in .env")
+            buildConfigField("String", "MQTT_PASSWORD", "\"$mqttPassword\"")
         } else {
             throw GradleException(
                 "Missing .env file! please create it and include the 'WEBVIEW_URL"
@@ -99,6 +115,15 @@ android {
     dependenciesInfo {
         includeInApk = false
         includeInBundle = false
+    }
+
+    // this is to exclude unwanted files from the resulting package
+    packaging {
+        resources {
+            excludes += "META-INF/INDEX.LIST"
+            excludes += "META-INF/io.netty.versions.properties"
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
     }
 }
 
@@ -147,6 +172,7 @@ dependencies {
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.timber)
+    implementation(libs.hivemq)
     // temi dependency
     implementation(libs.temi.sdk)
     implementation(libs.androidx.compose.ui.text)
