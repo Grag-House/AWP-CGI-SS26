@@ -1,7 +1,9 @@
 package hka.awp.cgi.temi.app.ui.components
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -22,121 +24,118 @@ import androidx.compose.ui.unit.sp
  * Compose component that renders the vertical battery icon.
  *
  * The indicator dynamically updates its fill level based on the [level] percentage
- * and displays a charging bolt icon when [isCharging] is true. It includes a text
- * readout of the battery percentage (unless charging or at 100%) and adapts its
- * colors based on the current Material Theme.
+ * and displays a charging bolt icon when [isCharging] is true.
  *
  * @param level The battery percentage (0-100). If null, an empty outline with "--" is shown.
  * @param isCharging Boolean flag to determine if the charging bolt overlay should be displayed.
- * @param modifier [Modifier] to be applied to the bounding box of the battery indicator.
+ * @param modifier [Modifier] to be applied to the battery indicator.
  */
 @Composable
 fun BatteryIndicator(level: Int?, isCharging: Boolean, modifier: Modifier = Modifier) {
     @Suppress("MagicNumber")
     val safeLevel = level?.coerceIn(0, 100)
+
     val batteryColor = MaterialTheme.colorScheme.primary
-    val textOnFill = MaterialTheme.colorScheme.onPrimary
-    val textOnEmpty = MaterialTheme.colorScheme.primary
+    val textColor = MaterialTheme.colorScheme.primary
 
-    @Suppress("MagicNumber")
-    Box(
-        modifier = modifier.size(width = 15.dp, height = 24.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        val boltPath = remember { Path() }
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+       ) {
+        Box(
+            modifier = Modifier.size(width = 15.dp, height = 24.dp),
+            contentAlignment = Alignment.Center
+           ) {
+            val boltPath = remember { Path() }
 
-        Canvas(modifier = Modifier.matchParentSize()) {
-            val nubHeight = 4.dp.toPx()
-            val nubWidth = 9.dp.toPx()
-            val nubRadius = 1.5.dp.toPx()
+            Canvas(modifier = Modifier.matchParentSize()) {
+                val nubHeight = 4.dp.toPx()
+                val nubWidth = 9.dp.toPx()
+                val nubRadius = 1.5.dp.toPx()
 
-            val bodyTop = nubHeight - 0.5.dp.toPx()
-            val bodyWidth = 15.dp.toPx()
-            val bodyHeight = size.height - bodyTop
-            val bodyLeft = (size.width - bodyWidth) / 2f
+                val bodyTop = nubHeight - 0.5.dp.toPx()
+                val bodyWidth = 15.dp.toPx()
+                val bodyHeight = size.height - bodyTop
+                val bodyLeft = (size.width - bodyWidth) / 2f
 
-            val radius = 4.dp.toPx()
-            val strokeWidth = 2.dp.toPx()
+                val radius = 4.dp.toPx()
+                val strokeWidth = 2.dp.toPx()
 
-            val fillPercent = safeLevel?.div(100f) ?: 0f
-            val fillHeight = bodyHeight * fillPercent
-            val fillTop = bodyTop + bodyHeight - fillHeight
+                val fillPercent = safeLevel?.div(100f) ?: 0f
+                val fillHeight = bodyHeight * fillPercent
+                val fillTop = bodyTop + bodyHeight - fillHeight
 
-            // Nub top
-            drawRoundRect(
-                color = batteryColor,
-                topLeft = Offset((size.width - nubWidth) / 2f, 0f),
-                size = Size(nubWidth, nubHeight),
-                cornerRadius = CornerRadius(nubRadius, nubRadius)
-            )
-
-            if (safeLevel == null) {
-                // outline in case of no data
+                // Battery nub
                 drawRoundRect(
                     color = batteryColor,
-                    topLeft = Offset(bodyLeft, bodyTop),
-                    size = Size(bodyWidth, bodyHeight),
-                    cornerRadius = CornerRadius(radius, radius),
-                    style = Stroke(width = strokeWidth)
-                )
-            } else if (safeLevel >= 95) {
-                // just like the material icon, completely filled
-                drawRoundRect(
-                    color = batteryColor,
-                    topLeft = Offset(bodyLeft, bodyTop),
-                    size = Size(bodyWidth, bodyHeight),
-                    cornerRadius = CornerRadius(radius, radius)
-                )
-            } else {
-                // outline
-                drawRoundRect(
-                    color = batteryColor,
-                    topLeft = Offset(bodyLeft, bodyTop),
-                    size = Size(bodyWidth, bodyHeight),
-                    cornerRadius = CornerRadius(radius, radius),
-                    style = Stroke(width = strokeWidth)
-                )
+                    topLeft = Offset((size.width - nubWidth) / 2f, 0f),
+                    size = Size(nubWidth, nubHeight),
+                    cornerRadius = CornerRadius(nubRadius, nubRadius)
+                             )
 
-                // filling (bottom-up)
-                if (fillHeight > 0f) {
+                if (safeLevel == null) {
+                    // Empty outline when no data available
                     drawRoundRect(
                         color = batteryColor,
-                        topLeft = Offset(bodyLeft, fillTop),
-                        size = Size(bodyWidth, fillHeight),
+                        topLeft = Offset(bodyLeft, bodyTop),
+                        size = Size(bodyWidth, bodyHeight),
+                        cornerRadius = CornerRadius(radius, radius),
+                        style = Stroke(width = strokeWidth)
+                                 )
+                } else if (safeLevel >= 95) {
+                    // Fully filled battery
+                    drawRoundRect(
+                        color = batteryColor,
+                        topLeft = Offset(bodyLeft, bodyTop),
+                        size = Size(bodyWidth, bodyHeight),
                         cornerRadius = CornerRadius(radius, radius)
-                    )
-                }
-            }
+                                 )
+                } else {
+                    // Battery outline
+                    drawRoundRect(
+                        color = batteryColor,
+                        topLeft = Offset(bodyLeft, bodyTop),
+                        size = Size(bodyWidth, bodyHeight),
+                        cornerRadius = CornerRadius(radius, radius),
+                        style = Stroke(width = strokeWidth)
+                                 )
 
-            if (isCharging) {
-                // reset the path to clear the old one from the heap
-                boltPath.reset()
-                // bolt icon
-                boltPath.buildChargingBolt(size, bodyTop, bodyHeight)
-                drawPath(
-                    path = boltPath,
-                    color = batteryColor
-                )
+                    // Battery fill
+                    if (fillHeight > 0f) {
+                        drawRoundRect(
+                            color = batteryColor,
+                            topLeft = Offset(bodyLeft, fillTop),
+                            size = Size(bodyWidth, fillHeight),
+                            cornerRadius = CornerRadius(radius, radius)
+                                     )
+                    }
+                }
+
+                if (isCharging) {
+                    boltPath.reset()
+
+                    boltPath.buildChargingBolt(
+                        size = size,
+                        bodyTop = bodyTop,
+                        bodyHeight = bodyHeight
+                                              )
+
+                    drawPath(
+                        path = boltPath,
+                        color = batteryColor
+                            )
+                }
             }
         }
 
         if (!isCharging) {
             Text(
-                text =
-                when (safeLevel) {
-                    null -> "--"
-                    100 -> ""
-                    else -> safeLevel.toString()
-                },
+                text = safeLevel?.let { "$it%" } ?: "--%",
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Bold,
-                color =
-                when {
-                    safeLevel == null -> textOnEmpty
-                    safeLevel >= 45 -> textOnFill
-                    else -> textOnEmpty
-                }
-            )
+                color = textColor
+                )
         }
     }
 }
