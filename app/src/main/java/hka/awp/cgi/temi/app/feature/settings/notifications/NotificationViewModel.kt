@@ -50,27 +50,31 @@ class NotificationViewModel(
     private fun loadCurrentVolume() {
         robot?.let {
             val currentVolume = it.volume
-            Timber.d("Current temi volume: $currentVolume")
-            _volume.value = currentVolume / 10f
+            Timber.d("Current temi volume from SDK: $currentVolume")
+
+            val safeVolume = currentVolume.coerceIn(1, 10)
+            _volume.value = (safeVolume - 1) / 9f
         }
     }
 
     fun updateVolume(newVolume: Float) {
         _volume.value = newVolume
 
-        val temiVolume = (newVolume * 10).toInt()
+        val temiVolume = (1 + (newVolume * 9)).toInt().coerceIn(1, 10)
 
-        robot?.volume = temiVolume
+        robot?.setVolume(temiVolume)
     }
 
     fun toggleNotifications(enabled: Boolean) {
         _notificationsEnabled.value = enabled
 
         if (!enabled) {
-            previousVolume = (_volume.value * 10).toInt()
-            robot?.volume = 0
+            previousVolume = (1 + (_volume.value * 9)).toInt().coerceIn(1, 10)
+
+            robot?.setVolume(1)
         } else {
-            robot?.volume = previousVolume
+            val restoreVolume = if (previousVolume > 0) previousVolume else 5
+            robot?.setVolume(restoreVolume)
         }
     }
 
