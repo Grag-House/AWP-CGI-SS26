@@ -29,27 +29,27 @@ fun ModeIcon(modifier: Modifier = Modifier, tint: Color? = null) {
     Box(
         contentAlignment = Alignment.Center,
         modifier =
-        modifier.semantics {
-            contentDescription = description
-        }
-    ) {
+            modifier.semantics {
+                contentDescription = description
+            }
+       ) {
         Icon(
             painter = painterResource(id = R.drawable.ic_toggle_on),
             contentDescription = null,
             modifier =
-            Modifier
-                .size(24.dp)
-                .offset(y = (-7).dp),
+                Modifier
+                    .size(24.dp)
+                    .offset(y = (-7).dp),
             tint = tint ?: LocalContentColor.current
-        )
+            )
         Icon(
             painter = painterResource(id = R.drawable.ic_toggle_off),
             contentDescription = null,
             modifier =
-            Modifier
-                .size(24.dp)
-                .offset(y = 7.dp),
+                Modifier
+                    .size(24.dp)
+                    .offset(y = 7.dp),
             tint = tint ?: LocalContentColor.current
-        )
+            )
     }
 }

@@ -63,14 +63,14 @@ fun WeatherIconView(icon: WeatherIcon, modifier: Modifier = Modifier, size: Int 
             contentDescription = stringResource(R.string.icon_sun),
             tint = MaterialTheme.colorScheme.primary,
             modifier = modifier.size(sizeDp)
-        )
+                               )
 
         WeatherIcon.CLOUD -> Icon(
             imageVector = Icons.Default.Cloud,
             contentDescription = stringResource(R.string.icon_cloudy),
             tint = MaterialTheme.colorScheme.primary,
             modifier = modifier.size(sizeDp)
-        )
+                                 )
 
         WeatherIcon.SUN_CLOUD -> Box(contentAlignment = Alignment.Center, modifier = modifier) {
             Icon(
@@ -78,7 +78,7 @@ fun WeatherIconView(icon: WeatherIcon, modifier: Modifier = Modifier, size: Int 
                 contentDescription = stringResource(R.string.icon_partlycloudy),
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(sizeDp)
-            )
+                )
         }
 
         WeatherIcon.RAIN -> Icon(
@@ -86,28 +86,28 @@ fun WeatherIconView(icon: WeatherIcon, modifier: Modifier = Modifier, size: Int 
             contentDescription = stringResource(R.string.icon_rain),
             tint = MaterialTheme.colorScheme.primary,
             modifier = modifier.size(sizeDp)
-        )
+                                )
 
         WeatherIcon.SNOW -> Icon(
             imageVector = Icons.Default.AcUnit,
             contentDescription = stringResource(R.string.icon_snow),
             tint = MaterialTheme.colorScheme.primary,
             modifier = modifier.size(sizeDp)
-        )
+                                )
 
         WeatherIcon.THUNDER -> Icon(
             imageVector = Icons.Default.Bolt,
             contentDescription = stringResource(R.string.icon_thunder),
             tint = MaterialTheme.colorScheme.primary,
             modifier = modifier.size(sizeDp)
-        )
+                                   )
 
         WeatherIcon.FOG -> Icon(
             imageVector = Icons.Default.BlurOn,
             contentDescription = stringResource(R.string.icon_fog),
             tint = MaterialTheme.colorScheme.primary,
             modifier = modifier.size(sizeDp)
-        )
+                               )
     }
 }
 // ─── Cards ────────────────────────────────────────────────────────────────────
@@ -126,8 +126,8 @@ fun WeatherCard(modifier: Modifier = Modifier, content: @Composable ColumnScope.
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
-    ) {
+                                        )
+        ) {
         Column(modifier = Modifier.padding(16.dp), content = content)
     }
 }
@@ -147,21 +147,21 @@ fun CurrentWeatherCard(location: String, currentHour: HourlyItem?) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
-        ) {
+           ) {
             Column {
                 Text(
                     location,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
-                )
+                    )
                 Spacer(Modifier.height(12.dp))
                 Text(
                     currentHour.temp + stringResource(R.string.temp_celsius),
                     fontSize = 48.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
-                )
+                    )
             }
 
             WeatherIconView(currentHour.icon, size = 80)
@@ -182,19 +182,19 @@ fun HourlyForecastCard(hourlyData: List<HourlyItem>) {
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface
-        )
+            )
         Spacer(Modifier.height(12.dp))
         if (hourlyData.isEmpty()) return@WeatherCard
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
-        ) {
+           ) {
             hourlyData.forEachIndexed { index, item ->
                 val label = if (index == 0) stringResource(R.string.now) else item.label
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.weight(1f)
-                ) {
+                      ) {
                     Text(label, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 10.sp)
                     Spacer(Modifier.height(4.dp))
                     WeatherIconView(item.icon, size = 20)
@@ -204,12 +204,12 @@ fun HourlyForecastCard(hourlyData: List<HourlyItem>) {
                         color = MaterialTheme.colorScheme.onSurface,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold
-                    )
+                        )
                     Text(
                         item.precipitation + stringResource(R.string.percent),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 10.sp
-                    )
+                        )
                 }
             }
         }
@@ -229,19 +229,19 @@ fun WeeklyForecastCard(dailyData: List<DailyItem>) {
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface
-        )
+            )
         Spacer(Modifier.height(12.dp))
         if (dailyData.isEmpty()) return@WeatherCard
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
-        ) {
+           ) {
             dailyData.forEachIndexed { index, item ->
                 val dayLabel = if (index == 0) stringResource(R.string.today) else item.day
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.weight(1f)
-                ) {
+                      ) {
                     Text(dayLabel, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 10.sp)
                     Spacer(Modifier.height(4.dp))
                     WeatherIconView(item.icon, size = 22)
@@ -251,12 +251,12 @@ fun WeeklyForecastCard(dailyData: List<DailyItem>) {
                         color = MaterialTheme.colorScheme.onSurface,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold
-                    )
+                        )
                     Text(
                         item.low + stringResource(R.string.degree),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 10.sp
-                    )
+                        )
                 }
             }
         }
@@ -279,14 +279,14 @@ fun WetterTopBar() {
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(28.dp)
-                )
+                    )
                 Spacer(Modifier.width(8.dp))
                 Text(
                     stringResource(R.string.weather),
                     fontWeight = FontWeight.Bold,
                     fontSize = 22.sp,
                     color = MaterialTheme.colorScheme.onSurface
-                )
+                    )
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
@@ -296,9 +296,9 @@ fun WetterTopBar() {
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(end = 16.dp)
-            )
+                )
         }
-    )
+             )
 }
 
 // ─── Main screen ─────────────────────────────────────────────────────────────
@@ -316,7 +316,7 @@ fun WeatherContent(viewModel: WeatherViewModel) {
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-    ) {
+       ) {
         Column(modifier = Modifier.weight(1f)) {
             WetterTopBar()
 
@@ -326,11 +326,11 @@ fun WeatherContent(viewModel: WeatherViewModel) {
                     .verticalScroll(rememberScrollState())
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
+                  ) {
                 CurrentWeatherCard(
                     location = uiState.location,
                     currentHour = uiState.hourlyForecast.firstOrNull()
-                )
+                                  )
                 HourlyForecastCard(hourlyData = uiState.hourlyForecast)
                 WeeklyForecastCard(dailyData = uiState.weeklyForecast)
             }

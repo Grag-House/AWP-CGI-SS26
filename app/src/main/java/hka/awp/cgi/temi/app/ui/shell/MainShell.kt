@@ -53,7 +53,7 @@ fun MainShell(
     navigationViewModel: NavigationViewModel = koinViewModel(),
     webserverViewModel: WebserverViewModel = koinViewModel(),
     weatherViewModel: WeatherViewModel = koinViewModel()
-) {
+             ) {
     val wifiLevel by appViewModel.wifiLevel.collectAsStateWithLifecycle()
     val currentTime by appViewModel.currentTime.collectAsStateWithLifecycle()
     val batteryLevel by appViewModel.batteryLevel.collectAsStateWithLifecycle()
@@ -70,28 +70,28 @@ fun MainShell(
                 currentTime = currentTime,
                 batteryLevel = batteryLevel,
                 isCharging = isCharging
-            )
+                        )
         }
-    ) { paddingValues ->
+            ) { paddingValues ->
         Row(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-        ) {
+           ) {
             Sidebar(
                 isExpanded = appViewModel.isSidebarExpanded,
                 selectedRoute = appViewModel.selectedRoute,
                 onRouteSelected = { screen -> appViewModel.onRouteSelect(screen) },
                 onSidebarToggle = { appViewModel.onSideBarToggle() },
                 modifier = Modifier.width(260.dp)
-            )
+                   )
 
             Row(
                 modifier = Modifier
                     .weight(1f)
                     .padding(top = 12.dp, bottom = 12.dp, end = 12.dp)
                     .clip(RoundedCornerShape(24.dp))
-            ) {
+               ) {
                 when (appViewModel.selectedRoute) {
                     Screen.Dashboard.route -> MainContent(
                         modifier = Modifier.weight(1f),
@@ -101,14 +101,14 @@ fun MainShell(
                         serverState = serverState,
                         // TODO add utility method or catch the exception
                         Integer.parseInt(currentTemperatureState.hourlyForecast[0].temp)
-                    )
+                                                         )
 
                     Screen.Webserver.route -> WebViewScreen(BuildConfig.WEBVIEW_URL)
 
                     Screen.Navigation.route -> NavigationContent(
                         modifier = Modifier.weight(1f),
                         viewModel = navigationViewModel
-                    )
+                                                                )
 
                     Screen.Settings.route -> {
                         LaunchedEffect(Unit) {
@@ -137,7 +137,7 @@ fun MainShell(
                             onBackClick = {
                                 appViewModel.onRouteSelect(Screen.Settings)
                             }
-                        )
+                                     )
                     }
 
                     Screen.NotificationSettings.route -> {
@@ -145,7 +145,7 @@ fun MainShell(
                             onBackClick = {
                                 appViewModel.onRouteSelect(Screen.Settings)
                             }
-                        )
+                                          )
                     }
 
                     Screen.BatterySettings.route -> {
@@ -153,12 +153,12 @@ fun MainShell(
                             onBackClick = {
                                 appViewModel.onRouteSelect(Screen.Settings)
                             }
-                        )
+                                     )
                     }
 
                     Screen.Weather.route -> WeatherContent(
                         viewModel = weatherViewModel
-                    )
+                                                          )
 
                     // redundancy
                     else -> MainContent(
@@ -169,7 +169,7 @@ fun MainShell(
                         serverState = serverState,
                         // TODO add utility method or catch the exception
                         Integer.parseInt(currentTemperatureState.hourlyForecast[0].temp)
-                    )
+                                       )
                 }
             }
         }

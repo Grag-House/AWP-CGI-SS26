@@ -10,51 +10,51 @@ enum class WeatherIcon { SUN, CLOUD, SUN_CLOUD, RAIN, SNOW, THUNDER, FOG }
 data class WeatherState(
     val location: String = "Karlsruhe",
     val hourlyForecast: List<HourlyItem> =
-        // TODO this is so the app does not crash while trying to access this value before fetching it
+    // TODO this is so the app does not crash while trying to access this value before fetching it
         listOf(
             HourlyItem(
                 label = "N/A",
                 icon = WeatherIcon.SUN,
                 temp = "0",
                 precipitation = "N/A"
-            )
-        ),
+                      )
+              ),
     val weeklyForecast: List<DailyItem> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null
-)
+                       )
 
 data class HourlyItem(
     val label: String,
     val icon: WeatherIcon,
     val temp: String,
     val precipitation: String
-)
+                     )
 
 data class DailyItem(
     val day: String,
     val icon: WeatherIcon,
     val high: String,
     val low: String
-)
+                    )
 
 // --- API Models (Used for Parsing) ---
 
 @Serializable
 data class MetResponse(
     val properties: MetProperties
-)
+                      )
 
 @Serializable
 data class MetProperties(
     val timeseries: List<MetTimeSeries>
-)
+                        )
 
 @Serializable
 data class MetTimeSeries(
     val time: String,
     val data: MetData
-)
+                        )
 
 @Serializable
 data class MetData(
@@ -62,30 +62,30 @@ data class MetData(
     @SerialName("next_1_hours") val next1Hours: MetNextHours? = null,
     @SerialName("next_6_hours") val next6Hours: MetNextHours? = null,
     @SerialName("next_12_hours") val next12Hours: MetNextHours? = null
-)
+                  )
 
 @Serializable
 data class MetInstant(
     val details: MetInstantDetails
-)
+                     )
 
 @Serializable
 data class MetInstantDetails(
     @SerialName("air_temperature") val airTemperature: Double
-)
+                            )
 
 @Serializable
 data class MetNextHours(
     val summary: MetSummary,
     val details: MetNextDetails? = null
-)
+                       )
 
 @Serializable
 data class MetSummary(
     @SerialName("symbol_code") val symbolCode: String
-)
+                     )
 
 @Serializable
 data class MetNextDetails(
     @SerialName("precipitation_amount") val precipitationAmount: Double? = null
-)
+                         )

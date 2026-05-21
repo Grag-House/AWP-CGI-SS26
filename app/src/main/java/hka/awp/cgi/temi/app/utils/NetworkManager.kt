@@ -25,7 +25,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 class NetworkManager(val context: Context) {
     private val connectivityManager = context.applicationContext.getSystemService(
         Context.CONNECTIVITY_SERVICE
-    ) as ConnectivityManager
+                                                                                 ) as ConnectivityManager
     private val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
 
     companion object {
@@ -43,7 +43,7 @@ class NetworkManager(val context: Context) {
     // this will only run on android sdk 23, therefore usage of now deprecated methods is fine / necessary
     @RequiresPermission(
         allOf = [Manifest.permission.ACCESS_NETWORK_STATE, Manifest.permission.ACCESS_WIFI_STATE]
-    )
+                       )
     fun getWifiSignalLevel(): Int {
         val network = connectivityManager.activeNetwork ?: return 0
         val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return 0

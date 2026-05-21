@@ -32,7 +32,7 @@ class AppViewModel(
     clock: Clock,
     datetimeFormatter: DateTimeFormatter,
     temiBatteryMonitor: TemiBatteryMonitor
-) : ViewModel() {
+                  ) : ViewModel() {
     var selectedRoute by mutableStateOf(Screen.Dashboard.route)
         private set
 

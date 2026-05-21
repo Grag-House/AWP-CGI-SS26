@@ -31,7 +31,7 @@ class WeatherRepository(
     private val client: OkHttpClient,
     private val json: Json = Json { ignoreUnknownKeys = true },
     private val hourlyFormatter: DateTimeFormatter
-) {
+                       ) {
     companion object {
         private const val USER_AGENT = "jonas.mueller@cgi.com"
 
@@ -58,7 +58,7 @@ class WeatherRepository(
             if (!response.isSuccessful) {
                 return@withContext Result.failure(
                     WeatherApiException(response.code, "API Error: ${response.code}")
-                )
+                                                 )
             }
 
             val body = response.body.string()
@@ -74,7 +74,7 @@ class WeatherRepository(
             Result.failure(Exception("An Error occurred while parsing the JSON data"))
         } catch (
             @Suppress("TooGenericExceptionCaught") e: Exception
-        ) {
+                ) {
             Timber.e(e, "Unknown error during the weather API call")
             Result.failure(e)
         }
@@ -95,7 +95,7 @@ class WeatherRepository(
             entryTime.isAfter(now.minusMinutes(59))
         }.take(
             @Suppress("MagicNumber") 10
-        ).map {
+              ).map {
             val localTime = parse(it.time).atZone(ZoneId.systemDefault()).toLocalTime()
 
             HourlyItem(
@@ -103,7 +103,7 @@ class WeatherRepository(
                 icon = convertSymbolToIcon(it.data.next1Hours?.summary?.symbolCode ?: "clearsky"),
                 temp = it.data.instant.details.airTemperature.roundToInt().toString(),
                 precipitation = it.data.next1Hours?.details?.precipitationAmount?.toString() ?: "0.0"
-            )
+                      )
         }
 
         // Daily
@@ -116,7 +116,7 @@ class WeatherRepository(
             if ((date.isEqual(today) || date.isAfter(today)) && date.isBefore(endDate)) {
                 val temp = entry.data.instant.details.airTemperature
                 val symbol = entry.data.next1Hours?.summary?.symbolCode ?: entry.data.next6Hours?.summary?.symbolCode
-                    ?: entry.data.next12Hours?.summary?.symbolCode
+                ?: entry.data.next12Hours?.summary?.symbolCode
                 dailyEntries.getOrPut(date) { mutableListOf() }.add(temp to symbol)
             }
         }
@@ -132,13 +132,13 @@ class WeatherRepository(
                 icon = convertSymbolToIcon(dominantSymbol),
                 high = temps.maxOrNull()?.roundToInt()?.toString() ?: "0",
                 low = temps.minOrNull()?.roundToInt()?.toString() ?: "0"
-            )
+                     )
         }
 
         return WeatherState(
             hourlyForecast = hourly,
             weeklyForecast = weekly
-        )
+                           )
     }
 
     private fun convertSymbolToIcon(symbol: String): WeatherIcon {

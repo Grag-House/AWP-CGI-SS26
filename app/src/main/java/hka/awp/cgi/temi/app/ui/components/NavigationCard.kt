@@ -40,32 +40,32 @@ fun NavigationCard(label: String, icon: ImageVector, onClick: () -> Unit) {
     OutlinedCard(
         onClick = onClick,
         modifier =
-        Modifier
-            .fillMaxWidth()
-            .aspectRatio(0.95f),
+            Modifier
+                .fillMaxWidth()
+                .aspectRatio(0.95f),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.outlinedCardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
-        ),
+                                                ),
         border = BorderStroke(
             1.dp,
             MaterialTheme.colorScheme.outlineVariant
-        )
-    ) {
+                             )
+                ) {
         Column(
             modifier =
-            Modifier
-                .fillMaxSize()
-                .padding(16.dp),
+                Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
-        ) {
+              ) {
             Icon(
                 icon,
                 contentDescription = null,
                 modifier = Modifier.size(66.dp),
                 tint = MaterialTheme.colorScheme.primary
-            )
+                )
             Spacer(modifier = Modifier.height(24.dp))
             Text(
                 text = label,
@@ -73,7 +73,7 @@ fun NavigationCard(label: String, icon: ImageVector, onClick: () -> Unit) {
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center
-            )
+                )
         }
     }
 }

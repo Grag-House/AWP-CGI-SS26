@@ -32,31 +32,31 @@ fun TopStatusBar(
     batteryLevel: Int?,
     isCharging: Boolean,
     modifier: Modifier = Modifier
-) {
+                ) {
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically
-    ) {
+       ) {
         Icon(
             NetworkManager.getWifiIconForLevel(wifiLevel),
             contentDescription = stringResource(R.string.wifi_description),
             tint = MaterialTheme.colorScheme.primary
-        )
+            )
 
         Spacer(modifier = Modifier.width(8.dp))
 
         BatteryIndicator(
             level = batteryLevel,
             isCharging = isCharging
-        )
+                        )
 
         Spacer(modifier = Modifier.width(8.dp))
 
         Text(
             text = currentTime,
             color = MaterialTheme.colorScheme.primary
-        )
+            )
 
         Spacer(modifier = Modifier.width(16.dp))
 
@@ -64,6 +64,6 @@ fun TopStatusBar(
             Icons.Default.Notifications,
             contentDescription = stringResource(R.string.notifications_description),
             tint = MaterialTheme.colorScheme.primary
-        )
+            )
     }
 }

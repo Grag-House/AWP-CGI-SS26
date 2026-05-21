@@ -20,7 +20,7 @@ data class RobotInfo(
     val model: String,
     val serial: String,
     val appVersion: String
-)
+                    )
 
 class RobotRepository {
 
@@ -30,7 +30,7 @@ class RobotRepository {
             model = getModelName(),
             serial = Build.SERIAL,
             appVersion = BuildConfig.VERSION_NAME
-        )
+                        )
     }
 
     fun getIpAddress(): String {
@@ -66,7 +66,7 @@ class RobotRepository {
                 context.contentResolver,
                 Settings.System.SCREEN_BRIGHTNESS,
                 value * MAX_BRIGHTNESS
-            )
+                                  )
             Timber.d("Brightness changed successfully")
         } catch (exception: SecurityException) {
             Timber.e(exception, "Missing permission to change brightness")
@@ -107,7 +107,7 @@ class RobotRepository {
                 context.contentResolver,
                 Settings.System.SCREEN_OFF_TIMEOUT,
                 millis
-            )
+                                  )
             Timber.d("Screen timeout changed to $millis ms")
         } catch (exception: SecurityException) {
             Timber.e(exception, "Missing permission to change screen timeout")

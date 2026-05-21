@@ -72,6 +72,7 @@ class NotificationViewModel(
             robot?.volume = previousVolume
         }
     }
+
     fun setLocale(locale: Locale) {
         _selectedLocale.value = locale
         tts?.language = locale

@@ -65,7 +65,7 @@ private const val GRIDCELL_COUNT = 3
 fun NavigationContent(
     modifier: Modifier = Modifier,
     viewModel: NavigationViewModel
-) {
+                     ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val currentLocation = when (val state = uiState.currentLocation) {
         is LocationState.Resource -> stringResource(state.resId)
@@ -80,21 +80,21 @@ fun NavigationContent(
                 locations = uiState.mapLocations,
                 savedLocations = uiState.savedLocations,
                 robotPosition = uiState.robotPosition
-            ),
+                                  ),
             onDismiss = viewModel::dismissMap,
             onRetry = viewModel::showMap,
             onNavigateTo = { name ->
                 viewModel.goToLocation(name)
                 viewModel.dismissMap()
             }
-        )
+                 )
     }
 
     Column(
         modifier = modifier
             .fillMaxSize()
             .padding(24.dp)
-    ) {
+          ) {
         NavigationHeader()
         Spacer(modifier = Modifier.height(24.dp))
         SectionLabel(text = stringResource(R.string.navigation_status_label))
@@ -103,7 +103,7 @@ fun NavigationContent(
         CurrentLocationStatus(
             currentLocation = currentLocation,
             onMapClick = viewModel::showMap
-        )
+                             )
 
         Spacer(modifier = Modifier.height(4.dp))
         SectionLabel(text = stringResource(R.string.select_destination))
@@ -112,7 +112,7 @@ fun NavigationContent(
         DestinationsGrid(
             destinations = DestinationItems.all,
             onDestinationClick = { destination -> viewModel.goToLocation(destination.systemName) }
-        )
+                        )
     }
 }
 
@@ -122,7 +122,7 @@ private data class MapDialogState(
     val locations: List<LocationMarker>,
     val savedLocations: List<String>,
     val robotPosition: Position?
-)
+                                 )
 
 @Composable
 private fun MapDialog(
@@ -130,7 +130,7 @@ private fun MapDialog(
     onDismiss: () -> Unit,
     onRetry: () -> Unit,
     onNavigateTo: (String) -> Unit
-) {
+                     ) {
     AlertDialog(
         onDismissRequest = { if (!state.isLoading) onDismiss() },
         title = { Text(stringResource(R.string.show_map)) },
@@ -140,13 +140,13 @@ private fun MapDialog(
                 state.hasError -> MapDialogErrorContent(
                     savedLocations = state.savedLocations,
                     onNavigateTo = onNavigateTo
-                )
+                                                       )
 
                 else -> MapDialogSuccessContent(
                     locations = state.locations,
                     robotPosition = state.robotPosition,
                     onNavigateTo = onNavigateTo
-                )
+                                               )
             }
         },
         confirmButton = {
@@ -159,7 +159,7 @@ private fun MapDialog(
         } else {
             null
         }
-    )
+               )
 }
 
 @Composable
@@ -183,7 +183,7 @@ private fun MapDialogErrorContent(savedLocations: List<String>, onNavigateTo: (S
                 color = Color.Gray,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 1.sp
-            )
+                )
             Spacer(modifier = Modifier.height(8.dp))
             LazyColumn(modifier = Modifier.heightIn(max = 300.dp)) {
                 items(savedLocations) { location ->
@@ -193,12 +193,12 @@ private fun MapDialogErrorContent(savedLocations: List<String>, onNavigateTo: (S
                                 .fillMaxWidth()
                                 .padding(vertical = 4.dp),
                             verticalAlignment = Alignment.CenterVertically
-                        ) {
+                           ) {
                             Text(
                                 text = location,
                                 modifier = Modifier.weight(1f),
                                 style = MaterialTheme.typography.bodyMedium
-                            )
+                                )
                             TextButton(onClick = { onNavigateTo(location) }) { Text(stringResource(R.string.go_to)) }
                         }
                         HorizontalDivider()
@@ -214,7 +214,7 @@ private fun MapDialogSuccessContent(
     locations: List<LocationMarker>,
     robotPosition: Position?,
     onNavigateTo: (String) -> Unit
-) {
+                                   ) {
     Column {
         Text(
             text = stringResource(R.string.saved_locations, locations.size),
@@ -222,7 +222,7 @@ private fun MapDialogSuccessContent(
             color = Color.Gray,
             fontWeight = FontWeight.Bold,
             letterSpacing = 1.sp
-        )
+            )
         Spacer(modifier = Modifier.height(8.dp))
         LazyColumn(modifier = Modifier.heightIn(max = 300.dp)) {
             items(locations) { marker ->
@@ -232,12 +232,12 @@ private fun MapDialogSuccessContent(
                             .fillMaxWidth()
                             .padding(vertical = 4.dp),
                         verticalAlignment = Alignment.CenterVertically
-                    ) {
+                       ) {
                         Text(
                             text = marker.name,
                             modifier = Modifier.weight(1f),
                             style = MaterialTheme.typography.bodyMedium
-                        )
+                            )
                         TextButton(onClick = { onNavigateTo(marker.name) }) { Text(stringResource(R.string.go_to)) }
                     }
                     HorizontalDivider()
@@ -250,7 +250,7 @@ private fun MapDialogSuccessContent(
                 text = "x=%.2f, y=%.2f".format(pos.x, pos.y),
                 style = MaterialTheme.typography.labelSmall,
                 color = Color.Gray
-            )
+                )
         }
     }
 }
@@ -263,13 +263,13 @@ private fun NavigationHeader() {
             contentDescription = null,
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(32.dp)
-        )
+            )
         Spacer(modifier = Modifier.width(12.dp))
         Text(
             text = stringResource(R.string.navigation),
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold
-        )
+            )
     }
 }
 
@@ -281,14 +281,14 @@ private fun SectionLabel(text: String) {
         color = Color.LightGray,
         fontWeight = FontWeight.Bold,
         letterSpacing = 1.sp
-    )
+        )
 }
 
 @Composable
 private fun CurrentLocationStatus(
     currentLocation: String,
     onMapClick: () -> Unit
-) {
+                                 ) {
     val prefix = stringResource(R.string.current_location_prefix)
     val primaryColor = MaterialTheme.colorScheme.primary
     val annotatedLocation = remember(currentLocation, prefix) {
@@ -300,8 +300,8 @@ private fun CurrentLocationStatus(
                     color = primaryColor,
                     textDecoration = TextDecoration.Underline,
                     fontWeight = FontWeight.Bold
-                )
-            ) {
+                                 )
+                     ) {
                 append(currentLocation)
             }
         }
@@ -313,19 +313,19 @@ private fun CurrentLocationStatus(
         color = Color.White,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         shadowElevation = 0.dp
-    ) {
+           ) {
         Row(
             modifier = Modifier.padding(vertical = 20.dp, horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically
-        ) {
+           ) {
             Text(
                 text = annotatedLocation,
                 style = MaterialTheme.typography.headlineSmall.copy(
                     fontSize = 25.sp,
                     fontWeight = FontWeight.Medium
-                ),
+                                                                   ),
                 modifier = Modifier.weight(1f)
-            )
+                )
 
             MapButton(onClick = onMapClick)
         }
@@ -338,25 +338,25 @@ private fun MapButton(onClick: () -> Unit) {
         onClick = onClick,
         shape = RoundedCornerShape(8.dp),
         color = Color(color = 0xFFF3F5F7)
-    ) {
+           ) {
         Row(
             modifier = Modifier.padding(horizontal = 7.dp, vertical = 7.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
+           ) {
             Icon(
                 Icons.Rounded.Map,
                 contentDescription = null,
                 modifier = Modifier.size(18.dp)
-            )
+                )
             Text(
                 text = stringResource(R.string.show_map),
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontWeight = FontWeight.Bold,
                     lineHeight = 11.sp,
                     fontSize = 9.sp
+                                                                )
                 )
-            )
         }
     }
 }
@@ -365,7 +365,7 @@ private fun MapButton(onClick: () -> Unit) {
 private fun DestinationsGrid(
     destinations: List<DestinationItems>,
     onDestinationClick: (DestinationItems) -> Unit
-) {
+                            ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(GRIDCELL_COUNT),
         horizontalArrangement = Arrangement.spacedBy(32.dp),
@@ -374,13 +374,13 @@ private fun DestinationsGrid(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 120.dp)
-    ) {
+                    ) {
         gridItems(destinations) { destination ->
             NavigationCard(
                 label = stringResource(destination.stringResource),
                 icon = destination.icon,
                 onClick = { onDestinationClick(destination) }
-            )
+                          )
         }
     }
 }

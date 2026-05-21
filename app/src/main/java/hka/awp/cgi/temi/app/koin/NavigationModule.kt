@@ -25,7 +25,7 @@ val navigationModule = module {
                     .username(BuildConfig.MQTT_USERNAME)
                     .password(BuildConfig.MQTT_PASSWORD.toByteArray())
                     .build()
-            )
+                       )
             .buildBlocking()
         return@single client
     }
@@ -34,7 +34,7 @@ val navigationModule = module {
         MqttManager(
             robot = get(),
             client = get()
-        )
+                   )
     }
 
     viewModel {
@@ -42,6 +42,6 @@ val navigationModule = module {
             robot = get(),
             mqttManager = get(),
             defaultMapName = androidApplication().getString(R.string.default_map_name)
-        )
+                           )
     }
 }

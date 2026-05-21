@@ -50,7 +50,7 @@ data class NavigationUiState(
     val hasMapError: Boolean = false,
     val robotPosition: Position? = null,
     val savedLocations: List<String> = emptyList(),
-)
+                            )
 
 /**
  * ViewModel responsible for managing navigation logic and map data for the robot.
@@ -62,7 +62,7 @@ class NavigationViewModel(
     private val robot: Robot?,
     private val mqttManager: MqttManager,
     private val defaultMapName: String
-) : ViewModel(),
+                         ) : ViewModel(),
     OnRobotReadyListener,
     OnDistanceToLocationChangedListener,
     OnGoToLocationStatusChangedListener,
@@ -148,7 +148,7 @@ class NavigationViewModel(
                     state.currentLocation
                 },
                 robotPosition = robot?.getPosition() ?: state.robotPosition
-            )
+                      )
         }
     }
 
@@ -219,7 +219,7 @@ class NavigationViewModel(
                     isMapLoading = false,
                     mapLocations = markers ?: emptyList(),
                     hasMapError = markers == null
-                )
+                       )
             }
         }
     }
@@ -291,7 +291,7 @@ class NavigationViewModel(
         status: String,
         descriptionId: Int,
         description: String
-    ) {
+                                            ) {
         val normalizedStatus = status.lowercase()
         val normalizedLocation = location.trim()
 

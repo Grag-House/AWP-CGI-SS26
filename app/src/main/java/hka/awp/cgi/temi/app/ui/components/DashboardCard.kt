@@ -50,7 +50,7 @@ fun DashboardCard(
     isTemp: Boolean = false,
     customIcon: @Composable (() -> Unit)? = null,
     onClick: () -> Unit = {}
-) {
+                 ) {
     @Suppress("MagicNumber")
     OutlinedCard(
         modifier = Modifier
@@ -58,25 +58,25 @@ fun DashboardCard(
             .aspectRatio(1.3f)
             .clickable { onClick() },
         shape = RoundedCornerShape(16.dp)
-    ) {
+                ) {
         Column(
             modifier = Modifier
                 .padding(16.dp)
                 .fillMaxSize()
-        ) {
+              ) {
             Box(
                 modifier = Modifier
                     .size(48.dp)
                     .background(Color.White, RoundedCornerShape(12.dp)),
                 contentAlignment = Alignment.Center
-            ) {
+               ) {
                 if (customIcon == null) {
                     Icon(
                         icon ?: Icons.Rounded.ImageNotSupported,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(24.dp)
-                    )
+                        )
                 } else {
                     customIcon()
                 }
@@ -88,7 +88,7 @@ fun DashboardCard(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
-            )
+                )
             Spacer(modifier = Modifier.height(4.dp))
             Text(text = subtitle, style = MaterialTheme.typography.bodySmall)
 
@@ -103,13 +103,13 @@ fun DashboardCard(
                         text = bottomText,
                         color = MaterialTheme.colorScheme.primary,
                         style = MaterialTheme.typography.headlineMedium
-                    )
+                        )
                 } else {
                     Text(
                         text = bottomText,
                         color = MaterialTheme.colorScheme.primary,
                         style = MaterialTheme.typography.labelMedium
-                    )
+                        )
                 }
             }
         }

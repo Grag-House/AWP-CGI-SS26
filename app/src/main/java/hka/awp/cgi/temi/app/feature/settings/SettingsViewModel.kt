@@ -27,20 +27,25 @@ class SettingsViewModel(private val repository: RobotRepository) : ViewModel() {
                     _navigationEvent.emit(SettingsNavigationEvent.NavigateToDisplay)
                 }
             }
+
             SettingsItem.About -> {
                 _aboutInfo.value = repository.getFullDeviceInfo()
             }
+
             SettingsItem.Notifications -> {
                 viewModelScope.launch {
                     _navigationEvent.emit(SettingsNavigationEvent.NavigateToNotifications)
                 }
             }
+
             SettingsItem.Battery -> {
                 viewModelScope.launch {
                     _navigationEvent.emit(SettingsNavigationEvent.NavigateToBattery)
                 }
             }
-            SettingsItem.Location -> { /* TODO */ }
+
+            SettingsItem.Location -> { /* TODO */
+            }
         }
     }
 

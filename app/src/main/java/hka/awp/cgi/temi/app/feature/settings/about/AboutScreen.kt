@@ -11,7 +11,7 @@ import org.koin.compose.viewmodel.koinViewModel
 fun SettingsScreen(
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = koinViewModel()
-) {
+                  ) {
     val aboutInfo by viewModel.aboutInfo.collectAsStateWithLifecycle()
 
     AboutContent(
@@ -23,5 +23,5 @@ fun SettingsScreen(
         onDismissAbout = {
             viewModel.dismissAbout()
         }
-    )
+                )
 }

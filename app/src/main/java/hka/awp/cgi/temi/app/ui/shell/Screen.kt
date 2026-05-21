@@ -32,7 +32,7 @@ sealed class Screen(
     val iconRes: Int? = null,
     @StringRes val contentDescription: Int,
     val isCustomIcon: Boolean = false
-) {
+                   ) {
     companion object {
         val navScreens by lazy { listOf(Dashboard, Webserver, Weather, Navigation, Settings) }
     }
@@ -42,54 +42,54 @@ sealed class Screen(
         title = R.string.hauptmenu,
         icon = Icons.Rounded.Home,
         contentDescription = R.string.home_description
-    )
+                                  )
 
     data object Webserver : Screen(
         route = "webserver",
         title = R.string.webserver,
         icon = Icons.Rounded.Storage,
         contentDescription = R.string.webserver_description
-    )
+                                  )
 
     data object Weather : Screen(
         route = "weather",
         title = R.string.wetter,
         iconRes = R.drawable.partly_cloudy_day,
         contentDescription = R.string.weather_description
-    )
+                                )
 
     data object Navigation : Screen(
         route = "navigation",
         title = R.string.navigation,
         icon = Icons.Rounded.Navigation,
         contentDescription = R.string.navigation_description
-    )
+                                   )
 
     data object Settings : Screen(
         route = "settings",
         title = R.string.settings,
         icon = Icons.Rounded.Settings,
         contentDescription = R.string.settings_description
-    )
+                                 )
 
     data object DisplaySettings : Screen(
         route = "display_settings",
         title = R.string.settings_display_title,
         icon = Icons.Rounded.Settings,
         contentDescription = R.string.settings_display_subtitle
-    )
+                                        )
 
     data object NotificationSettings : Screen(
         route = "notification_settings",
         title = R.string.settings_notifications_title,
         icon = Icons.Rounded.Notifications,
         contentDescription = R.string.settings_notifications_subtitle
-    )
+                                             )
 
     data object BatterySettings : Screen(
         route = "battery_settings",
         title = R.string.settings_battery_title,
         icon = Icons.Rounded.BatteryFull,
         contentDescription = R.string.settings_battery_subtitle
-    )
+                                        )
 }

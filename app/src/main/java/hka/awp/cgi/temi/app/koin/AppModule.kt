@@ -3,7 +3,6 @@ package hka.awp.cgi.temi.app.koin
 import android.app.Application
 import com.robotemi.sdk.Robot
 import hka.awp.cgi.temi.app.data.repository.RobotRepository
-import hka.awp.cgi.temi.app.feature.navigation.NavigationViewModel
 import hka.awp.cgi.temi.app.feature.settings.SettingsViewModel
 import hka.awp.cgi.temi.app.feature.settings.battery.BatteryViewModel
 import hka.awp.cgi.temi.app.feature.settings.display.DisplayViewModel
@@ -31,17 +30,17 @@ val appModule = module {
     single<DateTimeFormatter> {
         DateTimeFormatter.ofPattern("HH:mm").withZone(ZoneId.systemDefault())
     }
-        single<Robot?> {
-            try {
-                Robot.getInstance()
-            } catch (
-                @Suppress("TooGenericExceptionCaught")
-                e: Exception,
-            ) {
-                Timber.e(e, "Temi SDK not available, probably running locally")
-                null
-            }
+    single<Robot?> {
+        try {
+            Robot.getInstance()
+        } catch (
+            @Suppress("TooGenericExceptionCaught")
+            e: Exception,
+                ) {
+            Timber.e(e, "Temi SDK not available, probably running locally")
+            null
         }
+    }
 
     single<TemiBatteryMonitor> { TemiBatteryMonitor(robot = get()) }
 
@@ -51,7 +50,7 @@ val appModule = module {
             clock = get(),
             datetimeFormatter = get(),
             temiBatteryMonitor = get(),
-        )
+                    )
     }
 
     viewModel {
@@ -60,12 +59,14 @@ val appModule = module {
     viewModel {
         DisplayViewModel(
             application = androidContext() as Application,
-            get())
+            get()
+                        )
     }
     viewModel {
         NotificationViewModel(
             application = androidContext() as Application,
-            get())
+            get()
+                             )
     }
 
     viewModel<WebserverViewModel> { WebserverViewModel() }
