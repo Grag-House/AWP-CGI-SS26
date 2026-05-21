@@ -49,7 +49,7 @@ class NotificationViewModel(
 
     private fun loadCurrentVolume() {
         robot?.let {
-            val currentVolume = it.volume 
+            val currentVolume = it.volume
             Timber.d("Current temi volume from SDK: $currentVolume")
 
             val safeVolume = currentVolume.coerceIn(1, 10)
