@@ -54,7 +54,7 @@ val appModule = module {
     }
 
     viewModel {
-        SettingsViewModel(get())
+        SettingsViewModel(get(), robot = get())
     }
     viewModel {
         DisplayViewModel(

@@ -2,6 +2,7 @@ package hka.awp.cgi.temi.app.feature.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.robotemi.sdk.Robot
 import hka.awp.cgi.temi.app.data.repository.RobotInfo
 import hka.awp.cgi.temi.app.data.repository.RobotRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -12,7 +13,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class SettingsViewModel(private val repository: RobotRepository) : ViewModel() {
+class SettingsViewModel(private val repository: RobotRepository, private val robot: Robot?) : ViewModel() {
 
     private val _aboutInfo = MutableStateFlow<RobotInfo?>(null)
     val aboutInfo: StateFlow<RobotInfo?> = _aboutInfo.asStateFlow()
@@ -29,7 +30,7 @@ class SettingsViewModel(private val repository: RobotRepository) : ViewModel() {
             }
 
             SettingsItem.About -> {
-                _aboutInfo.value = repository.getFullDeviceInfo()
+                _aboutInfo.value = repository.getFullDeviceInfo(robot)
             }
 
             SettingsItem.Notifications -> {

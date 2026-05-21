@@ -69,6 +69,7 @@
     <string name="model">Modell</string>
     <string name="serial_number">Seriennummer</string>
     <string name="software_version">Version</string>
+    <string name="unknown">Unbekannt</string>
 
     <string name="battery">Akku</string>
     <string name="battery_status">Akkustatus</string>
