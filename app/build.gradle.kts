@@ -222,3 +222,14 @@ tasks.register("qualityCheck") {
 
     tasks.findByName("dokkaGenerate")?.mustRunAfter("detekt")
 }
+
+tasks.register<Sync>("copyDokkaReports") {
+    group = "documentation"
+    description = "Copy the dokka reports to the assets folder"
+
+    dependsOn("dokkaGenerate")
+
+    println("Copying dokka reports!")
+    from(layout.buildDirectory.dir("dokka/html"))
+    into(layout.projectDirectory.dir("src/main/assets/html"))
+}

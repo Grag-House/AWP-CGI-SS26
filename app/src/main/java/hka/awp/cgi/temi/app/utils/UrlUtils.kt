@@ -17,7 +17,7 @@ fun isUrlBlocked(checkUrl: String?): Boolean {
     }
 
     if (uri.scheme == "http") {
-        Timber.w("$checkUrl was blocked!")
+        Timber.w("%s was blocked!", checkUrl)
         return true
     }
 

@@ -49,7 +49,7 @@ class WebserverViewModel : ViewModel() {
     }
 
     init {
-        Timber.d("hostname: $hostname")
+        Timber.d("hostname: %s", hostname)
         startMonitoring()
     }
 }
