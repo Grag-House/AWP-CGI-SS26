@@ -69,4 +69,11 @@ sealed class Screen(
         icon = Icons.Rounded.Settings,
         contentDescription = R.string.settings_description
     )
+
+    data object Documentation : Screen(
+        route = "documentation",
+        title = R.string.webserver,
+        icon = Icons.Rounded.Storage,
+        contentDescription = R.string.webserver_description,
+    )
 }

@@ -31,7 +31,7 @@ class TemiApp : Application() {
 
             Thread.setDefaultUncaughtExceptionHandler { thread, e ->
                 // Use timber to log all uncaught exceptions
-                Timber.e(e, "App crashed in thread: ${thread.name}")
+                Timber.e(e, "App crashed in thread: %s", thread.name)
 
                 // return to the old handler
                 oldHandler?.uncaughtException(thread, e)

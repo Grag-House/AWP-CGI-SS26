@@ -59,7 +59,6 @@ private const val STYLED_ERROR = """
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
-            /* Grundlegende CSS-Zurücksetzung und volle Höhe */
             html, body {
                 height: 100%;
                 margin: 0;
