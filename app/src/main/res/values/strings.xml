@@ -40,6 +40,52 @@
     <string name="settings_about_title">Über</string>
     <string name="settings_about_subtitle">Informationen über das System</string>
 
+    <string name="display_brightness">Bildschirmhelligkeit</string>
+
+    <string name="display_screensaver">Bildschirmschoner</string>
+    <string name="display_screensaver_after">Startet nach %1$s Inaktivität</string>
+
+    <string name="display_change">Ändern</string>
+
+    <string name="display_dark_mode">Dark Mode</string>
+    <string name="display_enabled">Eingeschaltet</string>
+    <string name="display_disabled">Ausgeschaltet</string>
+
+    <string name="display_brightness_percent">%1$d%%</string>
+
+    <string name="display_timeout_dialog_title">Inaktivitätszeit wählen</string>
+
+    <string name="timeout_30_seconds">30 Sekunden</string>
+    <string name="timeout_1_minute">1 Minute</string>
+    <string name="timeout_2_minutes">2 Minuten</string>
+    <string name="timeout_5_minutes">5 Minuten</string>
+    <string name="timeout_10_minutes">10 Minuten</string>
+    <string name="timeout_15_minutes">15 Minuten</string>
+
+    <string name="close">Schließen</string>
+    <string name="system_information">Informationen</string>
+    <string name="ip_address">IP-Adresse</string>
+    <string name="model_name">Modell Name</string>
+    <string name="model">Modell</string>
+    <string name="serial_number">Seriennummer</string>
+    <string name="software_version">Version</string>
+    <string name="unknown">Unbekannt</string>
+
+    <string name="battery">Akku</string>
+    <string name="battery_status">Akkustatus</string>
+    <string name="battery_charging">Wird geladen...</string>
+    <string name="battery_not_charging">Wird aktuell nicht geladen.</string>
+    <string name="power_status">Stromversorgung</string>
+    <string name="currently_charging">Lädt aktuell</string>
+    <string name="battery_mode_active">Batterie wird genutzt</string>
+
+    <string name="notifications_voice">Benachrichtigungen &amp; Stimme</string>
+    <string name="enabled">Eingeschaltet</string>
+    <string name="muted">Stummgeschaltet</string>
+    <string name="volume">Lautstärke</string>
+    <string name="select_speaker">Sprecher auswählen</string>
+    <string name="current_language">Aktuelle Sprache: %1$s</string>
+
     <string name="home_description">Home icon for the main dashboard</string>
     <string name="webserver_description">Storage icon representing server status</string>
     <string name="weather_description">Sun and cloud symbol for local weather</string>
@@ -66,6 +112,7 @@
     <string name="location_reception">Empfang</string>
     <string name="location_wc">WC</string>
     <string name="location_charging">Laden</string>
+    <string name="voice_changed">Stimme geändert</string>
 
     <!-- Weather Page -->
     <string name="icon_sun">Sonnig</string>
@@ -89,7 +136,6 @@
     <string name="navigation_failed_with_name">Fehler bei Navigation zu: %1$s</string>
     <string name="saved_locations">Gespeicherte Orte (%1$d)</string>
     <string name="go_to">Anfahren</string>
-    <string name="close">Schließen</string>
     <string name="map_retry">Erneut laden</string>
 
     <!-- Logging & Errors for Navigation -->

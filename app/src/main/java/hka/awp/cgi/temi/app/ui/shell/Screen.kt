@@ -2,8 +2,10 @@ package hka.awp.cgi.temi.app.ui.shell
 
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.BatteryFull
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Navigation
+import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Storage
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -68,6 +70,27 @@ sealed class Screen(
         title = R.string.settings,
         icon = Icons.Rounded.Settings,
         contentDescription = R.string.settings_description
+    )
+
+    data object DisplaySettings : Screen(
+        route = "display_settings",
+        title = R.string.settings_display_title,
+        icon = Icons.Rounded.Settings,
+        contentDescription = R.string.settings_display_subtitle
+    )
+
+    data object NotificationSettings : Screen(
+        route = "notification_settings",
+        title = R.string.settings_notifications_title,
+        icon = Icons.Rounded.Notifications,
+        contentDescription = R.string.settings_notifications_subtitle
+    )
+
+    data object BatterySettings : Screen(
+        route = "battery_settings",
+        title = R.string.settings_battery_title,
+        icon = Icons.Rounded.BatteryFull,
+        contentDescription = R.string.settings_battery_subtitle
     )
 
     data object Documentation : Screen(

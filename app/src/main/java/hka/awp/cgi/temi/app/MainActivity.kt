@@ -4,9 +4,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import hka.awp.cgi.temi.app.feature.settings.display.DisplayViewModel
 import hka.awp.cgi.temi.app.ui.shell.MainShell
 import hka.awp.cgi.temi.app.ui.theme.CgiTheme
 import hka.awp.cgi.temi.app.utils.hideTopBar
+import org.koin.compose.viewmodel.koinViewModel
 
 /**
  * The main entry point of the application.
@@ -16,6 +20,7 @@ import hka.awp.cgi.temi.app.utils.hideTopBar
  * - Setting up the Jetpack Compose UI layout within the [CgiTheme].
  */
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -25,7 +30,10 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            CgiTheme {
+            val displayViewModel: DisplayViewModel = koinViewModel()
+            val isDarkMode by displayViewModel.isDarkMode.collectAsState()
+
+            CgiTheme(darkTheme = isDarkMode) {
                 MainShell()
             }
         }

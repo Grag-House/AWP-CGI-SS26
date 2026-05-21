@@ -155,7 +155,8 @@ kotlin {
 }
 
 dependencies {
-    // ----------------- runtime dependencies -----------------------
+    implementation(libs.androidx.ui)
+    implementation(libs.firebase.annotations)
     implementation(libs.koin.android)
     implementation(platform(libs.koin.bom))
     implementation(libs.koin.compose.viewmodel)
@@ -197,7 +198,7 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
 
-    // debug depedencies
+    // debug dependencies
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
