@@ -4,28 +4,22 @@ import androidx.core.net.toUri
 import hka.awp.cgi.temi.app.BuildConfig
 import timber.log.Timber
 
-private const val MISSING_ALLOWED_IP_MESSAGE =
-    "HTTP_ALLOWED_IP is missing in BuildConfig"
-
-private val allowedIp: String
-    get() = BuildConfig.HTTP_ALLOWED_IP
+const val ALLOWED_IP = BuildConfig.HTTP_ALLOWED_IP
 
 fun isUrlBlocked(checkUrl: String?): Boolean {
-    val uri = checkUrl?.toUri()
+    if (checkUrl == null) return true
 
-    return when {
-        uri == null -> true
+    val uri = checkUrl.toUri()
+    val host = uri.host
 
-        allowedIp.isBlank() -> {
-            Timber.e(MISSING_ALLOWED_IP_MESSAGE)
-            true
-        }
-
-        uri.scheme == "http" -> {
-            Timber.w("%s was blocked!", checkUrl)
-            true
-        }
-
-        else -> false
+    if (host == ALLOWED_IP) {
+        return false
     }
+
+    if (uri.scheme == "http") {
+        Timber.w("%s was blocked!", checkUrl)
+        return true
+    }
+
+    return false
 }
