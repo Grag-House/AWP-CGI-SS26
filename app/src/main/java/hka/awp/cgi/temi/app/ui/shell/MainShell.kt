@@ -24,6 +24,7 @@ import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherViewModel
 import hka.awp.cgi.temi.app.feature.webserver.WebViewScreen
 import hka.awp.cgi.temi.app.feature.webserver.WebserverViewModel
 import org.koin.compose.viewmodel.koinViewModel
+import timber.log.Timber
 
 /**
  * The primary UI shell of the application.
@@ -85,6 +86,8 @@ fun MainShell(
                     .padding(top = 12.dp, bottom = 12.dp, end = 12.dp)
                     .clip(RoundedCornerShape(24.dp))
             ) {
+                Timber.d("Selected route: %s", appViewModel.selectedRoute)
+
                 when (appViewModel.selectedRoute) {
                     Screen.Dashboard.route -> MainContent(
                         modifier = Modifier.weight(1f),
@@ -110,6 +113,10 @@ fun MainShell(
                     Screen.Weather.route -> WeatherContent(
                         viewModel = weatherViewModel
                     )
+
+                    Screen.Documentation.route -> {
+                        WebViewScreen("file:///android_asset/html/index.html")
+                    }
 
                     // redundancy
                     else -> MainContent(

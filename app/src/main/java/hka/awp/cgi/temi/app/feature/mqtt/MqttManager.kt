@@ -36,7 +36,7 @@ class MqttManager(private val robot: Robot?, private val client: Mqtt5BlockingCl
      * This function will suspend until the message loop is finished or cancelled.
      */
     suspend fun connect() = withContext(Dispatchers.IO) {
-        Timber.d("Connecting to MQTT broker at ${client.config.serverHost}")
+        Timber.d("Connecting to MQTT broker at %s", client.config.serverHost)
 
         try {
             client.connect()
@@ -89,7 +89,7 @@ class MqttManager(private val robot: Robot?, private val client: Mqtt5BlockingCl
             robot?.goTo(location)
             publishStatusBlocking(status = "going", location = location)
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-            Timber.e(e, "Error parsing temi_goto payload: $payload")
+            Timber.e(e, "Error parsing temi_goto payload: %s", payload)
         }
     }
 
@@ -109,7 +109,7 @@ class MqttManager(private val robot: Robot?, private val client: Mqtt5BlockingCl
                 robot?.speak(TtsRequest.create(speech = text, isShowOnConversationLayer = false))
             }
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-            Timber.e(e, "Error parsing temi_speak payload: $payload")
+            Timber.e(e, "Error parsing temi_speak payload: %s", payload)
         }
     }
 
@@ -141,7 +141,7 @@ class MqttManager(private val robot: Robot?, private val client: Mqtt5BlockingCl
                 robot?.playSequence(sequence)
             }
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-            Timber.e(e, "Error parsing temi_playsequence payload: $payload")
+            Timber.e(e, "Error parsing temi_playsequence payload: %s", payload)
         }
     }
 
@@ -152,7 +152,7 @@ class MqttManager(private val robot: Robot?, private val client: Mqtt5BlockingCl
                 robot?.tiltAngle(angle)
             }
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-            Timber.e(e, "Error parsing temi_tilt_angle payload: $payload")
+            Timber.e(e, "Error parsing temi_tilt_angle payload: %s", payload)
         }
     }
 

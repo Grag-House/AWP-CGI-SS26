@@ -108,7 +108,7 @@ class NavigationViewModel(
 
     override fun onAsrResult(asrResult: String, sttLanguage: SttLanguage) {
         robot?.finishConversation()
-        Timber.d("ASR Result: $asrResult ($sttLanguage)")
+        Timber.d("ASR Result: %s (%s)", asrResult, sttLanguage)
 
         viewModelScope.launch {
             mqttManager.publishAsr(asrResult)
@@ -137,7 +137,7 @@ class NavigationViewModel(
     override fun onRobotReady(isReady: Boolean) {
         if (!isReady) return
         val locs = robot?.locations ?: emptyList()
-        Timber.d("Robot ready, saved locations: $locs")
+        Timber.d("Robot ready, saved locations: %s", locs)
 
         _uiState.update { state ->
             state.copy(
@@ -168,19 +168,19 @@ class NavigationViewModel(
 
         if (_uiState.value.currentLocation != newState) {
             _uiState.update { it.copy(currentLocation = newState) }
-            Timber.d("Current location updated to: $systemName (distance: $distance)")
+            Timber.v("Current location updated to: %s (distance: %s)", systemName, distance)
         }
     }
 
     /** Navigates the robot to the specified waypoint. */
     fun goToLocation(name: String) {
-        Timber.d("Navigating to: $name")
+        Timber.d("Navigating to: %s", name)
         viewModelScope.launch {
             mqttManager.publishStatus(status = "going", location = name)
         }
         runCatching { robot?.goTo(name) }
             .onFailure {
-                Timber.e(it, "Navigation failed to: $name")
+                Timber.e(it, "Navigation failed to: %s", name)
                 viewModelScope.launch {
                     mqttManager.publishStatus(status = "failed", location = name)
                 }
@@ -236,7 +236,7 @@ class NavigationViewModel(
         val target = maps.firstOrNull { it.name == defaultMapName }
             ?: maps.firstOrNull() ?: return false
 
-        Timber.d("Loading map: ${target.name} (${target.id})")
+        Timber.d("Loading map: %s (%s)", target.name, target.id)
 
         return suspendCancellableCoroutine { cont ->
             var triggeredRequestId: String? = null
@@ -253,7 +253,7 @@ class NavigationViewModel(
 
                         OnLoadMapStatusChangedListener.START -> Unit
                         else -> {
-                            Timber.w("Map load failed with status: $status")
+                            Timber.w("Map load failed with status: %s", status)
                             robot?.removeOnLoadMapStatusChangedListener(this)
                             if (cont.isActive) cont.resume(false)
                         }

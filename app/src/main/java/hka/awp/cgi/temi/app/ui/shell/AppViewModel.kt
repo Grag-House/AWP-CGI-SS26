@@ -37,8 +37,8 @@ class AppViewModel(
         private set
 
     fun onRouteSelect(screen: Screen) {
+        Timber.v("Navigating to: %s", screen.route)
         selectedRoute = screen.route
-        Timber.d("TODO routing")
     }
 
     var isSidebarExpanded by mutableStateOf(true)
@@ -46,7 +46,7 @@ class AppViewModel(
 
     fun onSideBarToggle() {
         isSidebarExpanded = !isSidebarExpanded
-        Timber.d("Sidepanel collapse triggered, currently: $isSidebarExpanded")
+        Timber.v("Sidepanel collapse triggered, currently: %s", isSidebarExpanded)
     }
 
     private var _wifiLevel = MutableStateFlow(0)
