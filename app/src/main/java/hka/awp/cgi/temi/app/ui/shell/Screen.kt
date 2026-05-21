@@ -91,7 +91,8 @@ sealed class Screen(
         title = R.string.settings_battery_title,
         icon = Icons.Rounded.BatteryFull,
         contentDescription = R.string.settings_battery_subtitle
-      
+    )
+
     data object Documentation : Screen(
         route = "documentation",
         title = R.string.webserver,
