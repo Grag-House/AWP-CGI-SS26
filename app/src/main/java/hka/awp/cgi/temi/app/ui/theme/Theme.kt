@@ -32,7 +32,7 @@ fun CgiTheme(
     val colorScheme =
         if (darkTheme) {
             darkColorScheme(
-                primary = CgiRed,
+                primary = primary,
                 onPrimary = Color.White,
                 background = DarkBackground,
                 surface = DarkSurface,
@@ -41,7 +41,7 @@ fun CgiTheme(
             )
         } else {
             lightColorScheme(
-                primary = CgiRed,
+                primary = primary,
                 onPrimary = OnPrimary,
                 background = AppBackground,
                 surface = SidepanelColor,

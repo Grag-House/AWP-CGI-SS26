@@ -42,7 +42,6 @@ val appModule = module {
                 null
             }
         }
-    }
 
     single<TemiBatteryMonitor> { TemiBatteryMonitor(robot = get()) }
 
@@ -68,8 +67,6 @@ val appModule = module {
             application = androidContext() as Application,
             get())
     }
-
-    viewModel<NavigationViewModel> { NavigationViewModel() }
 
     viewModel<WebserverViewModel> { WebserverViewModel() }
     viewModel {

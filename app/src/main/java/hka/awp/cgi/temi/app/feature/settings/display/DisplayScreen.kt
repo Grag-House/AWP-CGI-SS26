@@ -173,7 +173,7 @@ fun TimeoutSelectionDialog(
                       ) {
                 Text(
                     text = stringResource(
-                        R.string.cancel
+                        R.string.close
                                          ),
                     color =
                         MaterialTheme.colorScheme.primary

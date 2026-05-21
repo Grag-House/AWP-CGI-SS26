@@ -45,7 +45,7 @@ import hka.awp.cgi.temi.app.ui.shell.Screen
  * @param onClick Callback triggered when an item that requires navigation is selected.
  */
 @Composable
-fun DashboardContent(
+fun MainContent(
     modifier: Modifier = Modifier,
     onClick: (Screen) -> Unit = {},
     serverState: ServerState,

@@ -55,8 +55,6 @@
 
     <string name="display_timeout_dialog_title">Inaktivitätszeit wählen</string>
 
-    <string name="cancel">Abbrechen</string>
-
     <string name="timeout_30_seconds">30 Sekunden</string>
     <string name="timeout_1_minute">1 Minute</string>
     <string name="timeout_2_minutes">2 Minuten</string>
@@ -137,7 +135,6 @@
     <string name="navigation_failed_with_name">Fehler bei Navigation zu: %1$s</string>
     <string name="saved_locations">Gespeicherte Orte (%1$d)</string>
     <string name="go_to">Anfahren</string>
-    <string name="close">Schließen</string>
     <string name="map_retry">Erneut laden</string>
 
     <!-- Logging & Errors for Navigation -->
