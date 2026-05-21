@@ -58,9 +58,9 @@ class NotificationViewModel(
     fun updateVolume(newVolume: Float) {
         _volume.value = newVolume
 
-        val temiVolume = (newVolume * 10).toInt()
+        val temiVolume = (1 + (newVolume * 9)).toInt().coerceIn(1, 10)
 
-        robot?.volume = temiVolume
+        robot?.setVolume(temiVolume)
     }
 
     fun toggleNotifications(enabled: Boolean) {
