@@ -20,6 +20,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+private const val MAX_BATTERY_LEVEL = 100
+private const val FULL_BATTERY_THRESHOLD = 95
+
 /**
  * Compose component that renders the vertical battery icon.
  *
@@ -32,8 +35,7 @@ import androidx.compose.ui.unit.sp
  */
 @Composable
 fun BatteryIndicator(level: Int?, isCharging: Boolean, modifier: Modifier = Modifier) {
-    @Suppress("MagicNumber")
-    val safeLevel = level?.coerceIn(0, 100)
+    val safeLevel = level?.coerceIn(0, MAX_BATTERY_LEVEL)
 
     val batteryColor = MaterialTheme.colorScheme.primary
     val textColor = MaterialTheme.colorScheme.primary
@@ -62,11 +64,10 @@ fun BatteryIndicator(level: Int?, isCharging: Boolean, modifier: Modifier = Modi
                 val radius = 4.dp.toPx()
                 val strokeWidth = 2.dp.toPx()
 
-                val fillPercent = safeLevel?.div(100f) ?: 0f
+                val fillPercent = safeLevel?.div(MAX_BATTERY_LEVEL.toFloat()) ?: 0f
                 val fillHeight = bodyHeight * fillPercent
                 val fillTop = bodyTop + bodyHeight - fillHeight
 
-                // Battery nub
                 drawRoundRect(
                     color = batteryColor,
                     topLeft = Offset((size.width - nubWidth) / 2f, 0f),
@@ -75,7 +76,6 @@ fun BatteryIndicator(level: Int?, isCharging: Boolean, modifier: Modifier = Modi
                              )
 
                 if (safeLevel == null) {
-                    // Empty outline when no data available
                     drawRoundRect(
                         color = batteryColor,
                         topLeft = Offset(bodyLeft, bodyTop),
@@ -83,8 +83,7 @@ fun BatteryIndicator(level: Int?, isCharging: Boolean, modifier: Modifier = Modi
                         cornerRadius = CornerRadius(radius, radius),
                         style = Stroke(width = strokeWidth)
                                  )
-                } else if (safeLevel >= 95) {
-                    // Fully filled battery
+                } else if (safeLevel >= FULL_BATTERY_THRESHOLD) {
                     drawRoundRect(
                         color = batteryColor,
                         topLeft = Offset(bodyLeft, bodyTop),
@@ -92,7 +91,6 @@ fun BatteryIndicator(level: Int?, isCharging: Boolean, modifier: Modifier = Modi
                         cornerRadius = CornerRadius(radius, radius)
                                  )
                 } else {
-                    // Battery outline
                     drawRoundRect(
                         color = batteryColor,
                         topLeft = Offset(bodyLeft, bodyTop),
@@ -101,7 +99,6 @@ fun BatteryIndicator(level: Int?, isCharging: Boolean, modifier: Modifier = Modi
                         style = Stroke(width = strokeWidth)
                                  )
 
-                    // Battery fill
                     if (fillHeight > 0f) {
                         drawRoundRect(
                             color = batteryColor,
@@ -114,7 +111,6 @@ fun BatteryIndicator(level: Int?, isCharging: Boolean, modifier: Modifier = Modi
 
                 if (isCharging) {
                     boltPath.reset()
-
                     boltPath.buildChargingBolt(
                         size = size,
                         bodyTop = bodyTop,
