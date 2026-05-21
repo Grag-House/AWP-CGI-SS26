@@ -51,6 +51,10 @@ jobs:
       - name: Run Code Analysis
         run: ./gradlew qualityCheck
 
+      - name: Place Dokka files in the assets folder
+        if: success()
+        run: ./gradlew copyDokkaReports
+
       - name: Upload HTML Report
         uses: actions/upload-artifact@v4
         if: always()

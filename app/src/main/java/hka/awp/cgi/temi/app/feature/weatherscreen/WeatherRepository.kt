@@ -67,10 +67,10 @@ class WeatherRepository(
         } catch (e: CancellationException) {
             throw e
         } catch (e: UnknownHostException) {
-            Timber.e("Possibly no internet connection: ${e.message}")
+            Timber.e("Possibly no internet connection: %s", e.message)
             Result.failure(Exception("Check your internet connection"))
         } catch (e: SerializationException) {
-            Timber.e("Error during JSON deserialization occured: ${e.message}")
+            Timber.e("Error during JSON deserialization occured: %s", e.message)
             Result.failure(Exception("An Error occurred while parsing the JSON data"))
         } catch (
             @Suppress("TooGenericExceptionCaught") e: Exception
