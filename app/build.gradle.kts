@@ -155,7 +155,7 @@ kotlin {
 }
 
 dependencies {
-    // runtime dependencies
+    // ----------------- runtime dependencies -----------------------
     implementation(libs.koin.android)
     implementation(platform(libs.koin.bom))
     implementation(libs.koin.compose.viewmodel)
@@ -172,11 +172,21 @@ dependencies {
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.timber)
+
+    // mqtt
     implementation(libs.hivemq)
+
+    // api call dependencies
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.tls)
+    implementation(libs.kotlinx.serialization.json)
+
     // temi dependency
     implementation(libs.temi.sdk)
     implementation(libs.androidx.compose.ui.text)
     implementation(libs.androidx.material.icons.extended)
+
+    // ----------------- DEBUG / Compile time dependencies -----------------------
 
     // unit test dependencies
     testImplementation(libs.mokk)
@@ -197,11 +207,6 @@ dependencies {
     // linting and formatting
     detektPlugins(libs.detekt.ktlint)
     detektPlugins(libs.detekt.compose)
-
-    // api call dependencies
-    implementation(libs.okhttp)
-    implementation(libs.okhttp.tls)
-    implementation(libs.kotlinx.serialization.json)
 }
 
 tasks.withType<Detekt>().configureEach {
