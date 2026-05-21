@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.detekt)
     alias(libs.plugins.dokka)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -60,6 +61,22 @@ android {
             val httpEnabledIpAddress = props.getProperty("HTTP_ALLOWED_IP")
                 ?: throw GradleException("Missing property 'HTTP_ALLOWED_IP' in .env")
             buildConfigField("String", "HTTP_ALLOWED_IP", "\"$httpEnabledIpAddress\"")
+
+            val mqttHost = props.getProperty("MQTT_HOST")
+                ?: throw GradleException("Missing property 'MQTT_HOST' in .env")
+            buildConfigField("String", "MQTT_HOST", "\"$mqttHost\"")
+
+            val mqttPort = props.getProperty("MQTT_PORT")
+                ?: throw GradleException("Missing property 'MQTT_PORT' in .env")
+            buildConfigField("Integer", "MQTT_PORT", mqttPort)
+
+            val mqttUsername = props.getProperty("MQTT_USERNAME")
+                ?: throw GradleException("Missing property 'MQTT_USERNAME' in .env")
+            buildConfigField("String", "MQTT_USERNAME", "\"$mqttUsername\"")
+
+            val mqttPassword = props.getProperty("MQTT_PASSWORD")
+                ?: throw GradleException("Missing property 'MQTT_PASSWORD' in .env")
+            buildConfigField("String", "MQTT_PASSWORD", "\"$mqttPassword\"")
         } else {
             throw GradleException(
                 "Missing .env file! please create it and include the 'WEBVIEW_URL"
@@ -98,6 +115,15 @@ android {
     dependenciesInfo {
         includeInApk = false
         includeInBundle = false
+    }
+
+    // this is to exclude unwanted files from the resulting package
+    packaging {
+        resources {
+            excludes += "META-INF/INDEX.LIST"
+            excludes += "META-INF/io.netty.versions.properties"
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
     }
 }
 
@@ -148,8 +174,11 @@ dependencies {
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.timber)
+    implementation(libs.hivemq)
     // temi dependency
     implementation(libs.temi.sdk)
+    implementation(libs.androidx.compose.ui.text)
+    implementation(libs.androidx.material.icons.extended)
 
     // unit test dependencies
     testImplementation(libs.mokk)
@@ -170,6 +199,11 @@ dependencies {
     // linting and formatting
     detektPlugins(libs.detekt.ktlint)
     detektPlugins(libs.detekt.compose)
+
+    // api call dependencies
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.tls)
+    implementation(libs.kotlinx.serialization.json)
 }
 
 tasks.withType<Detekt>().configureEach {

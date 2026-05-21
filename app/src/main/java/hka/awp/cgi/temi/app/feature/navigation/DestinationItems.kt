@@ -3,7 +3,6 @@ package hka.awp.cgi.temi.app.feature.navigation
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Coffee
-import androidx.compose.material.icons.rounded.CorporateFare
 import androidx.compose.material.icons.rounded.EvStation
 import androidx.compose.material.icons.rounded.Kitchen
 import androidx.compose.material.icons.rounded.Laptop
@@ -13,42 +12,31 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import hka.awp.cgi.temi.app.R
 
 /**
- * Represents the available navigation destinations within the application.
+ * Represents the available navigation destinations for the robot.
  *
- * This sealed class defines specific points of interest (POIs) that the user or robot can navigate to.
- * Each destination is associated with a localized string resource for its label and a vector icon
- * for visual representation in the UI.
+ * Each destination maps a UI string resource and an icon to a specific waypoint name
+ * recognized by the robot's operating system.
  *
  * @property stringResource The resource ID for the localized name of the destination.
- * @property icon The [ImageVector] used to visually identify the destination.
+ * @property icon The visual symbol associated with this destination.
+ * @property systemName The exact waypoint identifier stored on the robot's hardware.
  */
-sealed class DestinationItems(@StringRes val stringResource: Int, val icon: ImageVector) {
+sealed class DestinationItems(
+    @StringRes val stringResource: Int,
+    val icon: ImageVector,
+    val systemName: String
+) {
+    data object Kitchen : DestinationItems(R.string.location_kitchen, Icons.Rounded.Kitchen, "keynote kitchen")
+    data object Cafe : DestinationItems(R.string.location_cafe, Icons.Rounded.Coffee, "kaffeemaschine")
+    data object Reception : DestinationItems(R.string.location_reception, Icons.Rounded.MeetingRoom, "eingang")
+    data object Office : DestinationItems(R.string.location_office, Icons.Rounded.Laptop, "besprechungsraum")
+    data object WC : DestinationItems(R.string.location_wc, Icons.Rounded.Wc, "toiletten")
+    data object Charging : DestinationItems(R.string.location_charging, Icons.Rounded.EvStation, "home base")
+
     companion object {
-        val destinations by lazy {
-            listOf(
-                Kitchen,
-                Coffee,
-                MeetingRoom,
-                Laptop,
-                WC,
-                ChargingStation
-            )
-        }
+        val all = listOf(Kitchen, Cafe, Reception, Office, WC, Charging)
+
+        /** Returns the destination whose [systemName] matches the SDK's waypoint name. */
+        fun fromSystemName(name: String): DestinationItems? = all.find { it.systemName == name }
     }
-
-    data object Office : DestinationItems(R.string.location_office, Icons.Rounded.CorporateFare)
-
-    data object Kitchen : DestinationItems(R.string.location_kitchen, Icons.Rounded.Kitchen)
-
-    data object Coffee : DestinationItems(R.string.location_kitchen, Icons.Rounded.Coffee)
-
-    data object MeetingRoom :
-        DestinationItems(R.string.location_reception, Icons.Rounded.MeetingRoom)
-
-    data object Laptop : DestinationItems(R.string.location_office, Icons.Rounded.Laptop)
-
-    data object WC : DestinationItems(R.string.location_wc, Icons.Rounded.Wc)
-
-    data object ChargingStation :
-        DestinationItems(R.string.location_charging, Icons.Rounded.EvStation)
 }

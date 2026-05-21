@@ -18,6 +18,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TemiCGIApp"
         android:usesCleartextTraffic="true">
+        <meta-data
+            android:name="com.robotemi.sdk.metadata.SKILL_API_LEVEL"
+            android:value="2" />
+        <meta-data
+            android:name="com.robotemi.sdk.metadata.OVERRIDE_NLU"
+            android:value="true" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -25,8 +32,11 @@
             android:theme="@style/Theme.TemiCGIApp">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.robotemi.sdk.action.ROBOT_WELCOME" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
     </application>

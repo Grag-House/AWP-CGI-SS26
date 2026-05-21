@@ -12,12 +12,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import hka.awp.cgi.temi.app.BuildConfig
-import hka.awp.cgi.temi.app.feature.dashboard.DashboardContent
 import hka.awp.cgi.temi.app.feature.navigation.DestinationItems
+import hka.awp.cgi.temi.app.feature.dashboard.MainContent
 import hka.awp.cgi.temi.app.feature.navigation.NavigationContent
 import hka.awp.cgi.temi.app.feature.navigation.NavigationViewModel
 import hka.awp.cgi.temi.app.feature.settings.SettingsNavigationEvent
@@ -26,6 +25,8 @@ import hka.awp.cgi.temi.app.feature.settings.about.SettingsScreen
 import hka.awp.cgi.temi.app.feature.settings.battery.BatteryScreen
 import hka.awp.cgi.temi.app.feature.settings.display.DisplayScreen
 import hka.awp.cgi.temi.app.feature.settings.notifications.NotificationScreen
+import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherContent
+import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherViewModel
 import hka.awp.cgi.temi.app.feature.webserver.WebViewScreen
 import hka.awp.cgi.temi.app.feature.webserver.WebserverViewModel
 import org.koin.compose.viewmodel.koinViewModel
@@ -51,13 +52,15 @@ fun MainShell(
     appViewModel: AppViewModel = koinViewModel(),
     settingsViewModel: SettingsViewModel = koinViewModel(),
     navigationViewModel: NavigationViewModel = koinViewModel(),
-    webserverViewModel: WebserverViewModel = koinViewModel()
+    webserverViewModel: WebserverViewModel = koinViewModel(),
+    weatherViewModel: WeatherViewModel = koinViewModel()
 ) {
     val wifiLevel by appViewModel.wifiLevel.collectAsStateWithLifecycle()
     val currentTime by appViewModel.currentTime.collectAsStateWithLifecycle()
     val batteryLevel by appViewModel.batteryLevel.collectAsStateWithLifecycle()
     val isCharging by appViewModel.isCharging.collectAsStateWithLifecycle()
     val serverState by webserverViewModel.serverState.collectAsStateWithLifecycle()
+    val currentTemperatureState by weatherViewModel.uiState.collectAsStateWithLifecycle()
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -91,25 +94,22 @@ fun MainShell(
                     .clip(RoundedCornerShape(24.dp))
             ) {
                 when (appViewModel.selectedRoute) {
-                    Screen.Dashboard.route ->
-                        DashboardContent(
-                            modifier = Modifier.weight(1f),
-//                            selectedRoute = appViewModel.selectedRoute,
-                            onClick = { screen ->
-                                appViewModel.onRouteSelect(screen)
-                            },
-                            serverState = serverState
-                        )
+                    Screen.Dashboard.route -> MainContent(
+                        modifier = Modifier.weight(1f),
+                        onClick = { screen ->
+                            appViewModel.onRouteSelect(screen)
+                        },
+                        serverState = serverState,
+                        // TODO add utility method or catch the exception
+                        Integer.parseInt(currentTemperatureState.hourlyForecast[0].temp)
+                    )
 
-                    Screen.Webserver.route ->
-                        WebViewScreen(BuildConfig.WEBVIEW_URL)
+                    Screen.Webserver.route -> WebViewScreen(BuildConfig.WEBVIEW_URL)
 
-                    Screen.Navigation.route ->
-                        NavigationContent(
-                            modifier = Modifier.weight(1f),
-                            currentLocation = stringResource(DestinationItems.Office.stringResource),
-                            onDestinationClick = navigationViewModel::onNavigationClick
-                        )
+                    Screen.Navigation.route -> NavigationContent(
+                        modifier = Modifier.weight(1f),
+                        viewModel = navigationViewModel
+                    )
 
                     Screen.Settings.route -> {
                         LaunchedEffect(Unit) {
@@ -157,17 +157,20 @@ fun MainShell(
                         )
                     }
 
+                    Screen.Weather.route -> WeatherContent(
+                        viewModel = weatherViewModel
+                    )
+
                     // redundancy
-                    else -> {
-                        DashboardContent(
-                            modifier = Modifier.weight(1f),
-//                            selectedRoute = appViewModel.selectedRoute,
-                            onClick = { screen ->
-                                appViewModel.onRouteSelect(screen)
-                            },
-                            serverState = serverState
-                        )
-                    }
+                    else -> MainContent(
+                        modifier = Modifier.weight(1f),
+                        onClick = { screen ->
+                            appViewModel.onRouteSelect(screen)
+                        },
+                        serverState = serverState,
+                        // TODO add utility method or catch the exception
+                        Integer.parseInt(currentTemperatureState.hourlyForecast[0].temp)
+                    )
                 }
             }
         }

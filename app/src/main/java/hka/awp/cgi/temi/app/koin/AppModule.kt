@@ -31,13 +31,16 @@ val appModule = module {
     single<DateTimeFormatter> {
         DateTimeFormatter.ofPattern("HH:mm").withZone(ZoneId.systemDefault())
     }
-
-    single<Robot?> {
-        try {
-            Robot.getInstance()
-        } catch (exception: IllegalStateException) {
-            Timber.e(exception, "Temi SDK not available")
-            null
+        single<Robot?> {
+            try {
+                Robot.getInstance()
+            } catch (
+                @Suppress("TooGenericExceptionCaught")
+                e: Exception,
+            ) {
+                Timber.e(e, "Temi SDK not available, probably running locally")
+                null
+            }
         }
     }
 
