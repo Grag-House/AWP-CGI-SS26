@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -109,10 +110,15 @@ fun NavigationContent(
         SectionLabel(text = stringResource(R.string.select_destination))
         Spacer(modifier = Modifier.height(8.dp))
 
-        DestinationsGrid(
-            destinations = DestinationItems.all,
-            onDestinationClick = { destination -> viewModel.goToLocation(destination.systemName) }
-        )
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            DestinationsGrid(
+                destinations = DestinationItems.all,
+                onDestinationClick = { destination -> viewModel.goToLocation(destination.systemName) }
+            )
+        }
     }
 }
 
@@ -372,6 +378,7 @@ private fun DestinationsGrid(
         verticalArrangement = Arrangement.spacedBy(32.dp),
         userScrollEnabled = false,
         modifier = Modifier
+            .widthIn(max = 960.dp)
             .fillMaxWidth()
             .padding(horizontal = 120.dp)
     ) {
