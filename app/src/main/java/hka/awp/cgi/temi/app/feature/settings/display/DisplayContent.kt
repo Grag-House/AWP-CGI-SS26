@@ -59,13 +59,13 @@ fun DisplayContent(
             Slider(
                 value = brightness,
                 onValueChange = onBrightnessChange,
-                valueRange = 0f..1f
+                valueRange = 0f..100f
             )
 
             Text(
                 text = stringResource(
                     R.string.display_brightness_percent,
-                    (brightness * 100).toInt()
+                    brightness.toInt()
                 ),
                 modifier = Modifier.align(Alignment.End),
                 style = MaterialTheme.typography.bodyMedium

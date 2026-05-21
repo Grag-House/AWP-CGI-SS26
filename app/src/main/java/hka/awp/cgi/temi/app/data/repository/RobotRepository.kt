@@ -61,18 +61,28 @@ class RobotRepository {
 
     fun getModelName(): String = Build.MODEL
 
+    @Suppress("MagicNumber")
     fun setBrightness(value: Int, context: Context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.System.canWrite(context)) {
+            Timber.e("Fehlende Berechtigung: WRITE_SETTINGS wurde vom Nutzer nicht erteilt!")
+            return
+        }
+
         try {
+            val percentage = value.coerceIn(0, 100)
+
+            val androidBrightness = ((percentage / 100.0) * MAX_BRIGHTNESS).toInt()
+
             Settings.System.putInt(
                 context.contentResolver,
                 Settings.System.SCREEN_BRIGHTNESS,
-                value * MAX_BRIGHTNESS
+                androidBrightness
             )
-            Timber.d("Brightness changed successfully")
+            Timber.d("Helligkeit erfolgreich auf $androidBrightness ($percentage%) gesetzt.")
         } catch (exception: SecurityException) {
-            Timber.e(exception, "Missing permission to change brightness")
+            Timber.e(exception, "SecurityException beim Ändern der Helligkeit")
         } catch (exception: IllegalArgumentException) {
-            Timber.e(exception, "Invalid brightness value")
+            Timber.e(exception, "Ungültiger Helligkeitswert übergeben")
         }
     }
 

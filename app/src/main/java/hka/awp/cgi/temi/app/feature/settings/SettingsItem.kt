@@ -24,7 +24,6 @@ sealed class SettingsItem(
                 Notifications,
                 Display,
                 Battery,
-                Location,
                 About
             )
         }
@@ -46,12 +45,6 @@ sealed class SettingsItem(
         titleRes = R.string.settings_battery_title,
         subtitleRes = R.string.settings_battery_subtitle,
         icon = Icons.Rounded.BatteryFull
-    )
-
-    data object Location : SettingsItem(
-        titleRes = R.string.settings_location_title,
-        subtitleRes = R.string.settings_location_subtitle,
-        icon = Icons.Rounded.LocationOn
     )
 
     data object About : SettingsItem(
