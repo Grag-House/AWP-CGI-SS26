@@ -1,23 +1,60 @@
 package hka.awp.cgi.temi.app.feature.settings
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.robotemi.sdk.Robot
+import hka.awp.cgi.temi.app.data.repository.RobotInfo
+import hka.awp.cgi.temi.app.data.repository.RobotRepository
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
-/**
- * ViewModel for managing settings state and logic.
- */
-class SettingsViewModel : ViewModel() {
-    /**
-     * Handles clicks on setting items.
-     *
-     * @param item The selected setting.
-     */
+class SettingsViewModel(private val repository: RobotRepository, private val robot: Robot?) : ViewModel() {
+
+    private val _aboutInfo = MutableStateFlow<RobotInfo?>(null)
+    val aboutInfo: StateFlow<RobotInfo?> = _aboutInfo.asStateFlow()
+
+    private val _navigationEvent = MutableSharedFlow<SettingsNavigationEvent>()
+    val navigationEvent: SharedFlow<SettingsNavigationEvent> = _navigationEvent.asSharedFlow()
+
     fun onSettingsItemClick(item: SettingsItem) {
         when (item) {
-            SettingsItem.Notifications -> TODO()
-            SettingsItem.Display -> TODO()
-            SettingsItem.Battery -> TODO()
-            SettingsItem.Location -> TODO()
-            SettingsItem.About -> TODO()
+            SettingsItem.Display -> {
+                viewModelScope.launch {
+                    _navigationEvent.emit(SettingsNavigationEvent.NavigateToDisplay)
+                }
+            }
+
+            SettingsItem.About -> {
+                _aboutInfo.value = repository.getFullDeviceInfo(robot)
+            }
+
+            SettingsItem.Notifications -> {
+                viewModelScope.launch {
+                    _navigationEvent.emit(SettingsNavigationEvent.NavigateToNotifications)
+                }
+            }
+
+            SettingsItem.Battery -> {
+                viewModelScope.launch {
+                    _navigationEvent.emit(SettingsNavigationEvent.NavigateToBattery)
+                }
+            }
+            else -> { TODO() }
         }
     }
+
+    fun dismissAbout() {
+        _aboutInfo.value = null
+    }
+}
+
+sealed class SettingsNavigationEvent {
+    data object NavigateToDisplay : SettingsNavigationEvent()
+    data object NavigateToNotifications : SettingsNavigationEvent()
+    data object NavigateToBattery : SettingsNavigationEvent()
 }

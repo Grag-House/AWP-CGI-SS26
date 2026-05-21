@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -17,8 +18,12 @@ import hka.awp.cgi.temi.app.BuildConfig
 import hka.awp.cgi.temi.app.feature.dashboard.MainContent
 import hka.awp.cgi.temi.app.feature.navigation.NavigationContent
 import hka.awp.cgi.temi.app.feature.navigation.NavigationViewModel
-import hka.awp.cgi.temi.app.feature.settings.SettingsContent
+import hka.awp.cgi.temi.app.feature.settings.SettingsNavigationEvent
 import hka.awp.cgi.temi.app.feature.settings.SettingsViewModel
+import hka.awp.cgi.temi.app.feature.settings.about.SettingsScreen
+import hka.awp.cgi.temi.app.feature.settings.battery.BatteryScreen
+import hka.awp.cgi.temi.app.feature.settings.display.DisplayScreen
+import hka.awp.cgi.temi.app.feature.settings.notifications.NotificationScreen
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherContent
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherViewModel
 import hka.awp.cgi.temi.app.feature.webserver.WebViewScreen
@@ -39,6 +44,8 @@ import timber.log.Timber
  * @param settingsViewModel The ViewModel handling logic and interactions
  * specific to the settings screen.
  */
+
+@Suppress("LongMethod")
 @Composable
 fun MainShell(
     modifier: Modifier = Modifier,
@@ -106,9 +113,51 @@ fun MainShell(
                         viewModel = navigationViewModel
                     )
 
-                    Screen.Settings.route -> SettingsContent(
-                        onItemClick = settingsViewModel::onSettingsItemClick
-                    )
+                    Screen.Settings.route -> {
+                        LaunchedEffect(Unit) {
+                            settingsViewModel.navigationEvent.collect { event ->
+                                when (event) {
+                                    is SettingsNavigationEvent.NavigateToDisplay ->
+                                        appViewModel.onRouteSelect(Screen.DisplaySettings)
+
+                                    is SettingsNavigationEvent.NavigateToNotifications ->
+                                        appViewModel.onRouteSelect(Screen.NotificationSettings)
+
+                                    is SettingsNavigationEvent.NavigateToBattery ->
+                                        appViewModel.onRouteSelect(Screen.BatterySettings)
+                                }
+                            }
+                        }
+
+                        SettingsScreen(
+                            modifier = Modifier.weight(1f),
+                            viewModel = settingsViewModel,
+                        )
+                    }
+
+                    Screen.DisplaySettings.route -> {
+                        DisplayScreen(
+                            onBackClick = {
+                                appViewModel.onRouteSelect(Screen.Settings)
+                            }
+                        )
+                    }
+
+                    Screen.NotificationSettings.route -> {
+                        NotificationScreen(
+                            onBackClick = {
+                                appViewModel.onRouteSelect(Screen.Settings)
+                            }
+                        )
+                    }
+
+                    Screen.BatterySettings.route -> {
+                        BatteryScreen(
+                            onBackClick = {
+                                appViewModel.onRouteSelect(Screen.Settings)
+                            }
+                        )
+                    }
 
                     Screen.Weather.route -> WeatherContent(
                         viewModel = weatherViewModel
