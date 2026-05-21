@@ -23,6 +23,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 
+@Suppress("MagicNumber")
 @Composable
 fun ExpandableSettingsCard(
     modifier: Modifier = Modifier,
@@ -31,12 +32,12 @@ fun ExpandableSettingsCard(
     subtitle: String? = null,
     initialExpanded: Boolean = false,
     content: @Composable ColumnScope.() -> Unit
-                          ) {
+) {
     var isExpanded by remember { mutableStateOf(initialExpanded) }
 
     SettingsCard(
         modifier = modifier.clickable { isExpanded = !isExpanded }
-                ) {
+    ) {
         SettingsRow(
             icon = icon,
             title = title,
@@ -46,15 +47,15 @@ fun ExpandableSettingsCard(
                     imageVector = Icons.Rounded.ExpandMore,
                     contentDescription = null,
                     modifier = Modifier.rotate(if (isExpanded) 180f else 0f)
-                    )
+                )
             }
-                   )
+        )
 
         AnimatedVisibility(
             visible = isExpanded,
             enter = expandVertically() + fadeIn(),
             exit = shrinkVertically() + fadeOut()
-                          ) {
+        ) {
             Column {
                 Spacer(modifier = Modifier.height(16.dp))
                 content()

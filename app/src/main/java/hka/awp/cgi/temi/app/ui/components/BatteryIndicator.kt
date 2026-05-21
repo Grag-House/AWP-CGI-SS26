@@ -42,7 +42,7 @@ fun BatteryIndicator(level: Int?, isCharging: Boolean, modifier: Modifier = Modi
     Box(
         modifier = modifier.size(width = 15.dp, height = 24.dp),
         contentAlignment = Alignment.Center
-       ) {
+    ) {
         val boltPath = remember { Path() }
 
         Canvas(modifier = Modifier.matchParentSize()) {
@@ -68,7 +68,7 @@ fun BatteryIndicator(level: Int?, isCharging: Boolean, modifier: Modifier = Modi
                 topLeft = Offset((size.width - nubWidth) / 2f, 0f),
                 size = Size(nubWidth, nubHeight),
                 cornerRadius = CornerRadius(nubRadius, nubRadius)
-                         )
+            )
 
             if (safeLevel == null) {
                 // outline in case of no data
@@ -78,7 +78,7 @@ fun BatteryIndicator(level: Int?, isCharging: Boolean, modifier: Modifier = Modi
                     size = Size(bodyWidth, bodyHeight),
                     cornerRadius = CornerRadius(radius, radius),
                     style = Stroke(width = strokeWidth)
-                             )
+                )
             } else if (safeLevel >= 95) {
                 // just like the material icon, completely filled
                 drawRoundRect(
@@ -86,7 +86,7 @@ fun BatteryIndicator(level: Int?, isCharging: Boolean, modifier: Modifier = Modi
                     topLeft = Offset(bodyLeft, bodyTop),
                     size = Size(bodyWidth, bodyHeight),
                     cornerRadius = CornerRadius(radius, radius)
-                             )
+                )
             } else {
                 // outline
                 drawRoundRect(
@@ -95,7 +95,7 @@ fun BatteryIndicator(level: Int?, isCharging: Boolean, modifier: Modifier = Modi
                     size = Size(bodyWidth, bodyHeight),
                     cornerRadius = CornerRadius(radius, radius),
                     style = Stroke(width = strokeWidth)
-                             )
+                )
 
                 // filling (bottom-up)
                 if (fillHeight > 0f) {
@@ -104,7 +104,7 @@ fun BatteryIndicator(level: Int?, isCharging: Boolean, modifier: Modifier = Modi
                         topLeft = Offset(bodyLeft, fillTop),
                         size = Size(bodyWidth, fillHeight),
                         cornerRadius = CornerRadius(radius, radius)
-                                 )
+                    )
                 }
             }
 
@@ -116,27 +116,27 @@ fun BatteryIndicator(level: Int?, isCharging: Boolean, modifier: Modifier = Modi
                 drawPath(
                     path = boltPath,
                     color = batteryColor
-                        )
+                )
             }
         }
 
         if (!isCharging) {
             Text(
                 text =
-                    when (safeLevel) {
-                        null -> "--"
-                        100 -> ""
-                        else -> safeLevel.toString()
-                    },
+                when (safeLevel) {
+                    null -> "--"
+                    100 -> ""
+                    else -> safeLevel.toString()
+                },
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Bold,
                 color =
-                    when {
-                        safeLevel == null -> textOnEmpty
-                        safeLevel >= 45 -> textOnFill
-                        else -> textOnEmpty
-                    }
-                )
+                when {
+                    safeLevel == null -> textOnEmpty
+                    safeLevel >= 45 -> textOnFill
+                    else -> textOnEmpty
+                }
+            )
         }
     }
 }

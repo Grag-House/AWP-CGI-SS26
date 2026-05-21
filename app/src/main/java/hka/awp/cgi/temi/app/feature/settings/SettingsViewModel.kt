@@ -45,7 +45,8 @@ class SettingsViewModel(private val repository: RobotRepository, private val rob
                 }
             }
 
-            SettingsItem.Location -> { /* TODO */
+            SettingsItem.Location -> {
+                /* TODO */
             }
         }
     }

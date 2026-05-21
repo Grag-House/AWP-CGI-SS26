@@ -11,23 +11,23 @@ val provider =
         providerAuthority = "com.google.android.gms.fonts",
         providerPackage = "com.google.android.gms",
         certificates = R.array.com_google_android_gms_fonts_certs
-                       )
+    )
 
 val bodyFontFamily =
     FontFamily(
         Font(
             googleFont = GoogleFont("Inter"),
             fontProvider = provider
-            )
-              )
+        )
+    )
 
 val displayFontFamily =
     FontFamily(
         Font(
             googleFont = GoogleFont("Manrope"),
             fontProvider = provider
-            )
-              )
+        )
+    )
 
 // Default Material 3 typography values
 val baseline = Typography()
@@ -49,4 +49,4 @@ val AppTypography =
         labelLarge = baseline.labelLarge.copy(fontFamily = bodyFontFamily),
         labelMedium = baseline.labelMedium.copy(fontFamily = bodyFontFamily),
         labelSmall = baseline.labelSmall.copy(fontFamily = bodyFontFamily)
-              )
+    )

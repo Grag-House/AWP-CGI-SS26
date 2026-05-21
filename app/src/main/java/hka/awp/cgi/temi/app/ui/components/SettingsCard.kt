@@ -18,20 +18,20 @@ fun SettingsCard(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
-                ) {
+) {
     Surface(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(24.dp))
             .then(
                 if (onClick != null) Modifier.clickable { onClick() } else Modifier
-                 ),
+            ),
         color = MaterialTheme.colorScheme.surfaceVariant,
         shape = RoundedCornerShape(24.dp)
-           ) {
+    ) {
         Column(
             modifier = Modifier.padding(24.dp),
             content = content
-              )
+        )
     }
 }

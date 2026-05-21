@@ -37,7 +37,7 @@ import org.koin.compose.viewmodel.koinViewModel
 fun DisplayScreen(
     onBackClick: () -> Unit,
     viewModel: DisplayViewModel = koinViewModel()
-                 ) {
+) {
     val brightness by viewModel.brightness.collectAsState()
     val timeoutState by viewModel.screenTimeout.collectAsState()
     val isDarkMode by viewModel.isDarkMode.collectAsState()
@@ -52,7 +52,7 @@ fun DisplayScreen(
         onBackClick = onBackClick,
         isDarkMode = isDarkMode,
         onDarkModeChange = viewModel::toggleDarkMode
-                  )
+    )
 
     if (showDialog) {
         TimeoutSelectionDialog(
@@ -63,17 +63,18 @@ fun DisplayScreen(
                 showDialog = false
             },
             onDismiss = { showDialog = false }
-                              )
+        )
     }
 }
 
+@Suppress("LongMethod")
 @Composable
 fun TimeoutSelectionDialog(
     options: List<Pair<String, Int>>,
     currentSelection: String,
     onOptionSelected: (Pair<String, Int>) -> Unit,
     onDismiss: () -> Unit
-                          ) {
+) {
     AlertDialog(
         onDismissRequest = onDismiss,
         shape = RoundedCornerShape(28.dp),
@@ -82,16 +83,16 @@ fun TimeoutSelectionDialog(
             Text(
                 text = stringResource(
                     R.string.display_timeout_dialog_title
-                                     ),
+                ),
                 style = MaterialTheme.typography.headlineSmall
-                )
+            )
         },
         text = {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)
-                  ) {
+            ) {
                 options.forEachIndexed { index, option ->
                     val isSelected =
                         option.first == currentSelection
@@ -101,54 +102,57 @@ fun TimeoutSelectionDialog(
                             .fillMaxWidth()
                             .clip(
                                 RoundedCornerShape(12.dp)
-                                 )
+                            )
                             .clickable {
                                 onOptionSelected(option)
                             },
                         color =
-                            if (isSelected)
-                                MaterialTheme.colorScheme.primaryContainer
-                            else
-                                Color.Transparent
-                           ) {
+                        if (isSelected) {
+                            MaterialTheme.colorScheme.primaryContainer
+                        } else {
+                            Color.Transparent
+                        }
+                    ) {
                         Row(
                             modifier = Modifier.padding(
                                 horizontal = 16.dp,
                                 vertical = 12.dp
-                                                       ),
+                            ),
                             verticalAlignment =
-                                Alignment.CenterVertically
-                           ) {
+                            Alignment.CenterVertically
+                        ) {
                             Text(
                                 text = option.first,
                                 style =
-                                    MaterialTheme.typography.bodyLarge,
+                                MaterialTheme.typography.bodyLarge,
                                 fontWeight =
-                                    if (isSelected)
-                                        androidx.compose.ui.text.font.FontWeight.Bold
-                                    else
-                                        androidx.compose.ui.text.font.FontWeight.Normal,
+                                if (isSelected) {
+                                    androidx.compose.ui.text.font.FontWeight.Bold
+                                } else {
+                                    androidx.compose.ui.text.font.FontWeight.Normal
+                                },
                                 color =
-                                    if (isSelected)
-                                        MaterialTheme.colorScheme.onPrimaryContainer
-                                    else
-                                        MaterialTheme.colorScheme.onSurface
-                                )
+                                if (isSelected) {
+                                    MaterialTheme.colorScheme.onPrimaryContainer
+                                } else {
+                                    MaterialTheme.colorScheme.onSurface
+                                }
+                            )
 
                             if (isSelected) {
                                 Spacer(
                                     modifier = Modifier.weight(1f)
-                                      )
+                                )
 
                                 Icon(
                                     imageVector =
-                                        Icons.Rounded.Check,
+                                    Icons.Rounded.Check,
                                     contentDescription = null,
                                     tint =
-                                        MaterialTheme.colorScheme.primary,
+                                    MaterialTheme.colorScheme.primary,
                                     modifier =
-                                        Modifier.size(20.dp)
-                                    )
+                                    Modifier.size(20.dp)
+                                )
                             }
                         }
                     }
@@ -156,13 +160,13 @@ fun TimeoutSelectionDialog(
                     if (index < options.lastIndex) {
                         HorizontalDivider(
                             modifier =
-                                Modifier.padding(
-                                    horizontal = 16.dp
-                                                ),
+                            Modifier.padding(
+                                horizontal = 16.dp
+                            ),
                             thickness = 0.5.dp,
                             color =
-                                MaterialTheme.colorScheme.outlineVariant
-                                         )
+                            MaterialTheme.colorScheme.outlineVariant
+                        )
                     }
                 }
             }
@@ -170,15 +174,15 @@ fun TimeoutSelectionDialog(
         confirmButton = {
             TextButton(
                 onClick = onDismiss
-                      ) {
+            ) {
                 Text(
                     text = stringResource(
                         R.string.close
-                                         ),
+                    ),
                     color =
-                        MaterialTheme.colorScheme.primary
-                    )
+                    MaterialTheme.colorScheme.primary
+                )
             }
         }
-               )
+    )
 }

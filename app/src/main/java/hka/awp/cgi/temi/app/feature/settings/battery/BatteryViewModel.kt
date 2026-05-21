@@ -8,9 +8,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
+@Suppress("MagicNumber")
 class BatteryViewModel(
     private val batteryMonitor: TemiBatteryMonitor
-                      ) : ViewModel() {
+) : ViewModel() {
 
     val batteryLevel: StateFlow<Int> =
         batteryMonitor.batteryLevel
@@ -19,7 +20,7 @@ class BatteryViewModel(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),
                 initialValue = 0
-                    )
+            )
 
     val isCharging: StateFlow<Boolean> =
         batteryMonitor.isCharging

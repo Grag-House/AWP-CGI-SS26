@@ -36,7 +36,7 @@ val appModule = module {
         } catch (
             @Suppress("TooGenericExceptionCaught")
             e: Exception,
-                ) {
+        ) {
             Timber.e(e, "Temi SDK not available, probably running locally")
             null
         }
@@ -50,7 +50,7 @@ val appModule = module {
             clock = get(),
             datetimeFormatter = get(),
             temiBatteryMonitor = get(),
-                    )
+        )
     }
 
     viewModel {
@@ -60,13 +60,13 @@ val appModule = module {
         DisplayViewModel(
             application = androidContext() as Application,
             get()
-                        )
+        )
     }
     viewModel {
         NotificationViewModel(
             application = androidContext() as Application,
             get()
-                             )
+        )
     }
 
     viewModel<WebserverViewModel> { WebserverViewModel() }

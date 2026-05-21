@@ -9,10 +9,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import timber.log.Timber
 import java.util.Locale
 
+@Suppress("MagicNumber")
 class NotificationViewModel(
     application: Application,
     private val robot: Robot?
-                           ) : AndroidViewModel(application) {
+) : AndroidViewModel(application) {
 
     private var tts: TextToSpeech? = null
 

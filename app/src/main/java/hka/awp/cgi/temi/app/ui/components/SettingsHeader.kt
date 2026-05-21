@@ -20,11 +20,11 @@ fun SettingsHeader(
     title: String,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier
-                  ) {
+) {
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
-       ) {
+    ) {
         IconButton(onClick = onBackClick) {
             Icon(Icons.Rounded.ArrowBack, contentDescription = "Zurück")
         }
@@ -33,6 +33,6 @@ fun SettingsHeader(
             text = title,
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold
-            )
+        )
     }
 }

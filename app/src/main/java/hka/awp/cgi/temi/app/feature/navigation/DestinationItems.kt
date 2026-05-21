@@ -25,7 +25,7 @@ sealed class DestinationItems(
     @StringRes val stringResource: Int,
     val icon: ImageVector,
     val systemName: String
-                             ) {
+) {
     data object Kitchen : DestinationItems(R.string.location_kitchen, Icons.Rounded.Kitchen, "keynote kitchen")
     data object Cafe : DestinationItems(R.string.location_cafe, Icons.Rounded.Coffee, "kaffeemaschine")
     data object Reception : DestinationItems(R.string.location_reception, Icons.Rounded.MeetingRoom, "eingang")

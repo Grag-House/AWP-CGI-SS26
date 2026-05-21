@@ -10,7 +10,7 @@ import kotlinx.serialization.Serializable
 data class MqttCommand(
     val payloadObject: String? = null,
     val speed: String? = null
-                      )
+)
 
 /**
  * Represents a status update sent via MQTT.
@@ -19,7 +19,7 @@ data class MqttCommand(
 data class MqttStatus(
     val status: String,
     val location: String? = null
-                     )
+)
 
 /**
  * Represents an ASR (Speech Recognition) result sent via MQTT.
@@ -27,7 +27,7 @@ data class MqttStatus(
 @Serializable
 data class MqttAsr(
     val text: String
-                  )
+)
 
 /**
  * Represents a list response sent via MQTT.
@@ -35,4 +35,4 @@ data class MqttAsr(
 @Serializable
 data class MqttLocations(
     val payloadObject: List<String>
-                        )
+)

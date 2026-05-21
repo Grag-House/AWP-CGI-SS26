@@ -9,7 +9,7 @@ import org.koin.compose.viewmodel.koinViewModel
 fun BatteryScreen(
     onBackClick: () -> Unit,
     viewModel: BatteryViewModel = koinViewModel()
-                 ) {
+) {
     val batteryLevel by viewModel.batteryLevel.collectAsState()
     val isCharging by viewModel.isCharging.collectAsState()
 
@@ -17,5 +17,5 @@ fun BatteryScreen(
         batteryLevel = batteryLevel,
         isCharging = isCharging,
         onBackClick = onBackClick
-                  )
+    )
 }

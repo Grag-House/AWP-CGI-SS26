@@ -28,7 +28,7 @@ fun WebViewScreen(url: String) {
                     ViewGroup.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.MATCH_PARENT
-                                          )
+                    )
 
                 webViewClient = TemiWebViewClient()
                 // this is needed for the webserver backend to work
@@ -44,7 +44,7 @@ fun WebViewScreen(url: String) {
                         "text/html",
                         "UTF-8",
                         null
-                                       )
+                    )
                 }
             }
         }

@@ -9,7 +9,7 @@ import org.koin.compose.viewmodel.koinViewModel
 fun NotificationScreen(
     onBackClick: () -> Unit,
     viewModel: NotificationViewModel = koinViewModel()
-                      ) {
+) {
     val volume by viewModel.volume.collectAsState()
     val isEnabled by viewModel.notificationsEnabled.collectAsState()
     val availableLocales by viewModel.availableLocales.collectAsState()
@@ -24,5 +24,5 @@ fun NotificationScreen(
         selectedLocale = selectedLocale,
         onLocaleSelect = { viewModel.setLocale(it) },
         onBackClick = onBackClick
-                       )
+    )
 }

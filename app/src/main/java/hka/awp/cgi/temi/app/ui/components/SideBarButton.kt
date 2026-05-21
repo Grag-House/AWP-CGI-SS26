@@ -41,32 +41,32 @@ fun SidebarButton(isExpanded: Boolean, screen: Screen, isSelected: Boolean, onCl
     Button(
         onClick = onClick,
         colors =
-            ButtonDefaults.buttonColors(
-                containerColor = backgroundColor,
-                contentColor = contentColor
-                                       ),
+        ButtonDefaults.buttonColors(
+            containerColor = backgroundColor,
+            contentColor = contentColor
+        ),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
         shape = RoundedCornerShape(16.dp),
         modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(start = 24.dp, end = 24.dp)
-                .height(48.dp)
-          ) {
+        Modifier
+            .fillMaxWidth()
+            .padding(start = 24.dp, end = 24.dp)
+            .height(48.dp)
+    ) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
             if (isExpanded) {
                 if (!screen.isCustomIcon) {
                     Icon(
                         painter =
-                            if (screen.icon != null) {
-                                rememberVectorPainter(screen.icon)
-                            } else if (screen.iconRes != null) {
-                                painterResource(id = screen.iconRes)
-                            } else {
-                                rememberVectorPainter(Icons.Rounded.ImageNotSupported)
-                            },
+                        if (screen.icon != null) {
+                            rememberVectorPainter(screen.icon)
+                        } else if (screen.iconRes != null) {
+                            painterResource(id = screen.iconRes)
+                        } else {
+                            rememberVectorPainter(Icons.Rounded.ImageNotSupported)
+                        },
                         contentDescription = stringResource(id = screen.contentDescription)
-                        )
+                    )
                 } else {
                     ModeIcon()
                 }

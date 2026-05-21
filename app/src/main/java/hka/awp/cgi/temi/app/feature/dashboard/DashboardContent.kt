@@ -50,19 +50,19 @@ fun MainContent(
     onClick: (Screen) -> Unit = {},
     serverState: ServerState,
     currentTemperatureState: Int
-               ) {
+) {
     Column(
         modifier = modifier
             .fillMaxSize()
             .padding(24.dp)
-          ) {
+    ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
                 Icons.Rounded.SmartToy,
                 contentDescription = stringResource(R.string.robot_description),
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(48.dp)
-                )
+            )
             Spacer(modifier = Modifier.width(16.dp))
             val robotName = stringResource(id = R.string.robot_name)
             val welcomeParts = stringResource(R.string.welcome_message, "PLACEHOLDER").split("PLACEHOLDER")
@@ -78,7 +78,7 @@ fun MainContent(
                 },
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold
-                )
+            )
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -93,7 +93,7 @@ private fun ContentGrid(serverState: ServerState, onClick: (Screen) -> Unit, cur
         columns = GridCells.Fixed(GRIDCELL_COUNT),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
+    ) {
         item {
             DashboardCard(
                 title = stringResource(R.string.webserver),
@@ -103,7 +103,7 @@ private fun ContentGrid(serverState: ServerState, onClick: (Screen) -> Unit, cur
                     "${stringResource(R.string.status_online)} (${
                         serverState.ipAddress ?: stringResource(
                             R.string.unknown_host_address
-                                                               )
+                        )
                     })"
                 } else {
                     stringResource(R.string.status_offline)
@@ -111,7 +111,7 @@ private fun ContentGrid(serverState: ServerState, onClick: (Screen) -> Unit, cur
                 onClick = {
                     onClick(Screen.Webserver)
                 }
-                         )
+            )
         }
         @Suppress("MagicNumber")
         item {
@@ -123,12 +123,12 @@ private fun ContentGrid(serverState: ServerState, onClick: (Screen) -> Unit, cur
                         painter = painterResource(id = R.drawable.partly_cloudy_day),
                         tint = MaterialTheme.colorScheme.primary,
                         contentDescription = stringResource(R.string.weather_icon_description)
-                        )
+                    )
                 },
                 bottomText = stringResource(R.string.temp_unit, currentTemperatureState),
                 isTemp = true,
                 onClick = { onClick(Screen.Weather) }
-                         )
+            )
         }
         item {
             DashboardCard(
@@ -137,7 +137,7 @@ private fun ContentGrid(serverState: ServerState, onClick: (Screen) -> Unit, cur
                 Icons.Rounded.Navigation,
                 stringResource(R.string.fastestroute),
                 onClick = { onClick(Screen.Navigation) }
-                         )
+            )
         }
         item {
             DashboardCard(
@@ -147,7 +147,7 @@ private fun ContentGrid(serverState: ServerState, onClick: (Screen) -> Unit, cur
                 onClick = {
                     onClick(Screen.Settings)
                 }
-                         )
+            )
         }
     }
 }

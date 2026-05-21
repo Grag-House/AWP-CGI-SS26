@@ -10,10 +10,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+@Suppress("MagicNumber")
 class DisplayViewModel(
     application: Application,
     private val repository: RobotRepository
-                      ) : AndroidViewModel(application) {
+) : AndroidViewModel(application) {
 
     private val _brightness = MutableStateFlow(50f)
     val brightness: StateFlow<Float> = _brightness.asStateFlow()
@@ -21,28 +22,28 @@ class DisplayViewModel(
     val timeoutOptions = listOf(
         getApplication<Application>().getString(
             R.string.timeout_30_seconds
-                                               ) to 30000,
+        ) to 30000,
 
         getApplication<Application>().getString(
             R.string.timeout_1_minute
-                                               ) to 60000,
+        ) to 60000,
 
         getApplication<Application>().getString(
             R.string.timeout_2_minutes
-                                               ) to 120000,
+        ) to 120000,
 
         getApplication<Application>().getString(
             R.string.timeout_5_minutes
-                                               ) to 300000,
+        ) to 300000,
 
         getApplication<Application>().getString(
             R.string.timeout_10_minutes
-                                               ) to 600000,
+        ) to 600000,
 
         getApplication<Application>().getString(
             R.string.timeout_15_minutes
-                                               ) to 900000
-                               )
+        ) to 900000
+    )
     private val _screenTimeout = MutableStateFlow(timeoutOptions[2]) // Standard: 1 Min
     val screenTimeout = _screenTimeout.asStateFlow()
     private val _isDarkMode = MutableStateFlow(false)
@@ -63,18 +64,18 @@ class DisplayViewModel(
         repository.setBrightness(
             brightnessPercent,
             getApplication()
-                                )
+        )
     }
 
     fun updateTimeout(
         option: Pair<String, Int>
-                     ) {
+    ) {
         _screenTimeout.value = option
 
         repository.setScreenTimeout(
             option.second,
             getApplication()
-                                   )
+        )
     }
 
     fun toggleDarkMode(enabled: Boolean) {
@@ -83,6 +84,6 @@ class DisplayViewModel(
         repository.saveDarkMode(
             enabled,
             getApplication()
-                               )
+        )
     }
 }

@@ -52,11 +52,11 @@ fun Sidebar(
     onRouteSelected: (Screen) -> Unit,
     onSidebarToggle: () -> Unit,
     modifier: Modifier = Modifier
-           ) {
+) {
     val sidebarWidth by animateDpAsState(
         targetValue = if (isExpanded) 250.dp else 80.dp,
         label = "sidebar_width_animation"
-                                        )
+    )
 
     if (isExpanded) {
         Column(
@@ -66,24 +66,24 @@ fun Sidebar(
                 .clip(RoundedCornerShape((24.dp)))
                 .width(sidebarWidth)
                 .background(MaterialTheme.colorScheme.surface)
-              ) {
+        ) {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
-               ) {
+            ) {
                 Text(
                     modifier = Modifier.padding(start = 8.dp),
                     text = stringResource(R.string.cgi),
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.headlineMedium
-                    )
+                )
                 IconButton(onClick = { onSidebarToggle() }) {
                     Icon(
                         imageVector = Icons.Rounded.Menu,
                         contentDescription = stringResource(R.string.toggle_sidebar_description)
-                        )
+                    )
                 }
             }
 
@@ -95,7 +95,7 @@ fun Sidebar(
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.titleMedium
-                )
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -106,7 +106,7 @@ fun Sidebar(
                     screen = it,
                     isSelected = selectedRoute == it.route,
                     onClick = { onRouteSelected(it) }
-                             )
+                )
             }
 
             Spacer(modifier = Modifier.weight(1f))
@@ -120,19 +120,19 @@ fun Sidebar(
                     .fillMaxWidth()
                     .padding(
                         12.dp
-                            )
-                  ) {
+                    )
+            ) {
                 Icon(
                     Icons.AutoMirrored.Filled.HelpOutline,
                     contentDescription = null,
                     tint = Color(color = 0xFF7B7B7B)
-                    )
+                )
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(
                     stringResource(R.string.sidebar_help),
                     modifier = Modifier.weight(1f),
                     color = Color(color = 0xFF7B7B7B)
-                    )
+                )
             }
         }
     }
@@ -142,7 +142,7 @@ fun Sidebar(
             Icon(
                 imageVector = Icons.Rounded.Menu,
                 contentDescription = stringResource(R.string.toggle_sidebar_description)
-                )
+            )
         }
     }
 }

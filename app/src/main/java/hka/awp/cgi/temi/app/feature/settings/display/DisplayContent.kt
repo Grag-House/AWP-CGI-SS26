@@ -25,7 +25,7 @@ import hka.awp.cgi.temi.app.ui.components.SettingsCard
 import hka.awp.cgi.temi.app.ui.components.SettingsHeader
 import hka.awp.cgi.temi.app.ui.components.SettingsRow
 
-@Suppress("LongParameterList")
+@Suppress("LongParameterList", "MagicNumber")
 @Composable
 fun DisplayContent(
     brightness: Float,
@@ -35,16 +35,16 @@ fun DisplayContent(
     onBackClick: () -> Unit,
     isDarkMode: Boolean,
     onDarkModeChange: (Boolean) -> Unit
-                  ) {
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(32.dp)
-          ) {
+    ) {
         SettingsHeader(
             title = stringResource(R.string.settings_display_subtitle),
             onBackClick = onBackClick
-                      )
+        )
 
         Spacer(modifier = Modifier.height(40.dp))
 
@@ -52,7 +52,7 @@ fun DisplayContent(
             SettingsRow(
                 icon = Icons.Rounded.Brightness6,
                 title = stringResource(R.string.display_brightness)
-                       )
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -60,16 +60,16 @@ fun DisplayContent(
                 value = brightness,
                 onValueChange = onBrightnessChange,
                 valueRange = 0f..1f
-                  )
+            )
 
             Text(
                 text = stringResource(
                     R.string.display_brightness_percent,
                     (brightness * 100).toInt()
-                                     ),
+                ),
                 modifier = Modifier.align(Alignment.End),
                 style = MaterialTheme.typography.bodyMedium
-                )
+            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -81,42 +81,44 @@ fun DisplayContent(
                 subtitle = stringResource(
                     R.string.display_screensaver_after,
                     currentTimeoutLabel
-                                         ),
+                ),
                 action = {
                     Text(
                         text = stringResource(R.string.display_change),
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold
-                        )
+                    )
                 }
-                       )
+            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
         SettingsCard {
             SettingsRow(
-                icon = if (isDarkMode)
+                icon = if (isDarkMode) {
                     Icons.Rounded.DarkMode
-                else
-                    Icons.Rounded.LightMode,
+                } else {
+                    Icons.Rounded.LightMode
+                },
 
                 title = stringResource(R.string.display_dark_mode),
 
                 subtitle =
-                    if (isDarkMode)
-                        stringResource(R.string.display_enabled)
-                    else
-                        stringResource(R.string.display_disabled),
+                if (isDarkMode) {
+                    stringResource(R.string.display_enabled)
+                } else {
+                    stringResource(R.string.display_disabled)
+                },
 
                 action = {
                     Switch(
                         checked = isDarkMode,
                         onCheckedChange = onDarkModeChange
-                          )
+                    )
                 }
-                       )
+            )
         }
     }
 }
