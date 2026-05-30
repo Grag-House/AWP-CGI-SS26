@@ -6,6 +6,7 @@ import androidx.compose.material.icons.rounded.BatteryFull
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Navigation
 import androidx.compose.material.icons.rounded.Notifications
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Storage
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -34,7 +35,7 @@ sealed class Screen(
     val isCustomIcon: Boolean = false
 ) {
     companion object {
-        val navScreens by lazy { listOf(Dashboard, Webserver, Weather, Navigation, Settings) }
+        val navScreens by lazy { listOf(Dashboard, Webserver, Weather, Navigation, HideAndSeek, Settings) }
     }
 
     data object Dashboard : Screen(
@@ -91,6 +92,13 @@ sealed class Screen(
         title = R.string.settings_battery_title,
         icon = Icons.Rounded.BatteryFull,
         contentDescription = R.string.settings_battery_subtitle
+    )
+
+    data object HideAndSeek : Screen(
+        route = "hide_and_seek",
+        title = R.string.hide_and_seek,
+        icon = Icons.Rounded.Search,
+        contentDescription = R.string.hide_and_seek_description
     )
 
     data object Documentation : Screen(

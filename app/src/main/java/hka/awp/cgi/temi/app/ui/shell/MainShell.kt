@@ -16,6 +16,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import hka.awp.cgi.temi.app.BuildConfig
 import hka.awp.cgi.temi.app.feature.dashboard.MainContent
+import hka.awp.cgi.temi.app.feature.hideandseek.HideAndSeekScreen
+import hka.awp.cgi.temi.app.feature.hideandseek.HideAndSeekViewModel
 import hka.awp.cgi.temi.app.feature.navigation.NavigationContent
 import hka.awp.cgi.temi.app.feature.navigation.NavigationViewModel
 import hka.awp.cgi.temi.app.feature.settings.SettingsNavigationEvent
@@ -45,7 +47,7 @@ import timber.log.Timber
  * specific to the settings screen.
  */
 
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun MainShell(
     modifier: Modifier = Modifier,
@@ -53,7 +55,8 @@ fun MainShell(
     settingsViewModel: SettingsViewModel = koinViewModel(),
     navigationViewModel: NavigationViewModel = koinViewModel(),
     webserverViewModel: WebserverViewModel = koinViewModel(),
-    weatherViewModel: WeatherViewModel = koinViewModel()
+    weatherViewModel: WeatherViewModel = koinViewModel(),
+    hideAndSeekViewModel: HideAndSeekViewModel = koinViewModel()
 ) {
     val wifiLevel by appViewModel.wifiLevel.collectAsStateWithLifecycle()
     val currentTime by appViewModel.currentTime.collectAsStateWithLifecycle()
@@ -161,6 +164,12 @@ fun MainShell(
 
                     Screen.Weather.route -> WeatherContent(
                         viewModel = weatherViewModel
+                    )
+
+                    Screen.HideAndSeek.route -> HideAndSeekScreen(
+                        modifier = Modifier.weight(1f),
+                        viewModel = hideAndSeekViewModel,
+                        onNavigateToDashboard = { appViewModel.onRouteSelect(Screen.Dashboard) }
                     )
 
                     Screen.Documentation.route -> {
