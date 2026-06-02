@@ -3,6 +3,7 @@ package hka.awp.cgi.temi.app.koin
 import android.app.Application
 import com.robotemi.sdk.Robot
 import hka.awp.cgi.temi.app.data.repository.RobotRepository
+import hka.awp.cgi.temi.app.feature.controller.ControllerViewModel
 import hka.awp.cgi.temi.app.feature.settings.SettingsViewModel
 import hka.awp.cgi.temi.app.feature.settings.battery.BatteryViewModel
 import hka.awp.cgi.temi.app.feature.settings.display.DisplayViewModel
@@ -11,6 +12,10 @@ import hka.awp.cgi.temi.app.feature.webserver.WebserverViewModel
 import hka.awp.cgi.temi.app.ui.shell.AppViewModel
 import hka.awp.cgi.temi.app.utils.NetworkManager
 import hka.awp.cgi.temi.app.utils.TemiBatteryMonitor
+import hka.awp.cgi.temi.app.utils.TemiMovementController
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -44,6 +49,17 @@ val appModule = module {
 
     single<TemiBatteryMonitor> { TemiBatteryMonitor(robot = get()) }
 
+    single {
+        CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    }
+
+    single {
+        TemiMovementController(
+            robot = get(),
+            scope = get(),
+                              )
+    }
+
     viewModel<AppViewModel> {
         AppViewModel(
             networkManager = get(),
@@ -72,5 +88,11 @@ val appModule = module {
     viewModel<WebserverViewModel> { WebserverViewModel() }
     viewModel {
         BatteryViewModel(get())
+    }
+
+    viewModel {
+        ControllerViewModel(
+            movementController = get(),
+                           )
     }
 }
