@@ -49,8 +49,6 @@ import hka.awp.cgi.temi.app.R
 
 private const val SECONDS_PER_MINUTE = 60
 private const val URGENT_SECONDS_THRESHOLD = 30
-private const val HIDING_IMAGE_WEIGHT = 0.4f
-private const val HIDING_CONTENT_WEIGHT = 0.6f
 
 @Composable
 fun HideAndSeekScreen(
@@ -64,8 +62,8 @@ fun HideAndSeekScreen(
         GameState.SETUP -> SetupContent(
             modifier = modifier.fillMaxSize().padding(24.dp),
             uiState = uiState,
-            onIncrease = viewModel::increaseSearchTime,
-            onDecrease = viewModel::decreaseSearchTime,
+            onIncrease = { viewModel.adjustSearchTime(1) },
+            onDecrease = { viewModel.adjustSearchTime(-1) },
             onStart = viewModel::startGame
         )
         GameState.HIDING -> HidingContent(
@@ -257,6 +255,7 @@ private fun TimePickerCard(
     }
 }
 
+@Suppress("MagicNumber")
 @Composable
 private fun HidingContent(
     modifier: Modifier = Modifier,
@@ -273,14 +272,14 @@ private fun HidingContent(
             contentDescription = null,
             contentScale = ContentScale.Fit,
             modifier = Modifier
-                .weight(HIDING_IMAGE_WEIGHT)
+                .weight(0.4f)
                 .fillMaxHeight()
         )
 
         // Right: status + countdown + cancel
         Column(
             modifier = Modifier
-                .weight(HIDING_CONTENT_WEIGHT)
+                .weight(0.6f)
                 .fillMaxHeight(),
             verticalArrangement = Arrangement.Center
         ) {
