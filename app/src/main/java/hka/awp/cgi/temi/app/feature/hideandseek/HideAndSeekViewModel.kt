@@ -2,6 +2,9 @@ package hka.awp.cgi.temi.app.feature.hideandseek
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.robotemi.sdk.Robot
+import com.robotemi.sdk.listeners.OnGoToLocationStatusChangedListener
+import com.robotemi.sdk.navigation.listener.OnDistanceToLocationChangedListener
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,6 +13,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 private const val HIDING_COUNTDOWN_SECONDS = 20
 private const val DEFAULT_SEARCH_MINUTES = 3
@@ -17,6 +21,7 @@ private const val MIN_SEARCH_MINUTES = 1
 private const val MAX_SEARCH_MINUTES = 10
 private const val MILLIS_PER_SECOND = 1000L
 private const val SECONDS_PER_MINUTE = 60
+private const val MIN_HIDING_DISTANCE_METERS = 3f
 
 enum class GameState { SETUP, HIDING, WAITING, WON, LOST }
 
@@ -29,36 +34,72 @@ data class HideAndSeekUiState(
     val hidingSpotName: String = ""
 )
 
-class HideAndSeekViewModel : ViewModel() {
+class HideAndSeekViewModel(
+    private val robot: Robot?
+) : ViewModel(),
+    OnGoToLocationStatusChangedListener,
+    OnDistanceToLocationChangedListener {
 
     private val _uiState = MutableStateFlow(HideAndSeekUiState())
     val uiState: StateFlow<HideAndSeekUiState> = _uiState.asStateFlow()
 
     private var timerJob: Job? = null
+    private var distancesToLocations: Map<String, Float> = emptyMap()
 
-    fun increaseSearchTime() {
-        _uiState.update {
-            it.copy(searchTimeMinutes = (it.searchTimeMinutes + 1).coerceAtMost(MAX_SEARCH_MINUTES))
+    init {
+        robot?.addOnGoToLocationStatusChangedListener(this)
+        robot?.addOnDistanceToLocationChangedListener(this)
+    }
+
+    override fun onCleared() {
+        timerJob?.cancel()
+        robot?.removeOnGoToLocationStatusChangedListener(this)
+        robot?.removeOnDistanceToLocationChangedListener(this)
+        super.onCleared()
+    }
+
+    override fun onDistanceToLocationChanged(distances: Map<String, Float>) {
+        distancesToLocations = distances
+    }
+
+    override fun onGoToLocationStatusChanged(
+        location: String,
+        status: String,
+        descriptionId: Int,
+        description: String
+    ) {
+        val state = _uiState.value
+        if (state.gameState != GameState.HIDING) return
+        if (location != state.hidingSpotName) return
+
+        when (status) {
+            OnGoToLocationStatusChangedListener.COMPLETE -> transitionToWaiting()
+            OnGoToLocationStatusChangedListener.ABORT -> {
+                Timber.w("Navigation to hiding spot aborted: %s", location)
+                transitionToWaiting()
+            }
         }
     }
 
-    fun decreaseSearchTime() {
+    fun adjustSearchTime(delta: Int) {
         _uiState.update {
-            it.copy(searchTimeMinutes = (it.searchTimeMinutes - 1).coerceAtLeast(MIN_SEARCH_MINUTES))
+            it.copy(searchTimeMinutes = (it.searchTimeMinutes + delta).coerceIn(MIN_SEARCH_MINUTES, MAX_SEARCH_MINUTES))
         }
     }
 
     fun startGame() {
+        val hidingSpot = selectHidingSpot(robot, distancesToLocations)
         _uiState.update {
             it.copy(
                 gameState = GameState.HIDING,
-                hidingSecondsRemaining = HIDING_COUNTDOWN_SECONDS
+                hidingSecondsRemaining = HIDING_COUNTDOWN_SECONDS,
+                hidingSpotName = hidingSpot ?: ""
             )
         }
-        startHidingCountdown()
+        startHidingCountdown(hidingSpot)
     }
 
-    private fun startHidingCountdown() {
+    private fun startHidingCountdown(hidingSpot: String?) {
         timerJob?.cancel()
         timerJob = viewModelScope.launch {
             var remaining = HIDING_COUNTDOWN_SECONDS
@@ -67,12 +108,24 @@ class HideAndSeekViewModel : ViewModel() {
                 delay(MILLIS_PER_SECOND)
                 remaining--
             }
-            if (isActive) transitionToWaiting()
+            if (!isActive) return@launch
+
+            _uiState.update { it.copy(hidingSecondsRemaining = 0) }
+
+            if (hidingSpot != null && robot != null) {
+                Timber.d("Navigating to hiding spot: %s", hidingSpot)
+                runCatching { robot.goTo(hidingSpot) }
+                    .onFailure {
+                        Timber.e(it, "Navigation call failed for hiding spot: %s", hidingSpot)
+                        transitionToWaiting()
+                    }
+                // On success: wait for OnGoToLocationStatusChangedListener callback
+            } else {
+                transitionToWaiting()
+            }
         }
     }
 
-    // Called by the backend once the robot has reached its hiding spot.
-    // The frontend triggers this automatically after HIDING_COUNTDOWN_SECONDS as a placeholder.
     fun transitionToWaiting() {
         timerJob?.cancel()
         val totalSearch = _uiState.value.searchTimeMinutes * SECONDS_PER_MINUTE
@@ -113,13 +166,28 @@ class HideAndSeekViewModel : ViewModel() {
 
     fun cancelGame() {
         timerJob?.cancel()
+        if (_uiState.value.gameState == GameState.HIDING) {
+            robot?.stopMovement()
+        }
         _uiState.update { state ->
             HideAndSeekUiState(searchTimeMinutes = state.searchTimeMinutes)
         }
     }
+}
 
-    override fun onCleared() {
-        timerJob?.cancel()
-        super.onCleared()
+private fun selectHidingSpot(robot: Robot?, distancesToLocations: Map<String, Float>): String? {
+    val locations = robot?.locations ?: return null
+    if (locations.isEmpty()) return null
+
+    val nearestLocation = distancesToLocations.minByOrNull { it.value }?.key
+    val candidates = locations.filter { location ->
+        val distance = distancesToLocations[location]
+        distance == null || distance >= MIN_HIDING_DISTANCE_METERS
+    }
+
+    return if (candidates.isNotEmpty()) {
+        candidates.random()
+    } else {
+        locations.filter { it != nearestLocation }.randomOrNull() ?: locations.random()
     }
 }

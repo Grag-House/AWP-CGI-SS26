@@ -70,7 +70,7 @@ val appModule = module {
         )
     }
 
-    viewModel { HideAndSeekViewModel() }
+    viewModel { HideAndSeekViewModel(robot = get()) }
     viewModel<WebserverViewModel> { WebserverViewModel() }
     viewModel {
         BatteryViewModel(get())
