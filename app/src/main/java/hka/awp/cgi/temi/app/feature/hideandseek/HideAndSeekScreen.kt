@@ -2,6 +2,7 @@ package hka.awp.cgi.temi.app.feature.hideandseek
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -46,6 +48,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import hka.awp.cgi.temi.app.R
 
 private const val SECONDS_PER_MINUTE = 60
+private const val URGENT_SECONDS_THRESHOLD = 30
+private const val HIDING_IMAGE_WEIGHT = 0.4f
+private const val HIDING_CONTENT_WEIGHT = 0.6f
 
 @Composable
 fun HideAndSeekScreen(
@@ -258,65 +263,94 @@ private fun HidingContent(
     uiState: HideAndSeekUiState,
     onCancel: () -> Unit
 ) {
-    Column(modifier = modifier) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(24.dp)
+    ) {
+        // Left: Temi image
+        Image(
+            painter = painterResource(R.drawable.temi_hiding),
+            contentDescription = null,
+            contentScale = ContentScale.Fit,
+            modifier = Modifier
+                .weight(HIDING_IMAGE_WEIGHT)
+                .fillMaxHeight()
+        )
+
+        // Right: status + countdown + cancel
         Column(
-            modifier = Modifier.weight(1f).fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .weight(HIDING_CONTENT_WEIGHT)
+                .fillMaxHeight(),
             verticalArrangement = Arrangement.Center
         ) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(80.dp),
-                color = MaterialTheme.colorScheme.primary,
-                strokeWidth = 6.dp
-            )
-            Spacer(modifier = Modifier.height(32.dp))
-            Text(
-                text = stringResource(R.string.hide_and_seek_hiding_title),
-                style = MaterialTheme.typography.displaySmall,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = stringResource(R.string.hide_and_seek_hiding_subtitle),
-                style = MaterialTheme.typography.titleLarge,
-                color = Color.Gray,
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(6.dp))
-            Text(
-                text = stringResource(R.string.hide_and_seek_hiding_bystander_note),
-                style = MaterialTheme.typography.titleMedium,
-                color = Color.LightGray,
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(40.dp))
             Surface(
                 shape = RoundedCornerShape(20.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Column(
-                    modifier = Modifier.padding(horizontal = 48.dp, vertical = 20.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                Column(modifier = Modifier.padding(24.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            color = MaterialTheme.colorScheme.primary,
+                            strokeWidth = 3.dp
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = stringResource(R.string.hide_and_seek_hiding_title),
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = stringResource(R.string.hide_and_seek_hiding_subtitle),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = stringResource(R.string.hide_and_seek_hiding_bystander_note),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Gray
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Surface(
+                shape = RoundedCornerShape(20.dp),
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 20.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
                         text = stringResource(R.string.hide_and_seek_hiding_countdown_label),
                         style = MaterialTheme.typography.labelLarge,
-                        color = Color.Gray,
+                        color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 1.sp
                     )
-                    Spacer(modifier = Modifier.height(6.dp))
                     Text(
-                        text = stringResource(R.string.hide_and_seek_hiding_seconds, uiState.hidingSecondsRemaining),
-                        style = MaterialTheme.typography.displayMedium,
+                        text = stringResource(
+                            R.string.hide_and_seek_hiding_seconds,
+                            uiState.hidingSecondsRemaining
+                        ),
+                        style = MaterialTheme.typography.displaySmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
                     )
                 }
             }
-        }
-        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             TextButton(onClick = onCancel) {
                 Text(
                     text = stringResource(R.string.hide_and_seek_cancel),
@@ -335,6 +369,16 @@ private fun WaitingContent(
     onFound: () -> Unit,
     onCancel: () -> Unit
 ) {
+    val totalSeconds = (uiState.searchTimeMinutes * SECONDS_PER_MINUTE).toFloat()
+    val progress = if (totalSeconds > 0) uiState.searchSecondsRemaining / totalSeconds else 0f
+    val isUrgent = uiState.searchSecondsRemaining <= URGENT_SECONDS_THRESHOLD
+    val timerColor = if (isUrgent) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+    val trackColor = if (isUrgent) {
+        MaterialTheme.colorScheme.error.copy(alpha = 0.15f)
+    } else {
+        MaterialTheme.colorScheme.surfaceVariant
+    }
+
     Column(modifier = modifier) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -354,28 +398,52 @@ private fun WaitingContent(
                 )
             }
         }
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         Box(
             modifier = Modifier.fillMaxWidth().weight(1f),
             contentAlignment = Alignment.Center
         ) {
-            Surface(
-                shape = RoundedCornerShape(24.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant
-            ) {
-                Text(
-                    text = formatTime(uiState.searchSecondsRemaining),
-                    style = MaterialTheme.typography.displayLarge,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(horizontal = 56.dp, vertical = 28.dp),
-                    textAlign = TextAlign.Center,
-                    fontSize = 80.sp,
-                    color = if (uiState.searchSecondsRemaining <= 30) {
-                        MaterialTheme.colorScheme.error
-                    } else {
-                        MaterialTheme.colorScheme.onSurface
-                    }
+            Box(contentAlignment = Alignment.Center) {
+                // Robot behind the circle, shifted left so circle overlaps its right side
+                Image(
+                    painter = painterResource(R.drawable.temi_waiting),
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .size(140.dp)
+                        .offset(x = (-120).dp)
                 )
+                // Circle centered and rendered on top
+                Box(contentAlignment = Alignment.Center) {
+                    // Filled background matching screen background
+                    Box(
+                        modifier = Modifier
+                            .size(200.dp)
+                            .background(MaterialTheme.colorScheme.background, CircleShape)
+                    )
+                    // Background ring
+                    CircularProgressIndicator(
+                        progress = { 1f },
+                        modifier = Modifier.size(200.dp),
+                        strokeWidth = 14.dp,
+                        color = trackColor
+                    )
+                    // Timer ring
+                    CircularProgressIndicator(
+                        progress = { progress },
+                        modifier = Modifier.size(200.dp),
+                        strokeWidth = 14.dp,
+                        color = timerColor
+                    )
+                    // Time text in center
+                    Text(
+                        text = formatTime(uiState.searchSecondsRemaining),
+                        style = MaterialTheme.typography.displayMedium,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        color = timerColor
+                    )
+                }
             }
         }
         Spacer(modifier = Modifier.height(20.dp))
