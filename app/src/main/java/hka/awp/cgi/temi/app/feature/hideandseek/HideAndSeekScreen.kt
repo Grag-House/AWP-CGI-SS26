@@ -409,35 +409,35 @@ private fun WaitingContent(
                     contentDescription = null,
                     contentScale = ContentScale.Fit,
                     modifier = Modifier
-                        .size(140.dp)
-                        .offset(x = (-120).dp)
+                        .size(200.dp)
+                        .offset(x = (-170).dp)
                 )
                 // Circle centered and rendered on top
                 Box(contentAlignment = Alignment.Center) {
                     // Filled background matching screen background
                     Box(
                         modifier = Modifier
-                            .size(200.dp)
+                            .size(280.dp)
                             .background(MaterialTheme.colorScheme.background, CircleShape)
                     )
                     // Background ring
                     CircularProgressIndicator(
                         progress = { 1f },
-                        modifier = Modifier.size(200.dp),
-                        strokeWidth = 14.dp,
+                        modifier = Modifier.size(280.dp),
+                        strokeWidth = 16.dp,
                         color = trackColor
                     )
                     // Timer ring
                     CircularProgressIndicator(
                         progress = { progress },
-                        modifier = Modifier.size(200.dp),
-                        strokeWidth = 14.dp,
+                        modifier = Modifier.size(280.dp),
+                        strokeWidth = 16.dp,
                         color = timerColor
                     )
                     // Time text in center
                     Text(
                         text = formatTime(uiState.searchSecondsRemaining),
-                        style = MaterialTheme.typography.displayMedium,
+                        style = MaterialTheme.typography.displayLarge,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center,
                         color = timerColor
@@ -517,60 +517,77 @@ private fun WonContent(
     }
 }
 
+@Suppress("MagicNumber")
 @Composable
 private fun LostContent(
     modifier: Modifier = Modifier,
     uiState: HideAndSeekUiState,
     onPlayAgain: () -> Unit
 ) {
-    Column(
+    Row(
         modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        horizontalArrangement = Arrangement.spacedBy(24.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = stringResource(R.string.hide_and_seek_lost_title),
-            style = MaterialTheme.typography.displaySmall,
-            fontWeight = FontWeight.Bold
+        Image(
+            painter = painterResource(R.drawable.temi_hiding),
+            contentDescription = null,
+            contentScale = ContentScale.Fit,
+            modifier = Modifier
+                .weight(0.4f)
+                .fillMaxHeight()
         )
-        Spacer(modifier = Modifier.height(32.dp))
-        Surface(
-            shape = RoundedCornerShape(16.dp),
-            color = MaterialTheme.colorScheme.surfaceVariant
-        ) {
-            Column(
-                modifier = Modifier.padding(horizontal = 48.dp, vertical = 24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = stringResource(R.string.hide_and_seek_lost_location_label),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = Color.Gray,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.sp
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = uiState.hidingSpotName.ifBlank {
-                        stringResource(R.string.hide_and_seek_lost_location_unknown)
-                    },
-                    style = MaterialTheme.typography.headlineLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-        }
-        Spacer(modifier = Modifier.height(40.dp))
-        Button(
-            onClick = onPlayAgain,
-            shape = RoundedCornerShape(16.dp),
-            modifier = Modifier.widthIn(min = 280.dp).height(60.dp)
+        Column(
+            modifier = Modifier
+                .weight(0.6f)
+                .fillMaxHeight(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = stringResource(R.string.hide_and_seek_play_again),
-                style = MaterialTheme.typography.titleLarge,
+                text = stringResource(R.string.hide_and_seek_lost_title),
+                style = MaterialTheme.typography.displaySmall,
                 fontWeight = FontWeight.Bold
             )
+            Spacer(modifier = Modifier.height(32.dp))
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant
+            ) {
+                Column(
+                    modifier = Modifier.padding(horizontal = 48.dp, vertical = 24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = stringResource(R.string.hide_and_seek_lost_location_label),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = Color.Gray,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = uiState.hidingSpotName.ifBlank {
+                            stringResource(R.string.hide_and_seek_lost_location_unknown)
+                        },
+                        style = MaterialTheme.typography.headlineLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(40.dp))
+            Button(
+                onClick = onPlayAgain,
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier.widthIn(min = 280.dp).height(60.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.hide_and_seek_play_again),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
     }
 }

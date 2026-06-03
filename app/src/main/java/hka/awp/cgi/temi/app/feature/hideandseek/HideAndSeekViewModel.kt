@@ -15,7 +15,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
-private const val HIDING_COUNTDOWN_SECONDS = 20
+private const val HIDING_COUNTDOWN_SECONDS = 40
 private const val DEFAULT_SEARCH_MINUTES = 3
 private const val MIN_SEARCH_MINUTES = 1
 private const val MAX_SEARCH_MINUTES = 10
