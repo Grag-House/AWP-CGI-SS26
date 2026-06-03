@@ -43,6 +43,7 @@ class HideAndSeekViewModel(
     private val _uiState = MutableStateFlow(HideAndSeekUiState())
     val uiState: StateFlow<HideAndSeekUiState> = _uiState.asStateFlow()
 
+    private val navigator = HideAndSeekNavigator(robot, viewModelScope)
     private var timerJob: Job? = null
     private var distancesToLocations: Map<String, Float> = emptyMap()
 
@@ -53,6 +54,7 @@ class HideAndSeekViewModel(
 
     override fun onCleared() {
         timerJob?.cancel()
+        navigator.release()
         robot?.removeOnGoToLocationStatusChangedListener(this)
         robot?.removeOnDistanceToLocationChangedListener(this)
         super.onCleared()
@@ -92,12 +94,7 @@ class HideAndSeekViewModel(
                 hidingSpotName = hidingSpot ?: ""
             )
         }
-        val r = robot
-        if (hidingSpot != null && r != null) {
-            Timber.d("Navigating to hiding spot immediately: %s", hidingSpot)
-            runCatching { r.goTo(hidingSpot) }
-                .onFailure { Timber.e(it, "Navigation call failed for hiding spot: %s", hidingSpot) }
-        }
+        if (hidingSpot != null) navigator.navigateTo(hidingSpot)
         startHidingCountdown()
     }
 
