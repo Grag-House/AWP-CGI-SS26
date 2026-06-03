@@ -6,8 +6,8 @@ import androidx.compose.material.icons.rounded.BatteryFull
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Navigation
 import androidx.compose.material.icons.rounded.Notifications
-import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.icons.rounded.SportsEsports
 import androidx.compose.material.icons.rounded.Storage
 import androidx.compose.ui.graphics.vector.ImageVector
 import hka.awp.cgi.temi.app.R
@@ -97,7 +97,7 @@ sealed class Screen(
     data object HideAndSeek : Screen(
         route = "hide_and_seek",
         title = R.string.hide_and_seek,
-        icon = Icons.Rounded.Search,
+        icon = Icons.Rounded.SportsEsports,
         contentDescription = R.string.hide_and_seek_description
     )
 
