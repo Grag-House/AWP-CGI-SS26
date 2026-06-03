@@ -25,6 +25,9 @@
         <meta-data
             android:name="com.robotemi.sdk.metadata.OVERRIDE_NLU"
             android:value="true" />
+        <meta-data
+            android:name="com.robotemi.sdk.metadata.PERMISSIONS"
+            android:value="com.robotemi.permission.map" />
 
         <activity
             android:name=".MainActivity"
