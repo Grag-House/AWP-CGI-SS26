@@ -68,16 +68,12 @@ class HideAndSeekViewModel(
         descriptionId: Int,
         description: String
     ) {
-        val state = _uiState.value
-        if (state.gameState != GameState.HIDING) return
-        if (location != state.hidingSpotName) return
-
+        if (location != _uiState.value.hidingSpotName) return
         when (status) {
-            OnGoToLocationStatusChangedListener.COMPLETE -> transitionToWaiting()
-            OnGoToLocationStatusChangedListener.ABORT -> {
+            OnGoToLocationStatusChangedListener.COMPLETE ->
+                Timber.d("Arrived at hiding spot: %s", location)
+            OnGoToLocationStatusChangedListener.ABORT ->
                 Timber.w("Navigation to hiding spot aborted: %s", location)
-                transitionToWaiting()
-            }
         }
     }
 
@@ -96,10 +92,16 @@ class HideAndSeekViewModel(
                 hidingSpotName = hidingSpot ?: ""
             )
         }
-        startHidingCountdown(hidingSpot)
+        val r = robot
+        if (hidingSpot != null && r != null) {
+            Timber.d("Navigating to hiding spot immediately: %s", hidingSpot)
+            runCatching { r.goTo(hidingSpot) }
+                .onFailure { Timber.e(it, "Navigation call failed for hiding spot: %s", hidingSpot) }
+        }
+        startHidingCountdown()
     }
 
-    private fun startHidingCountdown(hidingSpot: String?) {
+    private fun startHidingCountdown() {
         timerJob?.cancel()
         timerJob = viewModelScope.launch {
             var remaining = HIDING_COUNTDOWN_SECONDS
@@ -109,20 +111,8 @@ class HideAndSeekViewModel(
                 remaining--
             }
             if (!isActive) return@launch
-
             _uiState.update { it.copy(hidingSecondsRemaining = 0) }
-
-            if (hidingSpot != null && robot != null) {
-                Timber.d("Navigating to hiding spot: %s", hidingSpot)
-                runCatching { robot.goTo(hidingSpot) }
-                    .onFailure {
-                        Timber.e(it, "Navigation call failed for hiding spot: %s", hidingSpot)
-                        transitionToWaiting()
-                    }
-                // On success: wait for OnGoToLocationStatusChangedListener callback
-            } else {
-                transitionToWaiting()
-            }
+            transitionToWaiting()
         }
     }
 
