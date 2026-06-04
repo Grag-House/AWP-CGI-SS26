@@ -63,6 +63,5 @@ sealed class SettingsNavigationEvent {
     data object NavigateToDisplay : SettingsNavigationEvent()
     data object NavigateToNotifications : SettingsNavigationEvent()
     data object NavigateToBattery : SettingsNavigationEvent()
-
     data object NavigateToAdminPanel : SettingsNavigationEvent()
 }
