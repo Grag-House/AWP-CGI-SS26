@@ -19,7 +19,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Language
@@ -32,7 +31,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -138,7 +136,7 @@ fun ConfigCard(
  * @param onCopy Callback invoked when the copy icon is tapped.
  */
 @Composable
-fun WebserverUrlCard(url: String, onCopy: () -> Unit) {
+fun WebserverUrlCard(url: String) {
     ConfigCard {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -153,13 +151,6 @@ fun WebserverUrlCard(url: String, onCopy: () -> Unit) {
                 ConfigLabel("Webserver-test") // stringResource(R.string.config_webserver_url)
                 ConfigValue(url)
             }
-            IconButton(onClick = onCopy) {
-                Icon(
-                    imageVector = Icons.Outlined.ContentCopy,
-                    contentDescription = "Webserver-test", // stringResource(R.string.config_copy),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
         }
     }
 }
@@ -171,7 +162,7 @@ fun WebserverUrlCard(url: String, onCopy: () -> Unit) {
  * @param isLatest Whether to show the "Latest" badge.
  */
 @Composable
-fun AppVersionCard(version: String, isLatest: Boolean) {
+fun AppVersionCard(version: String) {
     ConfigCard {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -185,20 +176,6 @@ fun AppVersionCard(version: String, isLatest: Boolean) {
             Column(Modifier.weight(1f)) {
                 ConfigLabel("appversion") // stringResource(R.string.config_app_version)
                 ConfigValue(version)
-            }
-            if (isLatest) {
-                Surface(
-                    shape = RoundedCornerShape(6.dp),
-                    color = MaterialTheme.colorScheme.primary
-                ) {
-                    Text(
-                        text = "appversion", // stringResource(R.string.config_latest),
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                    )
-                }
             }
         }
     }
@@ -420,13 +397,11 @@ fun SystemConfigContent(viewModel: AdminPanelViewModel) {
                 )
 
                 WebserverUrlCard(
-                    url = uiState.webserverUrl,
-                    onCopy = viewModel::onCopyUrl
+                    url = uiState.webserverUrl
                 )
 
                 AppVersionCard(
                     version = uiState.appVersion,
-                    isLatest = uiState.isLatestVersion
                 )
 
                 MqttReportsCard(
