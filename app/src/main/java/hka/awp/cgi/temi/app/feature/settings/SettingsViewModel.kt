@@ -44,6 +44,12 @@ class SettingsViewModel(private val repository: RobotRepository, private val rob
                     _navigationEvent.emit(SettingsNavigationEvent.NavigateToBattery)
                 }
             }
+
+            SettingsItem.AdminPanel -> {
+                viewModelScope.launch {
+                    _navigationEvent.emit(SettingsNavigationEvent.NavigateToAdminPanel)
+                }
+            }
             else -> { TODO() }
         }
     }
@@ -57,4 +63,6 @@ sealed class SettingsNavigationEvent {
     data object NavigateToDisplay : SettingsNavigationEvent()
     data object NavigateToNotifications : SettingsNavigationEvent()
     data object NavigateToBattery : SettingsNavigationEvent()
+
+    data object NavigateToAdminPanel : SettingsNavigationEvent()
 }

@@ -125,6 +125,9 @@ fun MainShell(
 
                                     is SettingsNavigationEvent.NavigateToBattery ->
                                         appViewModel.onRouteSelect(Screen.BatterySettings)
+
+                                    is SettingsNavigationEvent.NavigateToAdminPanel ->
+                                        appViewModel.onRouteSelect(Screen.AdminPanel)
                                 }
                             }
                         }
