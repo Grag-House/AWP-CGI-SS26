@@ -2,6 +2,7 @@ package hka.awp.cgi.temi.app.feature.settings
 
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AdminPanelSettings
 import androidx.compose.material.icons.rounded.BatteryFull
 import androidx.compose.material.icons.rounded.Brightness6
 import androidx.compose.material.icons.rounded.Info
@@ -23,7 +24,8 @@ sealed class SettingsItem(
                 Notifications,
                 Display,
                 Battery,
-                About
+                About,
+                AdminPanel
             )
         }
     }
@@ -44,6 +46,12 @@ sealed class SettingsItem(
         titleRes = R.string.settings_battery_title,
         subtitleRes = R.string.settings_battery_subtitle,
         icon = Icons.Rounded.BatteryFull
+    )
+
+    data object AdminPanel : SettingsItem(
+        titleRes = R.string.admin_panel,
+        subtitleRes = R.string.admin_panel_description,
+        icon = Icons.Rounded.AdminPanelSettings
     )
 
     data object About : SettingsItem(

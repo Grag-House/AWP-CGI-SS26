@@ -99,6 +99,9 @@
     <string name="cgi">CGI</string>
     <string name="toggle_sidebar_description">button to toggle or expand the side panel</string>
 
+    <string name="admin_panel">Admin Panel</string>
+    <string name="admin_panel_description">Erweiterte Einstellungen für Wetterseite, Webserver, MQTT</string>
+
     <!-- Navigation Page -->
     <string name="navigation_status_label">STATUS</string>
     <string name="current_location_prefix">Aktueller Standort:</string>
