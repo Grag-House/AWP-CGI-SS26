@@ -15,6 +15,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import hka.awp.cgi.temi.app.BuildConfig
+import hka.awp.cgi.temi.app.feature.controller.ControllerScreen
 import hka.awp.cgi.temi.app.feature.dashboard.MainContent
 import hka.awp.cgi.temi.app.feature.navigation.NavigationContent
 import hka.awp.cgi.temi.app.feature.navigation.NavigationViewModel
@@ -111,6 +112,10 @@ fun MainShell(
                     Screen.Navigation.route -> NavigationContent(
                         modifier = Modifier.weight(1f),
                         viewModel = navigationViewModel
+                    )
+
+                    Screen.Controller.route -> ControllerScreen(
+                        modifier = Modifier.weight(1f),
                     )
 
                     Screen.Settings.route -> {

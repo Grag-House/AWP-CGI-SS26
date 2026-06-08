@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Navigation
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.SmartToy
+import androidx.compose.material.icons.rounded.SportsEsports
 import androidx.compose.material.icons.rounded.Storage
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -146,6 +147,17 @@ private fun ContentGrid(serverState: ServerState, onClick: (Screen) -> Unit, cur
                 Icons.Rounded.Settings,
                 onClick = {
                     onClick(Screen.Settings)
+                }
+            )
+        }
+        item {
+            DashboardCard(
+                title = "Controller",
+                subtitle = "Gamepad verbinden und Steuerung aktivieren",
+                icon = Icons.Rounded.SportsEsports,
+                bottomText = "Bluetooth Controller",
+                onClick = {
+                    onClick(Screen.Controller)
                 }
             )
         }

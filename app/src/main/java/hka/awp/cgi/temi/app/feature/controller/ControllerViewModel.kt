@@ -8,10 +8,22 @@ import kotlinx.coroutines.flow.asStateFlow
 
 class ControllerViewModel(
     private val movementController: TemiMovementController,
-                         ) : ViewModel() {
+    private val bluetoothControllerManager: BluetoothControllerManager,
+) : ViewModel() {
+
+    val devices: StateFlow<List<ControllerDevice>> = bluetoothControllerManager.devices
+    val isScanning: StateFlow<Boolean> = bluetoothControllerManager.isScanning
 
     private val _controllerEnabled = MutableStateFlow(false)
     val controllerEnabled: StateFlow<Boolean> = _controllerEnabled.asStateFlow()
+
+    fun connectHidDevice(address: String) {
+        bluetoothControllerManager.connectHidDevice(address)
+    }
+
+    fun removeBond(address: String) {
+        bluetoothControllerManager.removeBond(address)
+    }
 
     fun setControllerEnabled(enabled: Boolean) {
         _controllerEnabled.value = enabled
@@ -19,6 +31,22 @@ class ControllerViewModel(
         if (!enabled) {
             movementController.stop()
         }
+    }
+
+    fun startBluetoothScan() {
+        bluetoothControllerManager.startDiscovery()
+    }
+
+    fun stopBluetoothScan() {
+        bluetoothControllerManager.stopDiscovery()
+    }
+
+    fun pairDevice(address: String) {
+        bluetoothControllerManager.pairDevice(address)
+    }
+
+    fun logPairedDevices() {
+        bluetoothControllerManager.logPairedDevices()
     }
 
     fun onControllerInput(x: Float, y: Float) {
@@ -34,7 +62,7 @@ class ControllerViewModel(
         movementController.move(
             linear = -y,
             angular = x,
-                               )
+        )
     }
 
     fun onControllerReleased() {
@@ -43,6 +71,7 @@ class ControllerViewModel(
 
     override fun onCleared() {
         movementController.stop()
+        bluetoothControllerManager.release()
         super.onCleared()
     }
 }
