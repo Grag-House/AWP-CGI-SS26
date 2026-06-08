@@ -7,6 +7,7 @@ import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Navigation
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.icons.rounded.SportsEsports
 import androidx.compose.material.icons.rounded.Storage
 import androidx.compose.ui.graphics.vector.ImageVector
 import hka.awp.cgi.temi.app.R
@@ -98,5 +99,11 @@ sealed class Screen(
         title = R.string.webserver,
         icon = Icons.Rounded.Storage,
         contentDescription = R.string.webserver_description,
+    )
+    data object Controller : Screen(
+        route = "controller",
+        title = R.string.controller,
+        icon = Icons.Rounded.SportsEsports,
+        contentDescription = R.string.controller_description,
     )
 }

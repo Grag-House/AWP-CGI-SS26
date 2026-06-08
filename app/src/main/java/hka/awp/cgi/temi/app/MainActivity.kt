@@ -51,11 +51,13 @@ class MainActivity : ComponentActivity() {
     override fun dispatchGenericMotionEvent(event: MotionEvent): Boolean {
         Timber.d(
             "MotionEvent source=${event.source} device=${event.device?.name}"
-                )
+        )
 
         if (event.isGameControllerEvent()) {
             val x = event.getCenteredAxis(MotionEvent.AXIS_X)
             val y = event.getCenteredAxis(MotionEvent.AXIS_Y)
+
+            Timber.d("Controller motion device=${event.device?.name} x=$x y=$y")
 
             Timber.d("Controller motion x=$x y=$y")
 
@@ -76,7 +78,8 @@ class MainActivity : ComponentActivity() {
     ): Boolean {
         Timber.d(
             "KeyDown keyCode=$keyCode device=${event?.device?.name}"
-                )
+        )
+        Timber.d("Controller button device=${event?.device?.name} keyCode=$keyCode")
         if (event?.isGameControllerEvent() == true) {
             Timber.d("Controller button keyCode=$keyCode")
 
