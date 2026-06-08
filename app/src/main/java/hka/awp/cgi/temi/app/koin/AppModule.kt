@@ -1,12 +1,12 @@
 package hka.awp.cgi.temi.app.koin
 
-import android.app.Application
 import com.robotemi.sdk.Robot
 import hka.awp.cgi.temi.app.data.repository.RobotRepository
 import hka.awp.cgi.temi.app.feature.controller.ControllerViewModel
 import hka.awp.cgi.temi.app.feature.settings.SettingsViewModel
 import hka.awp.cgi.temi.app.feature.settings.battery.BatteryViewModel
 import hka.awp.cgi.temi.app.feature.settings.display.DisplayViewModel
+import hka.awp.cgi.temi.app.feature.settings.navigation.NavigationViewModel
 import hka.awp.cgi.temi.app.feature.settings.notifications.NotificationViewModel
 import hka.awp.cgi.temi.app.feature.webserver.WebserverViewModel
 import hka.awp.cgi.temi.app.ui.shell.AppViewModel
@@ -16,6 +16,7 @@ import hka.awp.cgi.temi.app.utils.TemiMovementController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -57,7 +58,7 @@ val appModule = module {
         TemiMovementController(
             robot = get(),
             scope = get(),
-                              )
+        )
     }
 
     viewModel<AppViewModel> {
@@ -73,16 +74,14 @@ val appModule = module {
         SettingsViewModel(get(), robot = get())
     }
     viewModel {
-        DisplayViewModel(
-            application = androidContext() as Application,
-            get()
-        )
+        DisplayViewModel(androidApplication(), get())
     }
     viewModel {
-        NotificationViewModel(
-            application = androidContext() as Application,
-            get()
-        )
+        NotificationViewModel(androidApplication(), get())
+    }
+
+    viewModel {
+        NavigationViewModel(get())
     }
 
     viewModel<WebserverViewModel> { WebserverViewModel() }
@@ -93,6 +92,6 @@ val appModule = module {
     viewModel {
         ControllerViewModel(
             movementController = get(),
-                           )
+        )
     }
 }

@@ -5,6 +5,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.BatteryFull
 import androidx.compose.material.icons.rounded.Brightness6
 import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.Navigation
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.ui.graphics.vector.ImageVector
 import hka.awp.cgi.temi.app.R
@@ -23,6 +24,7 @@ sealed class SettingsItem(
                 Notifications,
                 Display,
                 Battery,
+                Navigation,
                 About
             )
         }
@@ -44,6 +46,12 @@ sealed class SettingsItem(
         titleRes = R.string.settings_battery_title,
         subtitleRes = R.string.settings_battery_subtitle,
         icon = Icons.Rounded.BatteryFull
+    )
+
+    data object Navigation : SettingsItem(
+        titleRes = R.string.settings_navigation_title,
+        subtitleRes = R.string.settings_navigation_subtitle,
+        icon = Icons.Rounded.Navigation
     )
 
     data object About : SettingsItem(

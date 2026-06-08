@@ -1,0 +1,33 @@
+package hka.awp.cgi.temi.app.feature.settings.navigation
+
+import androidx.lifecycle.ViewModel
+import com.robotemi.sdk.Robot
+import com.robotemi.sdk.navigation.model.SpeedLevel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+
+class NavigationViewModel(private val robot: Robot?) : ViewModel() {
+
+    private val _goToSpeed = MutableStateFlow(SpeedLevel.MEDIUM)
+    val goToSpeed: StateFlow<SpeedLevel> = _goToSpeed.asStateFlow()
+
+    private val _followSpeed = MutableStateFlow(SpeedLevel.MEDIUM)
+    val followSpeed: StateFlow<SpeedLevel> = _followSpeed.asStateFlow()
+
+    init {
+        _goToSpeed.value = robot?.goToSpeed ?: SpeedLevel.MEDIUM
+        _followSpeed.value = robot?.getFollowSpeed() ?: SpeedLevel.MEDIUM
+    }
+
+    fun updateGoToSpeed(newSpeed: SpeedLevel) {
+        robot?.goToSpeed = newSpeed
+        _goToSpeed.update { newSpeed }
+    }
+
+    fun updateFollowSpeed(newSpeed: SpeedLevel) {
+        robot?.setFollowSpeed(newSpeed)
+        _followSpeed.update { newSpeed }
+    }
+}

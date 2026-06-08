@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.asStateFlow
 
 class ControllerViewModel(
     private val movementController: TemiMovementController,
-                         ) : ViewModel() {
+) : ViewModel() {
 
     private val _controllerEnabled = MutableStateFlow(false)
     val controllerEnabled: StateFlow<Boolean> = _controllerEnabled.asStateFlow()
@@ -34,7 +34,7 @@ class ControllerViewModel(
         movementController.move(
             linear = -y,
             angular = x,
-                               )
+        )
     }
 
     fun onControllerReleased() {

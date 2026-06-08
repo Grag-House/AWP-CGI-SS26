@@ -2,7 +2,7 @@ package hka.awp.cgi.temi.app.feature.settings.notifications
 
 import android.app.Application
 import android.speech.tts.TextToSpeech
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import com.robotemi.sdk.Robot
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -11,9 +11,9 @@ import java.util.Locale
 
 @Suppress("MagicNumber")
 class NotificationViewModel(
-    application: Application,
+    private val context: Application,
     private val robot: Robot?
-) : AndroidViewModel(application) {
+) : ViewModel() {
 
     private var tts: TextToSpeech? = null
 
@@ -31,7 +31,7 @@ class NotificationViewModel(
     private var previousVolume = 5
 
     init {
-        tts = TextToSpeech(application) { status ->
+        tts = TextToSpeech(context) { status ->
             if (status == TextToSpeech.SUCCESS) {
                 val locales = Locale.getAvailableLocales().filter { locale ->
                     val availability = tts?.isLanguageAvailable(locale) ?: -1

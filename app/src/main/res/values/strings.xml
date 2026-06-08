@@ -160,4 +160,10 @@
     <string name="log_no_maps_found">Keine Karten auf dem Roboter gefunden</string>
     <string name="log_error_fetch_map_list">Fehler beim Laden der Kartenliste</string>
     <string name="default_map_name">3_3</string>
+    <string name="settings_navigation_title">Fahrzeuggeschwindigkeit</string>
+    <string name="settings_navigation_subtitle">Temi-Geschwindigkeit und Folgegeschwindigkeit</string>
+    <string name="settings_navigation_speed_title">Navigationsgeschwindigkeit</string>
+    <string name="settings_navigation_speed_subtitle">Standard-Tempo für autonome Fahrten zu Orten</string>
+    <string name="settings_navigation_followspeed_subtitle">Tempo, wenn temi dir hinterherläuft</string>
+    <string name="settings_navigation_followspeed_title">Folgegeschwindigkeit</string>
 </resources>

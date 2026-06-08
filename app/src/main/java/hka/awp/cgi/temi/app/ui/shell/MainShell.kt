@@ -23,6 +23,7 @@ import hka.awp.cgi.temi.app.feature.settings.SettingsViewModel
 import hka.awp.cgi.temi.app.feature.settings.about.SettingsScreen
 import hka.awp.cgi.temi.app.feature.settings.battery.BatteryScreen
 import hka.awp.cgi.temi.app.feature.settings.display.DisplayScreen
+import hka.awp.cgi.temi.app.feature.settings.navigation.NavigationScreen
 import hka.awp.cgi.temi.app.feature.settings.notifications.NotificationScreen
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherContent
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherViewModel
@@ -45,7 +46,7 @@ import timber.log.Timber
  * specific to the settings screen.
  */
 
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun MainShell(
     modifier: Modifier = Modifier,
@@ -125,6 +126,9 @@ fun MainShell(
 
                                     is SettingsNavigationEvent.NavigateToBattery ->
                                         appViewModel.onRouteSelect(Screen.BatterySettings)
+
+                                    is SettingsNavigationEvent.NavigateToNavigation ->
+                                        appViewModel.onRouteSelect(Screen.NavigationSettings)
                                 }
                             }
                         }
@@ -153,6 +157,14 @@ fun MainShell(
 
                     Screen.BatterySettings.route -> {
                         BatteryScreen(
+                            onBackClick = {
+                                appViewModel.onRouteSelect(Screen.Settings)
+                            }
+                        )
+                    }
+
+                    Screen.NavigationSettings.route -> {
+                        NavigationScreen(
                             onBackClick = {
                                 appViewModel.onRouteSelect(Screen.Settings)
                             }
