@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Temi-CGI-App</string>
+    <string name="hauptmenu">Menu principale</string>
+    <string name="webserver">Server web</string>
+    <string name="webserverSub">Apri il server web</string>
+    <string name="weather">Meteo</string>
+    <string name="wetter">Meteo</string>
+    <string name="wetterSub">Previsioni meteo per la posizione attuale</string>
+    <string name="navigation">Navigazione</string>
+    <string name="navigationSub">Dimmi dove vuoi che ti porti.</string>
+    <string name="fastestroute">PERCORSO PIÙ VELOCE</string>
+    <string name="modus">Modalità</string>
+    <string name="modusSub">Cambia modalità</string>
+    <string name="settings">Impostazioni</string>
+    <string name="settingsSub">Percorsi, pattugliamenti ecc.</string>
+    <string name="settings_page_prefix">Temi </string>
+    <string name="status_online">Online</string>
+    <string name="status_offline">Offline</string>
+    <string name="temp_unit">%1$d°C</string>
+    <string name="showroom_mode">MODALITÀ SHOWROOM</string>
+    <string name="current_mode">Modalità attuale</string>
+    <string name="unknown_host_address">Indirizzo host sconosciuto!</string>
+
+    <string name="welcome_message">Ehi, sono %1$s\nCome posso aiutarti?</string>
+    <string name="robot_name">Temi!</string>
+    <string name="robot_description">Robot</string>
+    <string name="weather_icon_description">Simbolo sole e nuvole per il meteo locale</string>
+    <string name="sidebar_functions">Funzioni</string>
+    <string name="sidebar_help">Aiuto</string>
+
+    <string name="settings_languages_title">Lingue</string>
+    <string name="settings_languages_subtitle">Tedesco, Inglese, ...</string>
+    <string name="settings_display_title">Display</string>
+    <string name="settings_display_subtitle">Modalità scura</string>
+    <string name="settings_battery_title">Batteria</string>
+    <string name="settings_battery_subtitle">Consumo energetico e stato batteria</string>
+    <string name="settings_location_title">Posizione</string>
+    <string name="settings_location_subtitle">Servizi di localizzazione e navigazione</string>
+    <string name="settings_about_title">Informazioni</string>
+    <string name="settings_about_subtitle">Informazioni sul sistema</string>
+
+    <string name="display_brightness">Luminosità schermo</string>
+    <string name="display_screensaver">Salvaschermo</string>
+    <string name="display_screensaver_after">Si avvia dopo %1$s di inattività</string>
+    <string name="display_change">Cambia</string>
+    <string name="display_dark_mode">Modalità scura</string>
+    <string name="display_enabled">Attivato</string>
+    <string name="display_disabled">Disattivato</string>
+    <string name="display_brightness_percent">%1$d%%</string>
+    <string name="display_timeout_dialog_title">Scegli tempo di inattività</string>
+
+    <string name="timeout_30_seconds">30 secondi</string>
+    <string name="timeout_1_minute">1 minuto</string>
+    <string name="timeout_2_minutes">2 minuti</string>
+    <string name="timeout_5_minutes">5 minuti</string>
+    <string name="timeout_10_minutes">10 minuti</string>
+    <string name="timeout_15_minutes">15 minuti</string>
+
+    <string name="close">Chiudi</string>
+    <string name="system_information">Informazioni</string>
+    <string name="ip_address">Indirizzo IP</string>
+    <string name="model_name">Nome modello</string>
+    <string name="model">Modello</string>
+    <string name="serial_number">Numero di serie</string>
+    <string name="software_version">Versione</string>
+    <string name="unknown">Sconosciuto</string>
+
+    <string name="battery">Batteria</string>
+    <string name="battery_status">Stato batteria</string>
+    <string name="battery_charging">In carica...</string>
+    <string name="battery_not_charging">Non in carica.</string>
+    <string name="power_status">Alimentazione</string>
+    <string name="currently_charging">In carica</string>
+    <string name="battery_mode_active">Batteria in uso</string>
+
+    <string name="notifications_voice">Notifiche &amp; Voce</string>
+    <string name="enabled">Attivato</string>
+    <string name="muted">Disattivato (Muto)</string>
+    <string name="volume">Volume</string>
+    <string name="select_speaker">Seleziona altoparlante</string>
+    <string name="current_language">Lingua attuale: %1$s</string>
+
+    <string name="navigation_status_label">STATO</string>
+    <string name="current_location_prefix">Posizione attuale:</string>
+    <string name="show_map">Mostra\nmappa</string>
+    <string name="select_destination">SELEZIONA DESTINAZIONE</string>
+    <string name="location_status_locating">Localizzazione in corso</string>
+    <string name="location_status_none">Nessun luogo salvato</string>
+    <string name="location_office">Ufficio</string>
+    <string name="location_kitchen">Cucina</string>
+    <string name="location_cafe">Bar</string>
+    <string name="location_reception">Reception</string>
+    <string name="location_wc">Bagno</string>
+    <string name="location_charging">Ricarica</string>
+    <string name="voice_changed">Voce cambiata</string>
+
+    <string name="icon_sun">Soleggiato</string>
+    <string name="icon_cloudy">Nuvoloso</string>
+    <string name="icon_partlycloudy">Parzialmente nuvoloso</string>
+    <string name="icon_rain">Pioggia</string>
+    <string name="icon_snow">Neve</string>
+    <string name="icon_thunder">Temporali</string>
+    <string name="icon_fog">Nebbia</string>
+
+    <string name="location_kalrsruhe">Posizione: Karlsruhe</string>
+    <string name="temp_celsius">°C</string>
+    <string name="daily_outlook">Previsioni giornaliere</string>
+    <string name="degree">°</string>
+    <string name="percent">%</string>
+    <string name="weekly_outlook">Prossima settimana</string>
+    <string name="now">Ora</string>
+    <string name="today">Oggi</string>
+    <string name="show_map_failed">Nessuna posizione trovata.\nCi sono waypoint salvati sul robot?</string>
+    <string name="navigation_failed">Errore durante la navigazione verso:</string>
+    <string name="navigation_failed_with_name">Errore durante la navigazione verso: %1$s</string>
+    <string name="saved_locations">Luoghi salvati (%1$d)</string>
+    <string name="go_to">Vai a</string>
+    <string name="map_retry">Riprova</string>
+
+    <string name="settings_navigation_title">Velocità veicolo</string>
+    <string name="settings_navigation_subtitle">Velocità di Temi e velocità di inseguimento</string>
+    <string name="settings_navigation_speed_title">Velocità di navigazione</string>
+    <string name="settings_navigation_speed_subtitle">Velocità standard per spostamenti autonomi</string>
+    <string name="settings_navigation_followspeed_subtitle">Velocità quando Temi ti segue</string>
+    <string name="settings_navigation_followspeed_title">Velocità di inseguimento</string>
+</resources>

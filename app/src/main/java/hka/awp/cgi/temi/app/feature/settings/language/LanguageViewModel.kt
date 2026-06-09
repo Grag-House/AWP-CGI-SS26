@@ -14,8 +14,10 @@ class LanguageViewModel : ViewModel() {
     val selectedLocale = _selectedLocale.asStateFlow()
 
     val supportedLocales = listOf(
+        Locale.ENGLISH,
+        Locale.FRENCH,
         Locale.GERMAN,
-        Locale.ENGLISH
+        Locale.ITALIAN
     )
 
     fun updateLocale(languageCode: String, context: Context) {
