@@ -35,7 +35,7 @@ class AdminPanelViewModel : ViewModel() {
             longitude = WeatherRepository.LONGITUDE,
             latitude = WeatherRepository.LATITUDE,
             coordinates = "Länge: ${WeatherRepository.LONGITUDE} Breite: ${WeatherRepository.LATITUDE}"
-                                            )
+        )
     }
 
     fun onOpenMqttReports() {

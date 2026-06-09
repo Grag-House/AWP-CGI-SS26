@@ -241,7 +241,7 @@ fun WebserverPasswordCard(
 fun ChangePasswordDialog(
     onConfirm: (oldPassword: String, newPassword: String) -> Unit,
     onDismiss: () -> Unit
-                        ) {
+) {
     var oldPassword by remember { mutableStateOf("") }
     var newPassword by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
@@ -267,75 +267,104 @@ fun ChangePasswordDialog(
                     value = oldPassword,
                     onValueChange = { oldPassword = it },
                     label = { Text(stringResource(R.string.admin_panel_old_password)) },
-                    visualTransformation = if (oldVisible) VisualTransformation.None
-                    else PasswordVisualTransformation(),
+                    visualTransformation = if (oldVisible) {
+                        VisualTransformation.None
+                    } else {
+                        PasswordVisualTransformation()
+                    },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     trailingIcon = {
                         IconButton(onClick = { oldVisible = !oldVisible }) {
                             Icon(
-                                imageVector = if (oldVisible) Icons.Outlined.VisibilityOff
-                                else Icons.Outlined.Visibility,
-                                contentDescription = if (oldVisible) "Hide password"
-                                else "Show password"
-                                )
+                                imageVector = if (oldVisible) {
+                                    Icons.Outlined.VisibilityOff
+                                } else {
+                                    Icons.Outlined.Visibility
+                                },
+                                contentDescription = if (oldVisible) {
+                                    "Hide password"
+                                } else {
+                                    "Show password"
+                                }
+                            )
                         }
                     },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
-                                 )
+                )
 
                 OutlinedTextField(
                     value = newPassword,
                     onValueChange = { newPassword = it },
                     label = { Text(stringResource(R.string.admin_panel_new_password)) },
-                    visualTransformation = if (newVisible) VisualTransformation.None
-                    else PasswordVisualTransformation(),
+                    visualTransformation = if (newVisible) {
+                        VisualTransformation.None
+                    } else {
+                        PasswordVisualTransformation()
+                    },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     trailingIcon = {
                         IconButton(onClick = { newVisible = !newVisible }) {
                             Icon(
-                                imageVector = if (newVisible) Icons.Outlined.VisibilityOff
-                                else Icons.Outlined.Visibility,
-                                contentDescription = if (newVisible) "Hide password"
-                                else "Show password"
-                                )
+                                imageVector = if (newVisible) {
+                                    Icons.Outlined.VisibilityOff
+                                } else {
+                                    Icons.Outlined.Visibility
+                                },
+                                contentDescription = if (newVisible) {
+                                    "Hide password"
+                                } else {
+                                    "Show password"
+                                }
+                            )
                         }
                     },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
-                                 )
+                )
 
                 OutlinedTextField(
                     value = confirmPassword,
                     onValueChange = { confirmPassword = it },
                     label = { Text(stringResource(R.string.admin_panel_confirm_password)) },
-                    visualTransformation = if (confirmVisible) VisualTransformation.None
-                    else PasswordVisualTransformation(),
+                    visualTransformation = if (confirmVisible) {
+                        VisualTransformation.None
+                    } else {
+                        PasswordVisualTransformation()
+                    },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     trailingIcon = {
                         IconButton(onClick = { confirmVisible = !confirmVisible }) {
                             Icon(
-                                imageVector = if (confirmVisible) Icons.Outlined.VisibilityOff
-                                else Icons.Outlined.Visibility,
-                                contentDescription = if (confirmVisible) "Hide password"
-                                else "Show password"
-                                )
+                                imageVector = if (confirmVisible) {
+                                    Icons.Outlined.VisibilityOff
+                                } else {
+                                    Icons.Outlined.Visibility
+                                },
+                                contentDescription = if (confirmVisible) {
+                                    "Hide password"
+                                } else {
+                                    "Show password"
+                                }
+                            )
                         }
                     },
                     isError = confirmError,
                     supportingText = if (confirmError) {
                         { Text(stringResource(R.string.admin_panel_passwords_no_match)) }
-                    } else null,
+                    } else {
+                        null
+                    },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
-                                 )
+                )
             }
         },
         confirmButton = {
             Button(
                 onClick = { onConfirm(oldPassword, newPassword) },
                 enabled = oldPassword.isNotEmpty() && newPassword.isNotEmpty() && passwordsMatch
-                  ) {
+            ) {
                 Text(stringResource(R.string.admin_panel_confirm))
             }
         },
@@ -344,7 +373,7 @@ fun ChangePasswordDialog(
                 Text(stringResource(R.string.admin_panel_cancel))
             }
         }
-               )
+    )
 }
 
 /**
@@ -390,7 +419,7 @@ fun EditCoordinatesDialog(
     onConfirm: (latitude: Double, longitude: Double) -> Unit,
     onReset: () -> Unit,
     onDismiss: () -> Unit
-                         ) {
+) {
     var latitudeInput by remember { mutableStateOf(initialLatitude.toString()) }
     var longitudeInput by remember { mutableStateOf(initialLongitude.toString()) }
 
@@ -400,7 +429,7 @@ fun EditCoordinatesDialog(
             Icon(
                 imageVector = Icons.Outlined.LocationOn,
                 contentDescription = null
-                )
+            )
         },
         title = {
             Text(text = stringResource(R.string.admin_panel_webserver_coordiantes_change))
@@ -414,7 +443,7 @@ fun EditCoordinatesDialog(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
-                                 )
+                )
                 OutlinedTextField(
                     value = longitudeInput,
                     onValueChange = { longitudeInput = it },
@@ -422,7 +451,7 @@ fun EditCoordinatesDialog(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
-                                 )
+                )
             }
         },
         confirmButton = {
@@ -432,7 +461,7 @@ fun EditCoordinatesDialog(
                     val lon = longitudeInput.toDoubleOrNull() ?: return@Button
                     onConfirm(lat, lon)
                 }
-                  ) {
+            ) {
                 Text(stringResource(R.string.admin_panel_confirm))
             }
         },
@@ -446,7 +475,7 @@ fun EditCoordinatesDialog(
                 }
             }
         }
-               )
+    )
 }
 
 // ─── Typography helpers ───────────────────────────────────────────────────────
@@ -523,7 +552,7 @@ fun AdminPanelScreen(
                 showCoordinateDialog = false
             },
             onDismiss = { showCoordinateDialog = false }
-                             )
+        )
     }
     if (showPasswordDialog) {
         ChangePasswordDialog(
@@ -532,7 +561,7 @@ fun AdminPanelScreen(
                 showPasswordDialog = false
             },
             onDismiss = { showPasswordDialog = false }
-                            )
+        )
     }
 
     Row(
