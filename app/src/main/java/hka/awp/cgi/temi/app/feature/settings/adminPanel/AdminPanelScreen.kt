@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
@@ -25,19 +26,33 @@ import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Storage
+import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.material.icons.outlined.VisibilityOff
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -195,7 +210,8 @@ fun MqttReportsCard(onNavigate: () -> Unit) {
  */
 @Composable
 fun WebserverPasswordCard(
-    onChangePassword: () -> Unit) {
+    onChangePassword: () -> Unit
+) {
     ConfigCard {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -219,6 +235,116 @@ fun WebserverPasswordCard(
             )
         }
     }
+}
+
+@Composable
+fun ChangePasswordDialog(
+    onConfirm: (oldPassword: String, newPassword: String) -> Unit,
+    onDismiss: () -> Unit
+                        ) {
+    var oldPassword by remember { mutableStateOf("") }
+    var newPassword by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
+
+    var oldVisible by remember { mutableStateOf(false) }
+    var newVisible by remember { mutableStateOf(false) }
+    var confirmVisible by remember { mutableStateOf(false) }
+
+    val passwordsMatch = newPassword == confirmPassword
+    val confirmError = confirmPassword.isNotEmpty() && !passwordsMatch
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = {
+            Icon(imageVector = Icons.Outlined.Lock, contentDescription = null)
+        },
+        title = {
+            Text(stringResource(R.string.admin_panel_change_password_title))
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedTextField(
+                    value = oldPassword,
+                    onValueChange = { oldPassword = it },
+                    label = { Text(stringResource(R.string.admin_panel_old_password)) },
+                    visualTransformation = if (oldVisible) VisualTransformation.None
+                    else PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    trailingIcon = {
+                        IconButton(onClick = { oldVisible = !oldVisible }) {
+                            Icon(
+                                imageVector = if (oldVisible) Icons.Outlined.VisibilityOff
+                                else Icons.Outlined.Visibility,
+                                contentDescription = if (oldVisible) "Hide password"
+                                else "Show password"
+                                )
+                        }
+                    },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                                 )
+
+                OutlinedTextField(
+                    value = newPassword,
+                    onValueChange = { newPassword = it },
+                    label = { Text(stringResource(R.string.admin_panel_new_password)) },
+                    visualTransformation = if (newVisible) VisualTransformation.None
+                    else PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    trailingIcon = {
+                        IconButton(onClick = { newVisible = !newVisible }) {
+                            Icon(
+                                imageVector = if (newVisible) Icons.Outlined.VisibilityOff
+                                else Icons.Outlined.Visibility,
+                                contentDescription = if (newVisible) "Hide password"
+                                else "Show password"
+                                )
+                        }
+                    },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                                 )
+
+                OutlinedTextField(
+                    value = confirmPassword,
+                    onValueChange = { confirmPassword = it },
+                    label = { Text(stringResource(R.string.admin_panel_confirm_password)) },
+                    visualTransformation = if (confirmVisible) VisualTransformation.None
+                    else PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    trailingIcon = {
+                        IconButton(onClick = { confirmVisible = !confirmVisible }) {
+                            Icon(
+                                imageVector = if (confirmVisible) Icons.Outlined.VisibilityOff
+                                else Icons.Outlined.Visibility,
+                                contentDescription = if (confirmVisible) "Hide password"
+                                else "Show password"
+                                )
+                        }
+                    },
+                    isError = confirmError,
+                    supportingText = if (confirmError) {
+                        { Text(stringResource(R.string.admin_panel_passwords_no_match)) }
+                    } else null,
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                                 )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { onConfirm(oldPassword, newPassword) },
+                enabled = oldPassword.isNotEmpty() && newPassword.isNotEmpty() && passwordsMatch
+                  ) {
+                Text(stringResource(R.string.admin_panel_confirm))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.admin_panel_cancel))
+            }
+        }
+               )
 }
 
 /**
@@ -257,7 +383,71 @@ fun CoordinateManagementCard(
     }
 }
 
+@Composable
+fun EditCoordinatesDialog(
+    initialLatitude: Double,
+    initialLongitude: Double,
+    onConfirm: (latitude: Double, longitude: Double) -> Unit,
+    onReset: () -> Unit,
+    onDismiss: () -> Unit
+                         ) {
+    var latitudeInput by remember { mutableStateOf(initialLatitude.toString()) }
+    var longitudeInput by remember { mutableStateOf(initialLongitude.toString()) }
 
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = {
+            Icon(
+                imageVector = Icons.Outlined.LocationOn,
+                contentDescription = null
+                )
+        },
+        title = {
+            Text(text = stringResource(R.string.admin_panel_webserver_coordiantes_change))
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedTextField(
+                    value = latitudeInput,
+                    onValueChange = { latitudeInput = it },
+                    label = { Text(stringResource(R.string.admin_panel_latitude)) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                                 )
+                OutlinedTextField(
+                    value = longitudeInput,
+                    onValueChange = { longitudeInput = it },
+                    label = { Text(stringResource(R.string.admin_panel_longitude)) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                                 )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    val lat = latitudeInput.toDoubleOrNull() ?: return@Button
+                    val lon = longitudeInput.toDoubleOrNull() ?: return@Button
+                    onConfirm(lat, lon)
+                }
+                  ) {
+                Text(stringResource(R.string.admin_panel_confirm))
+            }
+        },
+        dismissButton = {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(onClick = onReset) {
+                    Text(stringResource(R.string.admin_panel_reset_defaults))
+                }
+                TextButton(onClick = onDismiss) {
+                    Text(stringResource(R.string.admin_panel_cancel))
+                }
+            }
+        }
+               )
+}
 
 // ─── Typography helpers ───────────────────────────────────────────────────────
 
@@ -317,6 +507,33 @@ fun AdminPanelScreen(
     viewModel: AdminPanelViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    var showCoordinateDialog by remember { mutableStateOf(false) }
+    var showPasswordDialog by remember { mutableStateOf(false) }
+
+    if (showCoordinateDialog) {
+        EditCoordinatesDialog(
+            initialLatitude = uiState.latitude,
+            initialLongitude = uiState.longitude,
+            onConfirm = { lat, lon ->
+                viewModel.onEditCoordinates(lat, lon)
+                showCoordinateDialog = false
+            },
+            onReset = {
+                viewModel.onResetCoordinates()
+                showCoordinateDialog = false
+            },
+            onDismiss = { showCoordinateDialog = false }
+                             )
+    }
+    if (showPasswordDialog) {
+        ChangePasswordDialog(
+            onConfirm = { old, new ->
+                viewModel.onChangePassword(old, new)
+                showPasswordDialog = false
+            },
+            onDismiss = { showPasswordDialog = false }
+                            )
+    }
 
     Row(
         modifier = Modifier
@@ -356,12 +573,12 @@ fun AdminPanelScreen(
                 )
 
                 WebserverPasswordCard(
-                    onChangePassword = viewModel::onChangePassword
+                    onChangePassword = { showPasswordDialog = true }
                 )
 
                 CoordinateManagementCard(
                     coordinates = uiState.coordinates,
-                    onEdit = { viewModel.onEditCoordinates(uiState) }
+                    onEdit = { showCoordinateDialog = true }
                 )
             }
         }
