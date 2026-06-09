@@ -24,6 +24,7 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.material.icons.rounded.SportsEsports
 import androidx.compose.material.icons.rounded.Tune
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -62,6 +63,19 @@ fun HideAndSeekScreen(
     val filterState by viewModel.filterManager.filterState.collectAsStateWithLifecycle()
     val showFilter by viewModel.filterManager.isOpen.collectAsStateWithLifecycle()
     val hasActiveFilter by viewModel.filterManager.hasActiveFilter.collectAsStateWithLifecycle()
+
+    if (uiState.errorMessage != null) {
+        AlertDialog(
+            onDismissRequest = viewModel::clearError,
+            confirmButton = {
+                TextButton(onClick = viewModel::clearError) {
+                    Text(stringResource(R.string.close))
+                }
+            },
+            title = { Text("Navigation fehlgeschlagen") },
+            text = { Text(uiState.errorMessage!!) }
+        )
+    }
 
     if (showFilter) {
         Dialog(onDismissRequest = viewModel.filterManager::dismiss) {

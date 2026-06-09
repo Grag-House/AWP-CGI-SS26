@@ -31,9 +31,11 @@ data class HideAndSeekUiState(
     val hidingSecondsRemaining: Int = HIDING_COUNTDOWN_SECONDS,
     val searchSecondsRemaining: Int = 0,
     val elapsedSeconds: Int = 0,
-    val hidingSpotName: String = ""
+    val hidingSpotName: String = "",
+    val errorMessage: String? = null
 )
 
+@Suppress("TooManyFunctions")
 class HideAndSeekViewModel(
     private val robot: Robot?,
     hidingSpotRepository: HidingSpotRepository
@@ -77,9 +79,28 @@ class HideAndSeekViewModel(
         when (status) {
             OnGoToLocationStatusChangedListener.COMPLETE ->
                 Timber.d("Arrived at hiding spot: %s", location)
-            OnGoToLocationStatusChangedListener.ABORT ->
+
+            OnGoToLocationStatusChangedListener.ABORT -> {
                 Timber.w("Navigation to hiding spot aborted: %s", location)
+                handleNavigationFailure()
+            }
         }
+    }
+
+    private fun handleNavigationFailure() {
+        timerJob?.cancel()
+        robot?.stopMovement()
+        _uiState.update {
+            it.copy(
+                gameState = GameState.SETUP,
+                errorMessage = "Navigation zum Versteck fehlgeschlagen.",
+                hidingSpotName = ""
+            )
+        }
+    }
+
+    fun clearError() {
+        _uiState.update { it.copy(errorMessage = null) }
     }
 
     fun adjustSearchTime(delta: Int) {
@@ -89,6 +110,7 @@ class HideAndSeekViewModel(
     }
 
     fun startGame() {
+        clearError()
         val hidingSpot = selectHidingSpot(robot, distancesToLocations, filterManager.savedEnabledSpots)
         _uiState.update {
             it.copy(
