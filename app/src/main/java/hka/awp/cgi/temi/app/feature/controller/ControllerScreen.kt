@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Switch
@@ -42,7 +44,9 @@ fun ControllerScreen(
     }
 
     Column(
-        modifier = modifier.padding(24.dp),
+        modifier = modifier
+            .padding(24.dp)
+            .verticalScroll(rememberScrollState()),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -92,6 +96,9 @@ fun ControllerScreen(
                 onRemoveClick = {
                     viewModel.removeBond(device.address)
                 },
+                onDisconnectClick = {
+                    viewModel.disconnectHidDevice(device.address)
+                },
             )
         }
     }
@@ -103,9 +110,11 @@ private fun ControllerDeviceRow(
     onPairClick: () -> Unit,
     onConnectClick: () -> Unit,
     onRemoveClick: () -> Unit,
+    onDisconnectClick: () -> Unit,
 ) {
     val isBonded = device.bondState == BluetoothDevice.BOND_BONDED
     val isBonding = device.bondState == BluetoothDevice.BOND_BONDING
+    val isConnected: Boolean
 
     Row(
         modifier = Modifier
@@ -124,26 +133,34 @@ private fun ControllerDeviceRow(
         Button(
             onClick = onPairClick,
             enabled = !isBonded && !isBonding,
-        ) {
+              ) {
             Text(
                 when {
                     isBonded -> "Gekoppelt"
                     isBonding -> "Kopplung läuft..."
                     else -> "Koppeln"
                 },
-            )
-            Button(
-                onClick = onConnectClick,
-                enabled = device.bondState == BluetoothDevice.BOND_BONDED,
-            ) {
-                Text("Verbinden")
-            }
-            Button(
-                onClick = onRemoveClick,
-                enabled = device.bondState == BluetoothDevice.BOND_BONDED,
-            ) {
-                Text("Entfernen")
-            }
+                )
+        }
+
+        Button(
+            onClick = {
+                if (device.isConnected) {
+                    onDisconnectClick()
+                } else {
+                    onConnectClick()
+                }
+            },
+            enabled = device.bondState == BluetoothDevice.BOND_BONDED,
+              ) {
+            Text(if (device.isConnected) "Trennen" else "Verbinden")
+        }
+
+        Button(
+            onClick = onRemoveClick,
+            enabled = device.bondState == BluetoothDevice.BOND_BONDED,
+              ) {
+            Text("Entfernen")
         }
     }
 }

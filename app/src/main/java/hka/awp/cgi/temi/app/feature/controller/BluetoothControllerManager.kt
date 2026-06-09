@@ -25,6 +25,18 @@ class BluetoothControllerManager(
     val isScanning: StateFlow<Boolean> = _isScanning.asStateFlow()
 
     private val receiver = object : BroadcastReceiver() {
+        private fun updateConnectionState(
+            address: String,
+            isConnected: Boolean,
+                                         ) {
+            _devices.value = _devices.value.map {
+                if (it.address == address) {
+                    it.copy(isConnected = isConnected)
+                } else {
+                    it
+                }
+            }
+        }
         override fun onReceive(context: Context?, intent: Intent?) {
             when (intent?.action) {
                 BluetoothDevice.ACTION_FOUND -> {
@@ -50,6 +62,24 @@ class BluetoothControllerManager(
                     _isScanning.value = false
                     Timber.d("Bluetooth discovery finished")
                 }
+
+                BluetoothDevice.ACTION_ACL_CONNECTED -> {
+                    val device: BluetoothDevice? =
+                        intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+
+                    device?.let {
+                        updateConnectionState(it.address, true)
+                    }
+                }
+
+                BluetoothDevice.ACTION_ACL_DISCONNECTED -> {
+                    val device: BluetoothDevice? =
+                        intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+
+                    device?.let {
+                        updateConnectionState(it.address, false)
+                    }
+                }
             }
         }
     }
@@ -59,6 +89,8 @@ class BluetoothControllerManager(
             addAction(BluetoothDevice.ACTION_FOUND)
             addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
             addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
+            addAction(BluetoothDevice.ACTION_ACL_CONNECTED)
+            addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED)
         }
 
         context.registerReceiver(receiver, filter)
@@ -114,6 +146,48 @@ class BluetoothControllerManager(
             Timber.e(exception, "Missing permission for HID connect")
         } catch (exception: Exception) {
             Timber.e(exception, "Failed to connect HID device via reflection")
+        }
+    }
+
+    @Suppress("TooGenericExceptionCaught")
+    fun disconnectHidDevice(address: String) {
+        try {
+            val adapter = bluetoothAdapter ?: return
+            val device = adapter.getRemoteDevice(address)
+
+            val listener = object : BluetoothProfile.ServiceListener {
+                override fun onServiceConnected(profile: Int, proxy: BluetoothProfile) {
+                    try {
+                        val disconnectMethod = proxy.javaClass.getMethod(
+                            "disconnect",
+                            BluetoothDevice::class.java,
+                                                                        )
+
+                        val result = disconnectMethod.invoke(proxy, device)
+                        Timber.d("HID disconnect result=$result for ${device.safeName()} ${device.address}")
+                    } catch (exception: Exception) {
+                        Timber.e(exception, "Failed to invoke HID disconnect")
+                    }
+                }
+
+                override fun onServiceDisconnected(profile: Int) {
+                    Timber.d("Bluetooth profile disconnected: profile=$profile")
+                }
+            }
+
+            val inputDeviceProfile = 4
+
+            val result = adapter.getProfileProxy(
+                context,
+                listener,
+                inputDeviceProfile,
+                                                )
+
+            Timber.d("getProfileProxy HID disconnect result=$result for $address")
+        } catch (exception: SecurityException) {
+            Timber.e(exception, "Missing permission for HID disconnect")
+        } catch (exception: Exception) {
+            Timber.e(exception, "Failed to disconnect HID device")
         }
     }
 

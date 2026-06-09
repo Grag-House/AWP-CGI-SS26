@@ -69,6 +69,10 @@ class ControllerViewModel(
         movementController.stop()
     }
 
+    fun disconnectHidDevice(address: String) {
+        bluetoothControllerManager.disconnectHidDevice(address)
+    }
+
     override fun onCleared() {
         movementController.stop()
         bluetoothControllerManager.release()
