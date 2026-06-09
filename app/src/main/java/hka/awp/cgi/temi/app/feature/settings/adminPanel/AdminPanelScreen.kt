@@ -132,7 +132,6 @@ fun ConfigCard(
  * Displays the webserver URL with a copy-to-clipboard action.
  *
  * @param url The webserver URL string to display.
- * @param onCopy Callback invoked when the copy icon is tapped.
  */
 @Composable
 fun WebserverUrlCard(url: String) {
@@ -158,7 +157,6 @@ fun WebserverUrlCard(url: String) {
  * Displays the current app version alongside a "Latest" badge when applicable.
  *
  * @param version The version string (e.g. "v1.4.2").
- * @param isLatest Whether to show the "Latest" badge.
  */
 @Composable
 fun AppVersionCard(version: String) {
@@ -360,7 +358,6 @@ fun SystemConfigTopBar() {
 }
 
 // ─── Main screen ─────────────────────────────────────────────────────────────
-
 
 @Composable
 fun AdminPanelScreen(
