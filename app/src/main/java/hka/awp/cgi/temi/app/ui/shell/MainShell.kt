@@ -21,6 +21,7 @@ import hka.awp.cgi.temi.app.feature.navigation.NavigationViewModel
 import hka.awp.cgi.temi.app.feature.settings.SettingsNavigationEvent
 import hka.awp.cgi.temi.app.feature.settings.SettingsViewModel
 import hka.awp.cgi.temi.app.feature.settings.about.SettingsScreen
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.AdminPanelScreen
 import hka.awp.cgi.temi.app.feature.settings.battery.BatteryScreen
 import hka.awp.cgi.temi.app.feature.settings.display.DisplayScreen
 import hka.awp.cgi.temi.app.feature.settings.notifications.NotificationScreen
@@ -160,6 +161,14 @@ fun MainShell(
                                 appViewModel.onRouteSelect(Screen.Settings)
                             }
                         )
+                    }
+
+                    Screen.AdminPanel.route -> {
+                        AdminPanelScreen(
+                            onBackClick = {
+                                appViewModel.onRouteSelect(Screen.Settings)
+                            }
+                                        )
                     }
 
                     Screen.Weather.route -> WeatherContent(
