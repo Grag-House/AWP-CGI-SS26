@@ -29,10 +29,10 @@
     <string name="sidebar_help">Hilfe</string>
 
     <!-- Settings Items -->
-    <string name="settings_notifications_title">Benachrichtigungen</string>
-    <string name="settings_notifications_subtitle">Töne und Systemmeldungen</string>
+    <string name="settings_languages_title">Sprache</string>
+    <string name="settings_languages_subtitle">Deutsch, Englisch, …</string>
     <string name="settings_display_title">Anzeige</string>
-    <string name="settings_display_subtitle">Helligkeit und Bildschirmschoner</string>
+    <string name="settings_display_subtitle">Dark-Mode</string>
     <string name="settings_battery_title">Akku</string>
     <string name="settings_battery_subtitle">Energieverbrauch und Akkustatus</string>
     <string name="settings_location_title">Standort</string>

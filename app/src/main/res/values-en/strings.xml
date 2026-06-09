@@ -28,10 +28,10 @@
     <string name="sidebar_functions">Functions</string>
     <string name="sidebar_help">Help</string>
 
-    <string name="settings_notifications_title">Notifications</string>
-    <string name="settings_notifications_subtitle">Sounds and system messages</string>
+    <string name="settings_languages_title">Languages</string>
+    <string name="settings_languages_subtitle">German, English, …</string>
     <string name="settings_display_title">Display</string>
-    <string name="settings_display_subtitle">Brightness and screensaver</string>
+    <string name="settings_display_subtitle">Dark-Mode</string>
     <string name="settings_battery_title">Battery</string>
     <string name="settings_battery_subtitle">Power consumption and battery status</string>
     <string name="settings_location_title">Location</string>
