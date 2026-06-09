@@ -3,10 +3,9 @@ package hka.awp.cgi.temi.app.feature.settings.language
 import android.app.Activity
 import android.content.Context
 import androidx.lifecycle.ViewModel
-import hka.awp.cgi.temi.app.utils.LocaleHelper
+import hka.awp.cgi.temi.app.utils.LanguageHelper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import timber.log.Timber
 import java.util.Locale
 
 class LanguageViewModel : ViewModel() {
@@ -20,7 +19,7 @@ class LanguageViewModel : ViewModel() {
     )
 
     fun updateLocale(languageCode: String, context: Context) {
-        LocaleHelper.setLocale(context, languageCode)
+        LanguageHelper.setLocale(context, languageCode)
 
         (context as? Activity)?.recreate()
     }
