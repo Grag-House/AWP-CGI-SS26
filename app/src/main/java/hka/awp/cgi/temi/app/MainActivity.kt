@@ -68,14 +68,18 @@ class MainActivity : ComponentActivity() {
     override fun dispatchGenericMotionEvent(event: MotionEvent): Boolean {
         Timber.d(
             "MotionEvent source=${event.source} device=${event.device?.name}"
-        )
+                )
 
         if (event.isGameControllerEvent()) {
             val leftY = event.getCenteredAxis(MotionEvent.AXIS_Y)
             val rightX = event.getCenteredAxis(MotionEvent.AXIS_Z)
 
             Timber.d(
-                "Controller axes leftY=$leftY rightX=$rightX X=${event.getCenteredAxis(MotionEvent.AXIS_X)} RX=${event.getCenteredAxis(MotionEvent.AXIS_RX)} RZ=${event.getCenteredAxis(MotionEvent.AXIS_RZ)}",
+                "Controller axes leftY=$leftY rightX=$rightX X=${event.getCenteredAxis(MotionEvent.AXIS_X)} RX=${
+                    event.getCenteredAxis(
+                        MotionEvent.AXIS_RX
+                                         )
+                } RZ=${event.getCenteredAxis(MotionEvent.AXIS_RZ)}",
                     )
 
             controllerViewModel.onControllerInput(
@@ -97,30 +101,43 @@ class MainActivity : ComponentActivity() {
     override fun onKeyDown(
         keyCode: Int,
         event: KeyEvent?,
-    ): Boolean {
-        Timber.d(
-            "KeyDown keyCode=$keyCode device=${event?.device?.name}"
-        )
-        Timber.d("Controller button device=${event?.device?.name} keyCode=$keyCode")
-        if (event?.isGameControllerEvent() == true) {
-            Timber.d("Controller button keyCode=$keyCode")
+                          ): Boolean {
+        Timber.d("KeyDown keyCode=$keyCode device=${event?.device?.name}")
 
+        if (event?.isGameControllerEvent() == true) {
             when (keyCode) {
-                KeyEvent.KEYCODE_DEL -> {
-                    soundPool.play(
-                        hornSoundId,
-                        1f,
-                        1f,
-                        1,
-                        0,
-                        1f,
-                                  )
+                99 -> {
+                    if (controllerViewModel.controllerEnabled.value) {
+                        soundPool.play(
+                            hornSoundId,
+                            1f,
+                            1f,
+                            1,
+                            0,
+                            1f,
+                                      )
+                    }
+                }
+
+                else -> {
+                    Timber.d("Ignored controller keyCode=$keyCode")
                     return true
                 }
             }
         }
 
         return super.onKeyDown(keyCode, event)
+    }
+
+    override fun onKeyUp(
+        keyCode: Int,
+        event: KeyEvent?,
+                        ): Boolean {
+        if (event?.isGameControllerEvent() == true) {
+            return true
+        }
+
+        return super.onKeyUp(keyCode, event)
     }
 }
 

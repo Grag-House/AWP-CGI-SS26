@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,7 +35,7 @@ fun ControllerScreen(
 
     val bluetoothPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
-    ) { permissions ->
+                                                                       ) { permissions ->
         val allGranted = permissions.values.all { it }
 
         if (allGranted) {
@@ -44,13 +44,11 @@ fun ControllerScreen(
     }
 
     Column(
-        modifier = modifier
-            .padding(24.dp)
-            .verticalScroll(rememberScrollState()),
-    ) {
+        modifier = modifier.padding(24.dp),
+          ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-        ) {
+           ) {
             Text("Controllersteuerung aktivieren")
 
             Spacer(modifier = Modifier.weight(1f))
@@ -58,48 +56,57 @@ fun ControllerScreen(
             Switch(
                 checked = controllerEnabled,
                 onCheckedChange = viewModel::setControllerEnabled,
-            )
+                  )
         }
 
-        Divider(modifier = Modifier.padding(vertical = 16.dp))
+        HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
 
-        Button(
-            onClick = {
-                bluetoothPermissionLauncher.launch(getBluetoothPermissions())
-            },
-            enabled = !isScanning,
-        ) {
-            Text(
-                if (isScanning) {
-                    "Suche läuft..."
-                } else {
-                    "Bluetooth-Geräte suchen"
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState()),
+              ) {
+            Button(
+                onClick = {
+                    if (isScanning) {
+                        viewModel.stopBluetoothScan()
+                    } else {
+                        bluetoothPermissionLauncher.launch(getBluetoothPermissions())
+                    }
                 },
-            )
-        }
+                  ) {
+                Text(
+                    if (isScanning) {
+                        "Suche abbrechen"
+                    } else {
+                        "Bluetooth-Geräte suchen"
+                    },
+                    )
+            }
 
-        Button(
-            onClick = viewModel::logPairedDevices,
-        ) {
-            Text("Gekoppelte Geräte loggen")
-        }
+            Button(
+                onClick = viewModel::loadPairedDevices,
+                  ) {
+                Text("Gekoppelte Geräte laden")
+            }
 
-        devices.forEach { device ->
-            ControllerDeviceRow(
-                device = device,
-                onPairClick = {
-                    viewModel.pairDevice(device.address)
-                },
-                onConnectClick = {
-                    viewModel.connectHidDevice(device.address)
-                },
-                onRemoveClick = {
-                    viewModel.removeBond(device.address)
-                },
-                onDisconnectClick = {
-                    viewModel.disconnectHidDevice(device.address)
-                },
-            )
+            devices.forEach { device ->
+                ControllerDeviceRow(
+                    device = device,
+                    onPairClick = {
+                        viewModel.pairDevice(device.address)
+                    },
+                    onConnectClick = {
+                        viewModel.connectHidDevice(device.address)
+                    },
+                    onDisconnectClick = {
+                        viewModel.disconnectHidDevice(device.address)
+                    },
+                    onRemoveClick = {
+                        viewModel.removeBond(device.address)
+                    },
+                                   )
+            }
         }
     }
 }
