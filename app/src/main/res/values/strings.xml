@@ -101,6 +101,15 @@
 
     <string name="admin_panel">Admin Panel</string>
     <string name="admin_panel_description">Erweiterte Einstellungen für Wetterseite, Webserver, MQTT</string>
+    <string name="admin_panel_webserver_url">Webserver-URL</string>
+    <string name="admin_panel_appversion">App Version</string>
+    <string name="admin_panel_mqtt_reports">MQTT Reports</string>
+    <string name="admin_panel_mqtt_reports_subtitle">Akutelle Reports</string>
+    <string name="admin_panel_webserver_password">Webserver Passwort</string>
+    <string name="admin_panel_webserver_password_change">Passwort ändern</string>
+    <string name="admin_panel_weather_coordinates">Wetterkoordinaten</string>
+    <string name="admin_panel_webserver_coordiantes_change">Koordinaten ändern</string>
+    <string name="admin_panel_header">Admin Panel</string>
 
     <!-- Navigation Page -->
     <string name="navigation_status_label">STATUS</string>
@@ -163,4 +172,5 @@
     <string name="log_no_maps_found">Keine Karten auf dem Roboter gefunden</string>
     <string name="log_error_fetch_map_list">Fehler beim Laden der Kartenliste</string>
     <string name="default_map_name">3_3</string>
+
 </resources>

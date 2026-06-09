@@ -15,10 +15,6 @@ class AdminPanelViewModel : ViewModel() {
         TODO()
     }
 
-    fun onOpenCoordinates() {
-        TODO()
-    }
-
     fun onOpenMqttReports() {
         TODO()
     }
@@ -30,9 +26,9 @@ class AdminPanelViewModel : ViewModel() {
 
 data class AdminPanelState(
 
-    val webserverUrl: String = "",
+    val webserverUrl: String = BuildConfig.WEBVIEW_URL,
 
     val appVersion: String = BuildConfig.VERSION_NAME,
 
-    val coordinates: String = "Latittude: ${WeatherRepository.LATITUDE} Longitude: ${WeatherRepository.LONGITUDE}"
+    val coordinates: String = "Länge: ${WeatherRepository.LATITUDE} Breite: ${WeatherRepository.LONGITUDE}"
 )
