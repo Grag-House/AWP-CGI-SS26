@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -19,7 +20,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.LocationOn
@@ -27,23 +27,22 @@ import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Storage
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import hka.awp.cgi.temi.app.R
+import hka.awp.cgi.temi.app.ui.components.SettingsHeader
 import org.koin.compose.viewmodel.koinViewModel
 
 // ─── Data models ─────────────────────────────────────────────────────────────
@@ -142,11 +141,11 @@ fun WebserverUrlCard(url: String) {
         ) {
             ConfigIconBox(
                 icon = Icons.Outlined.Language,
-                contentDescription = "webservertest" // stringResource(R.string.config_webserver_url)
+                contentDescription = "Webserver-URL" // stringResource(R.string.config_webserver_url)
             )
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
-                ConfigLabel("Webserver-test") // stringResource(R.string.config_webserver_url)
+                ConfigLabel(stringResource(R.string.admin_panel_webserver_url))
                 ConfigValue(url)
             }
         }
@@ -167,11 +166,11 @@ fun AppVersionCard(version: String) {
         ) {
             ConfigIconBox(
                 icon = Icons.Outlined.Info,
-                contentDescription = "appversion" // stringResource(R.string.config_app_version)
+                contentDescription = "AppVersion" // stringResource(R.string.config_app_version)
             )
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
-                ConfigLabel("appversion") // stringResource(R.string.config_app_version)
+                ConfigLabel(stringResource(R.string.admin_panel_appversion))
                 ConfigValue(version)
             }
         }
@@ -192,12 +191,12 @@ fun MqttReportsCard(onNavigate: () -> Unit) {
         ) {
             ConfigIconBox(
                 icon = Icons.Outlined.Storage,
-                contentDescription = "mqtt-reports" // stringResource(R.string.config_mqtt_reports)
+                contentDescription = "Mqtt-reports" // stringResource(R.string.config_mqtt_reports)
             )
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
-                ConfigValue("mqtt value") // stringResource(R.string.config_mqtt_reports)
-                ConfigSubtext("mqtt subtitle") // stringResource(R.string.config_mqtt_subtitle)
+                ConfigValue(stringResource(R.string.admin_panel_mqtt_reports))
+                ConfigSubtext(stringResource(R.string.admin_panel_mqtt_reports_subtitle))
             }
             Icon(
                 imageVector = Icons.Default.ChevronRight,
@@ -222,15 +221,15 @@ fun WebserverPasswordCard(onChangePassword: () -> Unit) {
         ) {
             ConfigIconBox(
                 icon = Icons.Outlined.Lock,
-                contentDescription = "webserver password" // stringResource(R.string.config_password)
+                contentDescription = "Webserver password" // stringResource(R.string.config_password)
             )
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
-                ConfigValue("webserver password value") // stringResource(R.string.config_password)
+                ConfigValue(stringResource(R.string.admin_panel_webserver_password))
                 PasswordDots()
             }
             Text(
-                text = "webserver password", // stringResource(R.string.config_change)
+                text = stringResource(R.string.admin_panel_webserver_password_change),
                 color = MaterialTheme.colorScheme.primary,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
@@ -251,35 +250,28 @@ fun WebserverPasswordCard(onChangePassword: () -> Unit) {
 fun CoordinateManagementCard(
     coordinates: String,
     onEdit: () -> Unit,
-    onNavigate: () -> Unit
 ) {
-    ConfigCard(onClick = onNavigate) {
+    ConfigCard() {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             ConfigIconBox(
                 icon = Icons.Outlined.LocationOn,
-                contentDescription = "coordinates" // stringResource(R.string.config_coordinates)
+                contentDescription = "Coordinates" // stringResource(R.string.config_coordinates)
             )
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
-                ConfigValue("coordinates") // stringResource(R.string.config_coordinates)
+                ConfigValue(stringResource(R.string.admin_panel_weather_coordinates))
                 ConfigSubtext(coordinates)
             }
-            IconButton(onClick = onEdit) {
-                Icon(
-                    imageVector = Icons.Outlined.Edit,
-                    contentDescription = "edit?", // stringResource(R.string.config_edit)
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(20.dp)
+            Text(
+                text = stringResource(R.string.admin_panel_webserver_coordiantes_change),
+                color = MaterialTheme.colorScheme.primary,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.clickable(onClick = onEdit)
                 )
-            }
-            Icon(
-                imageVector = Icons.Default.ChevronRight,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
         }
     }
 }
@@ -339,23 +331,23 @@ private fun PasswordDots(count: Int = 7) {
 /**
  * Top app bar for the System Configuration screen.
  */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun SystemConfigTopBar() {
-    TopAppBar(
-        title = {
-            Text(
-                text = "idk what this is", // stringResource(R.string.config_title)
-                fontWeight = FontWeight.Bold,
-                fontSize = 22.sp,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-        },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.background
-        )
-    )
-}
+//@OptIn(ExperimentalMaterial3Api::class)
+//@Composable
+//fun SystemConfigTopBar() {
+//    TopAppBar(
+//        title = {
+//            Text(
+//                text = "idk what this is", // stringResource(R.string.config_title)
+//                fontWeight = FontWeight.Bold,
+//                fontSize = 22.sp,
+//                color = MaterialTheme.colorScheme.onSurface
+//            )
+//        },
+//        colors = TopAppBarDefaults.topAppBarColors(
+//            containerColor = MaterialTheme.colorScheme.background
+//        )
+//    )
+//}
 
 // ─── Main screen ─────────────────────────────────────────────────────────────
 
@@ -371,9 +363,18 @@ fun AdminPanelScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        Column(modifier = Modifier.weight(1f)) {
-            SystemConfigTopBar()
+        Column(    modifier = Modifier
+            .fillMaxSize()
+            .padding(32.dp)
+              ) {
+            SettingsHeader(
+                title = stringResource(R.string.admin_panel_header),
+                onBackClick = onBackClick
+                          )
 
+            Spacer(
+                modifier = Modifier.height(40.dp)
+                  )
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -381,12 +382,6 @@ fun AdminPanelScreen(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text(
-                    text = "subtitle", // stringResource(R.string.config_subtitle),
-                    fontSize = 13.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
                 WebserverUrlCard(
                     url = uiState.webserverUrl
                 )
@@ -405,8 +400,7 @@ fun AdminPanelScreen(
 
                 CoordinateManagementCard(
                     coordinates = uiState.coordinates,
-                    onEdit = viewModel::onEditCoordinates,
-                    onNavigate = viewModel::onOpenCoordinates
+                    onEdit = viewModel::onEditCoordinates
                 )
             }
         }
