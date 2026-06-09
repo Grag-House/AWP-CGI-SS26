@@ -54,7 +54,7 @@ class BluetoothControllerManager(
 
                     device?.let {
                         addOrUpdateDevice(it)
-                        Timber.d("Bond state changed: ${it.safeName()} ${it.bondState}")
+                        Timber.d("Bond state changed: ${it.safeName()} ${it.safeBondState()}")
                     }
                 }
 
@@ -94,6 +94,16 @@ class BluetoothControllerManager(
         }
 
         context.registerReceiver(receiver, filter)
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun BluetoothDevice.safeBondState(): Int {
+        return try {
+            bondState
+        } catch (exception: SecurityException) {
+            Timber.e(exception, "Missing permission while reading bond state")
+            BluetoothDevice.BOND_NONE
+        }
     }
 
     @Suppress("TooGenericExceptionCaught")
@@ -336,7 +346,7 @@ class BluetoothControllerManager(
         return ControllerDevice(
             name = safeName(),
             address = address,
-            bondState = bondState,
+            bondState = safeBondState(),
         )
     }
 

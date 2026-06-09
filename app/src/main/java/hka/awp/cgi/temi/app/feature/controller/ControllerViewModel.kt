@@ -1,10 +1,13 @@
 package hka.awp.cgi.temi.app.feature.controller
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import hka.awp.cgi.temi.app.utils.TemiMovementController
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 class ControllerViewModel(
     private val movementController: TemiMovementController,
@@ -49,20 +52,42 @@ class ControllerViewModel(
         bluetoothControllerManager.logPairedDevices()
     }
 
+    private var lastX = 0f
+    private var lastY = 0f
+    private var wasMoving = false
+
+    init {
+        bluetoothControllerManager.loadPairedDevices()
+
+        viewModelScope.launch {
+            while (true) {
+                if (_controllerEnabled.value) {
+                    val isMoving = lastX != 0f || lastY != 0f
+
+                    if (isMoving) {
+                        movementController.move(
+                            linear = -lastY,
+                            angular = lastX,
+                                               )
+                        wasMoving = true
+                    } else if (wasMoving) {
+                        movementController.stop()
+                        wasMoving = false
+                    }
+                }
+
+                delay(50L)
+            }
+        }
+    }
+
     fun onControllerInput(x: Float, y: Float) {
-        if (!_controllerEnabled.value) {
-            return
-        }
+        lastX = x
+        lastY = y
+    }
 
-        if (x == 0f && y == 0f) {
-            movementController.stop()
-            return
-        }
-
-        movementController.move(
-            linear = -y,
-            angular = x,
-        )
+    fun loadPairedDevices() {
+        bluetoothControllerManager.loadPairedDevices()
     }
 
     fun onControllerReleased() {
