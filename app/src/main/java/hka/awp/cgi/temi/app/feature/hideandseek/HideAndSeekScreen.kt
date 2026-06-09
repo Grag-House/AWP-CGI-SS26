@@ -23,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.material.icons.rounded.SportsEsports
+import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -44,6 +45,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import hka.awp.cgi.temi.app.R
 
@@ -57,14 +59,36 @@ fun HideAndSeekScreen(
     onNavigateToDashboard: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val filterState by viewModel.filterManager.filterState.collectAsStateWithLifecycle()
+    val showFilter by viewModel.filterManager.isOpen.collectAsStateWithLifecycle()
+    val hasActiveFilter by viewModel.filterManager.hasActiveFilter.collectAsStateWithLifecycle()
+
+    if (showFilter) {
+        Dialog(onDismissRequest = viewModel.filterManager::dismiss) {
+            HidingSpotFilterContent(
+                state = filterState,
+                callbacks = HidingSpotFilterCallbacks(
+                    onToggle = viewModel.filterManager::toggle,
+                    onSelectAll = viewModel.filterManager::selectAll,
+                    onDeselectAll = viewModel.filterManager::deselectAll,
+                    onSave = viewModel.filterManager::save,
+                    onDismiss = viewModel.filterManager::dismiss
+                )
+            )
+        }
+    }
 
     when (uiState.gameState) {
         GameState.SETUP -> SetupContent(
             modifier = modifier.fillMaxSize().padding(24.dp),
             uiState = uiState,
-            onIncrease = { viewModel.adjustSearchTime(1) },
-            onDecrease = { viewModel.adjustSearchTime(-1) },
-            onStart = viewModel::startGame
+            hasActiveFilter = hasActiveFilter,
+            callbacks = SetupCallbacks(
+                onIncrease = { viewModel.adjustSearchTime(1) },
+                onDecrease = { viewModel.adjustSearchTime(-1) },
+                onStart = viewModel::startGame,
+                onOpenFilter = viewModel.filterManager::open
+            )
         )
         GameState.HIDING -> HidingContent(
             modifier = modifier.fillMaxSize().padding(24.dp),
@@ -91,13 +115,19 @@ fun HideAndSeekScreen(
     }
 }
 
+private data class SetupCallbacks(
+    val onIncrease: () -> Unit,
+    val onDecrease: () -> Unit,
+    val onStart: () -> Unit,
+    val onOpenFilter: () -> Unit
+)
+
 @Composable
 private fun SetupContent(
     modifier: Modifier = Modifier,
     uiState: HideAndSeekUiState,
-    onIncrease: () -> Unit,
-    onDecrease: () -> Unit,
-    onStart: () -> Unit
+    hasActiveFilter: Boolean,
+    callbacks: SetupCallbacks
 ) {
     Row(
         modifier = modifier,
@@ -108,9 +138,8 @@ private fun SetupContent(
         SetupRightColumn(
             modifier = Modifier.weight(1f).fillMaxHeight(),
             uiState = uiState,
-            onIncrease = onIncrease,
-            onDecrease = onDecrease,
-            onStart = onStart
+            hasActiveFilter = hasActiveFilter,
+            callbacks = callbacks
         )
     }
 }
@@ -149,9 +178,8 @@ private fun SetupLeftColumn(modifier: Modifier = Modifier) {
 private fun SetupRightColumn(
     modifier: Modifier = Modifier,
     uiState: HideAndSeekUiState,
-    onIncrease: () -> Unit,
-    onDecrease: () -> Unit,
-    onStart: () -> Unit
+    hasActiveFilter: Boolean,
+    callbacks: SetupCallbacks
 ) {
     Column(
         modifier = modifier,
@@ -159,8 +187,8 @@ private fun SetupRightColumn(
     ) {
         TimePickerCard(
             minutes = uiState.searchTimeMinutes,
-            onIncrease = onIncrease,
-            onDecrease = onDecrease
+            onIncrease = callbacks.onIncrease,
+            onDecrease = callbacks.onDecrease
         )
         Surface(
             shape = RoundedCornerShape(16.dp),
@@ -175,8 +203,28 @@ private fun SetupRightColumn(
                 lineHeight = 26.sp
             )
         }
+        OutlinedButton(
+            onClick = callbacks.onOpenFilter,
+            modifier = Modifier.fillMaxWidth().height(52.dp),
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.Tune,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(
+                text = if (hasActiveFilter) {
+                    stringResource(R.string.hiding_spot_filter_button_active)
+                } else {
+                    stringResource(R.string.hiding_spot_filter_button)
+                },
+                style = MaterialTheme.typography.titleMedium
+            )
+        }
         Button(
-            onClick = onStart,
+            onClick = callbacks.onStart,
             modifier = Modifier.fillMaxWidth().height(64.dp),
             shape = RoundedCornerShape(16.dp)
         ) {

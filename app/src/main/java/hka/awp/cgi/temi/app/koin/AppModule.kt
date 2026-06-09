@@ -4,6 +4,7 @@ import android.app.Application
 import com.robotemi.sdk.Robot
 import hka.awp.cgi.temi.app.data.repository.RobotRepository
 import hka.awp.cgi.temi.app.feature.hideandseek.HideAndSeekViewModel
+import hka.awp.cgi.temi.app.feature.hideandseek.HidingSpotRepository
 import hka.awp.cgi.temi.app.feature.settings.SettingsViewModel
 import hka.awp.cgi.temi.app.feature.settings.battery.BatteryViewModel
 import hka.awp.cgi.temi.app.feature.settings.display.DisplayViewModel
@@ -70,7 +71,8 @@ val appModule = module {
         )
     }
 
-    viewModel { HideAndSeekViewModel(robot = get()) }
+    single { HidingSpotRepository(androidContext()) }
+    viewModel { HideAndSeekViewModel(robot = get(), hidingSpotRepository = get()) }
     viewModel<WebserverViewModel> { WebserverViewModel() }
     viewModel {
         BatteryViewModel(get())
