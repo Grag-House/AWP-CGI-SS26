@@ -1,5 +1,7 @@
 package hka.awp.cgi.temi.app
 
+import android.media.AudioAttributes
+import android.media.SoundPool
 import android.os.Bundle
 import android.view.InputDevice
 import android.view.KeyEvent
@@ -30,6 +32,9 @@ class MainActivity : ComponentActivity() {
 
     private val controllerViewModel: ControllerViewModel by viewModel()
 
+    private lateinit var soundPool: SoundPool
+    private var hornSoundId: Int = 0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -37,6 +42,18 @@ class MainActivity : ComponentActivity() {
         hideTopBar(window)
 
         enableEdgeToEdge()
+
+        val audioAttributes = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_MEDIA)
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .build()
+
+        soundPool = SoundPool.Builder()
+            .setMaxStreams(1)
+            .setAudioAttributes(audioAttributes)
+            .build()
+
+        hornSoundId = soundPool.load(this, R.raw.horn, 1)
 
         setContent {
             val displayViewModel: DisplayViewModel = koinViewModel()
@@ -54,22 +71,27 @@ class MainActivity : ComponentActivity() {
         )
 
         if (event.isGameControllerEvent()) {
-            val x = event.getCenteredAxis(MotionEvent.AXIS_X)
-            val y = event.getCenteredAxis(MotionEvent.AXIS_Y)
+            val leftY = event.getCenteredAxis(MotionEvent.AXIS_Y)
+            val rightX = event.getCenteredAxis(MotionEvent.AXIS_Z)
 
-            Timber.d("Controller motion device=${event.device?.name} x=$x y=$y")
-
-            Timber.d("Controller motion x=$x y=$y")
+            Timber.d(
+                "Controller axes leftY=$leftY rightX=$rightX X=${event.getCenteredAxis(MotionEvent.AXIS_X)} RX=${event.getCenteredAxis(MotionEvent.AXIS_RX)} RZ=${event.getCenteredAxis(MotionEvent.AXIS_RZ)}",
+                    )
 
             controllerViewModel.onControllerInput(
-                x = x,
-                y = y,
-            )
+                x = -rightX,
+                y = leftY,
+                                                 )
 
             return true
         }
 
         return super.dispatchGenericMotionEvent(event)
+    }
+
+    override fun onDestroy() {
+        soundPool.release()
+        super.onDestroy()
     }
 
     override fun onKeyDown(
@@ -84,8 +106,15 @@ class MainActivity : ComponentActivity() {
             Timber.d("Controller button keyCode=$keyCode")
 
             when (keyCode) {
-                KeyEvent.KEYCODE_BUTTON_B -> {
-                    controllerViewModel.onControllerReleased()
+                KeyEvent.KEYCODE_DEL -> {
+                    soundPool.play(
+                        hornSoundId,
+                        1f,
+                        1f,
+                        1,
+                        0,
+                        1f,
+                                  )
                     return true
                 }
             }

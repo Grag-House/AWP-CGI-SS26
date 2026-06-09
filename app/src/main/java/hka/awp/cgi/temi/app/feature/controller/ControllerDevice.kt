@@ -4,4 +4,5 @@ data class ControllerDevice(
     val name: String,
     val address: String,
     val bondState: Int,
+    val isConnected: Boolean = false,
 )
