@@ -110,6 +110,16 @@
     <string name="admin_panel_weather_coordinates">Wetterkoordinaten</string>
     <string name="admin_panel_webserver_coordiantes_change">Koordinaten ändern</string>
     <string name="admin_panel_header">Admin Panel</string>
+    <string name="admin_panel_latitude">"Breite: "</string>
+    <string name="admin_panel_longitude">Länge:</string>
+    <string name="admin_panel_confirm">Bestätigen</string>
+    <string name="admin_panel_reset_defaults">Standart</string>
+    <string name="admin_panel_cancel">Abbrechen</string>
+    <string name="admin_panel_change_password_title">Ändere Passwort</string>
+    <string name="admin_panel_old_password">Altes Passwort:</string>
+    <string name="admin_panel_new_password">Neues Passwort:</string>
+    <string name="admin_panel_confirm_password">Wiederhole Passwort:</string>
+    <string name="admin_panel_passwords_no_match">Passwörter nicht gleich.</string>
 
     <!-- Navigation Page -->
     <string name="navigation_status_label">STATUS</string>
