@@ -1,0 +1,169 @@
+<resources>
+    <string name="app_name">Temi-CGI-App</string>
+    <string name="hauptmenu">Hauptmenü</string>
+    <string name="webserver">Webserver</string>
+    <string name="webserverSub">Rufe den Webserver auf</string>
+    <string name="weather">Wetter</string>
+    <string name="wetter">Wetter</string>
+    <string name="wetterSub">Wettervorhersagen für den aktuellen Standort</string>
+    <string name="navigation">Navigation</string>
+    <string name="navigationSub">Sag mir wo ich dich hinbringen soll.</string>
+    <string name="fastestroute">FASTEST ROUTE</string>
+    <string name="modus">Modus</string>
+    <string name="modusSub">Ändere den Modus</string>
+    <string name="settings">Einstellungen</string>
+    <string name="settingsSub">Routen, Patroullien etc.</string>
+    <string name="settings_page_prefix">Temi </string>
+    <string name="status_online">Online</string>
+    <string name="status_offline">Offline</string>
+    <string name="temp_unit">%1$d°C</string>
+    <string name="showroom_mode">SHOWROOM MODE</string>
+    <string name="current_mode">Aktueller Modus</string>
+    <string name="unknown_host_address">Unbekannte Host Adresse!</string>
+
+    <string name="welcome_message">Hey, Ich bin %1$s\nWie kann ich dir helfen?</string>
+    <string name="robot_name">Temi!</string>
+    <string name="robot_description">Roboter</string>
+    <string name="weather_icon_description">Sonne und Wolken Symbol für lokales Wetter</string>
+    <string name="sidebar_functions">Funktionen</string>
+    <string name="sidebar_help">Hilfe</string>
+
+    <!-- Settings Items -->
+    <string name="settings_notifications_title">Benachrichtigungen</string>
+    <string name="settings_notifications_subtitle">Töne und Systemmeldungen</string>
+    <string name="settings_display_title">Anzeige</string>
+    <string name="settings_display_subtitle">Helligkeit und Bildschirmschoner</string>
+    <string name="settings_battery_title">Akku</string>
+    <string name="settings_battery_subtitle">Energieverbrauch und Akkustatus</string>
+    <string name="settings_location_title">Standort</string>
+    <string name="settings_location_subtitle">Ortungsdienste und Navigation</string>
+    <string name="settings_about_title">Über</string>
+    <string name="settings_about_subtitle">Informationen über das System</string>
+
+    <string name="display_brightness">Bildschirmhelligkeit</string>
+
+    <string name="display_screensaver">Bildschirmschoner</string>
+    <string name="display_screensaver_after">Startet nach %1$s Inaktivität</string>
+
+    <string name="display_change">Ändern</string>
+
+    <string name="display_dark_mode">Dark Mode</string>
+    <string name="display_enabled">Eingeschaltet</string>
+    <string name="display_disabled">Ausgeschaltet</string>
+
+    <string name="display_brightness_percent">%1$d%%</string>
+
+    <string name="display_timeout_dialog_title">Inaktivitätszeit wählen</string>
+
+    <string name="timeout_30_seconds">30 Sekunden</string>
+    <string name="timeout_1_minute">1 Minute</string>
+    <string name="timeout_2_minutes">2 Minuten</string>
+    <string name="timeout_5_minutes">5 Minuten</string>
+    <string name="timeout_10_minutes">10 Minuten</string>
+    <string name="timeout_15_minutes">15 Minuten</string>
+
+    <string name="close">Schließen</string>
+    <string name="system_information">Informationen</string>
+    <string name="ip_address">IP-Adresse</string>
+    <string name="model_name">Modell Name</string>
+    <string name="model">Modell</string>
+    <string name="serial_number">Seriennummer</string>
+    <string name="software_version">Version</string>
+    <string name="unknown">Unbekannt</string>
+
+    <string name="battery">Akku</string>
+    <string name="battery_status">Akkustatus</string>
+    <string name="battery_charging">Wird geladen...</string>
+    <string name="battery_not_charging">Wird aktuell nicht geladen.</string>
+    <string name="power_status">Stromversorgung</string>
+    <string name="currently_charging">Lädt aktuell</string>
+    <string name="battery_mode_active">Batterie wird genutzt</string>
+
+    <string name="notifications_voice">Benachrichtigungen &amp; Stimme</string>
+    <string name="enabled">Eingeschaltet</string>
+    <string name="muted">Stummgeschaltet</string>
+    <string name="volume">Lautstärke</string>
+    <string name="select_speaker">Sprecher auswählen</string>
+    <string name="current_language">Aktuelle Sprache: %1$s</string>
+
+    <string name="home_description">Home icon for the main dashboard</string>
+    <string name="webserver_description">Storage icon representing server status</string>
+    <string name="weather_description">Sun and cloud symbol for local weather</string>
+    <string name="navigation_description">Arrow icon for robot navigation</string>
+    <string name="mode_description">Dual toggle switches for operation mode selection</string>
+    <string name="settings_description">Gear icon for system settings</string>
+    <string name="switch_mode_description">Switch mode</string>
+    <string name="wifi_description">WLAN</string>
+    <string name="battery_description">Batterie</string>
+    <string name="notifications_description">Benachrichtigungen</string>
+    <string name="cgi">CGI</string>
+    <string name="toggle_sidebar_description">button to toggle or expand the side panel</string>
+
+    <!-- Navigation Page -->
+    <string name="navigation_status_label">STATUS</string>
+    <string name="current_location_prefix">Aktueller Standort:</string>
+    <string name="show_map">Orte\nanzeigen</string>
+    <string name="select_destination">ZIEL WÄHLEN</string>
+    <string name="location_status_locating">Lokalisiere</string>
+    <string name="location_status_none">Keine Orte gespeichert</string>
+    <string name="location_office">Büro</string>
+    <string name="location_kitchen">Küche</string>
+    <string name="location_cafe">Café-Bar</string>
+    <string name="location_reception">Empfang</string>
+    <string name="location_wc">WC</string>
+    <string name="location_charging">Laden</string>
+    <string name="voice_changed">Stimme geändert</string>
+
+    <!-- Weather Page -->
+    <string name="icon_sun">Sonnig</string>
+    <string name="icon_cloudy">Wolkig</string>
+    <string name="icon_partlycloudy">Teilweise bewölkt</string>
+    <string name="icon_rain">Regnerisch</string>
+    <string name="icon_snow">Es Schneit</string>
+    <string name="icon_thunder">Es Gewittert</string>
+    <string name="icon_fog">Nebelig</string>
+
+    <string name="location_kalrsruhe">Standort: Kalrsruhe</string>
+    <string name="temp_celsius">°C</string>
+    <string name="daily_outlook">Täglicher Ausblick</string>
+    <string name="degree">°</string>
+    <string name="percent">%</string>
+    <string name="weekly_outlook">Nächste Woche</string>
+    <string name="now">Jetzt</string>
+    <string name="today">Heute</string>
+    <string name="show_map_failed">Keine Locations gefunden.\nSind Wegpunkte auf dem Roboter gespeichert?</string>
+    <string name="navigation_failed">Fehler bei Navigation zu:</string>
+    <string name="navigation_failed_with_name">Fehler bei Navigation zu: %1$s</string>
+    <string name="saved_locations">Gespeicherte Orte (%1$d)</string>
+    <string name="go_to">Anfahren</string>
+    <string name="map_retry">Erneut laden</string>
+
+    <!-- Logging & Errors for Navigation -->
+    <string name="log_robot_ready">Robot ready, gespeicherte Orte: %1$s</string>
+    <string name="log_position">Position: x=%1$f, y=%2$f</string>
+    <string name="log_location_distance">Standort: %1$s (%2$.2f m)</string>
+    <string name="log_map_status_changed">onLoadMapStatusChanged: status=%1$d</string>
+    <string name="log_load_map_failed_status">Karte laden fehlgeschlagen: status=%1$d</string>
+    <string name="log_navigating_to">Navigation zu: %1$s</string>
+    <string name="log_show_map">showMap() – robot=%1$s, locations=%2$s</string>
+    <string name="log_fetch_map_data">fetchMapData() – rufe getMapData() auf (Thread: %1$s)</string>
+    <string name="log_get_map_data_is_null">getMapData() → null? %1$b</string>
+    <string name="log_layers_total">Layers gesamt: %1$d</string>
+    <string name="log_layer_info">Layer: id=\'%1$s\', category=%2$d, poses=%3$d</string>
+    <string name="log_marker_info">Marker: \'%1$s\' → (%2$f, %3$f)</string>
+    <string name="log_markers_after_filter">Marker nach Filter (category=%1$d): %2$d</string>
+    <string name="log_no_location_layers">Keine Location-Layer gefunden → tryLoadMap()</string>
+    <string name="log_get_map_data_null_retry">getMapData() lieferte null → tryLoadMap()</string>
+    <string name="log_error_fetch_map_data">Fehler beim Laden der Kartendaten</string>
+    <string name="log_available_maps">Verfügbare Karten: %1$s</string>
+    <string name="log_loading_map">Lade Karte: id=%1$s, name=%2$s</string>
+    <string name="log_no_maps_found">Keine Karten auf dem Roboter gefunden</string>
+    <string name="log_error_fetch_map_list">Fehler beim Laden der Kartenliste</string>
+    <string name="default_map_name">3_3</string>
+    <string name="settings_navigation_title">Fahrzeuggeschwindigkeit</string>
+    <string name="settings_navigation_subtitle">Temi-Geschwindigkeit und Folgegeschwindigkeit</string>
+    <string name="settings_navigation_speed_title">Navigationsgeschwindigkeit</string>
+    <string name="settings_navigation_speed_subtitle">Standard-Tempo für autonome Fahrten zu Orten</string>
+    <string name="settings_navigation_followspeed_subtitle">Tempo, wenn temi dir hinterherläuft</string>
+    <string name="settings_navigation_followspeed_title">Folgegeschwindigkeit</string>
+</resources>

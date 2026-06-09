@@ -23,8 +23,8 @@ import hka.awp.cgi.temi.app.feature.settings.SettingsViewModel
 import hka.awp.cgi.temi.app.feature.settings.about.SettingsScreen
 import hka.awp.cgi.temi.app.feature.settings.battery.BatteryScreen
 import hka.awp.cgi.temi.app.feature.settings.display.DisplayScreen
+import hka.awp.cgi.temi.app.feature.settings.language.LanguageScreen
 import hka.awp.cgi.temi.app.feature.settings.navigation.NavigationScreen
-import hka.awp.cgi.temi.app.feature.settings.notifications.NotificationScreen
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherContent
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherViewModel
 import hka.awp.cgi.temi.app.feature.webserver.WebViewScreen
@@ -148,7 +148,7 @@ fun MainShell(
                     }
 
                     Screen.NotificationSettings.route -> {
-                        NotificationScreen(
+                        LanguageScreen(
                             onBackClick = {
                                 appViewModel.onRouteSelect(Screen.Settings)
                             }

@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 class DisplayViewModel(
     private val context: Application,
     private val repository: RobotRepository
-                      ) : ViewModel() {
+) : ViewModel() {
 
     private val _isDarkMode = MutableStateFlow(false)
     val isDarkMode: StateFlow<Boolean> = _isDarkMode.asStateFlow()
