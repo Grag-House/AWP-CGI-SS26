@@ -168,7 +168,7 @@ fun MainShell(
                             onBackClick = {
                                 appViewModel.onRouteSelect(Screen.Settings)
                             }
-                                        )
+                        )
                     }
 
                     Screen.Weather.route -> WeatherContent(

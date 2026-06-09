@@ -100,8 +100,6 @@ fun ConfigIconBox(
 // ─── Cards ────────────────────────────────────────────────────────────────────
 
 /**
- * A reusable container that provides consistent styling for configuration rows,
- * mirroring the [WeatherCard] pattern used in the weather feature.
  *
  * @param modifier Optional [Modifier].
  * @param onClick Optional click handler. When non-null the card becomes clickable.
@@ -363,20 +361,12 @@ fun SystemConfigTopBar() {
 
 // ─── Main screen ─────────────────────────────────────────────────────────────
 
-/**
- * Main content composable for the System Configuration screen.
- *
- * Observes [SystemConfigViewModel.uiState] and delegates each section to a
- * dedicated card composable, following the same pattern as [WeatherContent].
- *
- * @param viewModel The [SystemConfigViewModel] that provides the UI state and
- *   handles user actions.
- */
+
 @Composable
 fun AdminPanelScreen(
     onBackClick: () -> Unit,
     viewModel: AdminPanelViewModel = koinViewModel()
-                    ) {
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Row(

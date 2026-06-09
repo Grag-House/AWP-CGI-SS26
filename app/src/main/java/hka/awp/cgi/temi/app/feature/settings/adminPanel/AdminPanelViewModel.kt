@@ -3,7 +3,6 @@ package hka.awp.cgi.temi.app.feature.settings.adminPanel
 import androidx.lifecycle.ViewModel
 import hka.awp.cgi.temi.app.BuildConfig
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherRepository
-import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -12,7 +11,7 @@ class AdminPanelViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(AdminPanelState())
     val uiState: StateFlow<AdminPanelState> = _uiState.asStateFlow()
 
-    fun onEditCoordinates(){
+    fun onEditCoordinates() {
         TODO()
     }
 
@@ -24,10 +23,9 @@ class AdminPanelViewModel : ViewModel() {
         TODO()
     }
 
-    fun onChangePassword(){
+    fun onChangePassword() {
         TODO()
     }
-
 }
 
 data class AdminPanelState(
@@ -37,4 +35,4 @@ data class AdminPanelState(
     val appVersion: String = BuildConfig.VERSION_NAME,
 
     val coordinates: String = "Latittude: ${WeatherRepository.LATITUDE} Longitude: ${WeatherRepository.LONGITUDE}"
-                          )
+)
