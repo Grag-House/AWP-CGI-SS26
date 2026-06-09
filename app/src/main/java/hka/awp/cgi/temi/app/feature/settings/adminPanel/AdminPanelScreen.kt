@@ -45,25 +45,6 @@ import hka.awp.cgi.temi.app.R
 import hka.awp.cgi.temi.app.ui.components.SettingsHeader
 import org.koin.compose.viewmodel.koinViewModel
 
-// ─── Data models ─────────────────────────────────────────────────────────────
-
-/**
- * Represents the complete UI state for the System Configuration screen.
- *
- * @property webserverUrl The URL of the webserver.
- * @property appVersion The current application version string.
- * @property isLatestVersion Whether the installed version is the latest available.
- * @property webserverPassword The (masked) webserver password.
- * @property coordinates The geographic coordinates, formatted for display.
- */
-data class SystemConfigUiState(
-    val webserverUrl: String = "",
-    val appVersion: String = "",
-    val isLatestVersion: Boolean = false,
-    val webserverPassword: String = "",
-    val coordinates: String = ""
-)
-
 // ─── Icon view ────────────────────────────────────────────────────────────────
 
 /**
@@ -244,14 +225,13 @@ fun WebserverPasswordCard(onChangePassword: () -> Unit) {
  *
  * @param coordinates The formatted coordinate string to display.
  * @param onEdit Callback invoked when the edit icon is tapped.
- * @param onNavigate Callback invoked when the card is tapped.
  */
 @Composable
 fun CoordinateManagementCard(
     coordinates: String,
     onEdit: () -> Unit,
 ) {
-    ConfigCard() {
+    ConfigCard {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
@@ -271,7 +251,7 @@ fun CoordinateManagementCard(
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.clickable(onClick = onEdit)
-                )
+            )
         }
     }
 }
@@ -326,29 +306,6 @@ private fun PasswordDots(count: Int = 7) {
     }
 }
 
-// ─── Top bar ──────────────────────────────────────────────────────────────────
-
-/**
- * Top app bar for the System Configuration screen.
- */
-//@OptIn(ExperimentalMaterial3Api::class)
-//@Composable
-//fun SystemConfigTopBar() {
-//    TopAppBar(
-//        title = {
-//            Text(
-//                text = "idk what this is", // stringResource(R.string.config_title)
-//                fontWeight = FontWeight.Bold,
-//                fontSize = 22.sp,
-//                color = MaterialTheme.colorScheme.onSurface
-//            )
-//        },
-//        colors = TopAppBarDefaults.topAppBarColors(
-//            containerColor = MaterialTheme.colorScheme.background
-//        )
-//    )
-//}
-
 // ─── Main screen ─────────────────────────────────────────────────────────────
 
 @Composable
@@ -363,18 +320,19 @@ fun AdminPanelScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        Column(    modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp)
-              ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(32.dp)
+        ) {
             SettingsHeader(
                 title = stringResource(R.string.admin_panel_header),
                 onBackClick = onBackClick
-                          )
+            )
 
             Spacer(
                 modifier = Modifier.height(40.dp)
-                  )
+            )
             Column(
                 modifier = Modifier
                     .fillMaxSize()
