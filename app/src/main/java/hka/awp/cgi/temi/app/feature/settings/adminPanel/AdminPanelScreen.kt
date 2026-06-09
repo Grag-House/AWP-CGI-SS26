@@ -44,6 +44,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.koin.compose.viewmodel.koinViewModel
 
 // ─── Data models ─────────────────────────────────────────────────────────────
 
@@ -372,7 +373,10 @@ fun SystemConfigTopBar() {
  *   handles user actions.
  */
 @Composable
-fun SystemConfigContent(viewModel: AdminPanelViewModel) {
+fun AdminPanelScreen(
+    onBackClick: () -> Unit,
+    viewModel: AdminPanelViewModel = koinViewModel()
+                    ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Row(
