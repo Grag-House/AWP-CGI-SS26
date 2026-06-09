@@ -27,7 +27,9 @@ import hka.awp.cgi.temi.app.feature.settings.battery.BatteryScreen
 import hka.awp.cgi.temi.app.feature.settings.display.DisplayScreen
 import hka.awp.cgi.temi.app.feature.settings.notifications.NotificationScreen
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherContent
+import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherState
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherViewModel
+import hka.awp.cgi.temi.app.feature.webserver.ServerState
 import hka.awp.cgi.temi.app.feature.webserver.WebViewScreen
 import hka.awp.cgi.temi.app.feature.webserver.WebserverViewModel
 import org.koin.compose.viewmodel.koinViewModel
@@ -47,7 +49,7 @@ import timber.log.Timber
  * specific to the settings screen.
  */
 
-@Suppress("LongMethod", "CyclomaticComplexMethod")
+@Suppress("LongMethod")
 @Composable
 fun MainShell(
     modifier: Modifier = Modifier,
@@ -58,22 +60,17 @@ fun MainShell(
     weatherViewModel: WeatherViewModel = koinViewModel(),
     hideAndSeekViewModel: HideAndSeekViewModel = koinViewModel()
 ) {
-    val wifiLevel by appViewModel.wifiLevel.collectAsStateWithLifecycle()
-    val currentTime by appViewModel.currentTime.collectAsStateWithLifecycle()
-    val batteryLevel by appViewModel.batteryLevel.collectAsStateWithLifecycle()
-    val isCharging by appViewModel.isCharging.collectAsStateWithLifecycle()
-    val serverState by webserverViewModel.serverState.collectAsStateWithLifecycle()
-    val currentTemperatureState by weatherViewModel.uiState.collectAsStateWithLifecycle()
+    val state = observeMainShellState(appViewModel, webserverViewModel, weatherViewModel)
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopStatusBar(
-                wifiLevel = wifiLevel,
-                currentTime = currentTime,
-                batteryLevel = batteryLevel,
-                isCharging = isCharging
+                wifiLevel = state.wifiLevel,
+                currentTime = state.currentTime,
+                batteryLevel = state.batteryLevel,
+                isCharging = state.isCharging
             )
         }
     ) { paddingValues ->
@@ -98,96 +95,143 @@ fun MainShell(
             ) {
                 Timber.d("Selected route: %s", appViewModel.selectedRoute)
 
-                when (appViewModel.selectedRoute) {
-                    Screen.Dashboard.route -> MainContent(
-                        modifier = Modifier.weight(1f),
-                        onClick = { screen ->
-                            appViewModel.onRouteSelect(screen)
-                        },
-                        serverState = serverState,
-                        // TODO add utility method or catch the exception
-                        Integer.parseInt(currentTemperatureState.hourlyForecast[0].temp)
-                    )
-
-                    Screen.Webserver.route -> WebViewScreen(BuildConfig.WEBVIEW_URL)
-
-                    Screen.Navigation.route -> NavigationContent(
-                        modifier = Modifier.weight(1f),
-                        viewModel = navigationViewModel
-                    )
-
-                    Screen.Settings.route -> {
-                        LaunchedEffect(Unit) {
-                            settingsViewModel.navigationEvent.collect { event ->
-                                when (event) {
-                                    is SettingsNavigationEvent.NavigateToDisplay ->
-                                        appViewModel.onRouteSelect(Screen.DisplaySettings)
-
-                                    is SettingsNavigationEvent.NavigateToNotifications ->
-                                        appViewModel.onRouteSelect(Screen.NotificationSettings)
-
-                                    is SettingsNavigationEvent.NavigateToBattery ->
-                                        appViewModel.onRouteSelect(Screen.BatterySettings)
-                                }
-                            }
-                        }
-
-                        SettingsScreen(
-                            modifier = Modifier.weight(1f),
-                            viewModel = settingsViewModel,
-                        )
-                    }
-
-                    Screen.DisplaySettings.route -> {
-                        DisplayScreen(
-                            onBackClick = {
-                                appViewModel.onRouteSelect(Screen.Settings)
-                            }
-                        )
-                    }
-
-                    Screen.NotificationSettings.route -> {
-                        NotificationScreen(
-                            onBackClick = {
-                                appViewModel.onRouteSelect(Screen.Settings)
-                            }
-                        )
-                    }
-
-                    Screen.BatterySettings.route -> {
-                        BatteryScreen(
-                            onBackClick = {
-                                appViewModel.onRouteSelect(Screen.Settings)
-                            }
-                        )
-                    }
-
-                    Screen.Weather.route -> WeatherContent(
-                        viewModel = weatherViewModel
-                    )
-
-                    Screen.HideAndSeek.route -> HideAndSeekScreen(
-                        modifier = Modifier.weight(1f),
-                        viewModel = hideAndSeekViewModel,
-                        onNavigateToDashboard = { appViewModel.onRouteSelect(Screen.Dashboard) }
-                    )
-
-                    Screen.Documentation.route -> {
-                        WebViewScreen("file:///android_asset/html/index.html")
-                    }
-
-                    // redundancy
-                    else -> MainContent(
-                        modifier = Modifier.weight(1f),
-                        onClick = { screen ->
-                            appViewModel.onRouteSelect(screen)
-                        },
-                        serverState = serverState,
-                        // TODO add utility method or catch the exception
-                        Integer.parseInt(currentTemperatureState.hourlyForecast[0].temp)
-                    )
-                }
+                RenderContentForRoute(
+                    selectedRoute = state.selectedRoute,
+                    viewModels = ShellViewModels(
+                        settingsViewModel = settingsViewModel,
+                        navigationViewModel = navigationViewModel,
+                        weatherViewModel = weatherViewModel,
+                        hideAndSeekViewModel = hideAndSeekViewModel
+                    ),
+                    serverState = state.serverState,
+                    currentTemperatureState = state.currentTemperatureState,
+                    modifier = Modifier.weight(1f),
+                    onRouteSelect = { screen -> appViewModel.onRouteSelect(screen) }
+                )
             }
         }
     }
+}
+
+private data class MainShellState(
+    val wifiLevel: Int,
+    val currentTime: String,
+    val batteryLevel: Int?,
+    val isCharging: Boolean,
+    val serverState: ServerState,
+    val currentTemperatureState: WeatherState,
+    val selectedRoute: String,
+    val isSidebarExpanded: Boolean
+)
+
+@Composable
+private fun observeMainShellState(
+    appViewModel: AppViewModel,
+    webserverViewModel: WebserverViewModel,
+    weatherViewModel: WeatherViewModel
+): MainShellState {
+    val wifiLevel by appViewModel.wifiLevel.collectAsStateWithLifecycle()
+    val currentTime by appViewModel.currentTime.collectAsStateWithLifecycle()
+    val batteryLevel by appViewModel.batteryLevel.collectAsStateWithLifecycle()
+    val isCharging by appViewModel.isCharging.collectAsStateWithLifecycle()
+    val serverState by webserverViewModel.serverState.collectAsStateWithLifecycle()
+    val currentTemperatureState by weatherViewModel.uiState.collectAsStateWithLifecycle()
+
+    return MainShellState(
+        wifiLevel = wifiLevel,
+        currentTime = currentTime,
+        batteryLevel = batteryLevel,
+        isCharging = isCharging,
+        serverState = serverState,
+        currentTemperatureState = currentTemperatureState,
+        selectedRoute = appViewModel.selectedRoute,
+        isSidebarExpanded = appViewModel.isSidebarExpanded
+    )
+}
+
+@Composable
+private fun RenderContentForRoute(
+    selectedRoute: String,
+    viewModels: ShellViewModels,
+    serverState: ServerState,
+    currentTemperatureState: WeatherState,
+    modifier: Modifier = Modifier,
+    onRouteSelect: (Screen) -> Unit
+) {
+    when (selectedRoute) {
+        Screen.Dashboard.route -> MainContent(
+            modifier = modifier,
+            onClick = { screen -> onRouteSelect(screen) },
+            serverState = serverState,
+            Integer.parseInt(currentTemperatureState.hourlyForecast[0].temp)
+        )
+
+        Screen.Webserver.route -> WebViewScreen(BuildConfig.WEBVIEW_URL)
+
+        Screen.Navigation.route -> NavigationContent(
+            modifier = modifier,
+            viewModel = viewModels.navigationViewModel
+        )
+
+        Screen.Settings.route -> SettingsHost(
+            settingsViewModel = viewModels.settingsViewModel,
+            onNavigate = onRouteSelect,
+            modifier = modifier
+        )
+
+        Screen.DisplaySettings.route -> DisplayScreen(
+            onBackClick = { onRouteSelect(Screen.Settings) }
+        )
+
+        Screen.NotificationSettings.route -> NotificationScreen(
+            onBackClick = { onRouteSelect(Screen.Settings) }
+        )
+
+        Screen.BatterySettings.route -> BatteryScreen(
+            onBackClick = { onRouteSelect(Screen.Settings) }
+        )
+
+        Screen.Weather.route -> WeatherContent(viewModel = viewModels.weatherViewModel)
+
+        Screen.HideAndSeek.route -> HideAndSeekScreen(
+            modifier = modifier,
+            viewModel = viewModels.hideAndSeekViewModel,
+            onNavigateToDashboard = { onRouteSelect(Screen.Dashboard) }
+        )
+
+        Screen.Documentation.route -> WebViewScreen("file:///android_asset/html/index.html")
+
+        else -> MainContent(
+            modifier = modifier,
+            onClick = { screen -> onRouteSelect(screen) },
+            serverState = serverState,
+            Integer.parseInt(currentTemperatureState.hourlyForecast[0].temp)
+        )
+    }
+}
+
+private data class ShellViewModels(
+    val settingsViewModel: SettingsViewModel,
+    val navigationViewModel: NavigationViewModel,
+    val weatherViewModel: WeatherViewModel,
+    val hideAndSeekViewModel: HideAndSeekViewModel
+)
+
+@Composable
+private fun SettingsHost(
+    settingsViewModel: SettingsViewModel,
+    onNavigate: (Screen) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    LaunchedEffect(Unit) {
+        settingsViewModel.navigationEvent.collect { event ->
+            when (event) {
+                is SettingsNavigationEvent.NavigateToDisplay -> onNavigate(Screen.DisplaySettings)
+                is SettingsNavigationEvent.NavigateToNotifications -> onNavigate(Screen.NotificationSettings)
+                is SettingsNavigationEvent.NavigateToBattery -> onNavigate(Screen.BatterySettings)
+            }
+        }
+    }
+
+    SettingsScreen(modifier = modifier, viewModel = settingsViewModel)
 }
