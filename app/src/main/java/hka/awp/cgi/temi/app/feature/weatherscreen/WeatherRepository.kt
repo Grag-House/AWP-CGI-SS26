@@ -37,10 +37,10 @@ class WeatherRepository(
 
         // TODO move  to  method which reads the current location from temi
         @Suppress("MagicNumber")
-        val LATITUDE: Double by lazy { 49.0138 }
+        var LATITUDE: Double = 49.0138
 
         @Suppress("MagicNumber")
-        val LONGITUDE: Double by lazy { 8.3573 }
+        var LONGITUDE: Double = 8.3573
         private const val MET_API_ENDPOINT = "https://api.met.no/weatherapi/locationforecast/2.0/compact"
 
         private val API_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd")

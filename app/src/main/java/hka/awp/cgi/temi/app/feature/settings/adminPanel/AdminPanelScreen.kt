@@ -194,7 +194,8 @@ fun MqttReportsCard(onNavigate: () -> Unit) {
  * @param onChangePassword Callback invoked when "Change" is tapped.
  */
 @Composable
-fun WebserverPasswordCard(onChangePassword: () -> Unit) {
+fun WebserverPasswordCard(
+    onChangePassword: () -> Unit) {
     ConfigCard {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -255,6 +256,8 @@ fun CoordinateManagementCard(
         }
     }
 }
+
+
 
 // ─── Typography helpers ───────────────────────────────────────────────────────
 
@@ -358,7 +361,7 @@ fun AdminPanelScreen(
 
                 CoordinateManagementCard(
                     coordinates = uiState.coordinates,
-                    onEdit = viewModel::onEditCoordinates
+                    onEdit = { viewModel.onEditCoordinates(uiState) }
                 )
             }
         }
