@@ -1,5 +1,7 @@
 package hka.awp.cgi.temi.app
 
+import android.content.Context
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.InputDevice
 import android.view.KeyEvent
@@ -13,10 +15,12 @@ import hka.awp.cgi.temi.app.feature.controller.ControllerViewModel
 import hka.awp.cgi.temi.app.feature.settings.display.DisplayViewModel
 import hka.awp.cgi.temi.app.ui.shell.MainShell
 import hka.awp.cgi.temi.app.ui.theme.CgiTheme
+import hka.awp.cgi.temi.app.utils.LocaleHelper
 import hka.awp.cgi.temi.app.utils.hideTopBar
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.compose.viewmodel.koinViewModel
 import timber.log.Timber
+import java.util.Locale
 import kotlin.math.abs
 
 /**
@@ -46,6 +50,15 @@ class MainActivity : ComponentActivity() {
                 MainShell()
             }
         }
+    }
+
+    override fun attachBaseContext(newBase: Context) {
+        val langCode = LocaleHelper.getLocale(newBase)
+        val locale = Locale(langCode)
+        val config = Configuration(newBase.resources.configuration)
+        config.setLocale(locale)
+
+        super.attachBaseContext(newBase.createConfigurationContext(config))
     }
 
     override fun dispatchGenericMotionEvent(event: MotionEvent): Boolean {
