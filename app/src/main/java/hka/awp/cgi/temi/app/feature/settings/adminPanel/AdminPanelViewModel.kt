@@ -18,14 +18,18 @@ class AdminPanelViewModel : ViewModel() {
             WeatherRepository.LONGITUDE = round(longitude * 10000) / 10000
             WeatherRepository.LATITUDE = round(latitude * 10000) / 10000
         } else {
+            @Suppress("MagicNumber")
             WeatherRepository.LONGITUDE = 8.3573
+            @Suppress("MagicNumber")
             WeatherRepository.LATITUDE = 49.0138
         }
         updateCoordinateState()
     }
 
     fun onResetCoordinates() {
+        @Suppress("MagicNumber")
         WeatherRepository.LONGITUDE = 8.3573
+        @Suppress("MagicNumber")
         WeatherRepository.LATITUDE = 49.0138
         updateCoordinateState()
     }
@@ -39,11 +43,11 @@ class AdminPanelViewModel : ViewModel() {
     }
 
     fun onOpenMqttReports() {
-        TODO()
+        TODO() // Absprechen was eigentlich gewollt ist
     }
 
     fun onChangePassword(oldPassword: String, newPassword: String) {
-        TODO()
+        TODO() // Anbindung an Webserver Passwort Implementation
     }
 }
 
@@ -55,7 +59,9 @@ data class AdminPanelState(
 
     val coordinates: String = "Länge: ${WeatherRepository.LONGITUDE} Breite: ${WeatherRepository.LATITUDE}",
 
+    @Suppress("MagicNumber")
     var longitude: Double = 8.3573,
 
+    @Suppress("MagicNumber")
     var latitude: Double = 49.0138
 )
