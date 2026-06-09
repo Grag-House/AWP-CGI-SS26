@@ -21,7 +21,7 @@ private const val MIN_SEARCH_MINUTES = 1
 private const val MAX_SEARCH_MINUTES = 10
 private const val MILLIS_PER_SECOND = 1000L
 private const val SECONDS_PER_MINUTE = 60
-private const val MIN_HIDING_DISTANCE_METERS = 3f
+private const val MIN_HIDING_DISTANCE_METERS = 4f
 
 enum class GameState { SETUP, HIDING, WAITING, WON, LOST }
 
@@ -35,13 +35,16 @@ data class HideAndSeekUiState(
 )
 
 class HideAndSeekViewModel(
-    private val robot: Robot?
+    private val robot: Robot?,
+    hidingSpotRepository: HidingSpotRepository
 ) : ViewModel(),
     OnGoToLocationStatusChangedListener,
     OnDistanceToLocationChangedListener {
 
     private val _uiState = MutableStateFlow(HideAndSeekUiState())
     val uiState: StateFlow<HideAndSeekUiState> = _uiState.asStateFlow()
+
+    val filterManager = HidingSpotFilterManager(robot, hidingSpotRepository)
 
     private val navigator = HideAndSeekNavigator(robot, viewModelScope)
     private var timerJob: Job? = null
@@ -86,7 +89,7 @@ class HideAndSeekViewModel(
     }
 
     fun startGame() {
-        val hidingSpot = selectHidingSpot(robot, distancesToLocations)
+        val hidingSpot = selectHidingSpot(robot, distancesToLocations, filterManager.savedEnabledSpots)
         _uiState.update {
             it.copy(
                 gameState = GameState.HIDING,
@@ -162,8 +165,13 @@ class HideAndSeekViewModel(
     }
 }
 
-private fun selectHidingSpot(robot: Robot?, distancesToLocations: Map<String, Float>): String? {
-    val locations = robot?.locations ?: return null
+private fun selectHidingSpot(
+    robot: Robot?,
+    distancesToLocations: Map<String, Float>,
+    allowedSpots: Set<String>?
+): String? {
+    val allLocations = robot?.locations ?: return null
+    val locations = if (allowedSpots != null) allLocations.filter { it in allowedSpots } else allLocations
     if (locations.isEmpty()) return null
 
     val nearestLocation = distancesToLocations.minByOrNull { it.value }?.key

@@ -185,4 +185,15 @@
     <string name="hide_and_seek_lost_location_unknown">wird später enthüllt</string>
     <string name="hide_and_seek_play_again">Nochmal spielen</string>
     <string name="hide_and_seek_to_dashboard">Zum Dashboard</string>
+    <!-- Hide and Seek Place Filter -->
+    <string name="hiding_spot_filter_button">Verstecke bearbeiten</string>
+    <string name="hiding_spot_filter_button_active">Filter aktiv</string>
+    <string name="hiding_spot_filter_title">Verstecke auswählen</string>
+    <string name="hiding_spot_filter_subtitle">Welche Orte darf Temi als Versteck nutzen?</string>
+    <string name="hiding_spot_filter_select_all">Alle auswählen</string>
+    <string name="hiding_spot_filter_deselect_all">Alle abwählen</string>
+    <string name="hiding_spot_filter_no_locations">Keine Orte verfügbar. Bitte Roboter verbinden.</string>
+    <string name="hiding_spot_filter_count">%1$d von %2$d Orten aktiviert</string>
+    <string name="hiding_spot_filter_cancel">Abbrechen</string>
+    <string name="hiding_spot_filter_save">Speichern</string>
 </resources>
