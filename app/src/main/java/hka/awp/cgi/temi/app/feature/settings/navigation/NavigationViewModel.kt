@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import timber.log.Timber
 
 class NavigationViewModel(private val robot: Robot?) : ViewModel() {
 
@@ -23,7 +24,12 @@ class NavigationViewModel(private val robot: Robot?) : ViewModel() {
 
     fun updateGoToSpeed(newSpeed: SpeedLevel) {
         robot?.goToSpeed = newSpeed
+        Timber.d("Old speed = ${robot?.goToSpeed}")
         _goToSpeed.update { newSpeed }
+        Timber.d("Mid speed = ${robot?.goToSpeed}")
+        robot?.goToSpeed = SpeedLevel.HIGH
+
+        Timber.d("New speed = ${robot?.goToSpeed}")
     }
 
     fun updateFollowSpeed(newSpeed: SpeedLevel) {
