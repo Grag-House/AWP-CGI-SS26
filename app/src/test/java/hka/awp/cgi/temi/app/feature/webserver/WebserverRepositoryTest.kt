@@ -1,0 +1,95 @@
+package hka.awp.cgi.temi.app.feature.webserver
+
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.emptyPreferences
+import androidx.datastore.preferences.core.preferencesOf
+import androidx.datastore.preferences.core.stringPreferencesKey
+import hka.awp.cgi.temi.app.BuildConfig
+import hka.awp.cgi.temi.app.utils.extractHostSafely
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.unmockkAll
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import java.io.File
+import kotlin.io.path.ExperimentalPathApi
+import kotlin.io.path.createTempDirectory
+import kotlin.io.path.deleteRecursively
+
+class WebserverRepositoryTest {
+    private lateinit var repository: WebserverRepository
+    private lateinit var datastore: DataStore<Preferences>
+
+    @BeforeEach
+    fun setup() {
+        datastore = mockk<DataStore<Preferences>>(relaxed = true)
+        every { datastore.data } returns flowOf(emptyPreferences())
+        repository = WebserverRepository(dataStore = datastore)
+    }
+
+    @AfterEach
+    fun tearDown() {
+        // clear all mocks after each test to avoid interference between tests
+        unmockkAll()
+    }
+
+    @Test
+    fun `when DataStore is empty, it returns the BuildConfig fallback URL`() = runTest {
+        val expected = extractHostSafely(BuildConfig.WEBVIEW_URL)
+        val result = repository.currentDomain.first()
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun `when DataStore has a valid URL, it returns the host of that URL`() = runTest {
+        val key = stringPreferencesKey("webview_url")
+        val value = "https://example.com"
+        val expected = extractHostSafely(value)
+
+        datastore = mockk<DataStore<Preferences>>(relaxed = true)
+        every { datastore.data } returns flowOf(preferencesOf(key to value))
+        repository = WebserverRepository(dataStore = datastore)
+
+        assertEquals(expected, repository.currentDomain.first())
+    }
+
+    // we use a real  DataStore here, since it is too annoying to mock the edit function
+    @OptIn(ExperimentalPathApi::class)
+    @Test
+    fun `when the URL in DataStore is  updated, it returns the new host`() = runTest {
+        // temp file + dir
+        val tmpDir = createTempDirectory(prefix = "datastore-test")
+        val file = File(tmpDir.toString(), "preferences.preferences_pb")
+        println(file.absolutePath)
+
+        // create a real Preferences DataStore that the test controls via the test scope
+        val dataStore = PreferenceDataStoreFactory.create(
+            scope = this,
+            produceFile = { file }
+        )
+
+        val repository = WebserverRepository(dataStore)
+
+        // initial: should read fallback from BuildConfig
+        val expectedFallback = extractHostSafely(BuildConfig.WEBVIEW_URL)
+        assertEquals(expectedFallback, repository.currentDomain.first())
+
+        val newValue = "https://example.com/path"
+
+        // update the value
+        repository.updateDomain(newValue)
+
+        // DataStore will persist and emit the new value
+        assertEquals(extractHostSafely(newValue), repository.currentDomain.first())
+
+        // cleanup
+        tmpDir.deleteRecursively()
+    }
+}
