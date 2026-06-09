@@ -38,12 +38,13 @@ import hka.awp.cgi.temi.app.ui.components.SettingsCard
 import hka.awp.cgi.temi.app.ui.components.SettingsHeader
 import hka.awp.cgi.temi.app.ui.components.SettingsRow
 import java.util.Locale
+import kotlin.math.roundToInt
 
 @Suppress("LongParameterList", "LongMethod")
 @Composable
 fun NotificationContent(
-    volume: Float,
-    onVolumeChange: (Float) -> Unit,
+    volume: Int,
+    onVolumeChange: (Int) -> Unit,
     isEnabled: Boolean,
     onEnabledChange: (Boolean) -> Unit,
     availableLocales: List<Locale>,
@@ -106,19 +107,20 @@ fun NotificationContent(
             )
 
             Slider(
-                value = volume,
-                onValueChange = onVolumeChange,
-                enabled = isEnabled,
-                valueRange = 0f..1f
-            )
+                value = volume.toFloat(),
+                onValueChange = {
+                    onVolumeChange(it.toInt())
+                },
+                valueRange = 0f..10f,
+                steps = 9
+                  )
 
             Text(
-                text = "${(volume * 100).toInt()}%",
-                modifier = Modifier.align(
-                    Alignment.End
-                ),
+                text = "$volume / 10",
+                modifier = Modifier.align(Alignment.End),
                 style = MaterialTheme.typography.bodyMedium
-            )
+                )
+
         }
 
         Spacer(

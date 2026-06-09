@@ -14,12 +14,8 @@ class NavigationViewModel(private val robot: Robot?) : ViewModel() {
     private val _goToSpeed = MutableStateFlow(SpeedLevel.MEDIUM)
     val goToSpeed: StateFlow<SpeedLevel> = _goToSpeed.asStateFlow()
 
-    private val _followSpeed = MutableStateFlow(SpeedLevel.MEDIUM)
-    val followSpeed: StateFlow<SpeedLevel> = _followSpeed.asStateFlow()
-
     init {
         _goToSpeed.value = robot?.goToSpeed ?: SpeedLevel.MEDIUM
-        _followSpeed.value = robot?.getFollowSpeed() ?: SpeedLevel.MEDIUM
     }
 
     fun updateGoToSpeed(newSpeed: SpeedLevel) {
@@ -30,10 +26,5 @@ class NavigationViewModel(private val robot: Robot?) : ViewModel() {
         robot?.goToSpeed = SpeedLevel.HIGH
 
         Timber.d("New speed = ${robot?.goToSpeed}")
-    }
-
-    fun updateFollowSpeed(newSpeed: SpeedLevel) {
-        robot?.setFollowSpeed(newSpeed)
-        _followSpeed.update { newSpeed }
     }
 }

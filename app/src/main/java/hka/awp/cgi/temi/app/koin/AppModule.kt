@@ -77,7 +77,7 @@ val appModule = module {
         DisplayViewModel(androidApplication(), get())
     }
     viewModel {
-        NotificationViewModel(androidApplication(), get())
+        NotificationViewModel(get())
     }
 
     viewModel {

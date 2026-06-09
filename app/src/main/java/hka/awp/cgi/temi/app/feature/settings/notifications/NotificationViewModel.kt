@@ -1,7 +1,6 @@
 package hka.awp.cgi.temi.app.feature.settings.notifications
 
 import android.app.Application
-import android.speech.tts.TextToSpeech
 import androidx.lifecycle.ViewModel
 import com.robotemi.sdk.Robot
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,13 +10,10 @@ import java.util.Locale
 
 @Suppress("MagicNumber")
 class NotificationViewModel(
-    private val context: Application,
     private val robot: Robot?
-) : ViewModel() {
+                           ) : ViewModel() {
 
-    private var tts: TextToSpeech? = null
-
-    private val _volume = MutableStateFlow(0.5f)
+    private val _volume = MutableStateFlow(0)
     val volume = _volume.asStateFlow()
 
     private val _notificationsEnabled = MutableStateFlow(true)
@@ -28,64 +24,42 @@ class NotificationViewModel(
 
     private val _selectedLocale = MutableStateFlow(Locale.getDefault())
     val selectedLocale = _selectedLocale.asStateFlow()
-    private var previousVolume = 5
 
-    init {
-        tts = TextToSpeech(context) { status ->
-            if (status == TextToSpeech.SUCCESS) {
-                val locales = Locale.getAvailableLocales().filter { locale ->
-                    val availability = tts?.isLanguageAvailable(locale) ?: -1
-                    availability >= TextToSpeech.LANG_AVAILABLE
-                }.sortedBy { it.displayName }
-                _availableLocales.value = locales
-                _selectedLocale.value = tts?.voice?.locale ?: Locale.getDefault()
-            }
-        }
-    }
+    private var previousVolume = 5
 
     init {
         loadCurrentVolume()
     }
 
     private fun loadCurrentVolume() {
-        robot?.let {
-            val currentVolume = it.volume
-            Timber.d("Current temi volume from SDK: $currentVolume")
-
-            val safeVolume = currentVolume.coerceIn(1, 10)
-            _volume.value = (safeVolume - 1) / 9f
-        }
+        val current = robot?.volume ?: return
+        _volume.value = current.coerceIn(0, 10)
     }
 
-    fun updateVolume(newVolume: Float) {
-        _volume.value = newVolume
+    fun updateVolume(newVolume: Int) {
+        val clamped = newVolume.coerceIn(0, 10)
 
-        val temiVolume = (1 + (newVolume * 9)).toInt().coerceIn(1, 10)
-
-        robot?.setVolume(temiVolume)
+        _volume.value = clamped
+        robot?.setVolume(clamped)
     }
 
     fun toggleNotifications(enabled: Boolean) {
         _notificationsEnabled.value = enabled
 
         if (!enabled) {
-            previousVolume = (1 + (_volume.value * 9)).toInt().coerceIn(1, 10)
+            previousVolume = _volume.value.coerceIn(0, 10)
 
-            robot?.setVolume(1)
+            robot?.setVolume(0)
+            _volume.value = 0
         } else {
-            val restoreVolume = if (previousVolume > 0) previousVolume else 5
-            robot?.setVolume(restoreVolume)
+            val restore = previousVolume.coerceIn(0, 10).takeIf { it > 0 } ?: 5
+
+            robot?.setVolume(restore)
+            _volume.value = restore
         }
     }
 
     fun setLocale(locale: Locale) {
         _selectedLocale.value = locale
-        tts?.language = locale
-    }
-
-    override fun onCleared() {
-        tts?.stop()
-        tts?.shutdown()
-        super.onCleared()
     }
 }

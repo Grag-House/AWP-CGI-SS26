@@ -10,13 +10,10 @@ fun NavigationScreen(
     viewModel: NavigationViewModel = koinViewModel()
 ) {
     val goToSpeedState = viewModel.goToSpeed.collectAsStateWithLifecycle()
-    val followSpeedState = viewModel.followSpeed.collectAsStateWithLifecycle()
 
     NavigationContent(
         currentGoToSpeed = goToSpeedState.value,
-        currentFollowSpeed = followSpeedState.value,
         onGoToSpeedChange = { newSpeed -> viewModel.updateGoToSpeed(newSpeed) },
-        onFollowSpeedChange = { newSpeed -> viewModel.updateFollowSpeed(newSpeed) },
         onBackClick = onBackClick
     )
 }
