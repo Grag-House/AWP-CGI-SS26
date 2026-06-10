@@ -20,4 +20,11 @@ class WebserverRepository(private val dataStore: DataStore<Preferences>) {
             preferences[key] = newUrl
         }
     }
+
+    suspend fun resetUrl() {
+        dataStore.edit { it.clear() }
+        dataStore.edit { preferences ->
+            preferences[key] = BuildConfig.WEBVIEW_URL
+        }
+    }
 }
