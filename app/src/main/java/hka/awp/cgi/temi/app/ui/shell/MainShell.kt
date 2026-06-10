@@ -14,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import hka.awp.cgi.temi.app.BuildConfig
 import hka.awp.cgi.temi.app.feature.controller.ControllerScreen
 import hka.awp.cgi.temi.app.feature.dashboard.MainContent
 import hka.awp.cgi.temi.app.feature.navigation.NavigationContent
@@ -110,6 +109,7 @@ fun MainShell(
                     weatherViewModel = weatherViewModel,
                     serverState = serverState,
                     currentTemperature = currentTemperature,
+                    webserverUrl = webserverUrlState,
                 )
             }
         }
@@ -126,6 +126,7 @@ private fun ShellRouteContent(
     weatherViewModel: WeatherViewModel,
     serverState: ServerState,
     currentTemperature: Int,
+    webserverUrl: String,
 ) {
     when (selectedRoute) {
         Screen.Dashboard.route -> MainContent(
@@ -135,7 +136,7 @@ private fun ShellRouteContent(
             currentTemperature,
         )
 
-        Screen.Webserver.route -> WebViewScreen(BuildConfig.WEBVIEW_URL)
+        Screen.Webserver.route -> WebViewScreen(webserverUrl)
 
         Screen.Navigation.route -> NavigationContent(
             modifier = Modifier.fillMaxSize(),

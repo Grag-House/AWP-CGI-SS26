@@ -66,21 +66,9 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun dispatchGenericMotionEvent(event: MotionEvent): Boolean {
-        Timber.d(
-            "MotionEvent source=${event.source} device=${event.device?.name}"
-        )
-
         if (event.isGameControllerEvent()) {
             val leftY = event.getCenteredAxis(MotionEvent.AXIS_Y)
             val rightX = event.getCenteredAxis(MotionEvent.AXIS_Z)
-
-            Timber.d(
-                "Controller axes leftY=$leftY rightX=$rightX X=${event.getCenteredAxis(MotionEvent.AXIS_X)} RX=${
-                    event.getCenteredAxis(
-                        MotionEvent.AXIS_RX
-                    )
-                } RZ=${event.getCenteredAxis(MotionEvent.AXIS_RZ)}",
-            )
 
             controllerViewModel.onControllerInput(
                 x = -rightX,
@@ -102,8 +90,6 @@ class MainActivity : ComponentActivity() {
         keyCode: Int,
         event: KeyEvent?,
     ): Boolean {
-        Timber.d("KeyDown keyCode=$keyCode device=${event?.device?.name}")
-
         if (event?.isGameControllerEvent() == true) {
             when (keyCode) {
                 CONTROLLER_KEYCODE_TRIANGLE -> {
