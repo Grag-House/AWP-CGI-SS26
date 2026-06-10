@@ -149,4 +149,15 @@
     <string name="controller">Contrôleur</string>
     <string name="controller_description">Support manette</string>
     <string name="controller_subtitle">Connecter la manette et activer le contrôle</string>
+    <string name="controller_steering_active">Activer le pilotage par manette</string>
+    <string name="controller_search_cancelled">Annuler la recherche</string>
+    <string name="controller_search_devices">Rechercher des appareils Bluetooth</string>
+    <string name="controller_loading_bluetooth_devices">Chargement des appareils appairés</string>
+    <string name="controller_isBonded">Appairé</string>
+    <string name="controller_isBonding">Appairage en cours</string>
+    <string name="controller_bond">Appairer</string>
+    <string name="controller_disconnect">Déconnecter</string>
+    <string name="controller_connect">Connecter</string>
+    <string name="controller_delete">Supprimer</string>
+    <string name="controller_isNotBonded">Non appairé</string>
 </resources>
