@@ -19,7 +19,7 @@ import java.net.InetAddress
 class WebserverViewModel(webserverRepository: WebserverRepository) : ViewModel() {
     private val _serverState = MutableStateFlow(ServerState())
     val serverState = _serverState.asStateFlow()
-    val urlState: StateFlow<String> = webserverRepository.currentURL.stateIn(
+    val urlState: StateFlow<String> = webserverRepository.currentUrl.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(SUBSCRIPTION_TIMEOUT),
         BuildConfig.WEBVIEW_URL

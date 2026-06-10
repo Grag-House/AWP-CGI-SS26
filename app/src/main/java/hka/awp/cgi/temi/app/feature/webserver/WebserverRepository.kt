@@ -11,13 +11,13 @@ import kotlinx.coroutines.flow.map
 class WebserverRepository(private val dataStore: DataStore<Preferences>) {
     private val key = stringPreferencesKey("webview_url")
 
-    val currentURL: Flow<String> = dataStore.data.map { preferences ->
+    val currentUrl: Flow<String> = dataStore.data.map { preferences ->
         preferences[key] ?: BuildConfig.WEBVIEW_URL
     }
 
-    suspend fun updateURL(newDomain: String) {
+    suspend fun updateUrl(newUrl: String) {
         dataStore.edit { preferences ->
-            preferences[key] = newDomain
+            preferences[key] = newUrl
         }
     }
 }

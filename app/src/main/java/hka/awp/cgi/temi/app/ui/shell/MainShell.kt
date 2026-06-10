@@ -60,7 +60,7 @@ fun MainShell(
     val isCharging by appViewModel.isCharging.collectAsStateWithLifecycle()
     val serverState by webserverViewModel.serverState.collectAsStateWithLifecycle()
     val currentTemperatureState by weatherViewModel.uiState.collectAsStateWithLifecycle()
-    val webserverURLState by webserverViewModel.urlState.collectAsStateWithLifecycle()
+    val webserverUrlState by webserverViewModel.urlState.collectAsStateWithLifecycle()
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -106,7 +106,7 @@ fun MainShell(
                         Integer.parseInt(currentTemperatureState.hourlyForecast[0].temp)
                     )
 
-                    Screen.Webserver.route -> WebViewScreen(webserverURLState)
+                    Screen.Webserver.route -> WebViewScreen(webserverUrlState)
 
                     Screen.Navigation.route -> NavigationContent(
                         modifier = Modifier.weight(1f),
