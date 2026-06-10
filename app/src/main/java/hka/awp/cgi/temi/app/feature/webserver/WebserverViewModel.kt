@@ -3,6 +3,7 @@ package hka.awp.cgi.temi.app.feature.webserver
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import hka.awp.cgi.temi.app.BuildConfig
+import hka.awp.cgi.temi.app.utils.extractHostSafely
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,7 +19,7 @@ import java.net.InetAddress
 class WebserverViewModel(webserverRepository: WebserverRepository) : ViewModel() {
     private val _serverState = MutableStateFlow(ServerState())
     val serverState = _serverState.asStateFlow()
-    val hostnameState: StateFlow<String> = webserverRepository.currentDomain.stateIn(
+    val urlState: StateFlow<String> = webserverRepository.currentURL.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(SUBSCRIPTION_TIMEOUT),
         BuildConfig.WEBVIEW_URL
@@ -40,7 +41,7 @@ class WebserverViewModel(webserverRepository: WebserverRepository) : ViewModel()
             while (isActive) {
                 try {
                     // DNS Query
-                    val address = InetAddress.getByName(hostnameState.value)
+                    val address = InetAddress.getByName(extractHostSafely(urlState.value))
                     val ip = address.hostAddress
 
                     // ping
@@ -60,7 +61,7 @@ class WebserverViewModel(webserverRepository: WebserverRepository) : ViewModel()
     }
 
     init {
-        Timber.d("hostname: %s", hostnameState)
+        Timber.d("hostname: %s", extractHostSafely(urlState.value))
         startMonitoring()
     }
 }
