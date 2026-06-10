@@ -35,7 +35,7 @@ class SettingsViewModel(private val repository: RobotRepository, private val rob
 
             SettingsItem.Notifications -> {
                 viewModelScope.launch {
-                    _navigationEvent.emit(SettingsNavigationEvent.NavigateToNotifications)
+                    _navigationEvent.emit(SettingsNavigationEvent.NavigateToLanguage)
                 }
             }
 
@@ -54,6 +54,6 @@ class SettingsViewModel(private val repository: RobotRepository, private val rob
 
 sealed class SettingsNavigationEvent {
     data object NavigateToDisplay : SettingsNavigationEvent()
-    data object NavigateToNotifications : SettingsNavigationEvent()
+    data object NavigateToLanguage : SettingsNavigationEvent()
     data object NavigateToBattery : SettingsNavigationEvent()
 }

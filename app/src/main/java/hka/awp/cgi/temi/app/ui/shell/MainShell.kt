@@ -164,6 +164,12 @@ private fun ShellRouteContent(
             },
         )
 
+        Screen.LanguageSettings.route -> LanguageScreen(
+            onBackClick = {
+                onRouteSelect(Screen.Settings)
+            },
+        )
+
         Screen.Weather.route -> WeatherContent(
             viewModel = weatherViewModel,
         )
@@ -192,8 +198,8 @@ private fun SettingsRouteContent(
                 is SettingsNavigationEvent.NavigateToDisplay ->
                     onRouteSelect(Screen.DisplaySettings)
 
-                is SettingsNavigationEvent.NavigateToNotifications ->
-                    onRouteSelect(Screen.NotificationSettings)
+                is SettingsNavigationEvent.NavigateToLanguage ->
+                    onRouteSelect(Screen.LanguageSettings)
 
                 is SettingsNavigationEvent.NavigateToBattery ->
                     onRouteSelect(Screen.BatterySettings)

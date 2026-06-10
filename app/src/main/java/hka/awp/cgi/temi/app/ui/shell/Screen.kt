@@ -4,8 +4,8 @@ import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.BatteryFull
 import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.Language
 import androidx.compose.material.icons.rounded.Navigation
-import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.SportsEsports
 import androidx.compose.material.icons.rounded.Storage
@@ -80,13 +80,6 @@ sealed class Screen(
         contentDescription = R.string.settings_display_subtitle
     )
 
-    data object NotificationSettings : Screen(
-        route = "notification_settings",
-        title = R.string.settings_languages_title,
-        icon = Icons.Rounded.Notifications,
-        contentDescription = R.string.settings_languages_subtitle
-    )
-
     data object BatterySettings : Screen(
         route = "battery_settings",
         title = R.string.settings_battery_title,
@@ -94,11 +87,11 @@ sealed class Screen(
         contentDescription = R.string.settings_battery_subtitle
     )
 
-    data object NavigationSettings : Screen(
-        route = "navigation_settings",
-        title = R.string.settings_navigation_title,
-        icon = Icons.Rounded.Navigation,
-        contentDescription = R.string.settings_navigation_subtitle
+    data object LanguageSettings : Screen(
+        route = "language_settings",
+        title = R.string.settings_languages_title,
+        icon = Icons.Rounded.Language,
+        contentDescription = R.string.settings_languages_subtitle
     )
 
     data object Documentation : Screen(
