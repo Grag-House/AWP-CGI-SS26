@@ -168,4 +168,9 @@
     <string name="settings_navigation_followspeed_title">Folgegeschwindigkeit</string>
     <string name="robox_version">Robox Version</string>
     <string name="launcher_version">Launcher Version</string>
+    
+    //Controller
+    <string name="controller">Controller</string>
+    <string name="controller_description">Controllersteuerung</string>
+    <string name="controller_subtitle">Gamepad verbinden und Steuerung aktivieren</string>
 </resources>

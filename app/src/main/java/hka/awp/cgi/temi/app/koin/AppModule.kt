@@ -2,6 +2,7 @@ package hka.awp.cgi.temi.app.koin
 
 import com.robotemi.sdk.Robot
 import hka.awp.cgi.temi.app.data.repository.RobotRepository
+import hka.awp.cgi.temi.app.feature.controller.BluetoothControllerManager
 import hka.awp.cgi.temi.app.feature.controller.ControllerViewModel
 import hka.awp.cgi.temi.app.feature.navigation.NavigationViewModel
 import hka.awp.cgi.temi.app.feature.settings.SettingsViewModel
@@ -84,14 +85,20 @@ val appModule = module {
         NavigationViewModel(get(), get(), get())
     }
 
-    viewModel<WebserverViewModel> { WebserverViewModel() }
     viewModel {
         BatteryViewModel(get())
+    }
+
+    single {
+        BluetoothControllerManager(
+            context = androidContext(),
+        )
     }
 
     viewModel {
         ControllerViewModel(
             movementController = get(),
+            bluetoothControllerManager = get(),
         )
     }
 }

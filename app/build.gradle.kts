@@ -42,7 +42,7 @@ android {
         // --> The App will only run on sdk 23 due to the limits of TEMI
         //noinspection OldTargetApi,ExpiredTargetSdkVersion
         targetSdk = 36
-        compileSdk = 36
+        compileSdk = 37
         versionCode = 1
         versionName = "1.0"
 
@@ -173,6 +173,7 @@ dependencies {
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.timber)
+    implementation(libs.androidx.datastore.preferences)
 
     // mqtt
     implementation(libs.hivemq)
@@ -185,13 +186,14 @@ dependencies {
     // temi dependency
     implementation(libs.temi.sdk)
     implementation(libs.androidx.compose.ui.text)
-    implementation(libs.androidx.material.icons.extended)
+    implementation(libs.androidx.compose.material.icons.extended)
 
     // ----------------- DEBUG / Compile time dependencies -----------------------
 
     // unit test dependencies
-    testImplementation(libs.mokk)
+    testImplementation(libs.mockk)
     testImplementation(libs.junit.jupiter.api)
+    testImplementation(libs.kotlinx.coroutines.test)
     testRuntimeOnly(libs.junit.jupiter.engine)
     testRuntimeOnly(libs.junit.platform.launcher)
     testImplementation(libs.junit.jupiter.params)
