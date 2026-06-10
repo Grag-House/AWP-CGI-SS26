@@ -7,7 +7,6 @@ import hka.awp.cgi.temi.app.feature.settings.SettingsViewModel
 import hka.awp.cgi.temi.app.feature.settings.battery.BatteryViewModel
 import hka.awp.cgi.temi.app.feature.settings.display.DisplayViewModel
 import hka.awp.cgi.temi.app.feature.settings.notifications.NotificationViewModel
-import hka.awp.cgi.temi.app.feature.webserver.WebserverViewModel
 import hka.awp.cgi.temi.app.ui.shell.AppViewModel
 import hka.awp.cgi.temi.app.utils.NetworkManager
 import hka.awp.cgi.temi.app.utils.TemiBatteryMonitor
@@ -69,7 +68,6 @@ val appModule = module {
         )
     }
 
-    viewModel<WebserverViewModel> { WebserverViewModel() }
     viewModel {
         BatteryViewModel(get())
     }
