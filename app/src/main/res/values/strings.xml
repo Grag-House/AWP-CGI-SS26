@@ -163,6 +163,7 @@
 
     <!-- Hide and Seek Page -->
     <string name="hide_and_seek">Verstecken</string>
+    <string name="hide_and_seek_sub">Suche Temi!</string>
     <string name="hide_and_seek_description">Suchsymbol für das Versteckspiel</string>
     <string name="hide_and_seek_image_description">Temi-Roboter schaut um eine Ecke</string>
     <string name="hide_and_seek_search_time_label">SUCHZEIT</string>
