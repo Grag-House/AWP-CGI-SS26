@@ -67,6 +67,7 @@ fun MainShell(
         .firstOrNull()
         ?.temp
         ?.toIntOrNull() ?: 0
+    val webserverUrlState by webserverViewModel.urlState.collectAsStateWithLifecycle()
 
     Scaffold(
         modifier = modifier.fillMaxSize(),

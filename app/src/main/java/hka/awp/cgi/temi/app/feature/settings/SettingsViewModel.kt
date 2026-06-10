@@ -44,7 +44,6 @@ class SettingsViewModel(private val repository: RobotRepository, private val rob
                     _navigationEvent.emit(SettingsNavigationEvent.NavigateToBattery)
                 }
             }
-            else -> { TODO() }
         }
     }
 
