@@ -47,5 +47,7 @@ fun extractHostSafely(input: String): String {
         trimmedInput
     }
 
-    return runCatching { URI(urlToParse).host }.getOrNull() ?: trimmedInput
+    return runCatching { URI(urlToParse).host }
+        .onFailure { Timber.e(it, "Could not parse host from: %s", input) }
+        .getOrNull() ?: trimmedInput
 }
