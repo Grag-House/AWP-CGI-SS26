@@ -42,7 +42,7 @@ class WebserverRepositoryTest {
     @Test
     fun `when DataStore is empty, it returns the BuildConfig fallback URL`() = runTest {
         val expected = BuildConfig.WEBVIEW_URL
-        val result = repository.currentURL.first()
+        val result = repository.currentUrl.first()
         assertEquals(expected, result)
     }
 
@@ -55,7 +55,7 @@ class WebserverRepositoryTest {
         every { datastore.data } returns flowOf(preferencesOf(key to value))
         repository = WebserverRepository(dataStore = datastore)
 
-        assertEquals(value, repository.currentURL.first())
+        assertEquals(value, repository.currentUrl.first())
     }
 
     // we use a real  DataStore here, since it is too annoying to mock the edit function
@@ -76,15 +76,15 @@ class WebserverRepositoryTest {
 
         // initial: should read fallback from BuildConfig
         val expectedFallback = BuildConfig.WEBVIEW_URL
-        assertEquals(expectedFallback, repository.currentURL.first())
+        assertEquals(expectedFallback, repository.currentUrl.first())
 
         val newValue = "https://example.com/path"
 
         // update the value
-        repository.updateURL(newValue)
+        repository.updateUrl(newValue)
 
         // DataStore will persist and emit the new value
-        assertEquals(newValue, repository.currentURL.first())
+        assertEquals(newValue, repository.currentUrl.first())
 
         // cleanup
         tmpDir.deleteRecursively()
