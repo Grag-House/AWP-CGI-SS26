@@ -149,4 +149,15 @@
     <string name="controller">Controller</string>
     <string name="controller_description">Supporto controller</string>
     <string name="controller_subtitle">Collega gamepad e attiva controllo</string>
+    <string name="controller_steering_active">Attiva controllo controller</string>
+    <string name="controller_search_cancelled">Annulla ricerca</string>
+    <string name="controller_search_devices">Cerca dispositivi Bluetooth</string>
+    <string name="controller_loading_bluetooth_devices">Caricamento dispositivi accoppiati</string>
+    <string name="controller_isBonded">Accoppiato</string>
+    <string name="controller_isBonding">Accoppiamento in corso</string>
+    <string name="controller_bond">Accoppia</string>
+    <string name="controller_disconnect">Disconnetti</string>
+    <string name="controller_connect">Connetti</string>
+    <string name="controller_delete">Rimuovi</string>
+    <string name="controller_isNotBonded">Non accoppiato</string>
 </resources>
