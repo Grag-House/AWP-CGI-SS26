@@ -58,5 +58,11 @@ val weatherModule =
 
         single<WeatherRepository> { WeatherRepository(client = get(), hourlyFormatter = get()) }
 
-        viewModel<WeatherViewModel> { WeatherViewModel(repository = get(), clock = get()) }
+        viewModel<WeatherViewModel> {
+            WeatherViewModel(
+                repository = get(),
+                appConfigRepository = get(),
+                clock = get()
+            )
+        }
     }

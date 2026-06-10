@@ -16,10 +16,10 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.net.InetAddress
 
-class WebserverViewModel(val webserverRepository: WebserverRepository) : ViewModel() {
+class WebserverViewModel(private val appConfigRepository: AppConfigRepository) : ViewModel() {
     private val _serverState = MutableStateFlow(ServerState())
     val serverState = _serverState.asStateFlow()
-    val urlState: StateFlow<String> = webserverRepository.currentUrl.stateIn(
+    val urlState: StateFlow<String> = appConfigRepository.currentUrl.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(SUBSCRIPTION_TIMEOUT),
         BuildConfig.WEBVIEW_URL
@@ -38,13 +38,13 @@ class WebserverViewModel(val webserverRepository: WebserverRepository) : ViewMod
 
     fun updateUrl(newUrl: String) {
         viewModelScope.launch {
-            webserverRepository.updateUrl(newUrl)
+            appConfigRepository.updateUrl(newUrl)
         }
     }
 
     fun resetUrl() {
         viewModelScope.launch {
-            webserverRepository.resetUrl()
+            appConfigRepository.clear()
         }
     }
 

@@ -35,12 +35,6 @@ class WeatherRepository(
     companion object {
         private const val USER_AGENT = "jonas.mueller@cgi.com"
 
-        // TODO move  to  method which reads the current location from temi
-        @Suppress("MagicNumber")
-        var LATITUDE: Double = 49.0138
-
-        @Suppress("MagicNumber")
-        var LONGITUDE: Double = 8.3573
         private const val MET_API_ENDPOINT = "https://api.met.no/weatherapi/locationforecast/2.0/compact"
 
         private val API_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd")
@@ -48,11 +42,16 @@ class WeatherRepository(
 
     private val weekdayFormatter = DateTimeFormatter.ofPattern("EEEE", Locale.getDefault())
 
-    suspend fun getWeatherData(): Result<WeatherState> = withContext(Dispatchers.IO) {
+    suspend fun getWeatherData(
+        latitude: Double,
+        longitude: Double
+    ): Result<WeatherState> = withContext(Dispatchers.IO) {
         return@withContext try {
-            val request =
-                Request.Builder().url("$MET_API_ENDPOINT?lat=$LATITUDE&lon=$LONGITUDE").header("User-Agent", USER_AGENT)
-                    .get().build()
+            val request = Request.Builder()
+                .url("$MET_API_ENDPOINT?lat=$latitude&lon=$longitude")
+                .header("User-Agent", USER_AGENT)
+                .get()
+                .build()
 
             val response = client.newCall(request).execute()
             if (!response.isSuccessful) {
@@ -63,7 +62,7 @@ class WeatherRepository(
 
             val body = response.body.string()
             val metResponse = json.decodeFromString<MetResponse>(body)
-            Result.success(transformToState(metResponse))
+            Result.success(transformToState(metResponse, latitude, longitude))
         } catch (e: CancellationException) {
             throw e
         } catch (e: UnknownHostException) {
@@ -80,7 +79,7 @@ class WeatherRepository(
         }
     }
 
-    private fun transformToState(response: MetResponse): WeatherState {
+    private fun transformToState(response: MetResponse, latitude: Double, longitude: Double): WeatherState {
         val timeseries = response.properties.timeseries
         val today = LocalDate.now()
         val now = ZonedDateTime.now(ZoneId.systemDefault())
@@ -134,24 +133,23 @@ class WeatherRepository(
                 low = temps.minOrNull()?.roundToInt()?.toString() ?: "0"
             )
         }
-        if (checkLocation()) {
+        if (checkLocation(latitude, longitude)) {
             return WeatherState(
                 hourlyForecast = hourly,
                 weeklyForecast = weekly
-                               )
+            )
         } else {
             return WeatherState(
-                location = "Länge: " + LONGITUDE.toString() + " Breite: " + LATITUDE.toString(),
+                location = "Länge: $longitude Breite: $latitude",
                 hourlyForecast = hourly,
                 weeklyForecast = weekly
-                               )
+            )
         }
     }
 
     @Suppress("MagicNumber")
-    private fun checkLocation(): Boolean {
-        if (LATITUDE == 49.0138 && LONGITUDE == 8.3573) return true
-        return false
+    private fun checkLocation(latitude: Double, longitude: Double): Boolean {
+        return latitude == 49.0138 && longitude == 8.3573
     }
 
     private fun convertSymbolToIcon(symbol: String): WeatherIcon {

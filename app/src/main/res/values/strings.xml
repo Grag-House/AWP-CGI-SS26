@@ -73,7 +73,7 @@
 
     <string name="battery">Akku</string>
     <string name="battery_status">Akkustatus</string>
-    <string name="battery_charging">Wird geladen...</string>
+    <string name="battery_charging">Wird geladen…</string>
     <string name="battery_not_charging">Wird aktuell nicht geladen.</string>
     <string name="power_status">Stromversorgung</string>
     <string name="currently_charging">Lädt aktuell</string>
@@ -109,17 +109,23 @@
     <string name="admin_panel_webserver_password_change">Passwort ändern</string>
     <string name="admin_panel_weather_coordinates">Wetterkoordinaten</string>
     <string name="admin_panel_webserver_coordiantes_change">Koordinaten ändern</string>
+    <string name="admin_panel_webserver_url_change">URL ändern</string>
     <string name="admin_panel_header">Admin Panel</string>
     <string name="admin_panel_latitude">"Breite: "</string>
     <string name="admin_panel_longitude">Länge:</string>
     <string name="admin_panel_confirm">Bestätigen</string>
-    <string name="admin_panel_reset_defaults">Standart</string>
+    <string name="admin_panel_reset_defaults">Standard</string>
+    <string name="admin_panel_latitude_error">Gültigkeitsbereich: -90 bis 90</string>
+    <string name="admin_panel_longitude_error">Gültigkeitsbereich: -180 bis 180</string>
     <string name="admin_panel_cancel">Abbrechen</string>
     <string name="admin_panel_change_password_title">Ändere Passwort</string>
     <string name="admin_panel_old_password">Altes Passwort:</string>
     <string name="admin_panel_new_password">Neues Passwort:</string>
     <string name="admin_panel_confirm_password">Wiederhole Passwort:</string>
     <string name="admin_panel_passwords_no_match">Passwörter nicht gleich.</string>
+    <string name="admin_panel_wrong_old_password">Altes Passwort ist falsch.</string>
+    <string name="admin_panel_webserver_defaults_reset">Webserver-URL und Passwort zurücksetzen</string>
+    <string name="admin_panel_webserver_defaults_reset_done">Webserver-Defaults wurden zurückgesetzt.</string>
 
     <!-- Navigation Page -->
     <string name="navigation_status_label">STATUS</string>

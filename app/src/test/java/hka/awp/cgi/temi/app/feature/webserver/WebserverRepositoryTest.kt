@@ -23,14 +23,14 @@ import kotlin.io.path.createTempDirectory
 import kotlin.io.path.deleteRecursively
 
 class WebserverRepositoryTest {
-    private lateinit var repository: WebserverRepository
+    private lateinit var repository: AppConfigRepository
     private lateinit var datastore: DataStore<Preferences>
 
     @BeforeEach
     fun setup() {
         datastore = mockk<DataStore<Preferences>>(relaxed = true)
         every { datastore.data } returns flowOf(emptyPreferences())
-        repository = WebserverRepository(dataStore = datastore)
+        repository = AppConfigRepository(dataStore = datastore)
     }
 
     @AfterEach
@@ -53,7 +53,7 @@ class WebserverRepositoryTest {
 
         datastore = mockk<DataStore<Preferences>>(relaxed = true)
         every { datastore.data } returns flowOf(preferencesOf(key to value))
-        repository = WebserverRepository(dataStore = datastore)
+        repository = AppConfigRepository(dataStore = datastore)
 
         assertEquals(value, repository.currentUrl.first())
     }
@@ -72,7 +72,7 @@ class WebserverRepositoryTest {
             produceFile = { file }
         )
 
-        val repository = WebserverRepository(dataStore)
+        val repository = AppConfigRepository(dataStore)
 
         // initial: should read fallback from BuildConfig
         val expectedFallback = BuildConfig.WEBVIEW_URL
