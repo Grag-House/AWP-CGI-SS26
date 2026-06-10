@@ -13,19 +13,21 @@ class AdminPanelViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(AdminPanelState())
     val uiState: StateFlow<AdminPanelState> = _uiState.asStateFlow()
 
+    // Standart range for coordinates is -180 -> 180 and -90 -> 90
+    @Suppress("MagicNumber")
+    @Suppress("ComplexCondition")
     fun onEditCoordinates(latitude: Double, longitude: Double) {
-        if (longitude >= -180 && longitude <= 180 && latitude >= -90 && latitude <= 90) { //Standart range for coordinates
+        if (longitude >= -180 && longitude <= 180 && latitude >= -90 && latitude <= 90) {
             WeatherRepository.LONGITUDE = round(longitude * 10000) / 10000
             WeatherRepository.LATITUDE = round(latitude * 10000) / 10000
         } else {
-            @Suppress("MagicNumber")
             WeatherRepository.LONGITUDE = 8.3573
-            @Suppress("MagicNumber")
-             WeatherRepository.LATITUDE = 49.0138
+            WeatherRepository.LATITUDE = 49.0138
         }
         updateCoordinateState()
     }
 
+    @Suppress("MagicNumber")
     fun onResetCoordinates() {
         @Suppress("MagicNumber")
         WeatherRepository.LONGITUDE = 8.3573
@@ -45,7 +47,6 @@ class AdminPanelViewModel : ViewModel() {
     fun onOpenMqttReports() {
         TODO() // Absprechen was eigentlich gewollt ist
     }
-
     fun onChangePassword(oldPassword: String, newPassword: String) {
         TODO() // Anbindung an Webserver Passwort Implementation
     }
