@@ -14,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import hka.awp.cgi.temi.app.BuildConfig
 import hka.awp.cgi.temi.app.feature.dashboard.MainContent
 import hka.awp.cgi.temi.app.feature.navigation.NavigationContent
 import hka.awp.cgi.temi.app.feature.navigation.NavigationViewModel
@@ -62,6 +61,7 @@ fun MainShell(
     val isCharging by appViewModel.isCharging.collectAsStateWithLifecycle()
     val serverState by webserverViewModel.serverState.collectAsStateWithLifecycle()
     val currentTemperatureState by weatherViewModel.uiState.collectAsStateWithLifecycle()
+    val webserverUrlState by webserverViewModel.urlState.collectAsStateWithLifecycle()
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -107,7 +107,7 @@ fun MainShell(
                         Integer.parseInt(currentTemperatureState.hourlyForecast[0].temp)
                     )
 
-                    Screen.Webserver.route -> WebViewScreen(BuildConfig.WEBVIEW_URL)
+                    Screen.Webserver.route -> WebViewScreen(webserverUrlState)
 
                     Screen.Navigation.route -> NavigationContent(
                         modifier = Modifier.weight(1f),
