@@ -71,7 +71,7 @@ class MainActivity : ComponentActivity() {
 
     override fun attachBaseContext(newBase: Context) {
         val langCode = LanguageHelper.getLocale(newBase)
-        val locale = Locale(langCode)
+        val locale = Locale.forLanguageTag(langCode)
         val config = Configuration(newBase.resources.configuration)
         config.setLocale(locale)
 
