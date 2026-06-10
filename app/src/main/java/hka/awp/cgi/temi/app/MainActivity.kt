@@ -105,6 +105,20 @@ class MainActivity : ComponentActivity() {
     ): Boolean {
         if (event?.isGameControllerEvent() == true) {
             when (keyCode) {
+                CONTROLLER_KEYCODE_ENABLE -> {
+                    if (!controllerViewModel.controllerEnabled.value) {
+                        controllerViewModel.setControllerEnabled(true)
+                    }
+                    return true
+                }
+
+                CONTROLLER_KEYCODE_DISABLE -> {
+                    if (controllerViewModel.controllerEnabled.value) {
+                        controllerViewModel.setControllerEnabled(false)
+                    }
+                    return true
+                }
+
                 CONTROLLER_KEYCODE_TRIANGLE -> {
                     if (controllerViewModel.controllerEnabled.value) {
                         soundPool.play(
@@ -160,3 +174,5 @@ private fun MotionEvent.getCenteredAxis(axis: Int): Float {
 
 private const val DEFAULT_CONTROLLER_DEAD_ZONE = 0.08f
 private const val CONTROLLER_KEYCODE_TRIANGLE = 99
+private const val CONTROLLER_KEYCODE_ENABLE = 101
+private const val CONTROLLER_KEYCODE_DISABLE = 100
