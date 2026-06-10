@@ -73,7 +73,7 @@
 
     <string name="battery">Akku</string>
     <string name="battery_status">Akkustatus</string>
-    <string name="battery_charging">Wird geladen...</string>
+    <string name="battery_charging">Wird geladen…</string>
     <string name="battery_not_charging">Wird aktuell nicht geladen.</string>
     <string name="power_status">Stromversorgung</string>
     <string name="currently_charging">Lädt aktuell</string>
@@ -86,18 +86,18 @@
     <string name="select_speaker">Sprecher auswählen</string>
     <string name="current_language">Aktuelle Sprache: %1$s</string>
 
-    <string name="home_description">Home icon for the main dashboard</string>
-    <string name="webserver_description">Storage icon representing server status</string>
-    <string name="weather_description">Sun and cloud symbol for local weather</string>
-    <string name="navigation_description">Arrow icon for robot navigation</string>
-    <string name="mode_description">Dual toggle switches for operation mode selection</string>
-    <string name="settings_description">Gear icon for system settings</string>
-    <string name="switch_mode_description">Switch mode</string>
+    <string name="home_description">Startsymbol für das Hauptdashboard</string>
+    <string name="webserver_description">Speichersymbol zur Darstellung des Serverstatus</string>
+    <string name="weather_description">Sonnen- und Wolkensymbol für das lokale Wetter</string>
+    <string name="navigation_description">Pfeilsymbol für die Roboternavigation</string>
+    <string name="mode_description">Zwei Umschalter zur Auswahl des Betriebsmodus</string>
+    <string name="settings_description">Zahnradsymbol für Systemeinstellungen</string>
+    <string name="switch_mode_description">Modus wechseln</string>
     <string name="wifi_description">WLAN</string>
     <string name="battery_description">Batterie</string>
     <string name="notifications_description">Benachrichtigungen</string>
     <string name="cgi">CGI</string>
-    <string name="toggle_sidebar_description">button to toggle or expand the side panel</string>
+    <string name="toggle_sidebar_description">Schaltfläche zum Ein- oder Ausklappen der Seitenleiste</string>
 
     <!-- Navigation Page -->
     <string name="navigation_status_label">STATUS</string>
@@ -160,12 +160,6 @@
     <string name="log_no_maps_found">Keine Karten auf dem Roboter gefunden</string>
     <string name="log_error_fetch_map_list">Fehler beim Laden der Kartenliste</string>
     <string name="default_map_name">3_3</string>
-    <string name="settings_navigation_title">Fahrzeuggeschwindigkeit</string>
-    <string name="settings_navigation_subtitle">Temi-Geschwindigkeit und Folgegeschwindigkeit</string>
-    <string name="settings_navigation_speed_title">Navigationsgeschwindigkeit</string>
-    <string name="settings_navigation_speed_subtitle">Standard-Tempo für autonome Fahrten zu Orten</string>
-    <string name="settings_navigation_followspeed_subtitle">Tempo, wenn temi dir hinterherläuft</string>
-    <string name="settings_navigation_followspeed_title">Folgegeschwindigkeit</string>
     <string name="robox_version">Robox Version</string>
     <string name="launcher_version">Launcher Version</string>
     
