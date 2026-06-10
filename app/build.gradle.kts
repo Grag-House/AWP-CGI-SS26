@@ -79,7 +79,7 @@ android {
             buildConfigField("String", "MQTT_PASSWORD", "\"$mqttPassword\"")
 
             val adminPassword = props.getProperty("DEFAULT_ADMIN_PASSWORD")
-                ?: throw GradleException("Missing property 'ADMIN_PASSWORD' in .env")
+                ?: throw GradleException("Missing property 'DEFAULT_ADMIN_PASSWORD' in .env")
             buildConfigField("String", "DEFAULT_ADMIN_PASSWORD", "\"$adminPassword\"")
         } else {
             throw GradleException(
