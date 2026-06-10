@@ -14,14 +14,14 @@ class AdminPanelViewModel : ViewModel() {
     val uiState: StateFlow<AdminPanelState> = _uiState.asStateFlow()
 
     fun onEditCoordinates(latitude: Double, longitude: Double) {
-        if (longitude > 0 && latitude > 0) {
+        if (longitude >= -180 && longitude <= 180 && latitude >= -90 && latitude <= 90) { //Standart range for coordinates
             WeatherRepository.LONGITUDE = round(longitude * 10000) / 10000
             WeatherRepository.LATITUDE = round(latitude * 10000) / 10000
         } else {
             @Suppress("MagicNumber")
             WeatherRepository.LONGITUDE = 8.3573
             @Suppress("MagicNumber")
-            WeatherRepository.LATITUDE = 49.0138
+             WeatherRepository.LATITUDE = 49.0138
         }
         updateCoordinateState()
     }
