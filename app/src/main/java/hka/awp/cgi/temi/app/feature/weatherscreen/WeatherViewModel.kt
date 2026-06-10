@@ -65,6 +65,18 @@ class WeatherViewModel(
         }
     }
 
+    fun oneTimeFetch() { // TODO make work for when location is updated, or shorten delay for fetching
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.getWeatherData()
+                .onSuccess { newState ->
+                    _uiState.value = newState.copy(isLoading = false)
+                }
+                .onFailure { error ->
+                    _uiState.update { it.copy(isLoading = false, error = error.message) }
+                }
+        }
+    }
+
     companion object {
         private const val FETCH_OFFSET_SECONDS = 3L
     }
