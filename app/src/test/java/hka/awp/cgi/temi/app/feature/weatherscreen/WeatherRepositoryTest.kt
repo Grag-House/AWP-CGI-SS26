@@ -1,5 +1,6 @@
 package hka.awp.cgi.temi.app.feature.weatherscreen
 
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
@@ -19,12 +20,18 @@ class WeatherRepositoryTest {
     private lateinit var repository: WeatherRepository
     private val mockClient = mockk<OkHttpClient>()
     private val mockCall = mockk<Call>()
+    private val mockLocationNameResolver = mockk<LocationNameResolver>()
 
     private val formatter = DateTimeFormatter.ofPattern("HH:mm").withZone(ZoneId.systemDefault())
 
     @BeforeEach
     fun setup() {
-        repository = WeatherRepository(client = mockClient, hourlyFormatter = formatter)
+        coEvery { mockLocationNameResolver.resolveLocationName(any(), any()) } returns "Karlsruhe"
+        repository = WeatherRepository(
+            client = mockClient,
+            hourlyFormatter = formatter,
+            locationNameResolver = mockLocationNameResolver
+        )
     }
 
     @Test
@@ -60,7 +67,7 @@ class WeatherRepositoryTest {
         every { mockCall.execute() } returns response
 
         // Act
-        val result = repository.getWeatherData()
+        val result = repository.getWeatherData(8.3573, 49.0138)
 
         // Assert
         assertTrue(result.isSuccess)
@@ -84,7 +91,7 @@ class WeatherRepositoryTest {
         every { mockCall.execute() } returns response
 
         // Act
-        val result = repository.getWeatherData()
+        val result = repository.getWeatherData(8.3573, 49.0138)
 
         // Assert
         assertTrue(result.isFailure)

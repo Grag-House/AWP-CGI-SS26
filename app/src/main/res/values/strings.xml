@@ -73,7 +73,7 @@
 
     <string name="battery">Akku</string>
     <string name="battery_status">Akkustatus</string>
-    <string name="battery_charging">Wird geladen...</string>
+    <string name="battery_charging">Wird geladen…</string>
     <string name="battery_not_charging">Wird aktuell nicht geladen.</string>
     <string name="power_status">Stromversorgung</string>
     <string name="currently_charging">Lädt aktuell</string>
@@ -98,6 +98,38 @@
     <string name="notifications_description">Benachrichtigungen</string>
     <string name="cgi">CGI</string>
     <string name="toggle_sidebar_description">button to toggle or expand the side panel</string>
+
+    <string name="admin_panel">Admin Panel</string>
+    <string name="admin_panel_description">Erweiterte Einstellungen für Wetterseite, Webserver, MQTT</string>
+    <string name="admin_panel_webserver_url">Webserver-URL</string>
+    <string name="admin_panel_appversion">App Version</string>
+    <string name="admin_panel_mqtt_reports">MQTT Reports</string>
+    <string name="admin_panel_mqtt_reports_subtitle">Akutelle Reports</string>
+    <string name="admin_panel_webserver_password">Webserver-Passwort</string>
+    <string name="admin_panel_webserver_password_change">Webserver-Passwort ändern</string>
+    <string name="admin_panel_weather_coordinates">Wetterkoordinaten</string>
+    <string name="admin_panel_webserver_coordiantes_change">Koordinaten ändern</string>
+    <string name="admin_panel_webserver_url_change">URL ändern</string>
+    <string name="admin_panel_header">Admin Panel</string>
+    <string name="admin_panel_latitude">"Breite: "</string>
+    <string name="admin_panel_longitude">Länge:</string>
+    <string name="admin_panel_confirm">Bestätigen</string>
+    <string name="admin_panel_reset_defaults">Standard</string>
+    <string name="admin_panel_latitude_error">Gültigkeitsbereich: -90 bis 90</string>
+    <string name="admin_panel_longitude_error">Gültigkeitsbereich: -180 bis 180</string>
+    <string name="admin_panel_cancel">Abbrechen</string>
+    <string name="admin_panel_change_password_title">Webserver-Passwort ändern</string>
+    <string name="admin_panel_new_password">Neues Webserver-Passwort:</string>
+    <string name="admin_panel_webserver_defaults_reset">Webserver-URL und Webserver-Passwort zurücksetzen</string>
+    <string name="admin_panel_webserver_defaults_reset_done">Webserver-Defaults wurden zurückgesetzt.</string>
+    <string name="admin_panel_mqtt_reports_topics_title">Beobachtete Topics</string>
+    <string name="admin_panel_mqtt_reports_topic_item">- %1$s</string>
+    <string name="admin_panel_mqtt_reports_messages_title">Nachrichten (neueste zuerst)</string>
+    <string name="admin_panel_mqtt_reports_empty">Noch keine MQTT-Nachrichten empfangen oder gesendet.</string>
+    <string name="admin_panel_mqtt_reports_direction_in">IN</string>
+    <string name="admin_panel_mqtt_reports_direction_out">OUT</string>
+    <string name="admin_panel_mqtt_reports_clear">Leeren</string>
+    <string name="admin_panel_close">Schließen</string>
 
     <!-- Navigation Page -->
     <string name="navigation_status_label">STATUS</string>
@@ -160,4 +192,5 @@
     <string name="log_no_maps_found">Keine Karten auf dem Roboter gefunden</string>
     <string name="log_error_fetch_map_list">Fehler beim Laden der Kartenliste</string>
     <string name="default_map_name">3_3</string>
+
 </resources>

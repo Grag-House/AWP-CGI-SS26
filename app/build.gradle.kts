@@ -77,6 +77,10 @@ android {
             val mqttPassword = props.getProperty("MQTT_PASSWORD")
                 ?: throw GradleException("Missing property 'MQTT_PASSWORD' in .env")
             buildConfigField("String", "MQTT_PASSWORD", "\"$mqttPassword\"")
+
+            val adminPassword = props.getProperty("DEFAULT_ADMIN_PASSWORD")
+                ?: throw GradleException("Missing property 'DEFAULT_ADMIN_PASSWORD' in .env")
+            buildConfigField("String", "DEFAULT_ADMIN_PASSWORD", "\"$adminPassword\"")
         } else {
             throw GradleException(
                 "Missing .env file! please create it and include the 'WEBVIEW_URL"

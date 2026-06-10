@@ -20,6 +20,7 @@ import hka.awp.cgi.temi.app.feature.navigation.NavigationViewModel
 import hka.awp.cgi.temi.app.feature.settings.SettingsNavigationEvent
 import hka.awp.cgi.temi.app.feature.settings.SettingsViewModel
 import hka.awp.cgi.temi.app.feature.settings.about.SettingsScreen
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.AdminPanelScreen
 import hka.awp.cgi.temi.app.feature.settings.battery.BatteryScreen
 import hka.awp.cgi.temi.app.feature.settings.display.DisplayScreen
 import hka.awp.cgi.temi.app.feature.settings.notifications.NotificationScreen
@@ -93,92 +94,126 @@ fun MainShell(
                     .padding(top = 12.dp, bottom = 12.dp, end = 12.dp)
                     .clip(RoundedCornerShape(24.dp))
             ) {
-                Timber.d("Selected route: %s", appViewModel.selectedRoute)
-
-                when (appViewModel.selectedRoute) {
-                    Screen.Dashboard.route -> MainContent(
-                        modifier = Modifier.weight(1f),
-                        onClick = { screen ->
-                            appViewModel.onRouteSelect(screen)
-                        },
+                RenderSelectedRoute(
+                    selectedRoute = appViewModel.selectedRoute,
+                    routeDeps = MainShellRouteDeps(
+                        appViewModel = appViewModel,
+                        settingsViewModel = settingsViewModel,
+                        navigationViewModel = navigationViewModel,
+                        weatherViewModel = weatherViewModel,
                         serverState = serverState,
-                        // TODO add utility method or catch the exception
-                        Integer.parseInt(currentTemperatureState.hourlyForecast[0].temp)
-                    )
-
-                    Screen.Webserver.route -> WebViewScreen(webserverUrlState)
-
-                    Screen.Navigation.route -> NavigationContent(
-                        modifier = Modifier.weight(1f),
-                        viewModel = navigationViewModel
-                    )
-
-                    Screen.Settings.route -> {
-                        LaunchedEffect(Unit) {
-                            settingsViewModel.navigationEvent.collect { event ->
-                                when (event) {
-                                    is SettingsNavigationEvent.NavigateToDisplay ->
-                                        appViewModel.onRouteSelect(Screen.DisplaySettings)
-
-                                    is SettingsNavigationEvent.NavigateToNotifications ->
-                                        appViewModel.onRouteSelect(Screen.NotificationSettings)
-
-                                    is SettingsNavigationEvent.NavigateToBattery ->
-                                        appViewModel.onRouteSelect(Screen.BatterySettings)
-                                }
-                            }
-                        }
-
-                        SettingsScreen(
-                            modifier = Modifier.weight(1f),
-                            viewModel = settingsViewModel,
-                        )
-                    }
-
-                    Screen.DisplaySettings.route -> {
-                        DisplayScreen(
-                            onBackClick = {
-                                appViewModel.onRouteSelect(Screen.Settings)
-                            }
-                        )
-                    }
-
-                    Screen.NotificationSettings.route -> {
-                        NotificationScreen(
-                            onBackClick = {
-                                appViewModel.onRouteSelect(Screen.Settings)
-                            }
-                        )
-                    }
-
-                    Screen.BatterySettings.route -> {
-                        BatteryScreen(
-                            onBackClick = {
-                                appViewModel.onRouteSelect(Screen.Settings)
-                            }
-                        )
-                    }
-
-                    Screen.Weather.route -> WeatherContent(
-                        viewModel = weatherViewModel
-                    )
-
-                    Screen.Documentation.route -> {
-                        WebViewScreen("file:///android_asset/html/index.html")
-                    }
-
-                    // redundancy
-                    else -> MainContent(
-                        modifier = Modifier.weight(1f),
-                        onClick = { screen ->
-                            appViewModel.onRouteSelect(screen)
-                        },
-                        serverState = serverState,
-                        // TODO add utility method or catch the exception
-                        Integer.parseInt(currentTemperatureState.hourlyForecast[0].temp)
-                    )
-                }
+                        currentTemperatureState = currentTemperatureState,
+                        webserverUrlState = webserverUrlState
+                    ),
+                    modifier = Modifier.weight(1f)
+                )
             }
         }
     }
+}
+
+@Composable
+private fun RenderSelectedRoute(
+    selectedRoute: String,
+    routeDeps: MainShellRouteDeps,
+    modifier: Modifier
+) {
+    Timber.d("Selected route: %s", selectedRoute)
+
+    when (selectedRoute) {
+        Screen.Dashboard.route -> DashboardRouteContent(
+            modifier = modifier,
+            appViewModel = routeDeps.appViewModel,
+            serverState = routeDeps.serverState,
+            currentTemperatureState = routeDeps.currentTemperatureState
+        )
+
+        Screen.Webserver.route -> WebViewScreen(routeDeps.webserverUrlState)
+
+        Screen.Navigation.route -> NavigationContent(
+            modifier = modifier,
+            viewModel = routeDeps.navigationViewModel
+        )
+
+        Screen.Settings.route -> {
+            HandleSettingsNavigationEvents(
+                settingsViewModel = routeDeps.settingsViewModel,
+                onNavigate = routeDeps.appViewModel::onRouteSelect
+            )
+            SettingsScreen(modifier = modifier, viewModel = routeDeps.settingsViewModel)
+        }
+
+        Screen.DisplaySettings.route -> DisplayScreen(
+            onBackClick = { routeDeps.appViewModel.onRouteSelect(Screen.Settings) }
+        )
+
+        Screen.NotificationSettings.route -> NotificationScreen(
+            onBackClick = { routeDeps.appViewModel.onRouteSelect(Screen.Settings) }
+        )
+
+        Screen.BatterySettings.route -> BatteryScreen(
+            onBackClick = { routeDeps.appViewModel.onRouteSelect(Screen.Settings) }
+        )
+
+        Screen.AdminPanel.route -> AdminPanelScreen(
+            onBackClick = { routeDeps.appViewModel.onRouteSelect(Screen.Settings) }
+        )
+
+        Screen.Weather.route -> WeatherContent(viewModel = routeDeps.weatherViewModel)
+
+        Screen.Documentation.route -> WebViewScreen("file:///android_asset/html/index.html")
+
+        // Keep fallback behavior identical to the dashboard card content.
+        else -> DashboardRouteContent(
+            modifier = modifier,
+            appViewModel = routeDeps.appViewModel,
+            serverState = routeDeps.serverState,
+            currentTemperatureState = routeDeps.currentTemperatureState
+        )
+    }
+}
+
+private data class MainShellRouteDeps(
+    val appViewModel: AppViewModel,
+    val settingsViewModel: SettingsViewModel,
+    val navigationViewModel: NavigationViewModel,
+    val weatherViewModel: WeatherViewModel,
+    val serverState: hka.awp.cgi.temi.app.feature.webserver.ServerState,
+    val currentTemperatureState: hka.awp.cgi.temi.app.feature.weatherscreen.WeatherState,
+    val webserverUrlState: String
+)
+
+@Composable
+private fun HandleSettingsNavigationEvents(
+    settingsViewModel: SettingsViewModel,
+    onNavigate: (Screen) -> Unit
+) {
+    LaunchedEffect(settingsViewModel) {
+        settingsViewModel.navigationEvent.collect { event ->
+            when (event) {
+                is SettingsNavigationEvent.NavigateToDisplay -> onNavigate(Screen.DisplaySettings)
+                is SettingsNavigationEvent.NavigateToNotifications -> onNavigate(Screen.NotificationSettings)
+                is SettingsNavigationEvent.NavigateToBattery -> onNavigate(Screen.BatterySettings)
+                is SettingsNavigationEvent.NavigateToAdminPanel -> onNavigate(Screen.AdminPanel)
+            }
+        }
+    }
+}
+
+@Composable
+private fun DashboardRouteContent(
+    modifier: Modifier,
+    appViewModel: AppViewModel,
+    serverState: hka.awp.cgi.temi.app.feature.webserver.ServerState,
+    currentTemperatureState: hka.awp.cgi.temi.app.feature.weatherscreen.WeatherState
+) {
+    MainContent(
+        modifier = modifier,
+        onClick = { screen ->
+            appViewModel.onRouteSelect(screen)
+        },
+        serverState = serverState,
+        // TODO add utility method or catch the exception
+        Integer.parseInt(currentTemperatureState.hourlyForecast[0].temp)
+    )
 }

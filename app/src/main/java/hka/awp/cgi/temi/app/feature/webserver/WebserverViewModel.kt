@@ -16,10 +16,10 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.net.InetAddress
 
-class WebserverViewModel(val webserverRepository: WebserverRepository) : ViewModel() {
+class WebserverViewModel(appConfigRepository: AppConfigRepository) : ViewModel() {
     private val _serverState = MutableStateFlow(ServerState())
     val serverState = _serverState.asStateFlow()
-    val urlState: StateFlow<String> = webserverRepository.currentUrl.stateIn(
+    val urlState: StateFlow<String> = appConfigRepository.currentUrl.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(SUBSCRIPTION_TIMEOUT),
         BuildConfig.WEBVIEW_URL
@@ -34,18 +34,6 @@ class WebserverViewModel(val webserverRepository: WebserverRepository) : ViewMod
 
         // The time to wait after the last subscriber disappeared before stopping the upstream flow (in milliseconds)
         private const val SUBSCRIPTION_TIMEOUT = 5000L
-    }
-
-    fun updateUrl(newUrl: String) {
-        viewModelScope.launch {
-            webserverRepository.updateUrl(newUrl)
-        }
-    }
-
-    fun resetUrl() {
-        viewModelScope.launch {
-            webserverRepository.resetUrl()
-        }
     }
 
     private fun startMonitoring() {
