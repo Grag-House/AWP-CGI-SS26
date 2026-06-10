@@ -2,24 +2,18 @@
 
 package hka.awp.cgi.temi.app.feature.settings.adminPanel
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -29,14 +23,9 @@ import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Storage
-import androidx.compose.material.icons.outlined.Visibility
-import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -50,14 +39,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -71,69 +56,7 @@ private const val LAT_MAX = 90.0
 private const val LON_MIN = -180.0
 private const val LON_MAX = 180.0
 
-// ─── Icon view ────────────────────────────────────────────────────────────────
-
-/**
- * Displays a tinted icon inside a rounded background box, consistent with the
- * app-wide icon treatment used on this screen.
- *
- * @param icon The [ImageVector] to render.
- * @param contentDescription Accessibility description for the icon.
- * @param modifier Optional [Modifier].
- */
-@Suppress("TooManyFunctions")
-@Composable
-fun ConfigIconBox(
-    icon: ImageVector,
-    contentDescription: String?,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .size(42.dp)
-            .clip(RoundedCornerShape(10.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = contentDescription,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(22.dp)
-        )
-    }
-}
-
 // ─── Cards ────────────────────────────────────────────────────────────────────
-
-/**
- *
- * @param modifier Optional [Modifier].
- * @param onClick Optional click handler. When non-null the card becomes clickable.
- * @param content The composable content rendered inside the card's [Column].
- */
-@Composable
-fun ConfigCard(
-    modifier: Modifier = Modifier,
-    onClick: (() -> Unit)? = null,
-    content: @Composable ColumnScope.() -> Unit
-) {
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
-            content = content
-        )
-    }
-}
 
 /**
  * Displays the webserver URL with an edit action.
@@ -182,7 +105,7 @@ fun AppVersionCard(version: String) {
         ) {
             ConfigIconBox(
                 icon = Icons.Outlined.Info,
-                contentDescription = "AppVersion" // stringResource(R.string.config_app_version)
+                contentDescription = stringResource(R.string.admin_panel_appversion)
             )
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
@@ -207,7 +130,7 @@ fun MqttReportsCard(onNavigate: () -> Unit) {
         ) {
             ConfigIconBox(
                 icon = Icons.Outlined.Storage,
-                contentDescription = "Mqtt-reports" // stringResource(R.string.config_mqtt_reports)
+                contentDescription = stringResource(R.string.admin_panel_mqtt_reports)
             )
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
@@ -239,7 +162,7 @@ fun WebserverPasswordCard(
         ) {
             ConfigIconBox(
                 icon = Icons.Outlined.Lock,
-                contentDescription = "Webserver password" // stringResource(R.string.config_password)
+                contentDescription = stringResource(R.string.admin_panel_webserver_password)
             )
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
@@ -260,131 +183,37 @@ fun WebserverPasswordCard(
 @Suppress("LongMethod")
 @Composable
 fun ChangePasswordDialog(
-    onConfirm: (oldPassword: String, newPassword: String) -> Unit,
+    onConfirm: (newPassword: String) -> Unit,
     onDismiss: () -> Unit
 ) {
-    var oldPassword by remember { mutableStateOf("") } // TODO einbindung in Passwort Ticket
     var newPassword by remember { mutableStateOf("") }
-    var confirmPassword by remember { mutableStateOf("") }
-
-    var oldVisible by remember { mutableStateOf(false) }
-    var newVisible by remember { mutableStateOf(false) }
-    var confirmVisible by remember { mutableStateOf(false) }
-
-    val passwordsMatch = newPassword == confirmPassword
-    val confirmError = confirmPassword.isNotEmpty() && !passwordsMatch
 
     AlertDialog(
         onDismissRequest = onDismiss,
         icon = {
-            Icon(imageVector = Icons.Outlined.Lock, contentDescription = null)
+            Icon(
+                imageVector = Icons.Outlined.Lock,
+                contentDescription = null
+            )
         },
         title = {
-            Text(stringResource(R.string.admin_panel_change_password_title))
+            Text(text = stringResource(R.string.admin_panel_change_password_title))
         },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                OutlinedTextField(
-                    value = oldPassword,
-                    onValueChange = { oldPassword = it },
-                    label = { Text(stringResource(R.string.admin_panel_old_password)) },
-                    visualTransformation = if (oldVisible) {
-                        VisualTransformation.None
-                    } else {
-                        PasswordVisualTransformation()
-                    },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    trailingIcon = {
-                        IconButton(onClick = { oldVisible = !oldVisible }) {
-                            Icon(
-                                imageVector = if (oldVisible) {
-                                    Icons.Outlined.VisibilityOff
-                                } else {
-                                    Icons.Outlined.Visibility
-                                },
-                                contentDescription = if (oldVisible) {
-                                    "Hide password"
-                                } else {
-                                    "Show password"
-                                }
-                            )
-                        }
-                    },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                OutlinedTextField(
-                    value = newPassword,
-                    onValueChange = { newPassword = it },
-                    label = { Text(stringResource(R.string.admin_panel_new_password)) },
-                    visualTransformation = if (newVisible) {
-                        VisualTransformation.None
-                    } else {
-                        PasswordVisualTransformation()
-                    },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    trailingIcon = {
-                        IconButton(onClick = { newVisible = !newVisible }) {
-                            Icon(
-                                imageVector = if (newVisible) {
-                                    Icons.Outlined.VisibilityOff
-                                } else {
-                                    Icons.Outlined.Visibility
-                                },
-                                contentDescription = if (newVisible) {
-                                    "Hide password"
-                                } else {
-                                    "Show password"
-                                }
-                            )
-                        }
-                    },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                OutlinedTextField(
-                    value = confirmPassword,
-                    onValueChange = { confirmPassword = it },
-                    label = { Text(stringResource(R.string.admin_panel_confirm_password)) },
-                    visualTransformation = if (confirmVisible) {
-                        VisualTransformation.None
-                    } else {
-                        PasswordVisualTransformation()
-                    },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    trailingIcon = {
-                        IconButton(onClick = { confirmVisible = !confirmVisible }) {
-                            Icon(
-                                imageVector = if (confirmVisible) {
-                                    Icons.Outlined.VisibilityOff
-                                } else {
-                                    Icons.Outlined.Visibility
-                                },
-                                contentDescription = if (confirmVisible) {
-                                    "Hide password"
-                                } else {
-                                    "Show password"
-                                }
-                            )
-                        }
-                    },
-                    isError = confirmError,
-                    supportingText = if (confirmError) {
-                        { Text(stringResource(R.string.admin_panel_passwords_no_match)) }
-                    } else {
-                        null
-                    },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
+            OutlinedTextField(
+                value = newPassword,
+                onValueChange = { newPassword = it },
+                label = { Text(stringResource(R.string.admin_panel_new_password)) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                visualTransformation = PasswordVisualTransformation(),
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
         },
         confirmButton = {
             Button(
-                onClick = { onConfirm(oldPassword, newPassword) },
-                enabled = oldPassword.isNotEmpty() && newPassword.isNotEmpty() && passwordsMatch
+                onClick = { onConfirm(newPassword) },
+                enabled = newPassword.isNotBlank()
             ) {
                 Text(stringResource(R.string.admin_panel_confirm))
             }
@@ -415,7 +244,7 @@ fun CoordinateManagementCard(
         ) {
             ConfigIconBox(
                 icon = Icons.Outlined.LocationOn,
-                contentDescription = "Coordinates" // stringResource(R.string.config_coordinates)
+                contentDescription = stringResource(R.string.admin_panel_weather_coordinates)
             )
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
@@ -450,122 +279,65 @@ fun EditCoordinatesDialog(
     val isLatError = latValue == null || (latValue < LAT_MIN) || (latValue > LAT_MAX)
     val isLonError = lonValue == null || (lonValue < LON_MIN) || (lonValue > LON_MAX)
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        icon = {
-            Icon(
-                imageVector = Icons.Outlined.LocationOn,
-                contentDescription = null
-            )
-        },
-        title = {
-            Text(text = stringResource(R.string.admin_panel_webserver_coordiantes_change))
-        },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                OutlinedTextField(
-                    value = latitudeInput,
-                    onValueChange = { latitudeInput = it },
-                    label = { Text(stringResource(R.string.admin_panel_latitude)) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    isError = isLatError,
-                    supportingText = if (isLatError) {
-                        { Text(stringResource(R.string.admin_panel_latitude_error)) }
-                    } else {
-                        null
-                    },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                OutlinedTextField(
-                    value = longitudeInput,
-                    onValueChange = { longitudeInput = it },
-                    label = { Text(stringResource(R.string.admin_panel_longitude)) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    isError = isLonError,
-                    supportingText = if (isLonError) {
-                        { Text(stringResource(R.string.admin_panel_longitude_error)) }
-                    } else {
-                        null
-                    },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = {
-                    if (latValue != null && lonValue != null) {
-                        onConfirm(latValue, lonValue)
-                    }
+    AlertDialog(onDismissRequest = onDismiss, icon = {
+        Icon(
+            imageVector = Icons.Outlined.LocationOn,
+            contentDescription = null
+        )
+    }, title = {
+        Text(text = stringResource(R.string.admin_panel_webserver_coordiantes_change))
+    }, text = {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            OutlinedTextField(
+                value = latitudeInput,
+                onValueChange = { latitudeInput = it },
+                label = { Text(stringResource(R.string.admin_panel_latitude)) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                isError = isLatError,
+                supportingText = if (isLatError) {
+                    { Text(stringResource(R.string.admin_panel_latitude_error)) }
+                } else {
+                    null
                 },
-                enabled = !isLatError && !isLonError
-            ) {
-                Text(stringResource(R.string.admin_panel_confirm))
-            }
-        },
-        dismissButton = {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(onClick = onReset) {
-                    Text(stringResource(R.string.admin_panel_reset_defaults))
-                }
-                TextButton(onClick = onDismiss) {
-                    Text(stringResource(R.string.admin_panel_cancel))
-                }
-            }
-        }
-    )
-}
-
-// ─── Typography helpers ───────────────────────────────────────────────────────
-
-/** Small all-caps label rendered above a value (e.g. "WEBSERVER URL"). */
-@Composable
-private fun ConfigLabel(text: String) {
-    Text(
-        text = text,
-        fontSize = 10.sp,
-        fontWeight = FontWeight.SemiBold,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        letterSpacing = 0.8.sp
-    )
-}
-
-/** Primary value text inside a configuration card. */
-@Composable
-private fun ConfigValue(text: String) {
-    Text(
-        text = text,
-        fontSize = 15.sp,
-        fontWeight = FontWeight.SemiBold,
-        color = MaterialTheme.colorScheme.onSurface
-    )
-}
-
-/** Secondary subtext beneath the primary value. */
-@Composable
-private fun ConfigSubtext(text: String) {
-    Text(
-        text = text,
-        fontSize = 12.sp,
-        color = MaterialTheme.colorScheme.onSurfaceVariant
-    )
-}
-
-/** Renders a row of filled circles to visually mask a password. */
-@Composable
-private fun PasswordDots(count: Int = 7) {
-    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        repeat(count) {
-            Box(
-                modifier = Modifier
-                    .size(8.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary)
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+            OutlinedTextField(
+                value = longitudeInput,
+                onValueChange = { longitudeInput = it },
+                label = { Text(stringResource(R.string.admin_panel_longitude)) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                isError = isLonError,
+                supportingText = if (isLonError) {
+                    { Text(stringResource(R.string.admin_panel_longitude_error)) }
+                } else {
+                    null
+                },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
             )
         }
-    }
+    }, confirmButton = {
+        Button(
+            onClick = {
+                if (latValue != null && lonValue != null) {
+                    onConfirm(latValue, lonValue)
+                }
+            },
+            enabled = !isLatError && !isLonError
+        ) {
+            Text(stringResource(R.string.admin_panel_confirm))
+        }
+    }, dismissButton = {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(onClick = onReset) {
+                Text(stringResource(R.string.admin_panel_reset_defaults))
+            }
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.admin_panel_cancel))
+            }
+        }
+    })
 }
 
 // ─── Main screen ─────────────────────────────────────────────────────────────
@@ -578,43 +350,36 @@ fun EditUrlDialog(
 ) {
     var urlInput by remember { mutableStateOf(initialUrl) }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        icon = {
-            Icon(
-                imageVector = Icons.Outlined.Language,
-                contentDescription = null
+    AlertDialog(onDismissRequest = onDismiss, icon = {
+        Icon(
+            imageVector = Icons.Outlined.Language,
+            contentDescription = null
+        )
+    }, title = {
+        Text(text = stringResource(R.string.admin_panel_webserver_url_change))
+    }, text = {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            OutlinedTextField(
+                value = urlInput,
+                onValueChange = { urlInput = it },
+                label = { Text(stringResource(R.string.admin_panel_webserver_url)) },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
             )
-        },
-        title = {
-            Text(text = stringResource(R.string.admin_panel_webserver_url_change))
-        },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                OutlinedTextField(
-                    value = urlInput,
-                    onValueChange = { urlInput = it },
-                    label = { Text(stringResource(R.string.admin_panel_webserver_url)) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = {
-                    onConfirm(urlInput)
-                }
-            ) {
-                Text(stringResource(R.string.admin_panel_confirm))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.admin_panel_cancel))
-            }
         }
-    )
+    }, confirmButton = {
+        Button(
+            onClick = {
+                onConfirm(urlInput)
+            }
+        ) {
+            Text(stringResource(R.string.admin_panel_confirm))
+        }
+    }, dismissButton = {
+        TextButton(onClick = onDismiss) {
+            Text(stringResource(R.string.admin_panel_cancel))
+        }
+    })
 }
 
 @Composable
@@ -623,8 +388,6 @@ fun AdminPanelScreen(
     viewModel: AdminPanelViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val context = LocalContext.current
-    val wrongOldPasswordMessage = stringResource(R.string.admin_panel_wrong_old_password)
     var showCoordinateDialog by remember { mutableStateOf(false) }
     var showPasswordDialog by remember { mutableStateOf(false) }
     var showUrlDialog by remember { mutableStateOf(false) }
@@ -632,10 +395,6 @@ fun AdminPanelScreen(
     LaunchedEffect(viewModel) {
         viewModel.events.collectLatest { event ->
             when (event) {
-                AdminPanelEvent.WrongOldPassword -> {
-                    Toast.makeText(context, wrongOldPasswordMessage, Toast.LENGTH_SHORT).show()
-                }
-
                 AdminPanelEvent.PasswordChanged -> {
                     showPasswordDialog = false
                 }
@@ -644,14 +403,10 @@ fun AdminPanelScreen(
     }
 
     if (showUrlDialog) {
-        EditUrlDialog(
-            initialUrl = uiState.webserverUrl,
-            onConfirm = { url ->
-                viewModel.onEditWebserverUrl(url)
-                showUrlDialog = false
-            },
-            onDismiss = { showUrlDialog = false }
-        )
+        EditUrlDialog(initialUrl = uiState.webserverUrl, onConfirm = { url ->
+            viewModel.onEditWebserverUrl(url)
+            showUrlDialog = false
+        }, onDismiss = { showUrlDialog = false })
     }
     if (showCoordinateDialog) {
         EditCoordinatesDialog(
@@ -669,12 +424,7 @@ fun AdminPanelScreen(
         )
     }
     if (showPasswordDialog) {
-        ChangePasswordDialog(
-            onConfirm = { old, new ->
-                viewModel.onChangePassword(old, new)
-            },
-            onDismiss = { showPasswordDialog = false }
-        )
+        ChangePasswordDialog(onConfirm = { viewModel.onChangePassword(it) }, onDismiss = { showPasswordDialog = false })
     }
 
     Row(
@@ -711,6 +461,7 @@ fun AdminPanelScreen(
                     version = uiState.appVersion,
                 )
 
+                // TODO add functionality to show mqtt messages
                 MqttReportsCard(
                     onNavigate = viewModel::onOpenMqttReports
                 )

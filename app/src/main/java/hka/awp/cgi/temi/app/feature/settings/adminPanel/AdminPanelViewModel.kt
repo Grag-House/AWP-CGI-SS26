@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlin.math.round
@@ -56,6 +55,7 @@ class AdminPanelViewModel(private val appConfigRepository: AppConfigRepository) 
     @Suppress("MagicNumber")
     fun onResetCoordinates() {
         viewModelScope.launch {
+            // Karlsruhe
             appConfigRepository.updateCoordinates(49.0138, 8.3573)
         }
     }
@@ -64,19 +64,8 @@ class AdminPanelViewModel(private val appConfigRepository: AppConfigRepository) 
         // Implementation pending
     }
 
-    fun onChangePassword(oldPassword: String, newPassword: String) {
+    fun onChangePassword(newPassword: String) {
         viewModelScope.launch {
-            val storedHash = appConfigRepository.adminPasswordHash.first()
-            val isOldPasswordCorrect = appConfigRepository.isValidAdminPassword(
-                plainPassword = oldPassword,
-                currentHash = storedHash
-            )
-
-            if (!isOldPasswordCorrect) {
-                _events.emit(AdminPanelEvent.WrongOldPassword)
-                return@launch
-            }
-
             appConfigRepository.updateAdminPassword(newPassword)
             _events.emit(AdminPanelEvent.PasswordChanged)
         }
@@ -87,7 +76,6 @@ class AdminPanelViewModel(private val appConfigRepository: AppConfigRepository) 
 }
 
 sealed interface AdminPanelEvent {
-    data object WrongOldPassword : AdminPanelEvent
     data object PasswordChanged : AdminPanelEvent
 }
 
