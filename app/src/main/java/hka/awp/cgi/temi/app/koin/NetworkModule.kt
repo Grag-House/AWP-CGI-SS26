@@ -1,10 +1,13 @@
 package hka.awp.cgi.temi.app.koin
 
+import hka.awp.cgi.temi.app.feature.weatherscreen.GeocoderLocationNameResolver
+import hka.awp.cgi.temi.app.feature.weatherscreen.LocationNameResolver
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherRepository
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherViewModel
 import okhttp3.OkHttpClient
 import okhttp3.tls.HandshakeCertificates
 import okhttp3.tls.decodeCertificatePem
+import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
@@ -56,7 +59,21 @@ val weatherModule =
                 .sslSocketFactory(certificates.sslSocketFactory(), certificates.trustManager).build()
         }
 
-        single<WeatherRepository> { WeatherRepository(client = get(), hourlyFormatter = get()) }
+        single<LocationNameResolver> { GeocoderLocationNameResolver(context = androidContext()) }
 
-        viewModel<WeatherViewModel> { WeatherViewModel(repository = get(), clock = get()) }
+        single<WeatherRepository> {
+            WeatherRepository(
+                client = get(),
+                hourlyFormatter = get(),
+                locationNameResolver = get()
+            )
+        }
+
+        viewModel<WeatherViewModel> {
+            WeatherViewModel(
+                repository = get(),
+                appConfigRepository = get(),
+                clock = get()
+            )
+        }
     }

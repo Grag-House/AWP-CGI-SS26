@@ -2,6 +2,7 @@ package hka.awp.cgi.temi.app.ui.shell
 
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AdminPanelSettings
 import androidx.compose.material.icons.rounded.BatteryFull
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Navigation
@@ -98,5 +99,12 @@ sealed class Screen(
         title = R.string.webserver,
         icon = Icons.Rounded.Storage,
         contentDescription = R.string.webserver_description,
+    )
+
+    data object AdminPanel : Screen(
+        route = "admin_panel",
+        title = R.string.admin_panel,
+        icon = Icons.Rounded.AdminPanelSettings,
+        contentDescription = R.string.admin_panel_description,
     )
 }

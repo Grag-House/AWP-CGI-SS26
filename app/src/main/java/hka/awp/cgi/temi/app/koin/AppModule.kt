@@ -4,6 +4,7 @@ import android.app.Application
 import com.robotemi.sdk.Robot
 import hka.awp.cgi.temi.app.data.repository.RobotRepository
 import hka.awp.cgi.temi.app.feature.settings.SettingsViewModel
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.AdminPanelViewModel
 import hka.awp.cgi.temi.app.feature.settings.battery.BatteryViewModel
 import hka.awp.cgi.temi.app.feature.settings.display.DisplayViewModel
 import hka.awp.cgi.temi.app.feature.settings.notifications.NotificationViewModel
@@ -67,6 +68,7 @@ val appModule = module {
             get()
         )
     }
+    viewModel { AdminPanelViewModel(appConfigRepository = get(), mqttManager = get()) }
 
     viewModel {
         BatteryViewModel(get())
