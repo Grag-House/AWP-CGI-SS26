@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+@Suppress("TooManyFunctions")
 class ControllerViewModel(
     private val movementController: TemiMovementController,
     private val bluetoothControllerManager: BluetoothControllerManager,
@@ -48,10 +49,6 @@ class ControllerViewModel(
         bluetoothControllerManager.pairDevice(address)
     }
 
-    fun logPairedDevices() {
-        bluetoothControllerManager.logPairedDevices()
-    }
-
     private var lastX = 0f
     private var lastY = 0f
     private var wasMoving = false
@@ -68,7 +65,7 @@ class ControllerViewModel(
                         movementController.move(
                             linear = -lastY,
                             angular = lastX,
-                                               )
+                        )
                         wasMoving = true
                     } else if (wasMoving) {
                         movementController.stop()
@@ -76,7 +73,7 @@ class ControllerViewModel(
                     }
                 }
 
-                delay(50L)
+                delay(CONTROLLER_UPDATE_INTERVAL_MS)
             }
         }
     }
@@ -90,10 +87,6 @@ class ControllerViewModel(
         bluetoothControllerManager.loadPairedDevices()
     }
 
-    fun onControllerReleased() {
-        movementController.stop()
-    }
-
     fun disconnectHidDevice(address: String) {
         bluetoothControllerManager.disconnectHidDevice(address)
     }
@@ -104,3 +97,5 @@ class ControllerViewModel(
         super.onCleared()
     }
 }
+
+private const val CONTROLLER_UPDATE_INTERVAL_MS = 50L

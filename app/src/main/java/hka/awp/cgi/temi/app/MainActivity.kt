@@ -68,7 +68,7 @@ class MainActivity : ComponentActivity() {
     override fun dispatchGenericMotionEvent(event: MotionEvent): Boolean {
         Timber.d(
             "MotionEvent source=${event.source} device=${event.device?.name}"
-                )
+        )
 
         if (event.isGameControllerEvent()) {
             val leftY = event.getCenteredAxis(MotionEvent.AXIS_Y)
@@ -78,14 +78,14 @@ class MainActivity : ComponentActivity() {
                 "Controller axes leftY=$leftY rightX=$rightX X=${event.getCenteredAxis(MotionEvent.AXIS_X)} RX=${
                     event.getCenteredAxis(
                         MotionEvent.AXIS_RX
-                                         )
-                } RZ=${event.getCenteredAxis(MotionEvent.AXIS_RZ)}",
                     )
+                } RZ=${event.getCenteredAxis(MotionEvent.AXIS_RZ)}",
+            )
 
             controllerViewModel.onControllerInput(
                 x = -rightX,
                 y = leftY,
-                                                 )
+            )
 
             return true
         }
@@ -101,12 +101,12 @@ class MainActivity : ComponentActivity() {
     override fun onKeyDown(
         keyCode: Int,
         event: KeyEvent?,
-                          ): Boolean {
+    ): Boolean {
         Timber.d("KeyDown keyCode=$keyCode device=${event?.device?.name}")
 
         if (event?.isGameControllerEvent() == true) {
             when (keyCode) {
-                99 -> {
+                CONTROLLER_KEYCODE_TRIANGLE -> {
                     if (controllerViewModel.controllerEnabled.value) {
                         soundPool.play(
                             hornSoundId,
@@ -115,7 +115,7 @@ class MainActivity : ComponentActivity() {
                             1,
                             0,
                             1f,
-                                      )
+                        )
                     }
                 }
 
@@ -132,7 +132,7 @@ class MainActivity : ComponentActivity() {
     override fun onKeyUp(
         keyCode: Int,
         event: KeyEvent?,
-                        ): Boolean {
+    ): Boolean {
         if (event?.isGameControllerEvent() == true) {
             return true
         }
@@ -160,3 +160,4 @@ private fun MotionEvent.getCenteredAxis(axis: Int): Float {
 }
 
 private const val DEFAULT_CONTROLLER_DEAD_ZONE = 0.08f
+private const val CONTROLLER_KEYCODE_TRIANGLE = 99

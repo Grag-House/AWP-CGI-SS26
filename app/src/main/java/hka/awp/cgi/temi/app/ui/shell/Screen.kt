@@ -35,7 +35,7 @@ sealed class Screen(
     val isCustomIcon: Boolean = false
 ) {
     companion object {
-        val navScreens by lazy { listOf(Dashboard, Webserver, Weather, Navigation, Settings) }
+        val navScreens by lazy { listOf(Dashboard, Webserver, Weather, Navigation, Controller, Settings) }
     }
 
     data object Dashboard : Screen(

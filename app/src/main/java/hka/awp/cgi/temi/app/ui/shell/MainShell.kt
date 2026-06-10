@@ -27,6 +27,7 @@ import hka.awp.cgi.temi.app.feature.settings.display.DisplayScreen
 import hka.awp.cgi.temi.app.feature.settings.notifications.NotificationScreen
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherContent
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherViewModel
+import hka.awp.cgi.temi.app.feature.webserver.ServerState
 import hka.awp.cgi.temi.app.feature.webserver.WebViewScreen
 import hka.awp.cgi.temi.app.feature.webserver.WebserverViewModel
 import org.koin.compose.viewmodel.koinViewModel
@@ -62,6 +63,10 @@ fun MainShell(
     val isCharging by appViewModel.isCharging.collectAsStateWithLifecycle()
     val serverState by webserverViewModel.serverState.collectAsStateWithLifecycle()
     val currentTemperatureState by weatherViewModel.uiState.collectAsStateWithLifecycle()
+    val currentTemperature = currentTemperatureState.hourlyForecast
+        .firstOrNull()
+        ?.temp
+        ?.toIntOrNull() ?: 0
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -96,94 +101,112 @@ fun MainShell(
             ) {
                 Timber.d("Selected route: %s", appViewModel.selectedRoute)
 
-                when (appViewModel.selectedRoute) {
-                    Screen.Dashboard.route -> MainContent(
-                        modifier = Modifier.weight(1f),
-                        onClick = { screen ->
-                            appViewModel.onRouteSelect(screen)
-                        },
-                        serverState = serverState,
-                        // TODO add utility method or catch the exception
-                        Integer.parseInt(currentTemperatureState.hourlyForecast[0].temp)
-                    )
-
-                    Screen.Webserver.route -> WebViewScreen(BuildConfig.WEBVIEW_URL)
-
-                    Screen.Navigation.route -> NavigationContent(
-                        modifier = Modifier.weight(1f),
-                        viewModel = navigationViewModel
-                    )
-
-                    Screen.Controller.route -> ControllerScreen(
-                        modifier = Modifier.weight(1f),
-                    )
-
-                    Screen.Settings.route -> {
-                        LaunchedEffect(Unit) {
-                            settingsViewModel.navigationEvent.collect { event ->
-                                when (event) {
-                                    is SettingsNavigationEvent.NavigateToDisplay ->
-                                        appViewModel.onRouteSelect(Screen.DisplaySettings)
-
-                                    is SettingsNavigationEvent.NavigateToNotifications ->
-                                        appViewModel.onRouteSelect(Screen.NotificationSettings)
-
-                                    is SettingsNavigationEvent.NavigateToBattery ->
-                                        appViewModel.onRouteSelect(Screen.BatterySettings)
-                                }
-                            }
-                        }
-
-                        SettingsScreen(
-                            modifier = Modifier.weight(1f),
-                            viewModel = settingsViewModel,
-                        )
-                    }
-
-                    Screen.DisplaySettings.route -> {
-                        DisplayScreen(
-                            onBackClick = {
-                                appViewModel.onRouteSelect(Screen.Settings)
-                            }
-                        )
-                    }
-
-                    Screen.NotificationSettings.route -> {
-                        NotificationScreen(
-                            onBackClick = {
-                                appViewModel.onRouteSelect(Screen.Settings)
-                            }
-                        )
-                    }
-
-                    Screen.BatterySettings.route -> {
-                        BatteryScreen(
-                            onBackClick = {
-                                appViewModel.onRouteSelect(Screen.Settings)
-                            }
-                        )
-                    }
-
-                    Screen.Weather.route -> WeatherContent(
-                        viewModel = weatherViewModel
-                    )
-
-                    Screen.Documentation.route -> {
-                        WebViewScreen("file:///android_asset/html/index.html")
-                    }
-
-                    // redundancy
-                    else -> MainContent(
-                        modifier = Modifier.weight(1f),
-                        onClick = { screen ->
-                            appViewModel.onRouteSelect(screen)
-                        },
-                        serverState = serverState,
-                        // TODO add utility method or catch the exception
-                        Integer.parseInt(currentTemperatureState.hourlyForecast[0].temp)
-                    )
-                }
+                ShellRouteContent(
+                    selectedRoute = appViewModel.selectedRoute,
+                    onRouteSelect = appViewModel::onRouteSelect,
+                    settingsViewModel = settingsViewModel,
+                    navigationViewModel = navigationViewModel,
+                    weatherViewModel = weatherViewModel,
+                    serverState = serverState,
+                    currentTemperature = currentTemperature,
+                )
             }
         }
     }
+}
+
+@Suppress("CyclomaticComplexMethod", "LongParameterList")
+@Composable
+private fun ShellRouteContent(
+    selectedRoute: String,
+    onRouteSelect: (Screen) -> Unit,
+    settingsViewModel: SettingsViewModel,
+    navigationViewModel: NavigationViewModel,
+    weatherViewModel: WeatherViewModel,
+    serverState: ServerState,
+    currentTemperature: Int,
+) {
+    when (selectedRoute) {
+        Screen.Dashboard.route -> MainContent(
+            modifier = Modifier.fillMaxSize(),
+            onClick = onRouteSelect,
+            serverState = serverState,
+            currentTemperature,
+        )
+
+        Screen.Webserver.route -> WebViewScreen(BuildConfig.WEBVIEW_URL)
+
+        Screen.Navigation.route -> NavigationContent(
+            modifier = Modifier.fillMaxSize(),
+            viewModel = navigationViewModel,
+        )
+
+        Screen.Controller.route -> ControllerScreen(
+            modifier = Modifier.fillMaxSize(),
+        )
+
+        Screen.Settings.route -> SettingsRouteContent(
+            settingsViewModel = settingsViewModel,
+            onRouteSelect = onRouteSelect,
+        )
+
+        Screen.DisplaySettings.route -> DisplayScreen(
+            onBackClick = {
+                onRouteSelect(Screen.Settings)
+            },
+        )
+
+        Screen.NotificationSettings.route -> NotificationScreen(
+            onBackClick = {
+                onRouteSelect(Screen.Settings)
+            },
+        )
+
+        Screen.BatterySettings.route -> BatteryScreen(
+            onBackClick = {
+                onRouteSelect(Screen.Settings)
+            },
+        )
+
+        Screen.Weather.route -> WeatherContent(
+            viewModel = weatherViewModel,
+        )
+
+        Screen.Documentation.route -> {
+            WebViewScreen("file:///android_asset/html/index.html")
+        }
+
+        else -> MainContent(
+            modifier = Modifier.fillMaxSize(),
+            onClick = onRouteSelect,
+            serverState = serverState,
+            currentTemperature,
+        )
+    }
+}
+
+@Composable
+private fun SettingsRouteContent(
+    settingsViewModel: SettingsViewModel,
+    onRouteSelect: (Screen) -> Unit,
+) {
+    LaunchedEffect(Unit) {
+        settingsViewModel.navigationEvent.collect { event ->
+            when (event) {
+                is SettingsNavigationEvent.NavigateToDisplay ->
+                    onRouteSelect(Screen.DisplaySettings)
+
+                is SettingsNavigationEvent.NavigateToNotifications ->
+                    onRouteSelect(Screen.NotificationSettings)
+
+                is SettingsNavigationEvent.NavigateToBattery ->
+                    onRouteSelect(Screen.BatterySettings)
+            }
+        }
+    }
+
+    SettingsScreen(
+        modifier = Modifier.fillMaxSize(),
+        viewModel = settingsViewModel,
+    )
 }

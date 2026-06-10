@@ -35,7 +35,7 @@ fun ControllerScreen(
 
     val bluetoothPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
-                                                                       ) { permissions ->
+    ) { permissions ->
         val allGranted = permissions.values.all { it }
 
         if (allGranted) {
@@ -45,10 +45,10 @@ fun ControllerScreen(
 
     Column(
         modifier = modifier.padding(24.dp),
-          ) {
+    ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-           ) {
+        ) {
             Text("Controllersteuerung aktivieren")
 
             Spacer(modifier = Modifier.weight(1f))
@@ -56,7 +56,7 @@ fun ControllerScreen(
             Switch(
                 checked = controllerEnabled,
                 onCheckedChange = viewModel::setControllerEnabled,
-                  )
+            )
         }
 
         HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
@@ -65,7 +65,7 @@ fun ControllerScreen(
             modifier = Modifier
                 .weight(1f)
                 .verticalScroll(rememberScrollState()),
-              ) {
+        ) {
             Button(
                 onClick = {
                     if (isScanning) {
@@ -74,19 +74,19 @@ fun ControllerScreen(
                         bluetoothPermissionLauncher.launch(getBluetoothPermissions())
                     }
                 },
-                  ) {
+            ) {
                 Text(
                     if (isScanning) {
                         "Suche abbrechen"
                     } else {
                         "Bluetooth-Geräte suchen"
                     },
-                    )
+                )
             }
 
             Button(
                 onClick = viewModel::loadPairedDevices,
-                  ) {
+            ) {
                 Text("Gekoppelte Geräte laden")
             }
 
@@ -105,7 +105,7 @@ fun ControllerScreen(
                     onRemoveClick = {
                         viewModel.removeBond(device.address)
                     },
-                                   )
+                )
             }
         }
     }
@@ -121,7 +121,6 @@ private fun ControllerDeviceRow(
 ) {
     val isBonded = device.bondState == BluetoothDevice.BOND_BONDED
     val isBonding = device.bondState == BluetoothDevice.BOND_BONDING
-    val isConnected: Boolean
 
     Row(
         modifier = Modifier
@@ -140,14 +139,14 @@ private fun ControllerDeviceRow(
         Button(
             onClick = onPairClick,
             enabled = !isBonded && !isBonding,
-              ) {
+        ) {
             Text(
                 when {
                     isBonded -> "Gekoppelt"
                     isBonding -> "Kopplung läuft..."
                     else -> "Koppeln"
                 },
-                )
+            )
         }
 
         Button(
@@ -159,14 +158,14 @@ private fun ControllerDeviceRow(
                 }
             },
             enabled = device.bondState == BluetoothDevice.BOND_BONDED,
-              ) {
+        ) {
             Text(if (device.isConnected) "Trennen" else "Verbinden")
         }
 
         Button(
             onClick = onRemoveClick,
             enabled = device.bondState == BluetoothDevice.BOND_BONDED,
-              ) {
+        ) {
             Text("Entfernen")
         }
     }

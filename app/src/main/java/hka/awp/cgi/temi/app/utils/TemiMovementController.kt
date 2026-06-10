@@ -12,7 +12,7 @@ private const val MOVEMENT_REPEAT_DELAY_MS = 250L
 class TemiMovementController(
     private val robot: Robot?,
     private val scope: CoroutineScope,
-                            ) {
+) {
     private var movementJob: Job? = null
 
     fun move(linear: Float, angular: Float) {
@@ -23,7 +23,7 @@ class TemiMovementController(
                 robot?.skidJoy(
                     linear.coerceIn(-1f, 1f),
                     angular.coerceIn(-1f, 1f)
-                              )
+                )
                 delay(MOVEMENT_REPEAT_DELAY_MS)
             }
         }

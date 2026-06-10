@@ -3,6 +3,7 @@ package hka.awp.cgi.temi.app.feature.controller
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -13,22 +14,35 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import timber.log.Timber
 
+@Suppress("TooManyFunctions")
 class BluetoothControllerManager(
     private val context: Context,
 ) {
-    private val bluetoothAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
-
+    private val bluetoothAdapter: BluetoothAdapter? =
+        context.getSystemService(BluetoothManager::class.java)?.adapter
     private val _devices = MutableStateFlow<List<ControllerDevice>>(emptyList())
     val devices: StateFlow<List<ControllerDevice>> = _devices.asStateFlow()
 
     private val _isScanning = MutableStateFlow(false)
     val isScanning: StateFlow<Boolean> = _isScanning.asStateFlow()
 
+    private fun Intent.getBluetoothDeviceExtra(): BluetoothDevice? {
+        return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            getParcelableExtra(
+                BluetoothDevice.EXTRA_DEVICE,
+                BluetoothDevice::class.java,
+            )
+        } else {
+            @Suppress("DEPRECATION")
+            getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+        }
+    }
+
     private val receiver = object : BroadcastReceiver() {
         private fun updateConnectionState(
             address: String,
             isConnected: Boolean,
-                                         ) {
+        ) {
             _devices.value = _devices.value.map {
                 if (it.address == address) {
                     it.copy(isConnected = isConnected)
@@ -40,8 +54,7 @@ class BluetoothControllerManager(
         override fun onReceive(context: Context?, intent: Intent?) {
             when (intent?.action) {
                 BluetoothDevice.ACTION_FOUND -> {
-                    val device: BluetoothDevice? =
-                        intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                    val device = intent.getBluetoothDeviceExtra()
 
                     device?.let {
                         addOrUpdateDevice(it)
@@ -49,8 +62,7 @@ class BluetoothControllerManager(
                 }
 
                 BluetoothDevice.ACTION_BOND_STATE_CHANGED -> {
-                    val device: BluetoothDevice? =
-                        intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                    val device = intent.getBluetoothDeviceExtra()
 
                     device?.let {
                         addOrUpdateDevice(it)
@@ -64,8 +76,7 @@ class BluetoothControllerManager(
                 }
 
                 BluetoothDevice.ACTION_ACL_CONNECTED -> {
-                    val device: BluetoothDevice? =
-                        intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                    val device = intent.getBluetoothDeviceExtra()
 
                     device?.let {
                         updateConnectionState(it.address, true)
@@ -73,8 +84,7 @@ class BluetoothControllerManager(
                 }
 
                 BluetoothDevice.ACTION_ACL_DISCONNECTED -> {
-                    val device: BluetoothDevice? =
-                        intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                    val device = intent.getBluetoothDeviceExtra()
 
                     device?.let {
                         updateConnectionState(it.address, false)
@@ -142,7 +152,7 @@ class BluetoothControllerManager(
                 }
             }
 
-            val inputDeviceProfile = 4
+            val inputDeviceProfile = BLUETOOTH_PROFILE_HID_DEVICE
 
             val result = getProfileProxyMethod.invoke(
                 adapter,
@@ -171,7 +181,7 @@ class BluetoothControllerManager(
                         val disconnectMethod = proxy.javaClass.getMethod(
                             "disconnect",
                             BluetoothDevice::class.java,
-                                                                        )
+                        )
 
                         val result = disconnectMethod.invoke(proxy, device)
                         Timber.d("HID disconnect result=$result for ${device.safeName()} ${device.address}")
@@ -185,13 +195,13 @@ class BluetoothControllerManager(
                 }
             }
 
-            val inputDeviceProfile = 4
+            val inputDeviceProfile = BLUETOOTH_PROFILE_HID_DEVICE
 
             val result = adapter.getProfileProxy(
                 context,
                 listener,
                 inputDeviceProfile,
-                                                )
+            )
 
             Timber.d("getProfileProxy HID disconnect result=$result for $address")
         } catch (exception: SecurityException) {
@@ -353,9 +363,13 @@ class BluetoothControllerManager(
     @SuppressLint("MissingPermission")
     private fun BluetoothDevice.safeName(): String {
         return try {
-            name ?: "Unbekanntes Gerät"
+            name ?: UNKNOWN_BLUETOOTH_DEVICE_NAME
         } catch (exception: SecurityException) {
-            "Unbekanntes Gerät"
+            Timber.e(exception, "Missing permission while reading Bluetooth device name")
+            UNKNOWN_BLUETOOTH_DEVICE_NAME
         }
     }
 }
+
+private const val BLUETOOTH_PROFILE_HID_DEVICE = 4
+private const val UNKNOWN_BLUETOOTH_DEVICE_NAME = "Unbekanntes Gerät"
