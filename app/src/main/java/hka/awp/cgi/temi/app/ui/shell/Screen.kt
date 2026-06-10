@@ -82,9 +82,9 @@ sealed class Screen(
 
     data object NotificationSettings : Screen(
         route = "notification_settings",
-        title = R.string.settings_notifications_title,
+        title = R.string.settings_languages_title,
         icon = Icons.Rounded.Notifications,
-        contentDescription = R.string.settings_notifications_subtitle
+        contentDescription = R.string.settings_languages_subtitle
     )
 
     data object BatterySettings : Screen(
@@ -92,6 +92,13 @@ sealed class Screen(
         title = R.string.settings_battery_title,
         icon = Icons.Rounded.BatteryFull,
         contentDescription = R.string.settings_battery_subtitle
+    )
+
+    data object NavigationSettings : Screen(
+        route = "navigation_settings",
+        title = R.string.settings_navigation_title,
+        icon = Icons.Rounded.Navigation,
+        contentDescription = R.string.settings_navigation_subtitle
     )
 
     data object Documentation : Screen(

@@ -29,8 +29,8 @@ sealed class SettingsItem(
     }
 
     data object Notifications : SettingsItem(
-        titleRes = R.string.settings_notifications_title,
-        subtitleRes = R.string.settings_notifications_subtitle,
+        titleRes = R.string.settings_languages_title,
+        subtitleRes = R.string.settings_languages_subtitle,
         icon = Icons.Rounded.Notifications
     )
 
