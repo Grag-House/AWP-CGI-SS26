@@ -166,4 +166,6 @@
     <string name="settings_navigation_speed_subtitle">Standard-Tempo für autonome Fahrten zu Orten</string>
     <string name="settings_navigation_followspeed_subtitle">Tempo, wenn temi dir hinterherläuft</string>
     <string name="settings_navigation_followspeed_title">Folgegeschwindigkeit</string>
+    <string name="robox_version">Robox Version</string>
+    <string name="launcher_version">Launcher Version</string>
 </resources>

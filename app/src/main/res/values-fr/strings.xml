@@ -124,4 +124,6 @@
     <string name="settings_navigation_speed_subtitle">Vitesse standard pour les déplacements autonomes</string>
     <string name="settings_navigation_followspeed_subtitle">Vitesse quand Temi te suit</string>
     <string name="settings_navigation_followspeed_title">Vitesse de suivi</string>
+    <string name="robox_version">Robox Version</string>
+    <string name="launcher_version">Launcher Version</string>
 </resources>

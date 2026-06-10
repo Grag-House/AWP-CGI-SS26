@@ -24,7 +24,6 @@ import hka.awp.cgi.temi.app.feature.settings.about.SettingsScreen
 import hka.awp.cgi.temi.app.feature.settings.battery.BatteryScreen
 import hka.awp.cgi.temi.app.feature.settings.display.DisplayScreen
 import hka.awp.cgi.temi.app.feature.settings.language.LanguageScreen
-import hka.awp.cgi.temi.app.feature.settings.navigation.NavigationScreen
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherContent
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherViewModel
 import hka.awp.cgi.temi.app.feature.webserver.WebViewScreen
@@ -126,9 +125,6 @@ fun MainShell(
 
                                     is SettingsNavigationEvent.NavigateToBattery ->
                                         appViewModel.onRouteSelect(Screen.BatterySettings)
-
-                                    is SettingsNavigationEvent.NavigateToNavigation ->
-                                        appViewModel.onRouteSelect(Screen.NavigationSettings)
                                 }
                             }
                         }
@@ -157,14 +153,6 @@ fun MainShell(
 
                     Screen.BatterySettings.route -> {
                         BatteryScreen(
-                            onBackClick = {
-                                appViewModel.onRouteSelect(Screen.Settings)
-                            }
-                        )
-                    }
-
-                    Screen.NavigationSettings.route -> {
-                        NavigationScreen(
                             onBackClick = {
                                 appViewModel.onRouteSelect(Screen.Settings)
                             }

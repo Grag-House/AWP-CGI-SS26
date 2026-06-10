@@ -3,11 +3,11 @@ package hka.awp.cgi.temi.app.koin
 import com.robotemi.sdk.Robot
 import hka.awp.cgi.temi.app.data.repository.RobotRepository
 import hka.awp.cgi.temi.app.feature.controller.ControllerViewModel
+import hka.awp.cgi.temi.app.feature.navigation.NavigationViewModel
 import hka.awp.cgi.temi.app.feature.settings.SettingsViewModel
 import hka.awp.cgi.temi.app.feature.settings.battery.BatteryViewModel
 import hka.awp.cgi.temi.app.feature.settings.display.DisplayViewModel
 import hka.awp.cgi.temi.app.feature.settings.language.LanguageViewModel
-import hka.awp.cgi.temi.app.feature.settings.navigation.NavigationViewModel
 import hka.awp.cgi.temi.app.feature.webserver.WebserverViewModel
 import hka.awp.cgi.temi.app.ui.shell.AppViewModel
 import hka.awp.cgi.temi.app.utils.NetworkManager
@@ -81,7 +81,7 @@ val appModule = module {
     }
 
     viewModel {
-        NavigationViewModel(get())
+        NavigationViewModel(get(), get(), get())
     }
 
     viewModel<WebserverViewModel> { WebserverViewModel() }

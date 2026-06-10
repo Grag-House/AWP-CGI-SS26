@@ -162,4 +162,6 @@
     <string name="settings_navigation_speed_subtitle">Default speed for autonomous travel to locations</string>
     <string name="settings_navigation_followspeed_subtitle">Speed when temi follows you</string>
     <string name="settings_navigation_followspeed_title">Follow speed</string>
+    <string name="robox_version">Robox Version</string>
+    <string name="launcher_version">Launcher Version</string>
 </resources>
