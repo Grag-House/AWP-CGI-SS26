@@ -4,17 +4,26 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import hka.awp.cgi.temi.app.feature.webserver.AppConfigRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.time.Clock
 import java.time.Duration
 import java.time.temporal.ChronoUnit
+import java.util.concurrent.atomic.AtomicLong
 
 /**
  * ViewModel for the weather screen that manages the UI state and handles periodic data fetching.
@@ -35,9 +44,10 @@ class WeatherViewModel(
 
     private val _uiState = MutableStateFlow(WeatherState())
     val uiState: StateFlow<WeatherState> = _uiState.asStateFlow()
+    private val fetchSequence = AtomicLong(0)
 
     init {
-        startFetching()
+        startWeatherRefreshPipeline()
     }
 
     private fun delayUntilNextFullHourMillis(): Long {
@@ -51,40 +61,44 @@ class WeatherViewModel(
             .coerceAtLeast(0L)
     }
 
-    private fun startFetching() {
-        viewModelScope.launch(Dispatchers.IO) {
-            while (isActive) {
-                _uiState.update { it.copy(isLoading = true) }
-
-                val lat = appConfigRepository.latitude.first()
-                val lon = appConfigRepository.longitude.first()
-
-                repository.getWeatherData(lat, lon)
-                    .onSuccess { newState ->
-                        _uiState.value = newState.copy(isLoading = false)
-                    }
-                    .onFailure { error ->
-                        _uiState.update { it.copy(isLoading = false, error = error.message) }
-                    }
-
-                delay(delayUntilNextFullHourMillis())
-            }
+    private fun refreshTriggerFlow(): Flow<Unit> = flow {
+        // emit something here so startWeatherRefreshPipeline will recognize this
+        emit(Unit)
+        while (currentCoroutineContext().isActive) {
+            delay(delayUntilNextFullHourMillis())
+            emit(Unit)
         }
     }
 
-    fun oneTimeFetch() {
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun startWeatherRefreshPipeline() {
         viewModelScope.launch(Dispatchers.IO) {
-            val lat = appConfigRepository.latitude.first()
-            val lon = appConfigRepository.longitude.first()
+            combine(appConfigRepository.latitude, appConfigRepository.longitude) { lat, lon ->
+                lat to lon
+            }
+                .distinctUntilChanged()
+                .flatMapLatest { coordinates ->
+                    refreshTriggerFlow().map { coordinates }
+                }
+                .collectLatest { (lat, lon) -> fetchWeather(lat, lon) }
+        }
+    }
 
-            repository.getWeatherData(lat, lon)
-                .onSuccess { newState ->
+    private suspend fun fetchWeather(lat: Double, lon: Double) {
+        val requestId = fetchSequence.incrementAndGet()
+        _uiState.update { it.copy(isLoading = true, error = null) }
+
+        repository.getWeatherData(lat, lon)
+            .onSuccess { newState ->
+                if (requestId == fetchSequence.get()) {
                     _uiState.value = newState.copy(isLoading = false)
                 }
-                .onFailure { error ->
+            }
+            .onFailure { error ->
+                if (requestId == fetchSequence.get()) {
                     _uiState.update { it.copy(isLoading = false, error = error.message) }
                 }
-        }
+            }
     }
 
     companion object {
