@@ -21,7 +21,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import hka.awp.cgi.temi.app.R
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -49,7 +51,7 @@ fun ControllerScreen(
         Row(
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text("Controllersteuerung aktivieren")
+            Text(stringResource(R.string.controller_steering_active))
 
             Spacer(modifier = Modifier.weight(1f))
 
@@ -77,9 +79,9 @@ fun ControllerScreen(
             ) {
                 Text(
                     if (isScanning) {
-                        "Suche abbrechen"
+                        stringResource(R.string.controller_search_cancelled)
                     } else {
-                        "Bluetooth-Geräte suchen"
+                        stringResource(R.string.controller_search_devices)
                     },
                 )
             }
@@ -87,7 +89,7 @@ fun ControllerScreen(
             Button(
                 onClick = viewModel::loadPairedDevices,
             ) {
-                Text("Gekoppelte Geräte laden")
+                Text(stringResource(R.string.controller_loading_bluetooth_devices))
             }
 
             devices.forEach { device ->
@@ -142,9 +144,9 @@ private fun ControllerDeviceRow(
         ) {
             Text(
                 when {
-                    isBonded -> "Gekoppelt"
-                    isBonding -> "Kopplung läuft..."
-                    else -> "Koppeln"
+                    isBonded -> stringResource(R.string.controller_isBonded)
+                    isBonding -> stringResource(R.string.controller_isBonding)
+                    else -> stringResource(R.string.controller_bond)
                 },
             )
         }
@@ -159,24 +161,33 @@ private fun ControllerDeviceRow(
             },
             enabled = device.bondState == BluetoothDevice.BOND_BONDED,
         ) {
-            Text(if (device.isConnected) "Trennen" else "Verbinden")
+            Text(
+                if (device.isConnected) {
+                    stringResource(
+                        R.string.controller_disconnect
+                    )
+                } else {
+                    stringResource(R.string.controller_connect)
+                }
+            )
         }
 
         Button(
             onClick = onRemoveClick,
             enabled = device.bondState == BluetoothDevice.BOND_BONDED,
         ) {
-            Text("Entfernen")
+            Text(stringResource(R.string.controller_delete))
         }
     }
 }
 
+@Composable
 private fun ControllerDevice.bondStateLabel(): String {
     return when (bondState) {
-        BluetoothDevice.BOND_NONE -> "Nicht gekoppelt"
-        BluetoothDevice.BOND_BONDING -> "Kopplung läuft..."
-        BluetoothDevice.BOND_BONDED -> "Gekoppelt"
-        else -> "Unbekannt"
+        BluetoothDevice.BOND_NONE -> stringResource(R.string.controller_isNotBonded)
+        BluetoothDevice.BOND_BONDING -> stringResource(R.string.controller_isBonding)
+        BluetoothDevice.BOND_BONDED -> stringResource(R.string.controller_bond)
+        else -> stringResource(R.string.unknown)
     }
 }
 

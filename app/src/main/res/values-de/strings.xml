@@ -167,4 +167,15 @@
     <string name="controller">Controller</string>
     <string name="controller_description">Controllersteuerung</string>
     <string name="controller_subtitle">Gamepad verbinden und Steuerung aktivieren</string>
+    <string name="controller_steering_active">Controllersteuerung aktivieren</string>
+    <string name="controller_search_cancelled">Suche abbrechen</string>
+    <string name="controller_search_devices">Bluetooth-Geräte suchen</string>
+    <string name="controller_loading_bluetooth_devices">Gekoppelte Geräte laden</string>
+    <string name="controller_isBonded">Gekoppelt</string>
+    <string name="controller_isBonding">Kopplung läuft</string>
+    <string name="controller_bond">Koppeln</string>
+    <string name="controller_disconnect">Trennen</string>
+    <string name="controller_connect">Verbinden</string>
+    <string name="controller_delete">Entfernen</string>
+    <string name="controller_isNotBonded">Nicht gekoppelt</string>
 </resources>

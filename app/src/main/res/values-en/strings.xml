@@ -149,4 +149,15 @@
     <string name="controller">Controller</string>
     <string name="controller_description">Controller support</string>
     <string name="controller_subtitle">Connect gamepad and activate control</string>
+    <string name="controller_steering_active">Activate controller steering</string>
+    <string name="controller_search_cancelled">Cancel search</string>
+    <string name="controller_search_devices">Search for Bluetooth devices</string>
+    <string name="controller_loading_bluetooth_devices">Loading bonded devices</string>
+    <string name="controller_isBonded">Bonded</string>
+    <string name="controller_isBonding">Bonding</string>
+    <string name="controller_bond">Bond</string>
+    <string name="controller_disconnect">Disconnect</string>
+    <string name="controller_connect">Connect</string>
+    <string name="controller_delete">Remove</string>
+    <string name="controller_isNotBonded">Not bonded</string>
 </resources>
