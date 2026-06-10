@@ -3,6 +3,8 @@ package hka.awp.cgi.temi.app.feature.settings.adminPanel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import hka.awp.cgi.temi.app.BuildConfig
+import hka.awp.cgi.temi.app.feature.mqtt.MqttManager
+import hka.awp.cgi.temi.app.feature.mqtt.MqttTrafficEvent
 import hka.awp.cgi.temi.app.feature.webserver.AppConfigRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -13,7 +15,10 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlin.math.round
 
-class AdminPanelViewModel(private val appConfigRepository: AppConfigRepository) : ViewModel() {
+class AdminPanelViewModel(
+    private val appConfigRepository: AppConfigRepository,
+    private val mqttManager: MqttManager
+) : ViewModel() {
 
     private val _events = MutableSharedFlow<AdminPanelEvent>()
     val events = _events.asSharedFlow()
@@ -21,13 +26,16 @@ class AdminPanelViewModel(private val appConfigRepository: AppConfigRepository) 
     val uiState: StateFlow<AdminPanelState> = combine(
         appConfigRepository.currentUrl,
         appConfigRepository.latitude,
-        appConfigRepository.longitude
-    ) { url, lat, lon ->
+        appConfigRepository.longitude,
+        mqttManager.trafficEvents
+    ) { url, lat, lon, trafficEvents ->
         AdminPanelState(
             webserverUrl = url,
             latitude = lat,
             longitude = lon,
-            coordinates = "Länge: $lon Breite: $lat"
+            coordinates = "Länge: $lon Breite: $lat",
+            mqttReportTopics = MqttManager.reportTopics,
+            mqttTrafficEvents = trafficEvents.filter { it.topic in MqttManager.reportTopics }
         )
     }.stateIn(
         scope = viewModelScope,
@@ -61,7 +69,13 @@ class AdminPanelViewModel(private val appConfigRepository: AppConfigRepository) 
     }
 
     fun onOpenMqttReports() {
-        // Implementation pending
+        viewModelScope.launch {
+            _events.emit(AdminPanelEvent.OpenMqttReports)
+        }
+    }
+
+    fun onClearMqttReports() {
+        mqttManager.clearTrafficEvents()
     }
 
     fun onChangePassword(newPassword: String) {
@@ -76,12 +90,15 @@ class AdminPanelViewModel(private val appConfigRepository: AppConfigRepository) 
 }
 
 sealed interface AdminPanelEvent {
+    data object OpenMqttReports : AdminPanelEvent
     data object PasswordChanged : AdminPanelEvent
 }
 
 data class AdminPanelState(
     val webserverUrl: String = BuildConfig.WEBVIEW_URL,
     val appVersion: String = BuildConfig.VERSION_NAME,
+    val mqttReportTopics: Set<String> = emptySet(),
+    val mqttTrafficEvents: List<MqttTrafficEvent> = emptyList(),
     val coordinates: String = "",
     @Suppress("MagicNumber")
     var longitude: Double = 8.3573,

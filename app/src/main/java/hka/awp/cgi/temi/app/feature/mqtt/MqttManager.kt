@@ -5,10 +5,23 @@ import com.hivemq.client.mqtt.mqtt5.Mqtt5BlockingClient
 import com.robotemi.sdk.Robot
 import com.robotemi.sdk.TtsRequest
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import timber.log.Timber
+import java.time.Instant
+
+enum class MqttTrafficDirection { INBOUND, OUTBOUND }
+
+data class MqttTrafficEvent(
+    val timestampEpochMillis: Long,
+    val direction: MqttTrafficDirection,
+    val topic: String,
+    val payload: String
+)
 
 /**
  * Manages MQTT communication for the Temi robot.
@@ -29,7 +42,28 @@ class MqttManager(private val robot: Robot?, private val client: Mqtt5BlockingCl
         private const val SPEAK_TOPIC = "$BASE_TOPIC/temi_speak/set"
         private const val TTS_LISTENER_TOPIC = "$BASE_TOPIC/ttsListener"
         private val json = Json { ignoreUnknownKeys = true }
+        private const val MAX_TRAFFIC_EVENTS = 200
+
+        val reportTopics: Set<String> = setOf(
+            GOTO_TOPIC,
+            SPEAK_TOPIC,
+            WAKE_UP_TOPIC,
+            FOLLOW_TOPIC,
+            STOP_MOVEMENT_TOPIC,
+            GET_LOCATIONS_TOPIC,
+            "$GET_LOCATIONS_TOPIC/return",
+            GET_READY_STATE_TOPIC,
+            "$GET_READY_STATE_TOPIC/return",
+            PLAY_SEQUENCE_TOPIC,
+            TILT_ANGLE_TOPIC,
+            "$BASE_TOPIC/onlocationsstatuschangevents",
+            "$BASE_TOPIC/asrListener",
+            TTS_LISTENER_TOPIC
+        )
     }
+
+    private val _trafficEvents = MutableStateFlow<List<MqttTrafficEvent>>(emptyList())
+    val trafficEvents: StateFlow<List<MqttTrafficEvent>> = _trafficEvents.asStateFlow()
 
     /**
      * Connects to the MQTT broker and starts a blocking message loop.
@@ -61,6 +95,7 @@ class MqttManager(private val robot: Robot?, private val client: Mqtt5BlockingCl
                 val publish = publishes.receive()
                 val topic = publish.topic.toString()
                 val payload = publish.payloadAsBytes.toString(Charsets.UTF_8)
+                appendTrafficEvent(MqttTrafficDirection.INBOUND, topic, payload)
 
                 when (topic) {
                     GOTO_TOPIC -> handleGoto(payload)
@@ -96,7 +131,7 @@ class MqttManager(private val robot: Robot?, private val client: Mqtt5BlockingCl
     private fun publishStatusBlocking(status: String, location: String? = null) {
         try {
             val payload = json.encodeToString(MqttStatus(status, location))
-            client.publishWith().topic("$BASE_TOPIC/onlocationsstatuschangevents").payload(payload.toByteArray()).send()
+            publishMessage("$BASE_TOPIC/onlocationsstatuschangevents", payload)
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             Timber.e(e, "Failed to publish status")
         }
@@ -117,7 +152,7 @@ class MqttManager(private val robot: Robot?, private val client: Mqtt5BlockingCl
         try {
             val locations = robot?.locations.orEmpty()
             val payload = json.encodeToString(MqttLocations(payloadObject = locations))
-            client.publishWith().topic("$GET_LOCATIONS_TOPIC/return").payload(payload.toByteArray()).send()
+            publishMessage("$GET_LOCATIONS_TOPIC/return", payload)
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             Timber.e(e, "Failed to publish locations")
         }
@@ -125,10 +160,7 @@ class MqttManager(private val robot: Robot?, private val client: Mqtt5BlockingCl
 
     private fun handleGetReadyState() {
         try {
-            client.publishWith()
-                .topic("$GET_READY_STATE_TOPIC/return")
-                .payload("""{"payloadObject":${robot != null}}""".toByteArray())
-                .send()
+            publishMessage("$GET_READY_STATE_TOPIC/return", """{"payloadObject":${robot != null}}""")
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             Timber.e(e, "Failed to publish ready state")
         }
@@ -159,7 +191,7 @@ class MqttManager(private val robot: Robot?, private val client: Mqtt5BlockingCl
     suspend fun publishAsr(text: String) = withContext(Dispatchers.IO) {
         try {
             val payload = json.encodeToString(MqttAsr(text))
-            client.publishWith().topic("$BASE_TOPIC/asrListener").payload(payload.toByteArray()).send()
+            publishMessage("$BASE_TOPIC/asrListener", payload)
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             Timber.e(e, "Failed to publish ASR")
         }
@@ -172,10 +204,30 @@ class MqttManager(private val robot: Robot?, private val client: Mqtt5BlockingCl
     suspend fun publishTtsStatus(status: String) = withContext(Dispatchers.IO) {
         try {
             val payload = json.encodeToString(MqttStatus(status = status))
-            client.publishWith().topic(TTS_LISTENER_TOPIC).payload(payload.toByteArray()).send()
+            publishMessage(TTS_LISTENER_TOPIC, payload)
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             Timber.e(e, "Failed to publish TTS status")
         }
+    }
+
+    fun clearTrafficEvents() {
+        _trafficEvents.value = emptyList()
+    }
+
+    private fun publishMessage(topic: String, payload: String) {
+        client.publishWith().topic(topic).payload(payload.toByteArray()).send()
+        appendTrafficEvent(MqttTrafficDirection.OUTBOUND, topic, payload)
+    }
+
+    private fun appendTrafficEvent(direction: MqttTrafficDirection, topic: String, payload: String) {
+        val event = MqttTrafficEvent(
+            timestampEpochMillis = Instant.now().toEpochMilli(),
+            direction = direction,
+            topic = topic,
+            payload = payload
+        )
+
+        _trafficEvents.value = (_trafficEvents.value + event).takeLast(MAX_TRAFFIC_EVENTS)
     }
 
     fun disconnect() {

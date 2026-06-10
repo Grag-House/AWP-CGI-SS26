@@ -73,7 +73,7 @@ fun WebserverUrlCard(url: String, onEdit: () -> Unit) {
         ) {
             ConfigIconBox(
                 icon = Icons.Outlined.Language,
-                contentDescription = "Webserver-URL"
+                contentDescription = stringResource(R.string.admin_panel_webserver_url)
             )
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
@@ -391,10 +391,15 @@ fun AdminPanelScreen(
     var showCoordinateDialog by remember { mutableStateOf(false) }
     var showPasswordDialog by remember { mutableStateOf(false) }
     var showUrlDialog by remember { mutableStateOf(false) }
+    var showMqttReportsDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(viewModel) {
         viewModel.events.collectLatest { event ->
             when (event) {
+                AdminPanelEvent.OpenMqttReports -> {
+                    showMqttReportsDialog = true
+                }
+
                 AdminPanelEvent.PasswordChanged -> {
                     showPasswordDialog = false
                 }
@@ -425,6 +430,14 @@ fun AdminPanelScreen(
     }
     if (showPasswordDialog) {
         ChangePasswordDialog(onConfirm = { viewModel.onChangePassword(it) }, onDismiss = { showPasswordDialog = false })
+    }
+    if (showMqttReportsDialog) {
+        MqttReportsDialog(
+            monitoredTopics = uiState.mqttReportTopics,
+            events = uiState.mqttTrafficEvents,
+            onClear = viewModel::onClearMqttReports,
+            onDismiss = { showMqttReportsDialog = false }
+        )
     }
 
     Row(
@@ -461,7 +474,6 @@ fun AdminPanelScreen(
                     version = uiState.appVersion,
                 )
 
-                // TODO add functionality to show mqtt messages
                 MqttReportsCard(
                     onNavigate = viewModel::onOpenMqttReports
                 )

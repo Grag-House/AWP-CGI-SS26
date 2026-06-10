@@ -122,6 +122,14 @@
     <string name="admin_panel_new_password">Neues Webserver-Passwort:</string>
     <string name="admin_panel_webserver_defaults_reset">Webserver-URL und Webserver-Passwort zurücksetzen</string>
     <string name="admin_panel_webserver_defaults_reset_done">Webserver-Defaults wurden zurückgesetzt.</string>
+    <string name="admin_panel_mqtt_reports_topics_title">Beobachtete Topics</string>
+    <string name="admin_panel_mqtt_reports_topic_item">- %1$s</string>
+    <string name="admin_panel_mqtt_reports_messages_title">Nachrichten (neueste zuerst)</string>
+    <string name="admin_panel_mqtt_reports_empty">Noch keine MQTT-Nachrichten empfangen oder gesendet.</string>
+    <string name="admin_panel_mqtt_reports_direction_in">IN</string>
+    <string name="admin_panel_mqtt_reports_direction_out">OUT</string>
+    <string name="admin_panel_mqtt_reports_clear">Leeren</string>
+    <string name="admin_panel_close">Schließen</string>
 
     <!-- Navigation Page -->
     <string name="navigation_status_label">STATUS</string>

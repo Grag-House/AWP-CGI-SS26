@@ -68,7 +68,7 @@ val appModule = module {
             get()
         )
     }
-    viewModel { AdminPanelViewModel(appConfigRepository = get()) }
+    viewModel { AdminPanelViewModel(appConfigRepository = get(), mqttManager = get()) }
 
     viewModel {
         BatteryViewModel(get())
