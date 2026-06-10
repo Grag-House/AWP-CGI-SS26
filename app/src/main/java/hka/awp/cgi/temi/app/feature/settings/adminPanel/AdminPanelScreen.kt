@@ -70,6 +70,7 @@ import org.koin.compose.viewmodel.koinViewModel
  * @param contentDescription Accessibility description for the icon.
  * @param modifier Optional [Modifier].
  */
+@Suppress("TooManyFunctions")
 @Composable
 fun ConfigIconBox(
     icon: ImageVector,
@@ -237,12 +238,13 @@ fun WebserverPasswordCard(
     }
 }
 
+@Suppress("LongMethod")
 @Composable
 fun ChangePasswordDialog(
     onConfirm: (oldPassword: String, newPassword: String) -> Unit,
     onDismiss: () -> Unit
 ) {
-    var oldPassword by remember { mutableStateOf("") } //TODO einbindung in Passwort Ticket
+    var oldPassword by remember { mutableStateOf("") } // TODO einbindung in Passwort Ticket
     var newPassword by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
 

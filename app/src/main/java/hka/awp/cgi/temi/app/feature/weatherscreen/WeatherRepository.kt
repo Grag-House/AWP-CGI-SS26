@@ -134,11 +134,12 @@ class WeatherRepository(
                 low = temps.minOrNull()?.roundToInt()?.toString() ?: "0"
             )
         }
-        if (checkLocation()){
-        return WeatherState(
-            hourlyForecast = hourly,
-            weeklyForecast = weekly
-        )} else {
+        if (checkLocation()) {
+            return WeatherState(
+                hourlyForecast = hourly,
+                weeklyForecast = weekly
+                               )
+        } else {
             return WeatherState(
                 location = "Länge: " + LONGITUDE.toString() + " Breite: " + LATITUDE.toString(),
                 hourlyForecast = hourly,
@@ -147,11 +148,11 @@ class WeatherRepository(
         }
     }
 
-    private fun checkLocation() : Boolean{
-        if(LATITUDE == 49.0138 && LONGITUDE == 8.3573) return true
+    @Suppress("MagicNumber")
+    private fun checkLocation(): Boolean {
+        if (LATITUDE == 49.0138 && LONGITUDE == 8.3573) return true
         return false
     }
-
 
     private fun convertSymbolToIcon(symbol: String): WeatherIcon {
         val base = symbol.substringBefore("_")
