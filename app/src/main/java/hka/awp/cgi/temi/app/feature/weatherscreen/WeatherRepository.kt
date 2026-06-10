@@ -30,7 +30,8 @@ import kotlin.math.roundToInt
 class WeatherRepository(
     private val client: OkHttpClient,
     private val json: Json = Json { ignoreUnknownKeys = true },
-    private val hourlyFormatter: DateTimeFormatter
+    private val hourlyFormatter: DateTimeFormatter,
+    private val locationNameResolver: LocationNameResolver
 ) {
     companion object {
         private const val USER_AGENT = "jonas.mueller@cgi.com"
@@ -79,7 +80,11 @@ class WeatherRepository(
         }
     }
 
-    private fun transformToState(response: MetResponse, latitude: Double, longitude: Double): WeatherState {
+    private suspend fun transformToState(
+        response: MetResponse,
+        latitude: Double,
+        longitude: Double
+    ): WeatherState {
         val timeseries = response.properties.timeseries
         val today = LocalDate.now()
         val now = ZonedDateTime.now(ZoneId.systemDefault())
@@ -133,23 +138,14 @@ class WeatherRepository(
                 low = temps.minOrNull()?.roundToInt()?.toString() ?: "0"
             )
         }
-        if (checkLocation(latitude, longitude)) {
-            return WeatherState(
-                hourlyForecast = hourly,
-                weeklyForecast = weekly
-            )
-        } else {
-            return WeatherState(
-                location = "Länge: $longitude Breite: $latitude",
-                hourlyForecast = hourly,
-                weeklyForecast = weekly
-            )
-        }
-    }
+        val resolvedLocation = locationNameResolver.resolveLocationName(latitude, longitude)
+        val fallbackLocation = "Länge: $longitude Breite: $latitude"
 
-    @Suppress("MagicNumber")
-    private fun checkLocation(latitude: Double, longitude: Double): Boolean {
-        return latitude == 49.0138 && longitude == 8.3573
+        return WeatherState(
+            location = resolvedLocation ?: fallbackLocation,
+            hourlyForecast = hourly,
+            weeklyForecast = weekly
+        )
     }
 
     private fun convertSymbolToIcon(symbol: String): WeatherIcon {
