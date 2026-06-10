@@ -61,7 +61,7 @@ val appModule = module {
         )
     }
 
-    viewModel<AppViewModel> {
+    viewModel {
         AppViewModel(
             networkManager = get(),
             clock = get(),
