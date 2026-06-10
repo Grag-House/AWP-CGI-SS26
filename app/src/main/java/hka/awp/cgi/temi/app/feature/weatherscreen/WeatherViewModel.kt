@@ -2,11 +2,13 @@ package hka.awp.cgi.temi.app.feature.weatherscreen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import hka.awp.cgi.temi.app.feature.webserver.AppConfigRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -22,9 +24,11 @@ import java.time.temporal.ChronoUnit
  * of [WeatherState], which includes loading status, weather data, and error messages.
  *
  * @property repository The repository used to fetch weather data from a data source.
+ * @property appConfigRepository The repository used to fetch location coordinates.
  */
 class WeatherViewModel(
     private val repository: WeatherRepository,
+    private val appConfigRepository: AppConfigRepository,
     private val clock: Clock,
 ) :
     ViewModel() {
@@ -52,7 +56,10 @@ class WeatherViewModel(
             while (isActive) {
                 _uiState.update { it.copy(isLoading = true) }
 
-                repository.getWeatherData()
+                val lat = appConfigRepository.latitude.first()
+                val lon = appConfigRepository.longitude.first()
+
+                repository.getWeatherData(lat, lon)
                     .onSuccess { newState ->
                         _uiState.value = newState.copy(isLoading = false)
                     }
@@ -65,9 +72,12 @@ class WeatherViewModel(
         }
     }
 
-    fun oneTimeFetch() { // TODO make work for when location is updated, or shorten delay for fetching
+    fun oneTimeFetch() {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.getWeatherData()
+            val lat = appConfigRepository.latitude.first()
+            val lon = appConfigRepository.longitude.first()
+
+            repository.getWeatherData(lat, lon)
                 .onSuccess { newState ->
                     _uiState.value = newState.copy(isLoading = false)
                 }

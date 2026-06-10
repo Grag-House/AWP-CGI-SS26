@@ -1,5 +1,8 @@
+@file:Suppress("AssignedValueIsNeverRead")
+
 package hka.awp.cgi.temi.app.feature.settings.adminPanel
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -40,6 +43,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,6 +52,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -58,7 +63,13 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import hka.awp.cgi.temi.app.R
 import hka.awp.cgi.temi.app.ui.components.SettingsHeader
+import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.viewmodel.koinViewModel
+
+private const val LAT_MIN = -90.0
+private const val LAT_MAX = 90.0
+private const val LON_MIN = -180.0
+private const val LON_MAX = 180.0
 
 // ─── Icon view ────────────────────────────────────────────────────────────────
 
@@ -125,12 +136,13 @@ fun ConfigCard(
 }
 
 /**
- * Displays the webserver URL with a copy-to-clipboard action.
+ * Displays the webserver URL with an edit action.
  *
  * @param url The webserver URL string to display.
+ * @param onEdit Callback invoked when the edit action is tapped.
  */
 @Composable
-fun WebserverUrlCard(url: String) {
+fun WebserverUrlCard(url: String, onEdit: () -> Unit) {
     ConfigCard {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -138,13 +150,20 @@ fun WebserverUrlCard(url: String) {
         ) {
             ConfigIconBox(
                 icon = Icons.Outlined.Language,
-                contentDescription = "Webserver-URL" // stringResource(R.string.config_webserver_url)
+                contentDescription = "Webserver-URL"
             )
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
                 ConfigLabel(stringResource(R.string.admin_panel_webserver_url))
                 ConfigValue(url)
             }
+            Text(
+                text = stringResource(R.string.admin_panel_webserver_url_change),
+                color = MaterialTheme.colorScheme.primary,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.clickable(onClick = onEdit)
+            )
         }
     }
 }
@@ -425,6 +444,12 @@ fun EditCoordinatesDialog(
     var latitudeInput by remember { mutableStateOf(initialLatitude.toString()) }
     var longitudeInput by remember { mutableStateOf(initialLongitude.toString()) }
 
+    val latValue = latitudeInput.toDoubleOrNull()
+    val lonValue = longitudeInput.toDoubleOrNull()
+
+    val isLatError = latValue == null || (latValue < LAT_MIN) || (latValue > LAT_MAX)
+    val isLonError = lonValue == null || (lonValue < LON_MIN) || (lonValue > LON_MAX)
+
     AlertDialog(
         onDismissRequest = onDismiss,
         icon = {
@@ -443,6 +468,12 @@ fun EditCoordinatesDialog(
                     onValueChange = { latitudeInput = it },
                     label = { Text(stringResource(R.string.admin_panel_latitude)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    isError = isLatError,
+                    supportingText = if (isLatError) {
+                        { Text(stringResource(R.string.admin_panel_latitude_error)) }
+                    } else {
+                        null
+                    },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -451,6 +482,12 @@ fun EditCoordinatesDialog(
                     onValueChange = { longitudeInput = it },
                     label = { Text(stringResource(R.string.admin_panel_longitude)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    isError = isLonError,
+                    supportingText = if (isLonError) {
+                        { Text(stringResource(R.string.admin_panel_longitude_error)) }
+                    } else {
+                        null
+                    },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -459,10 +496,11 @@ fun EditCoordinatesDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    val lat = latitudeInput.toDoubleOrNull() ?: return@Button
-                    val lon = longitudeInput.toDoubleOrNull() ?: return@Button
-                    onConfirm(lat, lon)
-                }
+                    if (latValue != null && lonValue != null) {
+                        onConfirm(latValue, lonValue)
+                    }
+                },
+                enabled = !isLatError && !isLonError
             ) {
                 Text(stringResource(R.string.admin_panel_confirm))
             }
@@ -533,14 +571,88 @@ private fun PasswordDots(count: Int = 7) {
 // ─── Main screen ─────────────────────────────────────────────────────────────
 
 @Composable
+fun EditUrlDialog(
+    initialUrl: String,
+    onConfirm: (url: String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var urlInput by remember { mutableStateOf(initialUrl) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = {
+            Icon(
+                imageVector = Icons.Outlined.Language,
+                contentDescription = null
+            )
+        },
+        title = {
+            Text(text = stringResource(R.string.admin_panel_webserver_url_change))
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedTextField(
+                    value = urlInput,
+                    onValueChange = { urlInput = it },
+                    label = { Text(stringResource(R.string.admin_panel_webserver_url)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    onConfirm(urlInput)
+                }
+            ) {
+                Text(stringResource(R.string.admin_panel_confirm))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.admin_panel_cancel))
+            }
+        }
+    )
+}
+
+@Composable
 fun AdminPanelScreen(
     onBackClick: () -> Unit,
     viewModel: AdminPanelViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val wrongOldPasswordMessage = stringResource(R.string.admin_panel_wrong_old_password)
     var showCoordinateDialog by remember { mutableStateOf(false) }
     var showPasswordDialog by remember { mutableStateOf(false) }
+    var showUrlDialog by remember { mutableStateOf(false) }
 
+    LaunchedEffect(viewModel) {
+        viewModel.events.collectLatest { event ->
+            when (event) {
+                AdminPanelEvent.WrongOldPassword -> {
+                    Toast.makeText(context, wrongOldPasswordMessage, Toast.LENGTH_SHORT).show()
+                }
+
+                AdminPanelEvent.PasswordChanged -> {
+                    showPasswordDialog = false
+                }
+            }
+        }
+    }
+
+    if (showUrlDialog) {
+        EditUrlDialog(
+            initialUrl = uiState.webserverUrl,
+            onConfirm = { url ->
+                viewModel.onEditWebserverUrl(url)
+                showUrlDialog = false
+            },
+            onDismiss = { showUrlDialog = false }
+        )
+    }
     if (showCoordinateDialog) {
         EditCoordinatesDialog(
             initialLatitude = uiState.latitude,
@@ -560,7 +672,6 @@ fun AdminPanelScreen(
         ChangePasswordDialog(
             onConfirm = { old, new ->
                 viewModel.onChangePassword(old, new)
-                showPasswordDialog = false
             },
             onDismiss = { showPasswordDialog = false }
         )
@@ -592,7 +703,8 @@ fun AdminPanelScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 WebserverUrlCard(
-                    url = uiState.webserverUrl
+                    url = uiState.webserverUrl,
+                    onEdit = { showUrlDialog = true }
                 )
 
                 AppVersionCard(

@@ -60,7 +60,7 @@ class WeatherRepositoryTest {
         every { mockCall.execute() } returns response
 
         // Act
-        val result = repository.getWeatherData()
+        val result = repository.getWeatherData(8.3573, 49.0138)
 
         // Assert
         assertTrue(result.isSuccess)
@@ -84,7 +84,7 @@ class WeatherRepositoryTest {
         every { mockCall.execute() } returns response
 
         // Act
-        val result = repository.getWeatherData()
+        val result = repository.getWeatherData(8.3573, 49.0138)
 
         // Assert
         assertTrue(result.isFailure)

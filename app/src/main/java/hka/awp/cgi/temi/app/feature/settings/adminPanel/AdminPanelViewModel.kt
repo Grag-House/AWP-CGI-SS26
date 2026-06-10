@@ -1,68 +1,102 @@
 package hka.awp.cgi.temi.app.feature.settings.adminPanel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import hka.awp.cgi.temi.app.BuildConfig
-import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherRepository
-import kotlinx.coroutines.flow.MutableStateFlow
+import hka.awp.cgi.temi.app.feature.webserver.AppConfigRepository
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import kotlin.math.round
 
-class AdminPanelViewModel : ViewModel() {
+class AdminPanelViewModel(private val appConfigRepository: AppConfigRepository) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(AdminPanelState())
-    val uiState: StateFlow<AdminPanelState> = _uiState.asStateFlow()
+    private val _events = MutableSharedFlow<AdminPanelEvent>()
+    val events = _events.asSharedFlow()
 
-    // Standart range for coordinates is -180 -> 180 and -90 -> 90
+    val uiState: StateFlow<AdminPanelState> = combine(
+        appConfigRepository.currentUrl,
+        appConfigRepository.latitude,
+        appConfigRepository.longitude
+    ) { url, lat, lon ->
+        AdminPanelState(
+            webserverUrl = url,
+            latitude = lat,
+            longitude = lon,
+            coordinates = "Länge: $lon Breite: $lat"
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(STATE_TIMEOUT),
+        initialValue = AdminPanelState()
+    )
+
+    // Standard range for coordinates is -180 -> 180 and -90 -> 90
     @Suppress("MagicNumber")
-    @Suppress("ComplexCondition")
     fun onEditCoordinates(latitude: Double, longitude: Double) {
-        if (longitude >= -180 && longitude <= 180 && latitude >= -90 && latitude <= 90) {
-            WeatherRepository.LONGITUDE = round(longitude * 10000) / 10000
-            WeatherRepository.LATITUDE = round(latitude * 10000) / 10000
-        } else {
-            WeatherRepository.LONGITUDE = 8.3573
-            WeatherRepository.LATITUDE = 49.0138
+        val roundedLat = round(latitude * 10000.0) / 10000.0
+        val roundedLon = round(longitude * 10000.0) / 10000.0
+
+        viewModelScope.launch {
+            appConfigRepository.updateCoordinates(roundedLat, roundedLon)
         }
-        updateCoordinateState()
+    }
+
+    fun onEditWebserverUrl(newUrl: String) {
+        viewModelScope.launch {
+            appConfigRepository.updateUrl(newUrl)
+        }
     }
 
     @Suppress("MagicNumber")
     fun onResetCoordinates() {
-        @Suppress("MagicNumber")
-        WeatherRepository.LONGITUDE = 8.3573
-        @Suppress("MagicNumber")
-        WeatherRepository.LATITUDE = 49.0138
-        updateCoordinateState()
-    }
-
-    private fun updateCoordinateState() {
-        _uiState.value = _uiState.value.copy(
-            longitude = WeatherRepository.LONGITUDE,
-            latitude = WeatherRepository.LATITUDE,
-            coordinates = "Länge: ${WeatherRepository.LONGITUDE} Breite: ${WeatherRepository.LATITUDE}"
-        )
+        viewModelScope.launch {
+            appConfigRepository.updateCoordinates(49.0138, 8.3573)
+        }
     }
 
     fun onOpenMqttReports() {
-        TODO() // Absprechen was eigentlich gewollt ist
+        // Implementation pending
     }
+
     fun onChangePassword(oldPassword: String, newPassword: String) {
-        TODO() // Anbindung an Webserver Passwort Implementation
+        viewModelScope.launch {
+            val storedHash = appConfigRepository.adminPasswordHash.first()
+            val isOldPasswordCorrect = appConfigRepository.isValidAdminPassword(
+                plainPassword = oldPassword,
+                currentHash = storedHash
+            )
+
+            if (!isOldPasswordCorrect) {
+                _events.emit(AdminPanelEvent.WrongOldPassword)
+                return@launch
+            }
+
+            appConfigRepository.updateAdminPassword(newPassword)
+            _events.emit(AdminPanelEvent.PasswordChanged)
+        }
+    }
+    companion object {
+        private const val STATE_TIMEOUT = 5000L
     }
 }
 
+sealed interface AdminPanelEvent {
+    data object WrongOldPassword : AdminPanelEvent
+    data object PasswordChanged : AdminPanelEvent
+}
+
 data class AdminPanelState(
-
     val webserverUrl: String = BuildConfig.WEBVIEW_URL,
-
     val appVersion: String = BuildConfig.VERSION_NAME,
-
-    val coordinates: String = "Länge: ${WeatherRepository.LONGITUDE} Breite: ${WeatherRepository.LATITUDE}",
-
+    val coordinates: String = "",
     @Suppress("MagicNumber")
     var longitude: Double = 8.3573,
-
     @Suppress("MagicNumber")
     var latitude: Double = 49.0138
 )
