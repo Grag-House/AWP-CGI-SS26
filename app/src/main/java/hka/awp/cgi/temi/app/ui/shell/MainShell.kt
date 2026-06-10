@@ -23,7 +23,7 @@ import hka.awp.cgi.temi.app.feature.settings.SettingsViewModel
 import hka.awp.cgi.temi.app.feature.settings.about.SettingsScreen
 import hka.awp.cgi.temi.app.feature.settings.battery.BatteryScreen
 import hka.awp.cgi.temi.app.feature.settings.display.DisplayScreen
-import hka.awp.cgi.temi.app.feature.settings.notifications.NotificationScreen
+import hka.awp.cgi.temi.app.feature.settings.language.LanguageScreen
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherContent
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherViewModel
 import hka.awp.cgi.temi.app.feature.webserver.ServerState
@@ -46,7 +46,7 @@ import timber.log.Timber
  * specific to the settings screen.
  */
 
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun MainShell(
     modifier: Modifier = Modifier,
@@ -153,12 +153,6 @@ private fun ShellRouteContent(
         )
 
         Screen.DisplaySettings.route -> DisplayScreen(
-            onBackClick = {
-                onRouteSelect(Screen.Settings)
-            },
-        )
-
-        Screen.NotificationSettings.route -> NotificationScreen(
             onBackClick = {
                 onRouteSelect(Screen.Settings)
             },
