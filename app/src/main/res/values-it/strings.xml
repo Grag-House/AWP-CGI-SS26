@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">Temi-CGI-App</string>
     <string name="hauptmenu">Menu principale</string>
-    <string name="webserver">Server web</string>
-    <string name="webserverSub">Accedi al server web</string>
+    <string name="webserver">Webserver</string>
+    <string name="webserverSub">Accedi al webserver</string>
     <string name="weather">Meteo</string>
     <string name="wetter">Meteo</string>
     <string name="wetterSub">Previsioni meteo per la posizione attuale</string>
@@ -23,7 +23,7 @@
     <string name="welcome_message">Ehi, sono %1$s\nCome posso aiutarti?</string>
     <string name="robot_name">Temi!</string>
     <string name="robot_description">Robot</string>
-    <string name="weather_icon_description">Icona sole e nuvola per meteo locale</string>
+    <string name="weather_icon_description">Simbolo sole e nuvole per il meteo locale</string>
     <string name="sidebar_functions">Funzioni</string>
     <string name="sidebar_help">Aiuto</string>
 
@@ -40,12 +40,12 @@
     <string name="display_brightness">Luminosità schermo</string>
     <string name="display_screensaver">Salvaschermo</string>
     <string name="display_screensaver_after">Si avvia dopo %1$s di inattività</string>
-    <string name="display_change">Cambia</string>
+    <string name="display_change">Modifica</string>
     <string name="display_dark_mode">Modalità scura</string>
     <string name="display_enabled">Attivato</string>
     <string name="display_disabled">Disattivato</string>
     <string name="display_brightness_percent">%1$d%%</string>
-    <string name="display_timeout_dialog_title">Scegli tempo di inattività</string>
+    <string name="display_timeout_dialog_title">Seleziona tempo di inattività</string>
     <string name="timeout_30_seconds">30 secondi</string>
     <string name="timeout_1_minute">1 minuto</string>
     <string name="timeout_2_minutes">2 minuti</string>
@@ -67,26 +67,59 @@
     <string name="power_status">Alimentazione</string>
     <string name="currently_charging">In carica</string>
     <string name="battery_mode_active">Batteria in uso</string>
-    <string name="notifications_voice">Notifiche &amp; Voce</string>
+    <string name="notifications_voice">Notifiche e voce</string>
     <string name="enabled">Attivato</string>
-    <string name="muted">Disattivato (muto)</string>
+    <string name="muted">Disattivato</string>
     <string name="volume">Volume</string>
     <string name="select_speaker">Seleziona altoparlante</string>
     <string name="current_language">Lingua attuale: %1$s</string>
 
-    <string name="home_description">Icona home per dashboard principale</string>
-    <string name="webserver_description">Icona server per stato server</string>
-    <string name="weather_description">Icona meteo locale</string>
+    <string name="home_description">Icona Home per dashboard principale</string>
+    <string name="webserver_description">Icona server per stato</string>
+    <string name="weather_description">Icona sole/nuvole per meteo</string>
     <string name="navigation_description">Icona freccia per navigazione</string>
-    <string name="mode_description">Interruttore per modalità operativa</string>
+    <string name="mode_description">Toggle modalità</string>
     <string name="settings_description">Icona ingranaggio per impostazioni</string>
     <string name="switch_mode_description">Cambia modalità</string>
-    <string name="wifi_description">Wi-Fi</string>
+    <string name="wifi_description">WLAN</string>
     <string name="battery_description">Batteria</string>
     <string name="notifications_description">Notifiche</string>
     <string name="cgi">CGI</string>
-    <string name="toggle_sidebar_description">Pulsante per aprire/chiudere barra laterale</string>
-    <string name="navigation_status_label">STATO</string>
+    <string name="toggle_sidebar_description">Toggle barra laterale</string>
+
+    <string name="admin_panel">Admin Panel</string>
+    <string name="admin_panel_description">Impostazioni avanzate</string>
+    <string name="admin_panel_webserver_url">URL Webserver</string>
+    <string name="admin_panel_appversion">Versione App</string>
+    <string name="admin_panel_mqtt_reports">Report MQTT</string>
+    <string name="admin_panel_mqtt_reports_subtitle">Report attuali</string>
+    <string name="admin_panel_webserver_password">Password Webserver</string>
+    <string name="admin_panel_webserver_password_change">Cambia password</string>
+    <string name="admin_panel_weather_coordinates">Coordinate meteo</string>
+    <string name="admin_panel_webserver_coordiantes_change">Cambia coordinate</string>
+    <string name="admin_panel_webserver_url_change">Cambia URL</string>
+    <string name="admin_panel_header">Admin Panel</string>
+    <string name="admin_panel_latitude">"Latitudine: "</string>
+    <string name="admin_panel_longitude">Longitudine:</string>
+    <string name="admin_panel_confirm">Conferma</string>
+    <string name="admin_panel_reset_defaults">Predefinito</string>
+    <string name="admin_panel_latitude_error">Range: -90 a 90</string>
+    <string name="admin_panel_longitude_error">Range: -180 a 180</string>
+    <string name="admin_panel_cancel">Annulla</string>
+    <string name="admin_panel_change_password_title">Cambia password</string>
+    <string name="admin_panel_new_password">Nuova password:</string>
+    <string name="admin_panel_webserver_defaults_reset">Ripristina default</string>
+    <string name="admin_panel_webserver_defaults_reset_done">Ripristinato.</string>
+    <string name="admin_panel_mqtt_reports_topics_title">Argomenti osservati</string>
+    <string name="admin_panel_mqtt_reports_topic_item">- %1$s</string>
+    <string name="admin_panel_mqtt_reports_messages_title">Messaggi (più recenti prima)</string>
+    <string name="admin_panel_mqtt_reports_empty">Nessun messaggio MQTT.</string>
+    <string name="admin_panel_mqtt_reports_direction_in">IN</string>
+    <string name="admin_panel_mqtt_reports_direction_out">OUT</string>
+    <string name="admin_panel_mqtt_reports_clear">Svuota</string>
+    <string name="admin_panel_close">Chiudi</string>
+
+    <string name="navigation_status_label">STATUS</string>
     <string name="current_location_prefix">Posizione attuale:</string>
     <string name="show_map">Mostra\nluoghi</string>
     <string name="select_destination">SELEZIONA DESTINAZIONE</string>
@@ -94,70 +127,106 @@
     <string name="location_status_none">Nessun luogo salvato</string>
     <string name="location_office">Ufficio</string>
     <string name="location_kitchen">Cucina</string>
-    <string name="location_cafe">Caffetteria</string>
-    <string name="location_reception">Reception</string>
-    <string name="location_wc">Bagno</string>
-    <string name="location_charging">Stazione di ricarica</string>
+    <string name="location_cafe">Cafè-Bar</string>
+    <string name="location_reception">Ricezione</string>
+    <string name="location_wc">WC</string>
+    <string name="location_charging">Carica</string>
     <string name="voice_changed">Voce cambiata</string>
 
     <string name="icon_sun">Soleggiato</string>
     <string name="icon_cloudy">Nuvoloso</string>
     <string name="icon_partlycloudy">Parzialmente nuvoloso</string>
     <string name="icon_rain">Piovoso</string>
-    <string name="icon_snow">Neve</string>
-    <string name="icon_thunder">Temporali</string>
+    <string name="icon_snow">Nevoso</string>
+    <string name="icon_thunder">Temporale</string>
     <string name="icon_fog">Nebbia</string>
+
     <string name="location_kalrsruhe">Posizione: Karlsruhe</string>
     <string name="temp_celsius">°C</string>
     <string name="daily_outlook">Previsioni giornaliere</string>
     <string name="degree">°</string>
     <string name="percent">%</string>
     <string name="weekly_outlook">Prossima settimana</string>
-    <string name="now">Adesso</string>
+    <string name="now">Ora</string>
     <string name="today">Oggi</string>
-    <string name="show_map_failed">Nessun luogo trovato.\nCi sono waypoints salvati sul robot?</string>
-    <string name="navigation_failed">Errore durante la navigazione verso:</string>
-    <string name="navigation_failed_with_name">Errore durante la navigazione verso: %1$s</string>
+    <string name="show_map_failed">Nessun luogo trovato.\nWaypoints salvati?</string>
+    <string name="navigation_failed">Errore navigazione a:</string>
+    <string name="navigation_failed_with_name">Errore navigazione a: %1$s</string>
     <string name="saved_locations">Luoghi salvati (%1$d)</string>
     <string name="go_to">Vai a</string>
     <string name="map_retry">Riprova</string>
 
-    <string name="log_robot_ready">Robot pronto, luoghi salvati: %1$s</string>
+    <string name="log_robot_ready">Robot pronto, luoghi: %1$s</string>
     <string name="log_position">Posizione: x=%1$f, y=%2$f</string>
-    <string name="log_location_distance">Posizione: %1$s (%2$.2f m)</string>
-    <string name="log_map_status_changed">onLoadMapStatusChanged: stato=%1$d</string>
-    <string name="log_load_map_failed_status">Caricamento mappa fallito: stato=%1$d</string>
-    <string name="log_navigating_to">Navigazione verso: %1$s</string>
+    <string name="log_location_distance">Luogo: %1$s (%2$.2f m)</string>
+    <string name="log_map_status_changed">onLoadMapStatusChanged: status=%1$d</string>
+    <string name="log_load_map_failed_status">Caricamento mappa fallito: status=%1$d</string>
+    <string name="log_navigating_to">Navigazione a: %1$s</string>
     <string name="log_show_map">showMap() – robot=%1$s, luoghi=%2$s</string>
-    <string name="log_fetch_map_data">fetchMapData() – chiamo getMapData() (thread: %1$s)</string>
+    <string name="log_fetch_map_data">fetchMapData() – chiamo getMapData()</string>
     <string name="log_get_map_data_is_null">getMapData() → null? %1$b</string>
-    <string name="log_layers_total">Totale layer: %1$d</string>
-    <string name="log_layer_info">Layer: id=\'%1$s\', categoria=%2$d, pose=%3$d</string>
-    <string name="log_marker_info">Marker: \'%1$s\' → (%2$f, %3$f)</string>
-    <string name="log_markers_after_filter">Marker dopo filtro (categoria=%1$d): %2$d</string>
-    <string name="log_no_location_layers">Nessun layer di posizione trovato → tryLoadMap()</string>
-    <string name="log_get_map_data_null_retry">getMapData() ha restituito null → tryLoadMap()</string>
-    <string name="log_error_fetch_map_data">Errore nel recupero dati mappa</string>
+    <string name="log_layers_total">Livelli totali: %1$d</string>
+    <string name="log_layer_info">Livello: id=\'%1$s\', cat=%2$d, pos=%3$d</string>
+    <string name="log_marker_info">Marcatore: \'%1$s\' → (%2$f, %3$f)</string>
+    <string name="log_markers_after_filter">Marcatori filtrati (cat=%1$d): %2$d</string>
+    <string name="log_no_location_layers">Nessun livello posizione → tryLoadMap()</string>
+    <string name="log_get_map_data_null_retry">getMapData() null → tryLoadMap()</string>
+    <string name="log_error_fetch_map_data">Errore caricamento mappa</string>
     <string name="log_available_maps">Mappe disponibili: %1$s</string>
     <string name="log_loading_map">Caricamento mappa: id=%1$s, nome=%2$s</string>
-    <string name="log_no_maps_found">Nessuna mappa trovata sul robot</string>
-    <string name="log_error_fetch_map_list">Errore nel recupero lista mappe</string>
+    <string name="log_no_maps_found">Nessuna mappa trovata</string>
+    <string name="log_error_fetch_map_list">Errore lista mappe</string>
     <string name="default_map_name">3_3</string>
     <string name="robox_version">Versione Robox</string>
     <string name="launcher_version">Versione Launcher</string>
 
     <string name="controller">Controller</string>
-    <string name="controller_description">Supporto controller</string>
-    <string name="controller_subtitle">Collega gamepad e attiva controllo</string>
-    <string name="controller_steering_active">Attiva controllo controller</string>
-    <string name="controller_search_cancelled">Annulla ricerca</string>
+    <string name="controller_description">Controllo gamepad</string>
+    <string name="controller_subtitle">Collega gamepad</string>
+    <string name="controller_steering_active">Attiva controllo</string>
+    <string name="controller_search_cancelled">Ricerca annullata</string>
     <string name="controller_search_devices">Cerca dispositivi Bluetooth</string>
-    <string name="controller_loading_bluetooth_devices">Caricamento dispositivi accoppiati</string>
+    <string name="controller_loading_bluetooth_devices">Carico dispositivi</string>
     <string name="controller_isBonded">Accoppiato</string>
-    <string name="controller_isBonding">Accoppiamento in corso</string>
+    <string name="controller_isBonding">Accoppiamento</string>
     <string name="controller_bond">Accoppia</string>
     <string name="controller_disconnect">Disconnetti</string>
     <string name="controller_connect">Connetti</string>
     <string name="controller_delete">Rimuovi</string>
     <string name="controller_isNotBonded">Non accoppiato</string>
+
+    <string name="hide_and_seek">Nascondino</string>
+    <string name="hide_and_seek_sub">Trova Temi!</string>
+    <string name="hide_and_seek_description">Icona ricerca per Nascondino</string>
+    <string name="hide_and_seek_image_description">Temi che sbircia</string>
+    <string name="hide_and_seek_search_time_label">TEMPO RICERCA</string>
+    <string name="hide_and_seek_search_time_value">%1$d min</string>
+    <string name="hide_and_seek_intro_text">Temi sta cercando un nascondiglio – hai %1$d minuti!</string>
+    <string name="hide_and_seek_start_button">Andiamo!</string>
+    <string name="hide_and_seek_hiding_title">Temi sta giocando a nascondino</string>
+    <string name="hide_and_seek_hiding_subtitle">Non seguirmi – vado nel mio nascondiglio!</string>
+    <string name="hide_and_seek_hiding_bystander_note">Non dare suggerimenti.</string>
+    <string name="hide_and_seek_hiding_countdown_label">RICERCA IN</string>
+    <string name="hide_and_seek_hiding_seconds">%1$d s</string>
+    <string name="hide_and_seek_waiting_title">Trovami!</string>
+    <string name="hide_and_seek_found_button">Trovato!</string>
+    <string name="hide_and_seek_give_up">Rinuncia</string>
+    <string name="hide_and_seek_cancel">Annulla</string>
+    <string name="hide_and_seek_won_title">Trovato!</string>
+    <string name="hide_and_seek_won_message">Trovato in %1$s!</string>
+    <string name="hide_and_seek_lost_title">Tempo scaduto!</string>
+    <string name="hide_and_seek_lost_location_label">ERO NASCOSTO QUI</string>
+    <string name="hide_and_seek_lost_location_unknown">rivelato più tardi</string>
+    <string name="hide_and_seek_play_again">Gioca ancora</string>
+    <string name="hide_and_seek_to_dashboard">Al cruscotto</string>
+    <string name="hiding_spot_filter_button">Modifica nascondigli</string>
+    <string name="hiding_spot_filter_button_active">Filtro attivo</string>
+    <string name="hiding_spot_filter_title">Seleziona nascondigli</string>
+    <string name="hiding_spot_filter_subtitle">Quali luoghi può usare Temi?</string>
+    <string name="hiding_spot_filter_select_all">Seleziona tutti</string>
+    <string name="hiding_spot_filter_deselect_all">Deseleziona tutti</string>
+    <string name="hiding_spot_filter_no_locations">Nessun luogo.</string>
+    <string name="hiding_spot_filter_count">%1$d di %2$d attivati</string>
+    <string name="hiding_spot_filter_cancel">Annulla</string>
+    <string name="hiding_spot_filter_save">Salva</string>
 </resources>
