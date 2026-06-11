@@ -193,4 +193,40 @@
     <string name="log_error_fetch_map_list">Fehler beim Laden der Kartenliste</string>
     <string name="default_map_name">3_3</string>
 
+    <!-- Hide and Seek Page -->
+    <string name="hide_and_seek">Verstecken</string>
+    <string name="hide_and_seek_sub">Suche Temi!</string>
+    <string name="hide_and_seek_description">Suchsymbol für das Versteckspiel</string>
+    <string name="hide_and_seek_image_description">Temi-Roboter schaut um eine Ecke</string>
+    <string name="hide_and_seek_search_time_label">SUCHZEIT</string>
+    <string name="hide_and_seek_search_time_value">%1$d min</string>
+    <string name="hide_and_seek_intro_text">Temi sucht sich selbst ein Versteck – du hast dann %1$d Minuten, um ihn zu finden!</string>
+    <string name="hide_and_seek_start_button">Los geht\'s!</string>
+    <string name="hide_and_seek_hiding_title">Temi spielt gerade Verstecken</string>
+    <string name="hide_and_seek_hiding_subtitle">Bitte nicht folgen – ich fahre zu meinem Versteck!</string>
+    <string name="hide_and_seek_hiding_bystander_note">Andere Personen dürfen zusehen, aber bitte keine Tipps geben.</string>
+    <string name="hide_and_seek_hiding_countdown_label">SUCHEN BEGINNT IN</string>
+    <string name="hide_and_seek_hiding_seconds">%1$d s</string>
+    <string name="hide_and_seek_waiting_title">Finde mich!</string>
+    <string name="hide_and_seek_found_button">Ich hab dich gefunden!</string>
+    <string name="hide_and_seek_give_up">Aufgeben</string>
+    <string name="hide_and_seek_cancel">Abbrechen</string>
+    <string name="hide_and_seek_won_title">Gefunden!</string>
+    <string name="hide_and_seek_won_message">Du hast mich in %1$s gefunden!</string>
+    <string name="hide_and_seek_lost_title">Zeit abgelaufen!</string>
+    <string name="hide_and_seek_lost_location_label">ICH WAR HIER VERSTECKT</string>
+    <string name="hide_and_seek_lost_location_unknown">wird später enthüllt</string>
+    <string name="hide_and_seek_play_again">Nochmal spielen</string>
+    <string name="hide_and_seek_to_dashboard">Zum Dashboard</string>
+    <!-- Hide and Seek Place Filter -->
+    <string name="hiding_spot_filter_button">Verstecke bearbeiten</string>
+    <string name="hiding_spot_filter_button_active">Filter aktiv</string>
+    <string name="hiding_spot_filter_title">Verstecke auswählen</string>
+    <string name="hiding_spot_filter_subtitle">Welche Orte darf Temi als Versteck nutzen?</string>
+    <string name="hiding_spot_filter_select_all">Alle auswählen</string>
+    <string name="hiding_spot_filter_deselect_all">Alle abwählen</string>
+    <string name="hiding_spot_filter_no_locations">Keine Orte verfügbar. Bitte Roboter verbinden.</string>
+    <string name="hiding_spot_filter_count">%1$d von %2$d Orten aktiviert</string>
+    <string name="hiding_spot_filter_cancel">Abbrechen</string>
+    <string name="hiding_spot_filter_save">Speichern</string>
 </resources>

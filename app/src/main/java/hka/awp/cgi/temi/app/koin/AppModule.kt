@@ -3,6 +3,8 @@ package hka.awp.cgi.temi.app.koin
 import android.app.Application
 import com.robotemi.sdk.Robot
 import hka.awp.cgi.temi.app.data.repository.RobotRepository
+import hka.awp.cgi.temi.app.feature.hideandseek.HideAndSeekViewModel
+import hka.awp.cgi.temi.app.feature.hideandseek.HidingSpotRepository
 import hka.awp.cgi.temi.app.feature.settings.SettingsViewModel
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.AdminPanelViewModel
 import hka.awp.cgi.temi.app.feature.settings.battery.BatteryViewModel
@@ -70,6 +72,9 @@ val appModule = module {
     }
     viewModel { AdminPanelViewModel(appConfigRepository = get(), mqttManager = get()) }
 
+    single { HidingSpotRepository(androidContext()) }
+    viewModel { HideAndSeekViewModel(robot = get(), hidingSpotRepository = get()) }
+    viewModel<WebserverViewModel> { WebserverViewModel() }
     viewModel {
         BatteryViewModel(get())
     }
