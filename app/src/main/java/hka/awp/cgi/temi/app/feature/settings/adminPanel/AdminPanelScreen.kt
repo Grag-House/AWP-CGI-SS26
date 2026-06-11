@@ -2,7 +2,9 @@
 
 package hka.awp.cgi.temi.app.feature.settings.adminPanel
 
+import android.content.Intent
 import androidx.compose.foundation.background
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -24,6 +26,7 @@ import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Storage
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -38,6 +41,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -57,6 +61,70 @@ private const val LON_MAX = 180.0
 
 // ─── Cards ────────────────────────────────────────────────────────────────────
 
+@Composable
+fun RestartAppConfirmationDialog(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+                                ) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = {
+            Icon(
+                imageVector = Icons.Default.Refresh,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.error
+                )
+        },
+        title = {
+            Text(text = stringResource(R.string.admin_panel_restart_confirm_title))
+        },
+        text = {
+            Text(
+                text = stringResource(R.string.admin_panel_restart_confirm_text),
+                style = MaterialTheme.typography.bodyMedium
+                )
+        },
+        confirmButton = {
+            Button(
+                onClick = onConfirm,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error
+                                                    )
+                  ) {
+                Text(stringResource(R.string.admin_panel_confirm_restart))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.admin_panel_cancel))
+            }
+        }
+               )
+}
+@Composable
+fun RestartAppCard(onRestartClick: () -> Unit) {
+    ConfigCard(onClick = onRestartClick) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+           ) {
+            ConfigIconBox(
+                icon = Icons.Default.Refresh,
+                contentDescription = stringResource(R.string.admin_panel_restart_app)
+                         )
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                ConfigValue(stringResource(R.string.admin_panel_restart_app))
+                ConfigSubtext(stringResource(R.string.admin_panel_restart_app_subtitle))
+            }
+            Icon(
+                imageVector = Icons.Default.ChevronRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+        }
+    }
+}
 /**
  * Displays the webserver URL with an edit action.
  *
@@ -361,11 +429,13 @@ fun AdminPanelScreen(
     onBackClick: () -> Unit,
     viewModel: AdminPanelViewModel = koinViewModel()
 ) {
+    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showCoordinateDialog by remember { mutableStateOf(false) }
     var showPasswordDialog by remember { mutableStateOf(false) }
     var showUrlDialog by remember { mutableStateOf(false) }
     var showMqttReportsDialog by remember { mutableStateOf(false) }
+    var showRestartDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(viewModel) {
         viewModel.events.collectLatest { event ->
@@ -376,6 +446,13 @@ fun AdminPanelScreen(
 
                 AdminPanelEvent.PasswordChanged -> {
                     showPasswordDialog = false
+                }
+
+                AdminPanelEvent.RestartAppTriggered -> {
+                    val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+                    val mainIntent = Intent.makeRestartActivityTask(intent?.component)
+                    context.startActivity(mainIntent)
+                    Runtime.getRuntime().exit(0)
                 }
             }
         }
@@ -412,6 +489,15 @@ fun AdminPanelScreen(
             onClear = viewModel::onClearMqttReports,
             onDismiss = { showMqttReportsDialog = false }
         )
+    }
+    if (showRestartDialog) {
+        RestartAppConfirmationDialog(
+            onConfirm = {
+                viewModel.onRestartAppRequested()
+                showRestartDialog = false
+            },
+            onDismiss = { showRestartDialog = false }
+                                    )
     }
 
     Row(
@@ -456,6 +542,10 @@ fun AdminPanelScreen(
                     coordinates = uiState.coordinates,
                     onEdit = { showCoordinateDialog = true }
                 )
+
+                RestartAppCard(
+                    onRestartClick = { showRestartDialog = true }
+                              )
             }
         }
     }

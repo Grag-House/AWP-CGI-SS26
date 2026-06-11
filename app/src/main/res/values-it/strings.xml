@@ -229,4 +229,9 @@
     <string name="hiding_spot_filter_count">%1$d di %2$d attivati</string>
     <string name="hiding_spot_filter_cancel">Annulla</string>
     <string name="hiding_spot_filter_save">Salva</string>
+    <string name="admin_panel_restart_app">Riavvia app</string>
+    <string name="admin_panel_restart_app_subtitle">Riavviare in caso di problemi</string>
+    <string name="admin_panel_restart_confirm_title">Riavviare l\'app?</string>
+    <string name="admin_panel_restart_confirm_text">L\'applicazione verrà chiusa e riavviata immediatamente. I processi in background in esecuzione verranno interrotti.</string>
+    <string name="admin_panel_confirm_restart">Riavvia</string>
 </resources>

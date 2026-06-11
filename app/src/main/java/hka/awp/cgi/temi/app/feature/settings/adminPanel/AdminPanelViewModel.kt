@@ -84,6 +84,12 @@ class AdminPanelViewModel(
             _events.emit(AdminPanelEvent.PasswordChanged)
         }
     }
+
+    fun onRestartAppRequested() {
+        viewModelScope.launch {
+            _events.emit(AdminPanelEvent.RestartAppTriggered)
+        }
+    }
     companion object {
         private const val STATE_TIMEOUT = 5000L
     }
@@ -92,6 +98,7 @@ class AdminPanelViewModel(
 sealed interface AdminPanelEvent {
     data object OpenMqttReports : AdminPanelEvent
     data object PasswordChanged : AdminPanelEvent
+    data object RestartAppTriggered : AdminPanelEvent
 }
 
 data class AdminPanelState(
