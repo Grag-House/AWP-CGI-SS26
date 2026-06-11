@@ -161,7 +161,13 @@ private fun ContentGrid(serverState: ServerState, onClick: (Screen) -> Unit, cur
             DashboardCard(
                 title = "Controller",
                 subtitle = "Gamepad verbinden und Steuerung aktivieren",
-                icon = Icons.Rounded.SportsEsports,
+                customIcon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.joystick_24dp_000000_fill0_wght400_grad0_opsz24),
+                        tint = MaterialTheme.colorScheme.primary,
+                        contentDescription = stringResource(R.string.controller_description)
+                    )
+                },
                 bottomText = "Bluetooth Controller",
                 onClick = {
                     onClick(Screen.Controller)
