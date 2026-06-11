@@ -5,8 +5,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AdminPanelSettings
 import androidx.compose.material.icons.rounded.BatteryFull
 import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.Language
 import androidx.compose.material.icons.rounded.Navigation
-import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.SportsEsports
 import androidx.compose.material.icons.rounded.Storage
@@ -36,7 +36,7 @@ sealed class Screen(
     val isCustomIcon: Boolean = false
 ) {
     companion object {
-        val navScreens by lazy { listOf(Dashboard, Webserver, Weather, Navigation, HideAndSeek, Settings) }
+        val navScreens by lazy { listOf(Dashboard, Webserver, Weather, Navigation, Controller, HideAndSeek, Settings) }
     }
 
     data object Dashboard : Screen(
@@ -81,18 +81,18 @@ sealed class Screen(
         contentDescription = R.string.settings_display_subtitle
     )
 
-    data object NotificationSettings : Screen(
-        route = "notification_settings",
-        title = R.string.settings_notifications_title,
-        icon = Icons.Rounded.Notifications,
-        contentDescription = R.string.settings_notifications_subtitle
-    )
-
     data object BatterySettings : Screen(
         route = "battery_settings",
         title = R.string.settings_battery_title,
         icon = Icons.Rounded.BatteryFull,
         contentDescription = R.string.settings_battery_subtitle
+    )
+
+    data object LanguageSettings : Screen(
+        route = "language_settings",
+        title = R.string.settings_languages_title,
+        icon = Icons.Rounded.Language,
+        contentDescription = R.string.settings_languages_subtitle
     )
 
     data object HideAndSeek : Screen(
@@ -107,6 +107,12 @@ sealed class Screen(
         title = R.string.webserver,
         icon = Icons.Rounded.Storage,
         contentDescription = R.string.webserver_description,
+    )
+    data object Controller : Screen(
+        route = "controller",
+        title = R.string.controller,
+        icon = Icons.Rounded.SportsEsports,
+        contentDescription = R.string.controller_description,
     )
 
     data object AdminPanel : Screen(

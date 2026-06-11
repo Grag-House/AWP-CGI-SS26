@@ -183,6 +183,21 @@ fun AboutContent(
                             ),
                             value = aboutInfo.appVersion
                         )
+
+                        InfoItem(
+                            label = stringResource(
+                                R.string.robox_version
+                            ),
+                            value = aboutInfo.roboxVersion
+
+                        )
+
+                        InfoItem(
+                            label = stringResource(
+                                R.string.launcher_version
+                            ),
+                            value = aboutInfo.launcherVersion
+                        )
                     }
                 },
                 shape = RoundedCornerShape(28.dp),
