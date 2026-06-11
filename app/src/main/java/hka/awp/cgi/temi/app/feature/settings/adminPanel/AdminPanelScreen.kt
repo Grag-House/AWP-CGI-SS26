@@ -18,7 +18,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Lock
@@ -87,31 +86,6 @@ fun WebserverUrlCard(url: String, onEdit: () -> Unit) {
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.clickable(onClick = onEdit)
             )
-        }
-    }
-}
-
-/**
- * Displays the current app version alongside a "Latest" badge when applicable.
- *
- * @param version The version string (e.g. "v1.4.2").
- */
-@Composable
-fun AppVersionCard(version: String) {
-    ConfigCard {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            ConfigIconBox(
-                icon = Icons.Outlined.Info,
-                contentDescription = stringResource(R.string.admin_panel_appversion)
-            )
-            Spacer(Modifier.width(12.dp))
-            Column(Modifier.weight(1f)) {
-                ConfigLabel(stringResource(R.string.admin_panel_appversion))
-                ConfigValue(version)
-            }
         }
     }
 }
@@ -468,10 +442,6 @@ fun AdminPanelScreen(
                 WebserverUrlCard(
                     url = uiState.webserverUrl,
                     onEdit = { showUrlDialog = true }
-                )
-
-                AppVersionCard(
-                    version = uiState.appVersion,
                 )
 
                 MqttReportsCard(
