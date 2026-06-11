@@ -10,6 +10,7 @@ import hka.awp.cgi.temi.app.feature.settings.adminPanel.AdminPanelViewModel
 import hka.awp.cgi.temi.app.feature.settings.battery.BatteryViewModel
 import hka.awp.cgi.temi.app.feature.settings.display.DisplayViewModel
 import hka.awp.cgi.temi.app.feature.settings.notifications.NotificationViewModel
+import hka.awp.cgi.temi.app.feature.webserver.WebserverViewModel
 import hka.awp.cgi.temi.app.ui.shell.AppViewModel
 import hka.awp.cgi.temi.app.utils.NetworkManager
 import hka.awp.cgi.temi.app.utils.TemiBatteryMonitor
@@ -26,18 +27,20 @@ import java.time.format.DateTimeFormatter
  */
 val appModule = module {
     single<NetworkManager> { NetworkManager(androidContext()) }
+
     single { RobotRepository() }
+
     single<Clock> { Clock.systemDefaultZone() }
 
     single<DateTimeFormatter> {
         DateTimeFormatter.ofPattern("HH:mm").withZone(ZoneId.systemDefault())
     }
+
     single<Robot?> {
         try {
             Robot.getInstance()
         } catch (
-            @Suppress("TooGenericExceptionCaught")
-            e: Exception,
+            @Suppress("TooGenericExceptionCaught") e: Exception,
         ) {
             Timber.e(e, "Temi SDK not available, probably running locally")
             null
@@ -58,23 +61,29 @@ val appModule = module {
     viewModel {
         SettingsViewModel(get(), robot = get())
     }
+
     viewModel {
         DisplayViewModel(
             application = androidContext() as Application,
             get()
         )
     }
+
     viewModel {
         NotificationViewModel(
             application = androidContext() as Application,
             get()
         )
     }
+
     viewModel { AdminPanelViewModel(appConfigRepository = get(), mqttManager = get()) }
 
     single { HidingSpotRepository(androidContext()) }
+
     viewModel { HideAndSeekViewModel(robot = get(), hidingSpotRepository = get()) }
-    viewModel<WebserverViewModel> { WebserverViewModel() }
+
+    viewModel<WebserverViewModel> { WebserverViewModel(get()) }
+
     viewModel {
         BatteryViewModel(get())
     }
