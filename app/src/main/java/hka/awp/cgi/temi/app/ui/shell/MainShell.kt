@@ -26,7 +26,6 @@ import hka.awp.cgi.temi.app.feature.settings.about.SettingsScreen
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.AdminPanelScreen
 import hka.awp.cgi.temi.app.feature.settings.battery.BatteryScreen
 import hka.awp.cgi.temi.app.feature.settings.display.DisplayScreen
-import hka.awp.cgi.temi.app.feature.settings.language.LanguageScreen
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherContent
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherState
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherViewModel
@@ -67,10 +66,6 @@ fun MainShell(
     val isCharging by appViewModel.isCharging.collectAsStateWithLifecycle()
     val serverState by webserverViewModel.serverState.collectAsStateWithLifecycle()
     val currentTemperatureState by weatherViewModel.uiState.collectAsStateWithLifecycle()
-    val currentTemperature = currentTemperatureState.hourlyForecast
-        .firstOrNull()
-        ?.temp
-        ?.toIntOrNull() ?: 0
     val webserverUrlState by webserverViewModel.urlState.collectAsStateWithLifecycle()
 
     Scaffold(
@@ -148,7 +143,7 @@ private fun RenderSelectedRoute(
 
         Screen.Controller.route -> ControllerScreen(
             modifier = Modifier.fillMaxSize(),
-                                                   )
+        )
 
         Screen.Settings.route -> {
             HandleSettingsNavigationEvents(
@@ -159,10 +154,6 @@ private fun RenderSelectedRoute(
         }
 
         Screen.DisplaySettings.route -> DisplayScreen(
-            onBackClick = { routeDeps.appViewModel.onRouteSelect(Screen.Settings) }
-        )
-
-        Screen.NotificationSettings.route -> NotificationScreen(
             onBackClick = { routeDeps.appViewModel.onRouteSelect(Screen.Settings) }
         )
 
@@ -214,9 +205,9 @@ private fun HandleSettingsNavigationEvents(
         settingsViewModel.navigationEvent.collect { event ->
             when (event) {
                 is SettingsNavigationEvent.NavigateToDisplay -> onNavigate(Screen.DisplaySettings)
-                is SettingsNavigationEvent.NavigateToNotifications -> onNavigate(Screen.NotificationSettings)
                 is SettingsNavigationEvent.NavigateToBattery -> onNavigate(Screen.BatterySettings)
                 is SettingsNavigationEvent.NavigateToAdminPanel -> onNavigate(Screen.AdminPanel)
+                is SettingsNavigationEvent.NavigateToLanguage -> onNavigate(Screen.LanguageSettings)
             }
         }
     }
