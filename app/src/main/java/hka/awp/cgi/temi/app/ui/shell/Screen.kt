@@ -111,7 +111,7 @@ sealed class Screen(
     data object Controller : Screen(
         route = "controller",
         title = R.string.controller,
-        icon = Icons.Rounded.SportsEsports,
+        iconRes = R.drawable.joystick_24dp_000000_fill0_wght400_grad0_opsz24,
         contentDescription = R.string.controller_description,
     )
 
