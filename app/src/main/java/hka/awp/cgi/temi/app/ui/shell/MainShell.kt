@@ -15,6 +15,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import hka.awp.cgi.temi.app.feature.dashboard.MainContent
+import hka.awp.cgi.temi.app.feature.hideandseek.HideAndSeekScreen
+import hka.awp.cgi.temi.app.feature.hideandseek.HideAndSeekViewModel
 import hka.awp.cgi.temi.app.feature.navigation.NavigationContent
 import hka.awp.cgi.temi.app.feature.navigation.NavigationViewModel
 import hka.awp.cgi.temi.app.feature.settings.SettingsNavigationEvent
@@ -25,7 +27,9 @@ import hka.awp.cgi.temi.app.feature.settings.battery.BatteryScreen
 import hka.awp.cgi.temi.app.feature.settings.display.DisplayScreen
 import hka.awp.cgi.temi.app.feature.settings.notifications.NotificationScreen
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherContent
+import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherState
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherViewModel
+import hka.awp.cgi.temi.app.feature.webserver.ServerState
 import hka.awp.cgi.temi.app.feature.webserver.WebViewScreen
 import hka.awp.cgi.temi.app.feature.webserver.WebserverViewModel
 import org.koin.compose.viewmodel.koinViewModel
@@ -53,14 +57,10 @@ fun MainShell(
     settingsViewModel: SettingsViewModel = koinViewModel(),
     navigationViewModel: NavigationViewModel = koinViewModel(),
     webserverViewModel: WebserverViewModel = koinViewModel(),
-    weatherViewModel: WeatherViewModel = koinViewModel()
+    weatherViewModel: WeatherViewModel = koinViewModel(),
+    hideAndSeekViewModel: HideAndSeekViewModel = koinViewModel()
 ) {
-    val wifiLevel by appViewModel.wifiLevel.collectAsStateWithLifecycle()
-    val currentTime by appViewModel.currentTime.collectAsStateWithLifecycle()
-    val batteryLevel by appViewModel.batteryLevel.collectAsStateWithLifecycle()
-    val isCharging by appViewModel.isCharging.collectAsStateWithLifecycle()
-    val serverState by webserverViewModel.serverState.collectAsStateWithLifecycle()
-    val currentTemperatureState by weatherViewModel.uiState.collectAsStateWithLifecycle()
+    val state = observeMainShellState(appViewModel, webserverViewModel, weatherViewModel)
     val webserverUrlState by webserverViewModel.urlState.collectAsStateWithLifecycle()
 
     Scaffold(
@@ -68,10 +68,10 @@ fun MainShell(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopStatusBar(
-                wifiLevel = wifiLevel,
-                currentTime = currentTime,
-                batteryLevel = batteryLevel,
-                isCharging = isCharging
+                wifiLevel = state.wifiLevel,
+                currentTime = state.currentTime,
+                batteryLevel = state.batteryLevel,
+                isCharging = state.isCharging
             )
         }
     ) { paddingValues ->
@@ -101,6 +101,7 @@ fun MainShell(
                         settingsViewModel = settingsViewModel,
                         navigationViewModel = navigationViewModel,
                         weatherViewModel = weatherViewModel,
+                        hideAndSeekViewModel = hideAndSeekViewModel,
                         serverState = serverState,
                         currentTemperatureState = currentTemperatureState,
                         webserverUrlState = webserverUrlState
@@ -161,6 +162,12 @@ private fun RenderSelectedRoute(
 
         Screen.Weather.route -> WeatherContent(viewModel = routeDeps.weatherViewModel)
 
+        Screen.HideAndSeek.route -> HideAndSeekScreen(
+            modifier = modifier,
+            viewModel = routeDeps.hideAndSeekViewModel,
+            onNavigateToDashboard = { onRouteSelect(Screen.Dashboard) }
+                                                     )
+
         Screen.Documentation.route -> WebViewScreen("file:///android_asset/html/index.html")
 
         // Keep fallback behavior identical to the dashboard card content.
@@ -178,6 +185,7 @@ private data class MainShellRouteDeps(
     val settingsViewModel: SettingsViewModel,
     val navigationViewModel: NavigationViewModel,
     val weatherViewModel: WeatherViewModel,
+    val hideAndSeekViewModel: HideAndSeekViewModel,
     val serverState: hka.awp.cgi.temi.app.feature.webserver.ServerState,
     val currentTemperatureState: hka.awp.cgi.temi.app.feature.weatherscreen.WeatherState,
     val webserverUrlState: String

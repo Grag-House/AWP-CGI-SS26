@@ -14,7 +14,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Navigation
 import androidx.compose.material.icons.rounded.Settings
-import androidx.compose.material.icons.rounded.SmartToy
+import androidx.compose.material.icons.rounded.SportsEsports
 import androidx.compose.material.icons.rounded.Storage
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -58,7 +58,7 @@ fun MainContent(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
-                Icons.Rounded.SmartToy,
+                painter = painterResource(R.drawable.ic_temi_robot),
                 contentDescription = stringResource(R.string.robot_description),
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(48.dp)
@@ -137,6 +137,14 @@ private fun ContentGrid(serverState: ServerState, onClick: (Screen) -> Unit, cur
                 Icons.Rounded.Navigation,
                 stringResource(R.string.fastestroute),
                 onClick = { onClick(Screen.Navigation) }
+            )
+        }
+        item {
+            DashboardCard(
+                title = stringResource(R.string.hide_and_seek),
+                subtitle = stringResource(R.string.hide_and_seek_sub),
+                icon = Icons.Rounded.SportsEsports,
+                onClick = { onClick(Screen.HideAndSeek) }
             )
         }
         item {
