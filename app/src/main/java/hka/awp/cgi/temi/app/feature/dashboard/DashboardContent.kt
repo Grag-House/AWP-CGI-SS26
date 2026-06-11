@@ -157,6 +157,17 @@ private fun ContentGrid(serverState: ServerState, onClick: (Screen) -> Unit, cur
                 }
             )
         }
+        item {
+            DashboardCard(
+                title = "Controller",
+                subtitle = "Gamepad verbinden und Steuerung aktivieren",
+                icon = Icons.Rounded.SportsEsports,
+                bottomText = "Bluetooth Controller",
+                onClick = {
+                    onClick(Screen.Controller)
+                }
+            )
+        }
     }
 }
 

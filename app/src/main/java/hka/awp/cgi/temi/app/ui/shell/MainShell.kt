@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import hka.awp.cgi.temi.app.feature.controller.ControllerScreen
 import hka.awp.cgi.temi.app.feature.dashboard.MainContent
 import hka.awp.cgi.temi.app.feature.hideandseek.HideAndSeekScreen
 import hka.awp.cgi.temi.app.feature.hideandseek.HideAndSeekViewModel
@@ -25,7 +26,7 @@ import hka.awp.cgi.temi.app.feature.settings.about.SettingsScreen
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.AdminPanelScreen
 import hka.awp.cgi.temi.app.feature.settings.battery.BatteryScreen
 import hka.awp.cgi.temi.app.feature.settings.display.DisplayScreen
-import hka.awp.cgi.temi.app.feature.settings.notifications.NotificationScreen
+import hka.awp.cgi.temi.app.feature.settings.language.LanguageScreen
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherContent
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherState
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherViewModel
@@ -49,7 +50,7 @@ import timber.log.Timber
  * specific to the settings screen.
  */
 
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun MainShell(
     modifier: Modifier = Modifier,
@@ -66,6 +67,10 @@ fun MainShell(
     val isCharging by appViewModel.isCharging.collectAsStateWithLifecycle()
     val serverState by webserverViewModel.serverState.collectAsStateWithLifecycle()
     val currentTemperatureState by weatherViewModel.uiState.collectAsStateWithLifecycle()
+    val currentTemperature = currentTemperatureState.hourlyForecast
+        .firstOrNull()
+        ?.temp
+        ?.toIntOrNull() ?: 0
     val webserverUrlState by webserverViewModel.urlState.collectAsStateWithLifecycle()
 
     Scaffold(
@@ -140,6 +145,10 @@ private fun RenderSelectedRoute(
             modifier = modifier,
             viewModel = routeDeps.navigationViewModel
         )
+
+        Screen.Controller.route -> ControllerScreen(
+            modifier = Modifier.fillMaxSize(),
+                                                   )
 
         Screen.Settings.route -> {
             HandleSettingsNavigationEvents(

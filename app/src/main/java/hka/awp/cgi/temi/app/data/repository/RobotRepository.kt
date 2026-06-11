@@ -2,7 +2,7 @@ package hka.awp.cgi.temi.app.data.repository
 
 import android.content.Context
 import android.os.Build
-import android.provider.Settings
+import androidx.core.content.edit
 import com.robotemi.sdk.Robot
 import hka.awp.cgi.temi.app.BuildConfig
 import timber.log.Timber
@@ -12,7 +12,6 @@ import java.util.Collections
 
 private const val FALLBACK_IP_ADDRESS = "0.0.0.0"
 private const val NO_IP_FOUND_MESSAGE = "Keine IP gefunden"
-private const val MAX_BRIGHTNESS = 255
 private const val PREFS_NAME = "settings"
 private const val DARK_MODE_KEY = "dark_mode"
 
@@ -20,7 +19,9 @@ data class RobotInfo(
     val ip: String,
     val model: String,
     val serial: String,
-    val appVersion: String
+    val appVersion: String,
+    val roboxVersion: String,
+    val launcherVersion: String,
 )
 
 class RobotRepository {
@@ -30,7 +31,9 @@ class RobotRepository {
             ip = getIpAddress(),
             model = getModelName(),
             serial = robot?.serialNumber ?: "Unbekannt",
-            appVersion = BuildConfig.VERSION_NAME
+            appVersion = BuildConfig.VERSION_NAME,
+            roboxVersion = robot?.roboxVersion ?: "Unbekannt",
+            launcherVersion = robot?.launcherVersion ?: "Unbekannt"
         )
     }
 
@@ -61,55 +64,15 @@ class RobotRepository {
 
     fun getModelName(): String = Build.MODEL
 
-    @Suppress("MagicNumber")
-    fun setBrightness(value: Int, context: Context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.System.canWrite(context)) {
-            Timber.e("Fehlende Berechtigung: WRITE_SETTINGS wurde vom Nutzer nicht erteilt!")
-            return
-        }
-
-        try {
-            val percentage = value.coerceIn(0, 100)
-
-            val androidBrightness = ((percentage / 100.0) * MAX_BRIGHTNESS).toInt()
-
-            Settings.System.putInt(
-                context.contentResolver,
-                Settings.System.SCREEN_BRIGHTNESS,
-                androidBrightness
-            )
-            Timber.d("Helligkeit erfolgreich auf $androidBrightness ($percentage%) gesetzt.")
-        } catch (exception: SecurityException) {
-            Timber.e(exception, "SecurityException beim Ändern der Helligkeit")
-        } catch (exception: IllegalArgumentException) {
-            Timber.e(exception, "Ungültiger Helligkeitswert übergeben")
-        }
-    }
-
     fun saveDarkMode(enabled: Boolean, context: Context) {
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            .edit()
-            .putBoolean(DARK_MODE_KEY, enabled)
-            .apply()
+            .edit {
+                putBoolean(DARK_MODE_KEY, enabled)
+            }
     }
 
     fun getDarkMode(context: Context): Boolean {
         return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             .getBoolean(DARK_MODE_KEY, false)
-    }
-
-    fun setScreenTimeout(millis: Int, context: Context) {
-        try {
-            Settings.System.putInt(
-                context.contentResolver,
-                Settings.System.SCREEN_OFF_TIMEOUT,
-                millis
-            )
-            Timber.d("Screen timeout changed to $millis ms")
-        } catch (exception: SecurityException) {
-            Timber.e(exception, "Missing permission to change screen timeout")
-        } catch (exception: IllegalArgumentException) {
-            Timber.e(exception, "Invalid screen timeout value")
-        }
     }
 }

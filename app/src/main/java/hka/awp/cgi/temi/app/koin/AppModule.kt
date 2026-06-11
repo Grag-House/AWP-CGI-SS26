@@ -1,19 +1,27 @@
 package hka.awp.cgi.temi.app.koin
 
-import android.app.Application
 import com.robotemi.sdk.Robot
 import hka.awp.cgi.temi.app.data.repository.RobotRepository
 import hka.awp.cgi.temi.app.feature.hideandseek.HideAndSeekViewModel
 import hka.awp.cgi.temi.app.feature.hideandseek.HidingSpotRepository
+import hka.awp.cgi.temi.app.feature.controller.BluetoothControllerManager
+import hka.awp.cgi.temi.app.feature.controller.ControllerViewModel
+import hka.awp.cgi.temi.app.feature.navigation.NavigationViewModel
 import hka.awp.cgi.temi.app.feature.settings.SettingsViewModel
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.AdminPanelViewModel
 import hka.awp.cgi.temi.app.feature.settings.battery.BatteryViewModel
 import hka.awp.cgi.temi.app.feature.settings.display.DisplayViewModel
 import hka.awp.cgi.temi.app.feature.settings.notifications.NotificationViewModel
 import hka.awp.cgi.temi.app.feature.webserver.WebserverViewModel
+import hka.awp.cgi.temi.app.feature.settings.language.LanguageViewModel
 import hka.awp.cgi.temi.app.ui.shell.AppViewModel
 import hka.awp.cgi.temi.app.utils.NetworkManager
 import hka.awp.cgi.temi.app.utils.TemiBatteryMonitor
+import hka.awp.cgi.temi.app.utils.TemiMovementController
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -49,7 +57,18 @@ val appModule = module {
 
     single<TemiBatteryMonitor> { TemiBatteryMonitor(robot = get()) }
 
-    viewModel<AppViewModel> {
+    single {
+        CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    }
+
+    single {
+        TemiMovementController(
+            robot = get(),
+            scope = get(),
+        )
+    }
+
+    viewModel {
         AppViewModel(
             networkManager = get(),
             clock = get(),
@@ -63,17 +82,15 @@ val appModule = module {
     }
 
     viewModel {
-        DisplayViewModel(
-            application = androidContext() as Application,
-            get()
-        )
+        DisplayViewModel(androidApplication(), get())
     }
 
     viewModel {
-        NotificationViewModel(
-            application = androidContext() as Application,
-            get()
-        )
+        LanguageViewModel()
+    }
+
+    viewModel {
+        NavigationViewModel(get(), get(), get())
     }
 
     viewModel { AdminPanelViewModel(appConfigRepository = get(), mqttManager = get()) }
@@ -86,5 +103,18 @@ val appModule = module {
 
     viewModel {
         BatteryViewModel(get())
+    }
+
+    single {
+        BluetoothControllerManager(
+            context = androidContext(),
+        )
+    }
+
+    viewModel {
+        ControllerViewModel(
+            movementController = get(),
+            bluetoothControllerManager = get(),
+        )
     }
 }
