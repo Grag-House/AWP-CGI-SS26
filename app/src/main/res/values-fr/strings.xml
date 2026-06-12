@@ -234,4 +234,7 @@
     <string name="admin_panel_restart_confirm_title">Redémarrer l\'application ?</string>
     <string name="admin_panel_restart_confirm_text">L\'application sera fermée et redémarrée immédiatement. Les processus d\'arrière-plan en cours seront interrompus.</string>
     <string name="admin_panel_confirm_restart">Redémarrer</string>
+    <string name="admin_panel_password_input">Zone d\'administration protégée, veuillez saisir le mot de passe.</string>
+    <string name="admin_panel_enter_password">Saisir le mot de passe</string>
+    <string name="password_wrong">Mot de passe incorrect</string>
 </resources>

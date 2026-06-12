@@ -5,12 +5,15 @@ import androidx.lifecycle.viewModelScope
 import hka.awp.cgi.temi.app.BuildConfig
 import hka.awp.cgi.temi.app.feature.mqtt.MqttManager
 import hka.awp.cgi.temi.app.feature.mqtt.MqttTrafficEvent
-import hka.awp.cgi.temi.app.feature.webserver.AppConfigRepository
+import hka.awp.cgi.temi.app.utils.AppConfigRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlin.math.round
@@ -22,6 +25,11 @@ class AdminPanelViewModel(
 
     private val _events = MutableSharedFlow<AdminPanelEvent>()
     val events = _events.asSharedFlow()
+    private val _isAuthorized = MutableStateFlow(false)
+    val isAuthorized = _isAuthorized.asStateFlow()
+
+    private val _passwordError = MutableStateFlow(false)
+    val passwordError = _passwordError.asStateFlow()
 
     val uiState: StateFlow<AdminPanelState> = combine(
         appConfigRepository.currentUrl,
@@ -42,6 +50,30 @@ class AdminPanelViewModel(
         started = SharingStarted.WhileSubscribed(STATE_TIMEOUT),
         initialValue = AdminPanelState()
     )
+
+    fun checkPassword(input: String) {
+        viewModelScope.launch {
+            val currentHash = appConfigRepository.adminPasswordHash.first()
+
+            val isValid = appConfigRepository.isValidAdminPassword(input, currentHash)
+
+            if (isValid) {
+                _passwordError.value = false
+                _isAuthorized.value = true
+            } else {
+                _passwordError.value = true
+            }
+        }
+    }
+
+    fun clearPasswordError() {
+        _passwordError.value = false
+    }
+
+    fun resetAuthorization() {
+        _isAuthorized.value = false
+        _passwordError.value = false
+    }
 
     // Standard range for coordinates is -180 -> 180 and -90 -> 90
     @Suppress("MagicNumber")

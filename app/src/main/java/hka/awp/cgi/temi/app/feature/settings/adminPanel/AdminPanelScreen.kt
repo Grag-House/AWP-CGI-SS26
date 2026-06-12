@@ -4,6 +4,7 @@ package hka.awp.cgi.temi.app.feature.settings.adminPanel
 
 import android.content.Intent
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -11,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.AdminPasswordPrompt
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.ChangePasswordDialog
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.EditCoordinatesDialog
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.EditUrlDialog
@@ -27,6 +29,9 @@ fun AdminPanelScreen(
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    val isAuthorized by viewModel.isAuthorized.collectAsStateWithLifecycle()
+    val passwordError by viewModel.passwordError.collectAsStateWithLifecycle()
 
     var showCoordinateDialog by remember { mutableStateOf(false) }
     var showPasswordDialog by remember { mutableStateOf(false) }
@@ -47,6 +52,22 @@ fun AdminPanelScreen(
                 }
             }
         }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.resetAuthorization()
+        }
+    }
+
+    if (!isAuthorized) {
+        AdminPasswordPrompt(
+            isError = passwordError,
+            onConfirm = { enteredPassword -> viewModel.checkPassword(enteredPassword) },
+            onBackClick = onBackClick,
+            onValueChange = { viewModel.clearPasswordError() }
+        )
+        return
     }
 
     if (showUrlDialog) {

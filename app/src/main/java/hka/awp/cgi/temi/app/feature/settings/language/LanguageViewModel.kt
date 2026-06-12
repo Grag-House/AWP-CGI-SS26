@@ -21,6 +21,8 @@ class LanguageViewModel : ViewModel() {
     )
 
     fun updateLocale(languageCode: String, context: Context) {
+        val newLocale = Locale(languageCode)
+        _selectedLocale.value = newLocale
         LanguageHelper.setLocale(context, languageCode)
 
         (context as? Activity)?.recreate()

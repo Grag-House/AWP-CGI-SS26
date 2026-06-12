@@ -234,4 +234,7 @@
     <string name="admin_panel_restart_confirm_title">Riavviare l\'app?</string>
     <string name="admin_panel_restart_confirm_text">L\'applicazione verrà chiusa e riavviata immediatamente. I processi in background in esecuzione verranno interrotti.</string>
     <string name="admin_panel_confirm_restart">Riavvia</string>
+    <string name="admin_panel_enter_password">Inserisci la password</string>
+    <string name="admin_panel_password_input">Area admin protetta, inserisci la password.</string>
+    <string name="password_wrong">Password errata</string>
 </resources>

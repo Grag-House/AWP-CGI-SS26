@@ -47,7 +47,7 @@ fun LanguageContent(
         SettingsCard {
             Column {
                 supportedLocales.forEach { locale ->
-                    val isSelected = locale == selectedLocale
+                    val isSelected = locale.language == selectedLocale.language
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()

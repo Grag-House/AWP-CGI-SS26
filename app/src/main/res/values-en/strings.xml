@@ -235,4 +235,7 @@
     <string name="admin_panel_restart_confirm_title">Restart app?</string>
     <string name="admin_panel_restart_confirm_text">The application will be closed and restarted immediately. Running background processes will be interrupted.</string>
     <string name="admin_panel_confirm_restart">Restart</string>
+    <string name="admin_panel_password_input">Admin area protected, please enter password.</string>
+    <string name="admin_panel_enter_password">Enter password</string>
+    <string name="password_wrong">Incorrect password</string>
 </resources>
