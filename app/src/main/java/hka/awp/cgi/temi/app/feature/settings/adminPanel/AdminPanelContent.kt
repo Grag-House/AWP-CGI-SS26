@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import hka.awp.cgi.temi.app.R
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.CoordinateManagementCard
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.MqttReportsCard
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.PatrolSettingsCard
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.RestartAppCard
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.WebserverPasswordCard
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.WebserverUrlCard
@@ -32,7 +33,8 @@ fun AdminPanelContent(
     onOpenMqtt: () -> Unit,
     onChangePassword: () -> Unit,
     onEditCoordinates: () -> Unit,
-    onRestartRequest: () -> Unit
+    onRestartRequest: () -> Unit,
+    onNavigateToPatrolSettings: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -62,6 +64,10 @@ fun AdminPanelContent(
                 MqttReportsCard(onNavigate = onOpenMqtt)
                 WebserverPasswordCard(onChangePassword = onChangePassword)
                 CoordinateManagementCard(coordinates = uiState.coordinates, onEdit = onEditCoordinates)
+                PatrolSettingsCard(
+                    currentModeText = uiState.patrolModeText,
+                    onNavigate = onNavigateToPatrolSettings
+                )
                 RestartAppCard(onRestartClick = onRestartRequest)
             }
         }

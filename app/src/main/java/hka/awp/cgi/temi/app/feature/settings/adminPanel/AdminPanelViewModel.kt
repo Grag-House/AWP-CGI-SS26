@@ -122,6 +122,10 @@ class AdminPanelViewModel(
             _events.emit(AdminPanelEvent.RestartAppTriggered)
         }
     }
+
+    fun onSavePatrolSettings(mode: Any, minMin: Int, maxMin: Int, hours: Set<Int>) {
+        // TODO
+    }
     companion object {
         private const val STATE_TIMEOUT = 5000L
     }
@@ -139,6 +143,7 @@ data class AdminPanelState(
     val mqttReportTopics: Set<String> = emptySet(),
     val mqttTrafficEvents: List<MqttTrafficEvent> = emptyList(),
     val coordinates: String = "",
+    val patrolModeText: String = "Deaktiviert",
     @Suppress("MagicNumber")
     var longitude: Double = 8.3573,
     @Suppress("MagicNumber")

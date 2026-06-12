@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.ShieldMoon
 import androidx.compose.material.icons.outlined.Storage
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -156,6 +157,34 @@ fun CoordinateManagementCard(
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.clickable(onClick = onEdit)
+            )
+        }
+    }
+}
+
+@Composable
+fun PatrolSettingsCard(
+    currentModeText: String,
+    onNavigate: () -> Unit
+) {
+    ConfigCard(onClick = onNavigate) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            ConfigIconBox(
+                icon = Icons.Outlined.ShieldMoon,
+                contentDescription = "Automatische Kontrollfahrten"
+            )
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                ConfigValue("Automatische Kontrollfahrten")
+                ConfigSubtext("Aktiv: $currentModeText")
+            }
+            Icon(
+                imageVector = Icons.Default.ChevronRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }

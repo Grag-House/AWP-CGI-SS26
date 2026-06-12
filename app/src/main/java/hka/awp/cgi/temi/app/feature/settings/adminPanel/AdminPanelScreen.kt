@@ -14,9 +14,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.AdminPasswordPrompt
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.ChangePasswordDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.DialogPatrolMode
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.EditCoordinatesDialog
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.EditUrlDialog
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.MqttReportsDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.PatrolSettingsDialog
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.RestartAppConfirmationDialog
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.viewmodel.koinViewModel
@@ -38,6 +40,7 @@ fun AdminPanelScreen(
     var showUrlDialog by remember { mutableStateOf(false) }
     var showMqttReportsDialog by remember { mutableStateOf(false) }
     var showRestartDialog by remember { mutableStateOf(false) }
+    var showPatrolSettingsDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(viewModel) {
         viewModel.events.collectLatest { event ->
@@ -60,7 +63,7 @@ fun AdminPanelScreen(
         }
     }
 
-    if (!isAuthorized) {
+    if (isAuthorized) {
         AdminPasswordPrompt(
             isError = passwordError,
             onConfirm = { enteredPassword -> viewModel.checkPassword(enteredPassword) },
@@ -111,6 +114,20 @@ fun AdminPanelScreen(
             onDismiss = { showRestartDialog = false }
         )
     }
+    if (showPatrolSettingsDialog) {
+        PatrolSettingsDialog(
+            initialIsEnabled = false,
+            initialMode = DialogPatrolMode.RANDOM,
+            initialMinMinutes = 40,
+            initialMaxMinutes = 60,
+            initialHours = emptySet(),
+            onDismiss = { showPatrolSettingsDialog = false },
+            onSave = { isEnabled, mode, minMin, maxMin, hours ->
+                viewModel.onSavePatrolSettings(mode, minMin, maxMin, hours)
+                showPatrolSettingsDialog = false
+            }
+                            )
+    }
 
     AdminPanelContent(
         uiState = uiState,
@@ -119,6 +136,7 @@ fun AdminPanelScreen(
         onOpenMqtt = viewModel::onOpenMqttReports,
         onChangePassword = { showPasswordDialog = true },
         onEditCoordinates = { showCoordinateDialog = true },
-        onRestartRequest = { showRestartDialog = true }
+        onRestartRequest = { showRestartDialog = true },
+        onNavigateToPatrolSettings = { showPatrolSettingsDialog = true }
     )
 }
