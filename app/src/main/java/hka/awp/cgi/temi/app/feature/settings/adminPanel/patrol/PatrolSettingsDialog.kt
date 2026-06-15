@@ -1,4 +1,4 @@
-package hka.awp.cgi.temi.app.feature.settings.adminPanel.components
+package hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement

@@ -9,6 +9,7 @@ import hka.awp.cgi.temi.app.feature.hideandseek.HidingSpotRepository
 import hka.awp.cgi.temi.app.feature.navigation.NavigationViewModel
 import hka.awp.cgi.temi.app.feature.settings.SettingsViewModel
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.AdminPanelViewModel
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolManager
 import hka.awp.cgi.temi.app.feature.settings.battery.BatteryViewModel
 import hka.awp.cgi.temi.app.feature.settings.display.DisplayViewModel
 import hka.awp.cgi.temi.app.feature.settings.language.LanguageViewModel
@@ -92,7 +93,9 @@ val appModule = module {
         NavigationViewModel(get(), get(), get())
     }
 
-    viewModel { AdminPanelViewModel(appConfigRepository = get(), mqttManager = get()) }
+    viewModel { AdminPanelViewModel(appConfigRepository = get(), mqttManager = get(), patrolManager = get(), robot = get()) }
+
+    single { PatrolManager(robot = get()) }
 
     single { HidingSpotRepository(androidContext()) }
 

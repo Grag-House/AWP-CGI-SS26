@@ -2,10 +2,12 @@ package hka.awp.cgi.temi.app.feature.settings.adminPanel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.robotemi.sdk.Robot
 import hka.awp.cgi.temi.app.BuildConfig
 import hka.awp.cgi.temi.app.feature.mqtt.MqttManager
 import hka.awp.cgi.temi.app.feature.mqtt.MqttTrafficEvent
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.DialogPatrolMode
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.DialogPatrolMode
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolManager
 import hka.awp.cgi.temi.app.utils.AppConfigRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,13 +18,16 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import kotlin.math.round
 
 class AdminPanelViewModel(
     private val appConfigRepository: AppConfigRepository,
-    private val mqttManager: MqttManager
+    private val mqttManager: MqttManager,
+    private val robot: Robot?,
+    private val patrolManager: PatrolManager
 ) : ViewModel() {
 
     private val _events = MutableSharedFlow<AdminPanelEvent>()
@@ -32,16 +37,26 @@ class AdminPanelViewModel(
 
     private val _passwordError = MutableStateFlow(false)
     val passwordError = _passwordError.asStateFlow()
+
+    private val patrolRouteSettings = MutableStateFlow(PatrolRouteSettingsState())
+
+    fun loadPatrolLocations() {
+        patrolRouteSettings.update {
+            it.copy(savedLocations = robot?.locations ?: emptyList())
+        }
+    }
+
     val uiState: StateFlow<AdminPanelState> = combine(
-        appConfigRepository.currentUrl,           // 0
-        appConfigRepository.latitude,             // 1
-        appConfigRepository.longitude,            // 2
-        mqttManager.trafficEvents,                // 3
-        appConfigRepository.isPatrolEnabled,      // 4
-        appConfigRepository.patrolMode,           // 5
-        appConfigRepository.minPatrolMinutes,     // 6
-        appConfigRepository.maxPatrolMinutes,     // 7
-        appConfigRepository.selectedPatrolHours   // 8
+        appConfigRepository.currentUrl,
+        appConfigRepository.latitude,
+        appConfigRepository.longitude,
+        mqttManager.trafficEvents,
+        appConfigRepository.isPatrolEnabled,
+        appConfigRepository.patrolMode,
+        appConfigRepository.minPatrolMinutes,
+        appConfigRepository.maxPatrolMinutes,
+        appConfigRepository.selectedPatrolHours,
+        patrolRouteSettings
                                                      ) { args ->
         val url = args[0] as String
         val lat = args[1] as Double
@@ -52,6 +67,7 @@ class AdminPanelViewModel(
         val min = args[6] as Int
         val max = args[7] as Int
         val hours = args[8] as Set<Int>
+        val patrolRoute = args[9] as PatrolRouteSettingsState
 
         AdminPanelState(
             webserverUrl = url,
@@ -64,7 +80,18 @@ class AdminPanelViewModel(
             patrolMode = mode,
             minMinutes = min,
             maxMinutes = max,
-            selectedHours = hours
+            selectedHours = hours,
+            savedLocations = patrolRoute.savedLocations,
+            patrolRoute = patrolRoute.route,
+            patrolRouteText = patrolRoute.routeText,
+            patrolModeText = if (!isEnabled) {
+                "Deaktiviert"
+            } else {
+                when (mode) {
+                    DialogPatrolMode.RANDOM -> "Zufällig: $min-$max Min."
+                    DialogPatrolMode.FIXED -> "Feste Stunden: ${hours.size} ausgewählt"
+                }
+            }
                        )
     }.stateIn(
         scope = viewModelScope,
@@ -156,6 +183,9 @@ class AdminPanelViewModel(
         }
     }
 
+    private var pendingPatrolRoute: List<String> =emptyList()
+    private var patrolIndex = 0
+
     fun onTriggerImmediatePatrol() {
 
         // TODO Anbindung der Backend Logik
@@ -167,9 +197,23 @@ class AdminPanelViewModel(
         val meinStundenPlan = uiState.value.selectedHours
 
         Timber.d("Aktueller Stundenplan: $meinStundenPlan")
+
+        patrolManager.startImmediatePatrol(uiState.value.patrolRoute)
+    }
+
+    fun onSavePatrolRoute(route: List<String>) {
+        patrolRouteSettings.update {
+            it.copy(route = route)
+        }
     }
     companion object {
         private const val STATE_TIMEOUT = 5000L
+    }
+
+
+    override fun onCleared() {
+        super.onCleared()
+        patrolManager.clear()
     }
 }
 
@@ -186,6 +230,9 @@ data class AdminPanelState(
     val mqttTrafficEvents: List<MqttTrafficEvent> = emptyList(),
     val coordinates: String = "",
     val patrolModeText: String = "Deaktiviert",
+    val patrolRouteText: String = "Keine Route ausgewählt",
+    val savedLocations: List<String> = emptyList(),
+    val patrolRoute: List<String> = emptyList(),
     val isPatrolEnabled: Boolean = false,
     val patrolMode: DialogPatrolMode = DialogPatrolMode.RANDOM,
     val minMinutes: Int = 40,
@@ -196,3 +243,15 @@ data class AdminPanelState(
     @Suppress("MagicNumber")
     val latitude: Double = 49.0138
 )
+
+private data class PatrolRouteSettingsState(
+    val route: List<String> = emptyList(),
+    val savedLocations: List<String> = emptyList()
+) {
+    val routeText: String
+        get() = if (route.isEmpty()) {
+            "Keine Route ausgewählt"
+        } else {
+            route.joinToString(" → ")
+        }
+}

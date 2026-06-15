@@ -189,3 +189,31 @@ fun PatrolSettingsCard(
         }
     }
 }
+
+@Composable
+fun PatrolRouteCard(
+    currentRouteText: String,
+    onNavigate: () -> Unit
+){
+    ConfigCard(onClick = onNavigate) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+           ) {
+            ConfigIconBox(
+                icon = Icons.Outlined.ShieldMoon,
+                contentDescription = "Kontrollfahrten Routenkonfiguration"
+                         )
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                ConfigValue("Kontrollfahrten Routenkonfiguration")
+                ConfigSubtext("Aktiv: $currentRouteText")
+            }
+            Icon(
+                imageVector = Icons.Default.ChevronRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+        }
+    }
+}

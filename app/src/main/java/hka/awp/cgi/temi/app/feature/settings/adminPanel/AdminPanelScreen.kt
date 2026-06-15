@@ -17,8 +17,9 @@ import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.ChangePasswor
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.EditCoordinatesDialog
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.EditUrlDialog
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.MqttReportsDialog
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.PatrolSettingsDialog
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.RestartAppConfirmationDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolRouteDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolSettingsDialog
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -40,6 +41,7 @@ fun AdminPanelScreen(
     var showMqttReportsDialog by remember { mutableStateOf(false) }
     var showRestartDialog by remember { mutableStateOf(false) }
     var showPatrolSettingsDialog by remember { mutableStateOf(false) }
+    var showPatrolRouteDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(viewModel) {
         viewModel.events.collectLatest { event ->
@@ -133,6 +135,19 @@ fun AdminPanelScreen(
             onDismiss = { showPatrolSettingsDialog = false }
         )
     }
+    if (showPatrolRouteDialog) {
+        PatrolRouteDialog(
+            savedLocations = uiState.savedLocations,
+            initialRoute = uiState.patrolRoute,
+            onDismiss = {
+                showPatrolRouteDialog = false
+            },
+            onSave = { route ->
+                viewModel.onSavePatrolRoute(route)
+                showPatrolRouteDialog = false
+            }
+        )
+    }
 
     AdminPanelContent(
         uiState = uiState,
@@ -142,6 +157,10 @@ fun AdminPanelScreen(
         onChangePassword = { showPasswordDialog = true },
         onEditCoordinates = { showCoordinateDialog = true },
         onRestartRequest = { showRestartDialog = true },
-        onNavigateToPatrolSettings = { showPatrolSettingsDialog = true }
+        onNavigateToPatrolSettings = { showPatrolSettingsDialog = true },
+        onNavigateToPatrolRoute = {
+            viewModel.loadPatrolLocations()
+            showPatrolRouteDialog = true
+        }
     )
 }
