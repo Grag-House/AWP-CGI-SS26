@@ -126,7 +126,7 @@ fun AdminPanelScreen(
                 viewModel.onSavePatrolSettings(mode, minMin, maxMin, hours)
                 showPatrolSettingsDialog = false
             }
-                            )
+        )
     }
 
     AdminPanelContent(

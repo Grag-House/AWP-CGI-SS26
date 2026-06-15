@@ -93,6 +93,16 @@ fun PatrolSettingsDialog(
                 }
 
                 if (isEnabled) {
+                    Button(
+                        onClick = {
+                            // onTriggerPatrol()
+                            onDismiss()
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp)
+                          ) {
+                        Text("Jetzt eine Kontrollfahrt starten")
+                    }
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text("Planungs-Modus", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
 
