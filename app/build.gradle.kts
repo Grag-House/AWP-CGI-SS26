@@ -192,6 +192,13 @@ dependencies {
     implementation(libs.androidx.compose.ui.text)
     implementation(libs.androidx.compose.material.icons.extended)
 
+    // Vosk speech recognition dependencies
+    implementation(libs.vosk.android)
+
+    // 2. JNA manuell laden und durch das "@aar" am Ende ERZWINGEN,
+    // dass nur das Android-Archiv genutzt wird.
+    // implementation(libs.jna)
+
     // ----------------- DEBUG / Compile time dependencies -----------------------
 
     // unit test dependencies
