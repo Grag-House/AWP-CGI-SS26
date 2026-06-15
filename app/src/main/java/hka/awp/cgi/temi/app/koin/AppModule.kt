@@ -93,7 +93,9 @@ val appModule = module {
         NavigationViewModel(get(), get(), get())
     }
 
-    viewModel { AdminPanelViewModel(appConfigRepository = get(), mqttManager = get(), patrolManager = get(), robot = get()) }
+    viewModel {
+        AdminPanelViewModel(appConfigRepository = get(), mqttManager = get(), patrolManager = get(), robot = get())
+    }
 
     single { PatrolManager(robot = get()) }
 

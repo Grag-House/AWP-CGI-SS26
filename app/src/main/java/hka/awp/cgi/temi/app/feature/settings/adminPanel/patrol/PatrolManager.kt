@@ -6,7 +6,7 @@ import timber.log.Timber
 
 class PatrolManager(
     private val robot: Robot?
-                   ) : OnGoToLocationStatusChangedListener {
+) : OnGoToLocationStatusChangedListener {
 
     private var activeRoute: List<String> = emptyList()
     private var activeIndex = 0
@@ -51,7 +51,7 @@ class PatrolManager(
         status: String,
         descriptionId: Int,
         description: String
-                                            ) {
+    ) {
         if (!isRunning) return
 
         when (status.lowercase()) {

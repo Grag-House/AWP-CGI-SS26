@@ -2,6 +2,7 @@
 
 package hka.awp.cgi.temi.app.feature.settings.adminPanel
 
+import android.app.Activity
 import android.content.Intent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -14,6 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.AdminPasswordPrompt
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.ChangePasswordDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.CloseAppConfirmationDialog
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.EditCoordinatesDialog
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.EditUrlDialog
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.MqttReportsDialog
@@ -42,6 +44,7 @@ fun AdminPanelScreen(
     var showRestartDialog by remember { mutableStateOf(false) }
     var showPatrolSettingsDialog by remember { mutableStateOf(false) }
     var showPatrolRouteDialog by remember { mutableStateOf(false) }
+    var showCloseDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(viewModel) {
         viewModel.events.collectLatest { event ->
@@ -53,6 +56,9 @@ fun AdminPanelScreen(
                     val mainIntent = Intent.makeRestartActivityTask(intent?.component)
                     context.startActivity(mainIntent)
                     Runtime.getRuntime().exit(0)
+                }
+                AdminPanelEvent.CloseAppTriggered -> {
+                    (context as? Activity)?.finishAffinity()
                 }
             }
         }
@@ -149,6 +155,16 @@ fun AdminPanelScreen(
         )
     }
 
+    if (showCloseDialog) {
+        CloseAppConfirmationDialog(
+            onConfirm = {
+                showCloseDialog = false
+                viewModel.requestCloseApp()
+            },
+            onDismiss = { showCloseDialog = false }
+        )
+    }
+
     AdminPanelContent(
         uiState = uiState,
         onBackClick = onBackClick,
@@ -161,6 +177,7 @@ fun AdminPanelScreen(
         onNavigateToPatrolRoute = {
             viewModel.loadPatrolLocations()
             showPatrolRouteDialog = true
-        }
+        },
+        onCloseRequest = { showCloseDialog = true }
     )
 }

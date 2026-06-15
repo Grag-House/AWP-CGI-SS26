@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 class PatrolSettingsRepository(
     private val prefs: SharedPreferences
-                              ) {
+) {
     private val _settings = MutableStateFlow(loadSettings())
     val settings: StateFlow<PatrolSettings> = _settings
 
@@ -40,7 +40,7 @@ class PatrolSettingsRepository(
             route = prefs.getStringSet(KEY_ROUTE, emptySet())
                 ?.toList()
                 ?: emptyList()
-                             )
+        )
     }
 
     private companion object {

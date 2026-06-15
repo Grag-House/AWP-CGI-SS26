@@ -57,7 +57,7 @@ class AdminPanelViewModel(
         appConfigRepository.maxPatrolMinutes,
         appConfigRepository.selectedPatrolHours,
         patrolRouteSettings
-                                                     ) { args ->
+    ) { args ->
         val url = args[0] as String
         val lat = args[1] as Double
         val lon = args[2] as Double
@@ -92,12 +92,12 @@ class AdminPanelViewModel(
                     DialogPatrolMode.FIXED -> "Feste Stunden: ${hours.size} ausgewählt"
                 }
             }
-                       )
+        )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(STATE_TIMEOUT),
         initialValue = AdminPanelState()
-             )
+    )
 
     fun checkPassword(input: String) {
         viewModelScope.launch {
@@ -171,6 +171,12 @@ class AdminPanelViewModel(
         }
     }
 
+    fun requestCloseApp() {
+        viewModelScope.launch {
+            _events.emit(AdminPanelEvent.CloseAppTriggered)
+        }
+    }
+
     fun onSavePatrolSettings(
         isEnabled: Boolean,
         mode: DialogPatrolMode,
@@ -183,20 +189,21 @@ class AdminPanelViewModel(
         }
     }
 
-    private var pendingPatrolRoute: List<String> =emptyList()
+    private var pendingPatrolRoute: List<String> = emptyList()
     private var patrolIndex = 0
 
     fun onTriggerImmediatePatrol() {
-
         // TODO Anbindung der Backend Logik
 
-        //patrolMode = FIXED oder RANDOM
+        // patrolMode = FIXED oder RANDOM
         // isPatrolEnabled = true oder false
-        //selected Hours gibt int von 1 bis 24 für die Stunden
+        // selected Hours gibt int von 1 bis 24 für die Stunden
 
         val meinStundenPlan = uiState.value.selectedHours
+        val enabledPatrol = uiState.value.isPatrolEnabled
+        val patrolMode = uiState.value.patrolMode
 
-        Timber.d("Aktueller Stundenplan: $meinStundenPlan")
+        Timber.d("Aktueller Stundenplan: $meinStundenPlan , $enabledPatrol, $patrolMode")
 
         patrolManager.startImmediatePatrol(uiState.value.patrolRoute)
     }
@@ -210,7 +217,6 @@ class AdminPanelViewModel(
         private const val STATE_TIMEOUT = 5000L
     }
 
-
     override fun onCleared() {
         super.onCleared()
         patrolManager.clear()
@@ -221,6 +227,7 @@ sealed interface AdminPanelEvent {
     data object OpenMqttReports : AdminPanelEvent
     data object PasswordChanged : AdminPanelEvent
     data object RestartAppTriggered : AdminPanelEvent
+    data object CloseAppTriggered : AdminPanelEvent
 }
 
 data class AdminPanelState(

@@ -27,7 +27,7 @@ fun PatrolRouteDialog(
     initialRoute: List<String>,
     onDismiss: () -> Unit,
     onSave: (List<String>) -> Unit
-                     ) {
+) {
     val selectedRoute = remember {
         mutableStateListOf<String>().apply {
             addAll(initialRoute)
@@ -40,17 +40,17 @@ fun PatrolRouteDialog(
             Text(
                 text = "Kontrollroute einstellen",
                 fontWeight = FontWeight.Bold
-                )
+            )
         },
         text = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
-                  ) {
+            ) {
                 Text("Wähle die Orte aus, die Temi bei einer Kontrollfahrt anfahren soll.")
 
                 LazyColumn(
                     modifier = Modifier.heightIn(max = 360.dp)
-                          ) {
+                ) {
                     items(savedLocations) { location ->
                         val isSelected = location in selectedRoute
 
@@ -58,7 +58,7 @@ fun PatrolRouteDialog(
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 verticalAlignment = Alignment.CenterVertically
-                               ) {
+                            ) {
                                 Checkbox(
                                     checked = isSelected,
                                     onCheckedChange = { checked ->
@@ -68,12 +68,12 @@ fun PatrolRouteDialog(
                                             selectedRoute.remove(location)
                                         }
                                     }
-                                        )
+                                )
 
                                 Text(
                                     text = location,
                                     modifier = Modifier.weight(1f)
-                                    )
+                                )
                             }
 
                             HorizontalDivider()
@@ -88,7 +88,7 @@ fun PatrolRouteDialog(
                     onSave(selectedRoute.toList())
                     onDismiss()
                 }
-                  ) {
+            ) {
                 Text("Speichern")
             }
         },
@@ -97,5 +97,5 @@ fun PatrolRouteDialog(
                 Text("Abbrechen")
             }
         }
-               )
+    )
 }

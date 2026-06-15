@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BlindsClosed
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.outlined.Language
@@ -41,6 +42,31 @@ fun RestartAppCard(onRestartClick: () -> Unit) {
             Column(Modifier.weight(1f)) {
                 ConfigValue(stringResource(R.string.admin_panel_restart_app))
                 ConfigSubtext(stringResource(R.string.admin_panel_restart_app_subtitle))
+            }
+            Icon(
+                imageVector = Icons.Default.ChevronRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+fun CloseAppCard(onCloseClick: () -> Unit) {
+    ConfigCard(onClick = onCloseClick) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            ConfigIconBox(
+                icon = Icons.Default.BlindsClosed,
+                contentDescription = "App schließen"
+            )
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                ConfigValue("App schließen")
+                ConfigSubtext("App wird runtergefahren")
             }
             Icon(
                 imageVector = Icons.Default.ChevronRight,
@@ -194,16 +220,16 @@ fun PatrolSettingsCard(
 fun PatrolRouteCard(
     currentRouteText: String,
     onNavigate: () -> Unit
-){
+) {
     ConfigCard(onClick = onNavigate) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
-           ) {
+        ) {
             ConfigIconBox(
                 icon = Icons.Outlined.ShieldMoon,
                 contentDescription = "Kontrollfahrten Routenkonfiguration"
-                         )
+            )
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
                 ConfigValue("Kontrollfahrten Routenkonfiguration")
@@ -213,7 +239,7 @@ fun PatrolRouteCard(
                 imageVector = Icons.Default.ChevronRight,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            )
         }
     }
 }

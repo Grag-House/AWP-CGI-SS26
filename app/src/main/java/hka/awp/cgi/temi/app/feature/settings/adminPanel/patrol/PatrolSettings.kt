@@ -12,4 +12,4 @@ data class PatrolSettings(
     val maxMinutes: Int = 60,
     val hours: Set<Int> = emptySet(),
     val route: List<String> = emptyList()
-                         )
+)
