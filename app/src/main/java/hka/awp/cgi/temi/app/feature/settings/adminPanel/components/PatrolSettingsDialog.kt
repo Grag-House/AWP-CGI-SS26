@@ -43,6 +43,7 @@ fun PatrolSettingsDialog(
     initialMinMinutes: Int = 40,
     initialMaxMinutes: Int = 60,
     initialHours: Set<Int> = emptySet(),
+    onTriggerPatrol: () -> Unit,
     onDismiss: () -> Unit,
     onSave: (isEnabled: Boolean, mode: DialogPatrolMode, minMin: Int, maxMin: Int, hours: Set<Int>) -> Unit
 ) {
@@ -95,12 +96,12 @@ fun PatrolSettingsDialog(
                 if (isEnabled) {
                     Button(
                         onClick = {
-                            // onTriggerPatrol()
+                            onTriggerPatrol()
                             onDismiss()
                         },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp)
-                          ) {
+                    ) {
                         Text("Jetzt eine Kontrollfahrt starten")
                     }
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {

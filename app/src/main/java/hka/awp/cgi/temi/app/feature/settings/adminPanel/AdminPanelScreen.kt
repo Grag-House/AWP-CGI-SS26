@@ -14,7 +14,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.AdminPasswordPrompt
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.ChangePasswordDialog
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.DialogPatrolMode
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.EditCoordinatesDialog
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.EditUrlDialog
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.MqttReportsDialog
@@ -116,16 +115,22 @@ fun AdminPanelScreen(
     }
     if (showPatrolSettingsDialog) {
         PatrolSettingsDialog(
-            initialIsEnabled = false,
-            initialMode = DialogPatrolMode.RANDOM,
-            initialMinMinutes = 40,
-            initialMaxMinutes = 60,
-            initialHours = emptySet(),
-            onDismiss = { showPatrolSettingsDialog = false },
+            initialIsEnabled = uiState.isPatrolEnabled,
+            initialMode = uiState.patrolMode,
+            initialMinMinutes = uiState.minMinutes,
+            initialMaxMinutes = uiState.maxMinutes,
+            initialHours = uiState.selectedHours,
+            onTriggerPatrol = { viewModel.onTriggerImmediatePatrol() }, // Callback [cite: 4, 6]
             onSave = { isEnabled, mode, minMin, maxMin, hours ->
-                viewModel.onSavePatrolSettings(mode, minMin, maxMin, hours)
-                showPatrolSettingsDialog = false
-            }
+                viewModel.onSavePatrolSettings(
+                    isEnabled = isEnabled,
+                    mode = mode,
+                    minMin = minMin,
+                    maxMin = maxMin,
+                    hours = hours
+                )
+            },
+            onDismiss = { showPatrolSettingsDialog = false }
         )
     }
 

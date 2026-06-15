@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import hka.awp.cgi.temi.app.BuildConfig
 import hka.awp.cgi.temi.app.feature.mqtt.MqttManager
 import hka.awp.cgi.temi.app.feature.mqtt.MqttTrafficEvent
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.DialogPatrolMode
 import hka.awp.cgi.temi.app.utils.AppConfigRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import kotlin.math.round
 
 class AdminPanelViewModel(
@@ -30,26 +32,45 @@ class AdminPanelViewModel(
 
     private val _passwordError = MutableStateFlow(false)
     val passwordError = _passwordError.asStateFlow()
-
     val uiState: StateFlow<AdminPanelState> = combine(
-        appConfigRepository.currentUrl,
-        appConfigRepository.latitude,
-        appConfigRepository.longitude,
-        mqttManager.trafficEvents
-    ) { url, lat, lon, trafficEvents ->
+        appConfigRepository.currentUrl,           // 0
+        appConfigRepository.latitude,             // 1
+        appConfigRepository.longitude,            // 2
+        mqttManager.trafficEvents,                // 3
+        appConfigRepository.isPatrolEnabled,      // 4
+        appConfigRepository.patrolMode,           // 5
+        appConfigRepository.minPatrolMinutes,     // 6
+        appConfigRepository.maxPatrolMinutes,     // 7
+        appConfigRepository.selectedPatrolHours   // 8
+                                                     ) { args ->
+        val url = args[0] as String
+        val lat = args[1] as Double
+        val lon = args[2] as Double
+        val trafficEvents = args[3] as List<MqttTrafficEvent>
+        val isEnabled = args[4] as Boolean
+        val mode = args[5] as DialogPatrolMode
+        val min = args[6] as Int
+        val max = args[7] as Int
+        val hours = args[8] as Set<Int>
+
         AdminPanelState(
             webserverUrl = url,
             latitude = lat,
             longitude = lon,
             coordinates = "Länge: $lon Breite: $lat",
             mqttReportTopics = MqttManager.reportTopics,
-            mqttTrafficEvents = trafficEvents.filter { it.topic in MqttManager.reportTopics }
-        )
+            mqttTrafficEvents = trafficEvents.filter { it.topic in MqttManager.reportTopics },
+            isPatrolEnabled = isEnabled,
+            patrolMode = mode,
+            minMinutes = min,
+            maxMinutes = max,
+            selectedHours = hours
+                       )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(STATE_TIMEOUT),
         initialValue = AdminPanelState()
-    )
+             )
 
     fun checkPassword(input: String) {
         viewModelScope.launch {
@@ -123,8 +144,29 @@ class AdminPanelViewModel(
         }
     }
 
-    fun onSavePatrolSettings(mode: Any, minMin: Int, maxMin: Int, hours: Set<Int>) {
-        // TODO
+    fun onSavePatrolSettings(
+        isEnabled: Boolean,
+        mode: DialogPatrolMode,
+        minMin: Int,
+        maxMin: Int,
+        hours: Set<Int>
+    ) {
+        viewModelScope.launch {
+            appConfigRepository.updatePatrolSettings(isEnabled, mode, minMin, maxMin, hours)
+        }
+    }
+
+    fun onTriggerImmediatePatrol() {
+
+        // TODO Anbindung der Backend Logik
+
+        //patrolMode = FIXED oder RANDOM
+        // isPatrolEnabled = true oder false
+        //selected Hours gibt int von 1 bis 24 für die Stunden
+
+        val meinStundenPlan = uiState.value.selectedHours
+
+        Timber.d("Aktueller Stundenplan: $meinStundenPlan")
     }
     companion object {
         private const val STATE_TIMEOUT = 5000L
@@ -144,8 +186,13 @@ data class AdminPanelState(
     val mqttTrafficEvents: List<MqttTrafficEvent> = emptyList(),
     val coordinates: String = "",
     val patrolModeText: String = "Deaktiviert",
+    val isPatrolEnabled: Boolean = false,
+    val patrolMode: DialogPatrolMode = DialogPatrolMode.RANDOM,
+    val minMinutes: Int = 40,
+    val maxMinutes: Int = 60,
+    val selectedHours: Set<Int> = emptySet(),
     @Suppress("MagicNumber")
-    var longitude: Double = 8.3573,
+    val longitude: Double = 8.3573,
     @Suppress("MagicNumber")
-    var latitude: Double = 49.0138
+    val latitude: Double = 49.0138
 )
