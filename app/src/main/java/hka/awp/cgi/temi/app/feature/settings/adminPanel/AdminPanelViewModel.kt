@@ -39,10 +39,15 @@ class AdminPanelViewModel(
     val passwordError = _passwordError.asStateFlow()
 
     private val patrolRouteSettings = MutableStateFlow(PatrolRouteSettingsState())
+    private val patrolLocationPrefix = "patrol_"
 
     fun loadPatrolLocations() {
         patrolRouteSettings.update {
-            it.copy(savedLocations = robot?.locations ?: emptyList())
+            it.copy(savedLocations = robot
+                ?.locations
+                ?.filter { location -> location.startsWith(patrolLocationPrefix) }
+                ?: emptyList()
+                   )
         }
     }
 
