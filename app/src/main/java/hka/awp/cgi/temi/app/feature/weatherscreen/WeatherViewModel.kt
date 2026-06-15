@@ -2,7 +2,7 @@ package hka.awp.cgi.temi.app.feature.weatherscreen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import hka.awp.cgi.temi.app.feature.webserver.AppConfigRepository
+import hka.awp.cgi.temi.app.utils.AppConfigRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.currentCoroutineContext
