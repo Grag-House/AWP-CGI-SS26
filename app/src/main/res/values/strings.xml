@@ -247,4 +247,12 @@
     <string name="hiding_spot_filter_count">%1$d von %2$d Orten aktiviert</string>
     <string name="hiding_spot_filter_cancel">Abbrechen</string>
     <string name="hiding_spot_filter_save">Speichern</string>
+    <string name="admin_panel_restart_app">App neustarten</string>
+    <string name="admin_panel_restart_app_subtitle">Bei Problemen, einmal neustarten</string>
+    <string name="admin_panel_restart_confirm_title">App neustarten?</string>
+    <string name="admin_panel_restart_confirm_text">Die Anwendung wird beendet und sofort neu gestartet. Laufende Hintergrundprozesse werden unterbrochen.</string>
+    <string name="admin_panel_confirm_restart">Neustart</string>
+    <string name="admin_panel_password_input">Admin-Bereich geschützt, bitte Passwort eingeben.</string>
+    <string name="admin_panel_enter_password">Password eingeben</string>
+    <string name="password_wrong">Falsches Passwort</string>
 </resources>
