@@ -80,15 +80,10 @@ class ControllerViewModel(
     }
 
     fun onControllerInput(x: Float, y: Float) {
-        // 1. Exponential-Kurve wie gehabt
         val steering = if (x > 0) x * x else -(x * x)
 
-        // 2. Modifizierter Mix:
-        // Wenn wir vorwärts fahren, reduzieren wir die lineare Geschwindigkeit (y) leicht,
-        // um dem Roboter "Platz" für die Drehung (turn) zu geben.
-        val turnMultiplier = 2.0f // Aggressiverer Multiplikator
-
-        // Wir drosseln den Vorwärts-Speed um 30% bei starkem Lenken
+        val turnMultiplier = 2.0f
+        
         val turnEffort = abs(steering)
         val linearSpeed = y * (1.0f - (turnEffort * 0.3f))
 
