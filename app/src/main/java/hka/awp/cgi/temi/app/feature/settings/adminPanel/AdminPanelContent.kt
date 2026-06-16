@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import hka.awp.cgi.temi.app.R
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.CloseAppCard
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.CoordinateManagementCard
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.MqttReportsCard
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.PatrolRouteCard
@@ -36,7 +37,8 @@ fun AdminPanelContent(
     onEditCoordinates: () -> Unit,
     onRestartRequest: () -> Unit,
     onNavigateToPatrolSettings: () -> Unit,
-    onNavigateToPatrolRoute: () -> Unit
+    onNavigateToPatrolRoute: () -> Unit,
+    onCloseRequest: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -75,6 +77,7 @@ fun AdminPanelContent(
                     onNavigate = onNavigateToPatrolRoute
                 )
                 RestartAppCard(onRestartClick = onRestartRequest)
+                CloseAppCard(onCloseClick = onCloseRequest)
             }
         }
     }

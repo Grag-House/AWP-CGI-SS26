@@ -178,6 +178,12 @@ class AdminPanelViewModel(
         }
     }
 
+    fun requestCloseApp() {
+        viewModelScope.launch {
+            _events.emit(AdminPanelEvent.CloseAppTriggered)
+        }
+    }
+
     fun onSavePatrolSettings(
         isEnabled: Boolean,
         mode: DialogPatrolMode,
@@ -238,6 +244,7 @@ sealed interface AdminPanelEvent {
     data object OpenMqttReports : AdminPanelEvent
     data object PasswordChanged : AdminPanelEvent
     data object RestartAppTriggered : AdminPanelEvent
+    data object CloseAppTriggered : AdminPanelEvent
 }
 
 data class AdminPanelState(
