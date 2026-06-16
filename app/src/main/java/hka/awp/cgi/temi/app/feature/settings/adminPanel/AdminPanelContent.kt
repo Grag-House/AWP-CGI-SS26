@@ -73,7 +73,7 @@ fun AdminPanelContent(
                 PatrolRouteCard(
                     currentRouteText = uiState.patrolRouteText,
                     onNavigate = onNavigateToPatrolRoute
-                               )
+                )
                 RestartAppCard(onRestartClick = onRestartRequest)
             }
         }
