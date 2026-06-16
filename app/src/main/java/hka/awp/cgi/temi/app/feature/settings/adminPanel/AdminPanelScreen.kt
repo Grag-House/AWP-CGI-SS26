@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.Mic
 import androidx.compose.material.icons.outlined.Storage
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -28,6 +29,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -190,6 +192,115 @@ fun ChangePasswordDialog(
                 enabled = newPassword.isNotBlank()
             ) {
                 Text(stringResource(R.string.admin_panel_confirm))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.admin_panel_cancel))
+            }
+        }
+    )
+}
+
+@Composable
+fun SpeakerVerificationCard(
+    enabled: Boolean,
+    onToggle: (Boolean) -> Unit
+) {
+    ConfigCard {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            ConfigIconBox(
+                icon = Icons.Outlined.Mic,
+                contentDescription = stringResource(R.string.admin_panel_speaker_verification)
+            )
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                ConfigValue(stringResource(R.string.admin_panel_speaker_verification))
+                ConfigSubtext(stringResource(R.string.admin_panel_speaker_verification_subtitle))
+            }
+            Switch(
+                checked = enabled,
+                onCheckedChange = onToggle
+            )
+        }
+    }
+}
+
+@Composable
+fun ResetVoiceProfilesCard(
+    profileCount: Int,
+    isEnrollmentActive: Boolean,
+    onReset: () -> Unit,
+    onToggleEnrollment: (Boolean) -> Unit
+) {
+    ConfigCard {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            ConfigIconBox(
+                icon = Icons.Outlined.Mic,
+                contentDescription = "Stimmen-Management"
+            )
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                ConfigValue("Sprachprofile")
+                ConfigSubtext(
+                    if (isEnrollmentActive) {
+                        "Enrollment aktiv..."
+                    } else {
+                        "$profileCount Profile gespeichert"
+                    }
+                )
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                Text(
+                    text = if (isEnrollmentActive) "Stopp" else "Lernen",
+                    color = MaterialTheme.colorScheme.primary,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.clickable { onToggleEnrollment(!isEnrollmentActive) }
+                )
+                Text(
+                    text = "Reset",
+                    color = MaterialTheme.colorScheme.error,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.clickable(onClick = onReset)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ResetVoiceProfilesDialog(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Stimmen zurücksetzen") },
+        text = {
+            Text(
+                text = "Möchten Sie wirklich alle gespeicherten Sprachprofile löschen? " +
+                    "Diese Aktion kann nicht rückgängig gemacht werden."
+            )
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    onConfirm()
+                    onDismiss()
+                },
+                colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error
+                )
+            ) {
+                Text("Löschen")
             }
         },
         dismissButton = {
@@ -366,6 +477,7 @@ fun AdminPanelScreen(
     var showPasswordDialog by remember { mutableStateOf(false) }
     var showUrlDialog by remember { mutableStateOf(false) }
     var showMqttReportsDialog by remember { mutableStateOf(false) }
+    var showResetVoiceProfilesDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(viewModel) {
         viewModel.events.collectLatest { event ->
@@ -414,6 +526,13 @@ fun AdminPanelScreen(
         )
     }
 
+    if (showResetVoiceProfilesDialog) {
+        ResetVoiceProfilesDialog(
+            onConfirm = viewModel::onResetVoiceProfiles,
+            onDismiss = { showResetVoiceProfilesDialog = false }
+        )
+    }
+
     Row(
         modifier = Modifier
             .fillMaxSize()
@@ -455,6 +574,18 @@ fun AdminPanelScreen(
                 CoordinateManagementCard(
                     coordinates = uiState.coordinates,
                     onEdit = { showCoordinateDialog = true }
+                )
+
+                SpeakerVerificationCard(
+                    enabled = uiState.isSpeakerVerificationEnabled,
+                    onToggle = { viewModel.onToggleSpeakerVerification(it) }
+                )
+
+                ResetVoiceProfilesCard(
+                    profileCount = uiState.voiceProfileCount,
+                    isEnrollmentActive = uiState.isEnrollmentActive,
+                    onReset = { showResetVoiceProfilesDialog = true },
+                    onToggleEnrollment = { viewModel.onToggleEnrollment(it) }
                 )
             }
         }
