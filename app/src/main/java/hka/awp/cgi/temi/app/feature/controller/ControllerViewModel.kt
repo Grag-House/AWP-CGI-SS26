@@ -83,7 +83,7 @@ class ControllerViewModel(
         val steering = if (x > 0) x * x else -(x * x)
 
         val turnMultiplier = 2.0f
-        
+
         val turnEffort = abs(steering)
         val linearSpeed = y * (1.0f - (turnEffort * 0.3f))
 

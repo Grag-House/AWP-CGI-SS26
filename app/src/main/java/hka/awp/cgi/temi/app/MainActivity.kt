@@ -112,7 +112,7 @@ class MainActivity : ComponentActivity() {
 
             return true
         }
-        Timber.d("test ${event.toString()}")
+        Timber.d("test $event")
         return super.dispatchGenericMotionEvent(event)
     }
 
@@ -126,7 +126,7 @@ class MainActivity : ComponentActivity() {
         event: KeyEvent?,
     ): Boolean {
         if (event?.isGameControllerEvent() != true) {
-            Timber.d("test ${event.toString()}")
+            Timber.d("test $event")
             return super.onKeyDown(keyCode, event)
         }
 
