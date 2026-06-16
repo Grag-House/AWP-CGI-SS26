@@ -8,6 +8,8 @@ import hka.awp.cgi.temi.app.feature.mqtt.MqttManager
 import hka.awp.cgi.temi.app.feature.mqtt.MqttTrafficEvent
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.DialogPatrolMode
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolManager
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolMode
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolSettings
 import hka.awp.cgi.temi.app.utils.AppConfigRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,7 +22,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import kotlin.math.round
 
 class AdminPanelViewModel(
@@ -43,11 +44,12 @@ class AdminPanelViewModel(
 
     fun loadPatrolLocations() {
         patrolRouteSettings.update {
-            it.copy(savedLocations = robot
-                ?.locations
-                ?.filter { location -> location.startsWith(patrolLocationPrefix) }
-                ?: emptyList()
-                   )
+            it.copy(
+                savedLocations = robot
+                    ?.locations
+                    ?.filter { location -> location.startsWith(patrolLocationPrefix) }
+                    ?: emptyList()
+            )
         }
     }
 
@@ -62,7 +64,7 @@ class AdminPanelViewModel(
         appConfigRepository.maxPatrolMinutes,
         appConfigRepository.selectedPatrolHours,
         patrolRouteSettings
-                                                     ) { args ->
+    ) { args ->
         val url = args[0] as String
         val lat = args[1] as Double
         val lon = args[2] as Double
@@ -97,12 +99,12 @@ class AdminPanelViewModel(
                     DialogPatrolMode.FIXED -> "Feste Stunden: ${hours.size} ausgewählt"
                 }
             }
-                       )
+        )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(STATE_TIMEOUT),
         initialValue = AdminPanelState()
-             )
+    )
 
     fun checkPassword(input: String) {
         viewModelScope.launch {
@@ -185,24 +187,24 @@ class AdminPanelViewModel(
     ) {
         viewModelScope.launch {
             appConfigRepository.updatePatrolSettings(isEnabled, mode, minMin, maxMin, hours)
+
+            patrolManager.updateSchedule(
+                PatrolSettings(
+                    isEnabled = isEnabled,
+                    mode = when (mode) {
+                        DialogPatrolMode.RANDOM -> PatrolMode.RANDOM
+                        DialogPatrolMode.FIXED -> PatrolMode.FIXED
+                    },
+                    minMinutes = minMin,
+                    maxMinutes = maxMin,
+                    hours = hours,
+                    route = uiState.value.patrolRoute
+                )
+            )
         }
     }
 
-    private var pendingPatrolRoute: List<String> =emptyList()
-    private var patrolIndex = 0
-
     fun onTriggerImmediatePatrol() {
-
-        // TODO Anbindung der Backend Logik
-
-        //patrolMode = FIXED oder RANDOM
-        // isPatrolEnabled = true oder false
-        //selected Hours gibt int von 1 bis 24 für die Stunden
-
-        val meinStundenPlan = uiState.value.selectedHours
-
-        Timber.d("Aktueller Stundenplan: $meinStundenPlan")
-
         patrolManager.startImmediatePatrol(uiState.value.patrolRoute)
     }
 
@@ -210,15 +212,25 @@ class AdminPanelViewModel(
         patrolRouteSettings.update {
             it.copy(route = route)
         }
+
+        val state = uiState.value
+
+        patrolManager.updateSchedule(
+            PatrolSettings(
+                isEnabled = state.isPatrolEnabled,
+                mode = when (state.patrolMode) {
+                    DialogPatrolMode.RANDOM -> PatrolMode.RANDOM
+                    DialogPatrolMode.FIXED -> PatrolMode.FIXED
+                },
+                minMinutes = state.minMinutes,
+                maxMinutes = state.maxMinutes,
+                hours = state.selectedHours,
+                route = route
+            )
+        )
     }
     companion object {
         private const val STATE_TIMEOUT = 5000L
-    }
-
-
-    override fun onCleared() {
-        super.onCleared()
-        patrolManager.clear()
     }
 }
 

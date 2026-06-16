@@ -1,6 +1,8 @@
 package hka.awp.cgi.temi.app
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.media.AudioAttributes
 import android.media.SoundPool
@@ -11,8 +13,10 @@ import android.view.MotionEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.core.content.ContextCompat
 import hka.awp.cgi.temi.app.feature.controller.ControllerViewModel
 import hka.awp.cgi.temi.app.feature.settings.display.DisplayViewModel
 import hka.awp.cgi.temi.app.ui.shell.MainShell
@@ -35,12 +39,18 @@ import kotlin.math.abs
 class MainActivity : ComponentActivity() {
 
     private val controllerViewModel: ControllerViewModel by viewModel()
+    private val cameraPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { isGranted ->
+        Timber.d("Camera permission granted: $isGranted")
+    }
 
     private lateinit var soundPool: SoundPool
     private var hornSoundId: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        requestCameraPermissionIfNeeded()
 
         // this will hide the android topBar and only show if in case the user swipes down
         hideTopBar(window)
@@ -66,6 +76,17 @@ class MainActivity : ComponentActivity() {
             CgiTheme(darkTheme = isDarkMode) {
                 MainShell()
             }
+        }
+    }
+
+    private fun requestCameraPermissionIfNeeded() {
+        val isGranted = ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.CAMERA,
+        ) == PackageManager.PERMISSION_GRANTED
+
+        if (!isGranted) {
+            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
         }
     }
 

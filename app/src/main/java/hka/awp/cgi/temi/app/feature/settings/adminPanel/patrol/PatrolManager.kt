@@ -8,10 +8,14 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
+import kotlin.random.Random
 
 class PatrolManager(
-    private val robot: Robot?
-                   ) : OnGoToLocationStatusChangedListener {
+    private val robot: Robot?,
+    private val cameraStreamManager: PatrolCameraStreamManager
+) : OnGoToLocationStatusChangedListener {
 
     private val scope = CoroutineScope(Dispatchers.Main)
 
@@ -20,9 +24,11 @@ class PatrolManager(
     private var isRunning = false
     private var scanJob: Job? = null
     private var activeCameraTiltAngle = 0
+    private var schedulerJob: Job? = null
 
     init {
         robot?.addOnGoToLocationStatusChangedListener(this)
+        cameraStreamManager.connect()
     }
 
     private companion object {
@@ -34,7 +40,7 @@ class PatrolManager(
     fun startImmediatePatrol(
         route: List<String>,
         cameraTiltAngle: Int = 0
-                            ) {
+    ) {
         if (route.isEmpty()) {
             Timber.w("Keine Kontrollroute konfiguriert.")
             return
@@ -52,6 +58,9 @@ class PatrolManager(
 
         Timber.i("Starte Kontrollfahrt: $activeRoute")
 
+        cameraStreamManager.connect()
+        cameraStreamManager.startStream()
+
         moveToCurrentLocation()
     }
 
@@ -68,7 +77,7 @@ class PatrolManager(
         status: String,
         descriptionId: Int,
         description: String
-                                            ) {
+    ) {
         if (!isRunning) return
 
         when (status.lowercase()) {
@@ -92,7 +101,7 @@ class PatrolManager(
             setCameraTilt(cameraTiltAngle)
             delay(1500L)
 
-            activateCameraPlaceholder()
+            cameraStreamManager.sendPatrolPointReached(activeRoute[activeIndex])
 
             rotateSlowly()
 
@@ -134,7 +143,7 @@ class PatrolManager(
         robot?.tiltAngle(
             degrees = safeAngle,
             speed = CAMERA_TILT_SPEED
-                        )
+        )
     }
 
     private fun goToNextLocation() {
@@ -156,10 +165,92 @@ class PatrolManager(
         activeIndex = 0
         isRunning = false
         robot?.stopMovement()
+        cameraStreamManager.stopStream()
     }
 
     fun clear() {
+        schedulerJob?.cancel()
+        schedulerJob = null
         stopPatrol()
         robot?.removeOnGoToLocationStatusChangedListener(this)
+        cameraStreamManager.disconnect()
+    }
+
+    private suspend fun runRandomSchedule(settings: PatrolSettings) {
+        while (true) {
+            val min = settings.minMinutes.coerceAtLeast(1)
+            val max = settings.maxMinutes.coerceAtLeast(min)
+            val delayMinutes = Random.nextInt(from = min, until = max + 1)
+
+            Timber.d("Nächste zufällige Kontrollfahrt in $delayMinutes Minuten.")
+
+            delay(delayMinutes * 60_000L)
+
+            startImmediatePatrol(settings.route)
+        }
+    }
+
+    private suspend fun runFixedSchedule(settings: PatrolSettings) {
+        if (settings.hours.isEmpty()) {
+            Timber.w("Keine festen Stunden für Kontrollfahrt ausgewählt.")
+            return
+        }
+
+        while (true) {
+            val nextRun = getNextFullHourRun(settings.hours)
+            val delayMs = ChronoUnit.MILLIS.between(LocalDateTime.now(), nextRun)
+                .coerceAtLeast(0)
+
+            Timber.d("Nächste feste Kontrollfahrt um $nextRun in ${delayMs / 1000} Sekunden.")
+
+            delay(delayMs)
+
+            startImmediatePatrol(settings.route)
+        }
+    }
+
+    private fun getNextFullHourRun(hours: Set<Int>): LocalDateTime {
+        val validHours = hours
+            .filter { it in 0..23 }
+            .sorted()
+
+        val now = LocalDateTime.now()
+            .withMinute(0)
+            .withSecond(0)
+            .withNano(0)
+
+        val nextToday = validHours
+            .map { hour -> now.withHour(hour) }
+            .firstOrNull { time -> time.isAfter(LocalDateTime.now()) }
+
+        if (nextToday != null) return nextToday
+
+        val firstHourTomorrow = validHours.firstOrNull() ?: 0
+
+        return now
+            .plusDays(1)
+            .withHour(firstHourTomorrow)
+    }
+
+    fun updateSchedule(settings: PatrolSettings) {
+        schedulerJob?.cancel()
+        schedulerJob = null
+
+        if (!settings.isEnabled) {
+            Timber.d("Automatische Kontrollfahrten deaktiviert.")
+            return
+        }
+
+        if (settings.route.isEmpty()) {
+            Timber.w("Keine Kontrollroute konfiguriert. Scheduler startet nicht.")
+            return
+        }
+
+        schedulerJob = scope.launch {
+            when (settings.mode) {
+                PatrolMode.RANDOM -> runRandomSchedule(settings)
+                PatrolMode.FIXED -> runFixedSchedule(settings)
+            }
+        }
     }
 }

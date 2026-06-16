@@ -9,6 +9,7 @@ import hka.awp.cgi.temi.app.feature.hideandseek.HidingSpotRepository
 import hka.awp.cgi.temi.app.feature.navigation.NavigationViewModel
 import hka.awp.cgi.temi.app.feature.settings.SettingsViewModel
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.AdminPanelViewModel
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolCameraStreamManager
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolManager
 import hka.awp.cgi.temi.app.feature.settings.battery.BatteryViewModel
 import hka.awp.cgi.temi.app.feature.settings.display.DisplayViewModel
@@ -93,9 +94,11 @@ val appModule = module {
         NavigationViewModel(get(), get(), get())
     }
 
-    viewModel { AdminPanelViewModel(appConfigRepository = get(), mqttManager = get(), patrolManager = get(), robot = get()) }
+    viewModel {
+        AdminPanelViewModel(appConfigRepository = get(), mqttManager = get(), patrolManager = get(), robot = get())
+    }
 
-    single { PatrolManager(robot = get()) }
+    single { PatrolManager(robot = get(), cameraStreamManager = get()) }
 
     single { HidingSpotRepository(androidContext()) }
 
@@ -117,6 +120,13 @@ val appModule = module {
         ControllerViewModel(
             movementController = get(),
             bluetoothControllerManager = get(),
+        )
+    }
+
+    single {
+        PatrolCameraStreamManager(
+            context = get(),
+            serverUrl = "ws://192.168.178.66:8765"
         )
     }
 }
