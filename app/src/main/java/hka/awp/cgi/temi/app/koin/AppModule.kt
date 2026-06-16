@@ -3,6 +3,7 @@ package hka.awp.cgi.temi.app.koin
 import com.robotemi.sdk.Robot
 import hka.awp.cgi.temi.app.data.repository.RobotRepository
 import hka.awp.cgi.temi.app.feature.controller.BluetoothControllerManager
+import hka.awp.cgi.temi.app.feature.controller.ControllerCameraStreamManager
 import hka.awp.cgi.temi.app.feature.controller.ControllerViewModel
 import hka.awp.cgi.temi.app.feature.hideandseek.HideAndSeekViewModel
 import hka.awp.cgi.temi.app.feature.hideandseek.HidingSpotRepository
@@ -116,10 +117,20 @@ val appModule = module {
         )
     }
 
+    single {
+        ControllerCameraStreamManager(
+            context = androidContext(),
+            // Gleicher Server, aber du könntest hier auch einen anderen Endpoint/Port wählen,
+            // falls dein Server die Streams trennen muss (z.B. /patrol vs /controller)
+            serverUrl = "ws://192.168.178.66:8765"
+                                     )
+    }
+
     viewModel {
         ControllerViewModel(
             movementController = get(),
             bluetoothControllerManager = get(),
+            get()
         )
     }
 

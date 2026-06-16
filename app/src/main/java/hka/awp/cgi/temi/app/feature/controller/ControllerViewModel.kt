@@ -14,6 +14,7 @@ import kotlin.math.abs
 class ControllerViewModel(
     private val movementController: TemiMovementController,
     private val bluetoothControllerManager: BluetoothControllerManager,
+    private val cameraStreamManager: ControllerCameraStreamManager
 ) : ViewModel() {
 
     val devices: StateFlow<List<ControllerDevice>> = bluetoothControllerManager.devices
@@ -33,8 +34,11 @@ class ControllerViewModel(
     fun setControllerEnabled(enabled: Boolean) {
         _controllerEnabled.value = enabled
 
-        if (!enabled) {
+        if (enabled) {
+            cameraStreamManager.startLiveView()
+        } else {
             movementController.stop()
+            cameraStreamManager.stopLiveView()
         }
     }
 
@@ -104,6 +108,7 @@ class ControllerViewModel(
     override fun onCleared() {
         movementController.stop()
         bluetoothControllerManager.release()
+        cameraStreamManager.stopLiveView()
         super.onCleared()
     }
 }
