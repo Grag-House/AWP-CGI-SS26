@@ -66,7 +66,6 @@ val appModule = module {
             scope = get(),
         )
     }
-
     viewModel {
         AppViewModel(
             networkManager = get(),
@@ -92,7 +91,14 @@ val appModule = module {
         NavigationViewModel(get(), get(), get())
     }
 
-    viewModel { AdminPanelViewModel(appConfigRepository = get(), mqttManager = get()) }
+    viewModel {
+        AdminPanelViewModel(
+            appConfigRepository = get(),
+            mqttManager = get(),
+            voiceProfileRepository = get(),
+            voiceRecognitionViewModel = get()
+        )
+    }
 
     single { HidingSpotRepository(androidContext()) }
 

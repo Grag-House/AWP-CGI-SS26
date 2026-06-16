@@ -2,6 +2,7 @@ package hka.awp.cgi.temi.app.feature.webserver
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -20,6 +21,7 @@ class AppConfigRepository(private val dataStore: DataStore<Preferences>) {
     private val longitudeKey = doublePreferencesKey("longitude")
     private val adminPasswordHashKey = stringPreferencesKey("admin_password_hash")
     private val adminPasswordLegacyKey = stringPreferencesKey("admin_password")
+    private val speakerVerificationEnabledKey = booleanPreferencesKey("speaker_verification_enabled")
 
     // --- Webview URL ---
 
@@ -65,6 +67,18 @@ class AppConfigRepository(private val dataStore: DataStore<Preferences>) {
         dataStore.edit { preferences ->
             preferences[adminPasswordHashKey] = hash
             preferences.remove(adminPasswordLegacyKey)
+        }
+    }
+
+    // --- Speaker Verification ---
+
+    val isSpeakerVerificationEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[speakerVerificationEnabledKey] ?: false // Default off
+    }
+
+    suspend fun updateSpeakerVerificationEnabled(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[speakerVerificationEnabledKey] = enabled
         }
     }
 
