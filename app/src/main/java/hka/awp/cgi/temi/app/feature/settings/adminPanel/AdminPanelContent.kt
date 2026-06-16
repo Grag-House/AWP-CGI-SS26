@@ -17,6 +17,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import hka.awp.cgi.temi.app.R
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.CoordinateManagementCard
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.HidingSpotFilterCard
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.MqttReportsCard
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.RestartAppCard
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.WebserverPasswordCard
@@ -32,6 +33,7 @@ fun AdminPanelContent(
     onOpenMqtt: () -> Unit,
     onChangePassword: () -> Unit,
     onEditCoordinates: () -> Unit,
+    onOpenHidingSpotFilter: () -> Unit,
     onRestartRequest: () -> Unit
 ) {
     Row(
@@ -62,6 +64,7 @@ fun AdminPanelContent(
                 MqttReportsCard(onNavigate = onOpenMqtt)
                 WebserverPasswordCard(onChangePassword = onChangePassword)
                 CoordinateManagementCard(coordinates = uiState.coordinates, onEdit = onEditCoordinates)
+                HidingSpotFilterCard(onEdit = onOpenHidingSpotFilter)
                 RestartAppCard(onRestartClick = onRestartRequest)
             }
         }

@@ -92,7 +92,14 @@ val appModule = module {
         NavigationViewModel(get(), get(), get())
     }
 
-    viewModel { AdminPanelViewModel(appConfigRepository = get(), mqttManager = get()) }
+    viewModel {
+        AdminPanelViewModel(
+            appConfigRepository = get(),
+            mqttManager = get(),
+            robot = get(),
+            hidingSpotRepository = get()
+        )
+    }
 
     single { HidingSpotRepository(androidContext()) }
 

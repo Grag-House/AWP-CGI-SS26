@@ -13,6 +13,7 @@ import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Storage
+import androidx.compose.material.icons.rounded.SportsEsports
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -24,6 +25,31 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import hka.awp.cgi.temi.app.R
+
+@Composable
+fun HidingSpotFilterCard(onEdit: () -> Unit) {
+    ConfigCard(onClick = onEdit) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            ConfigIconBox(
+                icon = Icons.Rounded.SportsEsports,
+                contentDescription = stringResource(R.string.admin_panel_hiding_spots)
+            )
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                ConfigValue(stringResource(R.string.admin_panel_hiding_spots))
+                ConfigSubtext(stringResource(R.string.admin_panel_hiding_spots_subtitle))
+            }
+            Icon(
+                imageVector = Icons.Default.ChevronRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
 
 @Composable
 fun RestartAppCard(onRestartClick: () -> Unit) {

@@ -230,6 +230,8 @@
     <string name="hiding_spot_filter_count">%1$d of %2$d places activated</string>
     <string name="hiding_spot_filter_cancel">Cancel</string>
     <string name="hiding_spot_filter_save">Save</string>
+    <string name="admin_panel_hiding_spots">Hiding Spot Configuration</string>
+    <string name="admin_panel_hiding_spots_subtitle">Manage allowed hiding spots</string>
     <string name="admin_panel_restart_app">Restart App</string>
     <string name="admin_panel_restart_app_subtitle">Restart once if experiencing issues</string>
     <string name="admin_panel_restart_confirm_title">Restart app?</string>
