@@ -247,6 +247,8 @@
     <string name="hiding_spot_filter_count">%1$d von %2$d Orten aktiviert</string>
     <string name="hiding_spot_filter_cancel">Abbrechen</string>
     <string name="hiding_spot_filter_save">Speichern</string>
+    <string name="admin_panel_hiding_spots">Versteck-Konfiguration</string>
+    <string name="admin_panel_hiding_spots_subtitle">Erlaubte Versteckpositionen verwalten</string>
     <string name="admin_panel_restart_app">App neustarten</string>
     <string name="admin_panel_restart_app_subtitle">Bei Problemen, einmal neustarten</string>
     <string name="admin_panel_restart_confirm_title">App neustarten?</string>

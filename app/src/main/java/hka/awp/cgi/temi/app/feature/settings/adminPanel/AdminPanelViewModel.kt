@@ -2,7 +2,10 @@ package hka.awp.cgi.temi.app.feature.settings.adminPanel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.robotemi.sdk.Robot
 import hka.awp.cgi.temi.app.BuildConfig
+import hka.awp.cgi.temi.app.feature.hideandseek.HidingSpotFilterManager
+import hka.awp.cgi.temi.app.feature.hideandseek.HidingSpotRepository
 import hka.awp.cgi.temi.app.feature.mqtt.MqttManager
 import hka.awp.cgi.temi.app.feature.mqtt.MqttTrafficEvent
 import hka.awp.cgi.temi.app.utils.AppConfigRepository
@@ -20,8 +23,12 @@ import kotlin.math.round
 
 class AdminPanelViewModel(
     private val appConfigRepository: AppConfigRepository,
-    private val mqttManager: MqttManager
+    private val mqttManager: MqttManager,
+    robot: Robot?,
+    hidingSpotRepository: HidingSpotRepository
 ) : ViewModel() {
+
+    val filterManager = HidingSpotFilterManager(robot, hidingSpotRepository)
 
     private val _events = MutableSharedFlow<AdminPanelEvent>()
     val events = _events.asSharedFlow()
