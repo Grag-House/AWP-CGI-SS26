@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 
 @Suppress("TooManyFunctions")
 class ControllerViewModel(
@@ -79,8 +80,22 @@ class ControllerViewModel(
     }
 
     fun onControllerInput(x: Float, y: Float) {
-        lastX = x
-        lastY = y
+        // 1. Exponential-Kurve wie gehabt
+        val steering = if (x > 0) x * x else -(x * x)
+
+        // 2. Modifizierter Mix:
+        // Wenn wir vorwärts fahren, reduzieren wir die lineare Geschwindigkeit (y) leicht,
+        // um dem Roboter "Platz" für die Drehung (turn) zu geben.
+        val turnMultiplier = 2.0f // Aggressiverer Multiplikator
+
+        // Wir drosseln den Vorwärts-Speed um 30% bei starkem Lenken
+        val turnEffort = abs(steering)
+        val linearSpeed = y * (1.0f - (turnEffort * 0.3f))
+
+        val turn = steering * turnMultiplier
+
+        lastX = turn
+        lastY = linearSpeed
     }
 
     fun loadPairedDevices() {
@@ -98,4 +113,4 @@ class ControllerViewModel(
     }
 }
 
-private const val CONTROLLER_UPDATE_INTERVAL_MS = 50L
+private const val CONTROLLER_UPDATE_INTERVAL_MS = 20L

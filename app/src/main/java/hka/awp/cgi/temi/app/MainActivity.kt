@@ -82,6 +82,7 @@ class MainActivity : ComponentActivity() {
         if (event.isGameControllerEvent()) {
             val leftY = event.getCenteredAxis(MotionEvent.AXIS_Y)
             val rightX = event.getCenteredAxis(MotionEvent.AXIS_Z)
+            Timber.d("Stick Werte - RX: $leftY, Z: $rightX")
 
             controllerViewModel.onControllerInput(
                 x = -rightX,
@@ -90,7 +91,7 @@ class MainActivity : ComponentActivity() {
 
             return true
         }
-
+        Timber.d("test ${event.toString()}")
         return super.dispatchGenericMotionEvent(event)
     }
 
@@ -104,6 +105,7 @@ class MainActivity : ComponentActivity() {
         event: KeyEvent?,
     ): Boolean {
         if (event?.isGameControllerEvent() != true) {
+            Timber.d("test ${event.toString()}")
             return super.onKeyDown(keyCode, event)
         }
 
