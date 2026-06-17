@@ -24,7 +24,7 @@ class CameraStreamManager(
     private val context: Context,
     private val serverUrl: String,
     private val onMessageReceived: (String) -> Unit // Callback für eingehende Server-Nachrichten
-) {
+                         ) {
     private val client = OkHttpClient()
     private val cameraExecutor = Executors.newSingleThreadExecutor()
 
@@ -32,7 +32,14 @@ class CameraStreamManager(
     private var imageAnalysis: ImageAnalysis? = null
     private var isStreaming = false
 
-    fun connect() {
+    // Verhindert mehrfache Verbindungsaufbaue während der Stream läuft
+    @Volatile
+    private var isWebSocketConnectingOrConnected = false
+
+    // HINWEIS: Wird jetzt intern aufgerufen, wenn der erste Frame bereit ist!
+    private fun connect() {
+        if (webSocket != null) return
+
         val request = Request.Builder().url(serverUrl).build()
 
         webSocket = client.newWebSocket(
@@ -47,47 +54,66 @@ class CameraStreamManager(
                 }
 
                 override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-                    Timber.e(t, "WebSocket Fehler")
+                    Timber.e(t, "WebSocket Fehler - Setze Verbindungsstatus zurück")
+                    // Bei Fehler zurücksetzen, damit beim nächsten Frame ein Reconnect versucht werden kann
+                    isWebSocketConnectingOrConnected = false
+                    this@CameraStreamManager.webSocket = null
                 }
 
                 override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
                     Timber.d("WebSocket geschlossen: $code $reason")
+                    isWebSocketConnectingOrConnected = false
+                    this@CameraStreamManager.webSocket = null
                 }
             }
-        )
+                                       )
     }
 
     fun startStream() {
         if (isStreaming) return
         isStreaming = true
+        isWebSocketConnectingOrConnected = false // Status zurücksetzen
 
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
         cameraProviderFuture.addListener({
-            val cameraProvider = cameraProviderFuture.get()
+                                             val cameraProvider = cameraProviderFuture.get()
 
-            imageAnalysis = ImageAnalysis.Builder()
-                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                .build()
-                .also { analysis ->
-                    analysis.setAnalyzer(cameraExecutor) { imageProxy ->
-                        handleFrame(imageProxy)
-                    }
-                }
+                                             imageAnalysis = ImageAnalysis.Builder()
+                                                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                                                 .build()
+                                                 .also { analysis ->
+                                                     analysis.setAnalyzer(cameraExecutor) { imageProxy ->
+                                                         handleFrame(imageProxy)
+                                                     }
+                                                 }
 
-            cameraProvider.unbindAll()
-            cameraProvider.bindToLifecycle(
-                ProcessLifecycleOwner.get(),
-                CameraSelector.DEFAULT_FRONT_CAMERA,
-                imageAnalysis
-            )
-        }, ContextCompat.getMainExecutor(context))
+                                             cameraProvider.unbindAll()
+                                             cameraProvider.bindToLifecycle(
+                                                 ProcessLifecycleOwner.get(),
+                                                 CameraSelector.DEFAULT_FRONT_CAMERA,
+                                                 imageAnalysis
+                                                                           )
+                                         }, ContextCompat.getMainExecutor(context))
     }
 
     private fun handleFrame(imageProxy: ImageProxy) {
         try {
             if (!isStreaming) return
-            val jpegBytes = imageProxy.toJpegBytes(JPEG_QUALITY)
-            sendBytes(jpegBytes)
+
+            // 1. Erst wenn wirklich Frames ankommen, starten wir den WebSocket
+            if (!isWebSocketConnectingOrConnected) {
+                isWebSocketConnectingOrConnected = true
+                Timber.i("Erster Kamera-Frame empfangen! Starte WebSocket-Verbindung...")
+                connect()
+            }
+
+            // 2. Nur senden, wenn der Socket auch tatsächlich bereit ist
+            val currentWebSocket = webSocket
+            if (currentWebSocket != null) {
+                val jpegBytes = imageProxy.toJpegBytes(JPEG_QUALITY)
+                currentWebSocket.send(jpegBytes.toByteString())
+            }
+
         } catch (e: Exception) {
             Timber.e(e, "Frame konnte nicht gesendet werden")
         } finally {
@@ -106,18 +132,21 @@ class CameraStreamManager(
     fun stopStream() {
         if (!isStreaming) return
         isStreaming = false
+        isWebSocketConnectingOrConnected = false
 
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
         cameraProviderFuture.addListener({
-            cameraProviderFuture.get().unbindAll()
-            imageAnalysis = null
-        }, ContextCompat.getMainExecutor(context))
+                                             cameraProviderFuture.get().unbindAll()
+                                             imageAnalysis = null
+
+                                             // Socket schließen, wenn der Stream stoppt
+                                             webSocket?.close(1000, "Stream stopped")
+                                             webSocket = null
+                                         }, ContextCompat.getMainExecutor(context))
     }
 
     fun disconnect() {
         stopStream()
-        webSocket?.close(1000, "Stream closed")
-        webSocket = null
         cameraExecutor.shutdown()
     }
 

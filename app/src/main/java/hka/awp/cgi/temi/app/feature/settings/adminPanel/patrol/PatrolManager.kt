@@ -25,7 +25,6 @@ class PatrolManager(
 
     init {
         robot?.addOnGoToLocationStatusChangedListener(this)
-        cameraStreamManager.connect()
     }
 
     fun startImmediatePatrol(route: List<String>, cameraTiltAngle: Int = 0) {
@@ -44,7 +43,6 @@ class PatrolManager(
         activeCameraTiltAngle = cameraTiltAngle
 
         Timber.i("Starte Kontrollfahrt: $activeRoute")
-        cameraStreamManager.connect()
         cameraStreamManager.startStream()
 
         moveToCurrentLocation()

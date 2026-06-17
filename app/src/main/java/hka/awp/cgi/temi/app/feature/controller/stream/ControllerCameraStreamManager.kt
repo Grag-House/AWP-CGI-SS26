@@ -1,7 +1,8 @@
-package hka.awp.cgi.temi.app.feature.controller
+package hka.awp.cgi.temi.app.feature.controller.stream
 
 import android.content.Context
 import hka.awp.cgi.temi.app.core.camera.CameraStreamManager
+import kotlinx.coroutines.delay
 
 class ControllerCameraStreamManager(context: Context, serverUrl: String) {
 
@@ -9,7 +10,6 @@ class ControllerCameraStreamManager(context: Context, serverUrl: String) {
     }
 
     fun startLiveView() {
-        baseStreamManager.connect()
         baseStreamManager.startStream()
     }
 

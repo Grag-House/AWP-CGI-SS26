@@ -14,7 +14,6 @@ class PatrolCameraStreamManager(context: Context, serverUrl: String) {
         _events.tryEmit(parseEvent(text))
     }
 
-    fun connect() = baseStreamManager.connect()
     fun startStream() = baseStreamManager.startStream()
     fun stopStream() = baseStreamManager.stopStream()
     fun disconnect() = baseStreamManager.disconnect()
