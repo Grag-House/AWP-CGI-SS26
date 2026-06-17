@@ -1,6 +1,8 @@
 package hka.awp.cgi.temi.app.feature.photobox
 
 import android.graphics.Bitmap
+import androidx.camera.core.Preview
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
@@ -11,6 +13,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 enum class PhotoboxPhase { IDLE, COUNTDOWN, CAPTURE, PREVIEW }
 
@@ -24,11 +27,19 @@ data class PhotoboxUiState(
 private const val DEFAULT_DURATION = 3
 private const val TICK_MS = 1000L
 
-class PhotoboxViewModel : ViewModel() {
+class PhotoboxViewModel(
+    private val cameraManager: PhotoboxCameraManager
+) : ViewModel() {
     private val _uiState = MutableStateFlow(PhotoboxUiState())
     val uiState: StateFlow<PhotoboxUiState> = _uiState.asStateFlow()
 
+    val cameraState: StateFlow<PhotoboxCameraState> = cameraManager.cameraState
+
     private var countdownJob: Job? = null
+
+    fun bindCamera(lifecycleOwner: LifecycleOwner, surfaceProvider: Preview.SurfaceProvider) {
+        cameraManager.bindToLifecycle(lifecycleOwner, surfaceProvider)
+    }
 
     fun setDuration(seconds: Int) {
         _uiState.update { it.copy(selectedDuration = seconds, countdownRemaining = seconds) }
@@ -36,11 +47,8 @@ class PhotoboxViewModel : ViewModel() {
 
     fun startSession() = startCountdown()
 
-    fun takeAnotherPhoto() = startCountdown()
-
-    fun onPhotoCaptured(bitmap: Bitmap) {
-        _uiState.update { it.copy(phase = PhotoboxPhase.PREVIEW, capturedBitmap = bitmap) }
-    }
+    // Returns to the duration picker instead of immediately re-starting the countdown.
+    fun takeAnotherPhoto() = reset()
 
     fun reset() {
         countdownJob?.cancel()
@@ -50,6 +58,12 @@ class PhotoboxViewModel : ViewModel() {
                 countdownRemaining = state.selectedDuration
             )
         }
+    }
+
+    /** Called when the Photobox tab is left (e.g. the user switches to another tab). */
+    fun onScreenStopped() {
+        reset()
+        cameraManager.unbind()
     }
 
     private fun startCountdown() {
@@ -70,13 +84,29 @@ class PhotoboxViewModel : ViewModel() {
                 remaining--
             }
             if (!isActive) return@launch
-            // Enter CAPTURE — stays here until onPhotoCaptured() is called
+            // Enter CAPTURE — stays here until the camera callback resolves the photo
             _uiState.update { it.copy(phase = PhotoboxPhase.CAPTURE) }
+            capturePhoto()
+        }
+    }
+
+    private fun capturePhoto() {
+        cameraManager.capturePhoto { result ->
+            result.fold(
+                onSuccess = { bitmap ->
+                    _uiState.update { it.copy(phase = PhotoboxPhase.PREVIEW, capturedBitmap = bitmap) }
+                },
+                onFailure = { error ->
+                    Timber.e(error, "Failed to capture photobox photo")
+                    _uiState.update { it.copy(phase = PhotoboxPhase.IDLE) }
+                }
+            )
         }
     }
 
     override fun onCleared() {
         countdownJob?.cancel()
+        cameraManager.unbind()
         super.onCleared()
     }
 }
