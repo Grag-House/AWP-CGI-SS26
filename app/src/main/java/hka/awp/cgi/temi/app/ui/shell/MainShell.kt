@@ -20,6 +20,8 @@ import hka.awp.cgi.temi.app.feature.hideandseek.HideAndSeekScreen
 import hka.awp.cgi.temi.app.feature.hideandseek.HideAndSeekViewModel
 import hka.awp.cgi.temi.app.feature.navigation.NavigationContent
 import hka.awp.cgi.temi.app.feature.navigation.NavigationViewModel
+import hka.awp.cgi.temi.app.feature.photobox.PhotoboxScreen
+import hka.awp.cgi.temi.app.feature.photobox.PhotoboxViewModel
 import hka.awp.cgi.temi.app.feature.settings.SettingsNavigationEvent
 import hka.awp.cgi.temi.app.feature.settings.SettingsViewModel
 import hka.awp.cgi.temi.app.feature.settings.about.SettingsScreen
@@ -59,7 +61,8 @@ fun MainShell(
     navigationViewModel: NavigationViewModel = koinViewModel(),
     webserverViewModel: WebserverViewModel = koinViewModel(),
     weatherViewModel: WeatherViewModel = koinViewModel(),
-    hideAndSeekViewModel: HideAndSeekViewModel = koinViewModel()
+    hideAndSeekViewModel: HideAndSeekViewModel = koinViewModel(),
+    photoboxViewModel: PhotoboxViewModel = koinViewModel()
 ) {
     val wifiLevel by appViewModel.wifiLevel.collectAsStateWithLifecycle()
     val currentTime by appViewModel.currentTime.collectAsStateWithLifecycle()
@@ -108,6 +111,7 @@ fun MainShell(
                         navigationViewModel = navigationViewModel,
                         weatherViewModel = weatherViewModel,
                         hideAndSeekViewModel = hideAndSeekViewModel,
+                        photoboxViewModel = photoboxViewModel,
                         serverState = serverState,
                         currentTemperatureState = currentTemperatureState,
                         webserverUrlState = webserverUrlState
@@ -154,20 +158,12 @@ private fun RenderSelectedRoute(
             SettingsScreen(modifier = modifier, viewModel = routeDeps.settingsViewModel)
         }
 
-        Screen.DisplaySettings.route -> DisplayScreen(
-            onBackClick = { routeDeps.appViewModel.onRouteSelect(Screen.Settings) }
-        )
-
-        Screen.BatterySettings.route -> BatteryScreen(
-            onBackClick = { routeDeps.appViewModel.onRouteSelect(Screen.Settings) }
-        )
-
-        Screen.AdminPanel.route -> AdminPanelScreen(
-            onBackClick = { routeDeps.appViewModel.onRouteSelect(Screen.Settings) }
-        )
-
-        Screen.LanguageSettings.route -> LanguageScreen(
-            onBackClick = { routeDeps.appViewModel.onRouteSelect(Screen.Settings) }
+        Screen.DisplaySettings.route,
+        Screen.BatterySettings.route,
+        Screen.AdminPanel.route,
+        Screen.LanguageSettings.route -> RenderSettingsSubRoute(
+            selectedRoute = selectedRoute,
+            onNavigateBack = { routeDeps.appViewModel.onRouteSelect(Screen.Settings) }
         )
 
         Screen.Weather.route -> WeatherContent(viewModel = routeDeps.weatherViewModel)
@@ -175,6 +171,12 @@ private fun RenderSelectedRoute(
         Screen.HideAndSeek.route -> HideAndSeekScreen(
             modifier = modifier,
             viewModel = routeDeps.hideAndSeekViewModel,
+            onNavigateToDashboard = { routeDeps.appViewModel.onRouteSelect(Screen.Dashboard) }
+        )
+
+        Screen.Photobox.route -> PhotoboxScreen(
+            modifier = modifier,
+            viewModel = routeDeps.photoboxViewModel,
             onNavigateToDashboard = { routeDeps.appViewModel.onRouteSelect(Screen.Dashboard) }
         )
 
@@ -190,12 +192,23 @@ private fun RenderSelectedRoute(
     }
 }
 
+@Composable
+private fun RenderSettingsSubRoute(selectedRoute: String, onNavigateBack: () -> Unit) {
+    when (selectedRoute) {
+        Screen.DisplaySettings.route -> DisplayScreen(onBackClick = onNavigateBack)
+        Screen.BatterySettings.route -> BatteryScreen(onBackClick = onNavigateBack)
+        Screen.AdminPanel.route -> AdminPanelScreen(onBackClick = onNavigateBack)
+        else -> LanguageScreen(onBackClick = onNavigateBack)
+    }
+}
+
 private data class MainShellRouteDeps(
     val appViewModel: AppViewModel,
     val settingsViewModel: SettingsViewModel,
     val navigationViewModel: NavigationViewModel,
     val weatherViewModel: WeatherViewModel,
     val hideAndSeekViewModel: HideAndSeekViewModel,
+    val photoboxViewModel: PhotoboxViewModel,
     val serverState: ServerState,
     val currentTemperatureState: WeatherState,
     val webserverUrlState: String

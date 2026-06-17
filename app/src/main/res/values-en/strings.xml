@@ -238,4 +238,23 @@
     <string name="admin_panel_password_input">Admin area protected, please enter password.</string>
     <string name="admin_panel_enter_password">Enter password</string>
     <string name="password_wrong">Incorrect password</string>
+
+    <!-- Photobox -->
+    <string name="photobox">Photo Booth</string>
+    <string name="photobox_sub">Use Temi as a photo booth</string>
+    <string name="photobox_description">Photo booth camera icon</string>
+    <string name="photobox_intro_text">Stand in front of Temi and smile at the camera. The countdown starts automatically.</string>
+    <string name="photobox_countdown_label">COUNTDOWN DURATION</string>
+    <string name="photobox_start_button">Start Photo Booth</string>
+    <string name="photobox_smile_label">Say cheese!</string>
+    <string name="photobox_cancel">Cancel</string>
+    <string name="photobox_click_text">Click!</string>
+    <string name="photobox_preview_title">Photo taken!</string>
+    <string name="photobox_preview_message">Stand in front of Temi again when you\'re ready for the next photo.</string>
+    <string name="photobox_camera_permission_required">Camera permission required</string>
+    <string name="photobox_new_photo_button">New Photo</string>
+    <string name="photobox_to_dashboard">To Dashboard</string>
+    <string name="photobox_photo_count">%1$d photos taken</string>
+    <string name="photobox_photo_number">Photo #%1$d</string>
+    <string name="photobox_duration_seconds">%1$d s</string>
 </resources>
