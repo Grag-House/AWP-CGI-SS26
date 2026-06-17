@@ -7,6 +7,7 @@ import hka.awp.cgi.temi.app.feature.controller.ControllerViewModel
 import hka.awp.cgi.temi.app.feature.hideandseek.HideAndSeekViewModel
 import hka.awp.cgi.temi.app.feature.hideandseek.HidingSpotRepository
 import hka.awp.cgi.temi.app.feature.navigation.NavigationViewModel
+import hka.awp.cgi.temi.app.feature.photobox.PhotoboxCameraManager
 import hka.awp.cgi.temi.app.feature.photobox.PhotoboxViewModel
 import hka.awp.cgi.temi.app.feature.settings.SettingsViewModel
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.AdminPanelViewModel
@@ -99,7 +100,9 @@ val appModule = module {
 
     viewModel { HideAndSeekViewModel(robot = get(), hidingSpotRepository = get()) }
 
-    viewModel { PhotoboxViewModel() }
+    single { PhotoboxCameraManager(androidContext()) }
+
+    viewModel { PhotoboxViewModel(cameraManager = get()) }
 
     viewModel<WebserverViewModel> { WebserverViewModel(get()) }
 

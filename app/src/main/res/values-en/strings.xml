@@ -252,6 +252,7 @@
     <string name="photobox_preview_title">Photo taken!</string>
     <string name="photobox_preview_message">Stand in front of Temi again when you\'re ready for the next photo.</string>
     <string name="photobox_camera_permission_required">Camera permission required</string>
+    <string name="photobox_camera_unavailable">Camera unavailable</string>
     <string name="photobox_new_photo_button">New Photo</string>
     <string name="photobox_to_dashboard">To Dashboard</string>
     <string name="photobox_photo_count">%1$d photos taken</string>

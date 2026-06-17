@@ -3,15 +3,9 @@ package hka.awp.cgi.temi.app.feature.photobox
 import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.Matrix
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.camera.core.CameraSelector
-import androidx.camera.core.ImageCapture
-import androidx.camera.core.ImageCaptureException
-import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
-import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.Animatable
@@ -48,6 +42,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -67,10 +62,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import hka.awp.cgi.temi.app.R
-import timber.log.Timber
 
 private const val DURATION_SHORT_S = 3
 private const val DURATION_MEDIUM_S = 5
@@ -85,15 +80,18 @@ fun PhotoboxScreen(
     onNavigateToDashboard: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val cameraState by viewModel.cameraState.collectAsStateWithLifecycle()
+
+    DisposableEffect(viewModel) {
+        onDispose { viewModel.onScreenStopped() }
+    }
 
     Box(modifier = modifier.fillMaxSize()) {
-        if (uiState.phase != PhotoboxPhase.PREVIEW) {
-            CameraSection(
-                modifier = Modifier.fillMaxSize(),
-                shouldCapture = uiState.phase == PhotoboxPhase.CAPTURE,
-                onPhotoCaptured = viewModel::onPhotoCaptured
-            )
-        }
+        CameraSection(
+            modifier = Modifier.fillMaxSize(),
+            cameraState = cameraState,
+            onBindCamera = viewModel::bindCamera
+        )
 
         when (uiState.phase) {
             PhotoboxPhase.IDLE -> IdleOverlay(
@@ -123,8 +121,8 @@ fun PhotoboxScreen(
 @Composable
 private fun CameraSection(
     modifier: Modifier = Modifier,
-    shouldCapture: Boolean,
-    onPhotoCaptured: (Bitmap) -> Unit
+    cameraState: PhotoboxCameraState,
+    onBindCamera: (LifecycleOwner, Preview.SurfaceProvider) -> Unit
 ) {
     val context = LocalContext.current
     var hasCameraPermission by remember {
@@ -141,32 +139,39 @@ private fun CameraSection(
         if (!hasCameraPermission) permissionLauncher.launch(Manifest.permission.CAMERA)
     }
 
-    if (hasCameraPermission) {
-        CameraPreviewView(
+    when {
+        !hasCameraPermission -> CameraMessageOverlay(
             modifier = modifier,
-            shouldCapture = shouldCapture,
-            onPhotoCaptured = onPhotoCaptured
+            textRes = R.string.photobox_camera_permission_required
         )
-    } else {
-        Box(
-            modifier = modifier.background(MaterialTheme.colorScheme.surfaceVariant),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Icon(
-                    imageVector = Icons.Rounded.NoPhotography,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
-                    modifier = Modifier.size(56.dp)
-                )
-                Spacer(Modifier.height(12.dp))
-                Text(
-                    text = stringResource(R.string.photobox_camera_permission_required),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                    textAlign = TextAlign.Center
-                )
-            }
+        cameraState == PhotoboxCameraState.UNAVAILABLE -> CameraMessageOverlay(
+            modifier = modifier,
+            textRes = R.string.photobox_camera_unavailable
+        )
+        else -> CameraPreviewView(modifier = modifier, onBindCamera = onBindCamera)
+    }
+}
+
+@Composable
+private fun CameraMessageOverlay(modifier: Modifier = Modifier, textRes: Int) {
+    Box(
+        modifier = modifier.background(MaterialTheme.colorScheme.surfaceVariant),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(
+                imageVector = Icons.Rounded.NoPhotography,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                modifier = Modifier.size(56.dp)
+            )
+            Spacer(Modifier.height(12.dp))
+            Text(
+                text = stringResource(textRes),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                textAlign = TextAlign.Center
+            )
         }
     }
 }
@@ -174,67 +179,19 @@ private fun CameraSection(
 @Composable
 private fun CameraPreviewView(
     modifier: Modifier = Modifier,
-    shouldCapture: Boolean,
-    onPhotoCaptured: (Bitmap) -> Unit
+    onBindCamera: (LifecycleOwner, Preview.SurfaceProvider) -> Unit
 ) {
-    val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    val imageCapture = remember { ImageCapture.Builder().build() }
-
-    LaunchedEffect(shouldCapture) {
-        if (shouldCapture) {
-            imageCapture.takePicture(
-                ContextCompat.getMainExecutor(context),
-                object : ImageCapture.OnImageCapturedCallback() {
-                    override fun onCaptureSuccess(image: ImageProxy) {
-                        val bitmap = image.toBitmap()
-                        val rotation = image.imageInfo.rotationDegrees
-                        image.close()
-                        onPhotoCaptured(rotatedBitmap(bitmap, rotation))
-                    }
-                    override fun onError(exc: ImageCaptureException) {
-                        Timber.e(exc, "Photo capture failed")
-                    }
-                }
-            )
-        }
-    }
 
     AndroidView(
         factory = { ctx ->
-            val previewView = PreviewView(ctx).apply {
+            PreviewView(ctx).apply {
                 scaleType = PreviewView.ScaleType.FILL_CENTER
+                onBindCamera(lifecycleOwner, surfaceProvider)
             }
-            val future = ProcessCameraProvider.getInstance(ctx)
-            future.addListener({
-                val cameraProvider = future.get()
-                val preview = Preview.Builder().build().also {
-                    it.setSurfaceProvider(previewView.surfaceProvider)
-                }
-                val cameraSelector = when {
-                    cameraProvider.hasCamera(CameraSelector.DEFAULT_FRONT_CAMERA) ->
-                        CameraSelector.DEFAULT_FRONT_CAMERA
-                    else -> CameraSelector.DEFAULT_BACK_CAMERA
-                }
-                try {
-                    cameraProvider.unbindAll()
-                    cameraProvider.bindToLifecycle(lifecycleOwner, cameraSelector, preview, imageCapture)
-                } catch (e: IllegalStateException) {
-                    Timber.e(e, "Camera binding failed")
-                } catch (e: IllegalArgumentException) {
-                    Timber.e(e, "Camera binding failed")
-                }
-            }, ContextCompat.getMainExecutor(ctx))
-            previewView
         },
         modifier = modifier
     )
-}
-
-private fun rotatedBitmap(bitmap: Bitmap, degrees: Int): Bitmap {
-    if (degrees == 0) return bitmap
-    val matrix = Matrix().apply { postRotate(degrees.toFloat()) }
-    return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
 }
 
 // ─── IDLE overlay ────────────────────────────────────────────────────────────

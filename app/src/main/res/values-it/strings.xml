@@ -251,6 +251,7 @@
     <string name="photobox_preview_title">Foto scattata!</string>
     <string name="photobox_preview_message">Torna davanti a Temi quando sei pronto per la prossima foto.</string>
     <string name="photobox_camera_permission_required">Permesso fotocamera richiesto</string>
+    <string name="photobox_camera_unavailable">Fotocamera non disponibile</string>
     <string name="photobox_new_photo_button">Nuova foto</string>
     <string name="photobox_to_dashboard">Al dashboard</string>
     <string name="photobox_photo_count">%1$d foto scattate</string>
