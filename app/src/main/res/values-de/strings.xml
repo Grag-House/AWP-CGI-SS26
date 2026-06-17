@@ -255,4 +255,23 @@
     <string name="admin_panel_password_input">Admin-Bereich geschützt, bitte Passwort eingeben.</string>
     <string name="admin_panel_enter_password">Password eingeben</string>
     <string name="password_wrong">Falsches Passwort</string>
+
+    <!-- Photobox -->
+    <string name="photobox">Fotobox</string>
+    <string name="photobox_sub">Temi als Fotobox nutzen</string>
+    <string name="photobox_description">Fotobox-Kamera-Symbol</string>
+    <string name="photobox_intro_text">Stell dich vor Temi auf und lächle in die Kamera. Der Countdown startet automatisch.</string>
+    <string name="photobox_countdown_label">COUNTDOWN DAUER</string>
+    <string name="photobox_start_button">Fotobox starten</string>
+    <string name="photobox_smile_label">Lächeln bitte!</string>
+    <string name="photobox_cancel">Abbrechen</string>
+    <string name="photobox_click_text">Klick!</string>
+    <string name="photobox_preview_title">Foto aufgenommen!</string>
+    <string name="photobox_preview_message">Stell dich erneut vor Temi auf, wenn du bereit für das nächste Foto bist.</string>
+    <string name="photobox_camera_permission_required">Kamera-Berechtigung erforderlich</string>
+    <string name="photobox_new_photo_button">Neues Foto</string>
+    <string name="photobox_to_dashboard">Zum Dashboard</string>
+    <string name="photobox_photo_count">%1$d Fotos aufgenommen</string>
+    <string name="photobox_photo_number">Foto #%1$d</string>
+    <string name="photobox_duration_seconds">%1$d s</string>
 </resources>

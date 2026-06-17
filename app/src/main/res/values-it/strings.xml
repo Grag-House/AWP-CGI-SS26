@@ -237,4 +237,23 @@
     <string name="admin_panel_enter_password">Inserisci la password</string>
     <string name="admin_panel_password_input">Area admin protetta, inserisci la password.</string>
     <string name="password_wrong">Password errata</string>
+
+    <!-- Photobox -->
+    <string name="photobox">Fotobox</string>
+    <string name="photobox_sub">Usa Temi come fotobox</string>
+    <string name="photobox_description">Icona fotocamera fotobox</string>
+    <string name="photobox_intro_text">Mettiti davanti a Temi e sorridi alla fotocamera. Il conto alla rovescia parte automaticamente.</string>
+    <string name="photobox_countdown_label">DURATA CONTO ALLA ROVESCIA</string>
+    <string name="photobox_start_button">Avvia fotobox</string>
+    <string name="photobox_smile_label">Sorridi!</string>
+    <string name="photobox_cancel">Annulla</string>
+    <string name="photobox_click_text">Click!</string>
+    <string name="photobox_preview_title">Foto scattata!</string>
+    <string name="photobox_preview_message">Torna davanti a Temi quando sei pronto per la prossima foto.</string>
+    <string name="photobox_camera_permission_required">Permesso fotocamera richiesto</string>
+    <string name="photobox_new_photo_button">Nuova foto</string>
+    <string name="photobox_to_dashboard">Al dashboard</string>
+    <string name="photobox_photo_count">%1$d foto scattate</string>
+    <string name="photobox_photo_number">Foto #%1$d</string>
+    <string name="photobox_duration_seconds">%1$d s</string>
 </resources>
