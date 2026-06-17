@@ -81,6 +81,14 @@ android {
             val adminPassword = props.getProperty("DEFAULT_ADMIN_PASSWORD")
                 ?: throw GradleException("Missing property 'DEFAULT_ADMIN_PASSWORD' in .env")
             buildConfigField("String", "DEFAULT_ADMIN_PASSWORD", "\"$adminPassword\"")
+
+            val serverIp = props.getProperty("SERVER_IP")
+                ?: throw GradleException("Missing property 'SERVER_IP' in .env")
+            buildConfigField("String", "SERVER_IP", "\"$serverIp\"")
+
+            val serverPort = props.getProperty("SERVER_PORT")
+                ?: throw GradleException("Missing property 'SERVER_PORT' in .env")
+            buildConfigField("String", "SERVER_PORT", "\"$serverPort\"")
         } else {
             throw GradleException(
                 "Missing .env file! please create it and include the 'WEBVIEW_URL"

@@ -1,6 +1,7 @@
 package hka.awp.cgi.temi.app.koin
 
 import com.robotemi.sdk.Robot
+import hka.awp.cgi.temi.app.BuildConfig
 import hka.awp.cgi.temi.app.data.repository.RobotRepository
 import hka.awp.cgi.temi.app.feature.controller.BluetoothControllerManager
 import hka.awp.cgi.temi.app.feature.controller.stream.ControllerCameraStreamManager
@@ -118,9 +119,11 @@ val appModule = module {
     }
 
     single {
+        val ip = BuildConfig.SERVER_IP
+        val port = BuildConfig.SERVER_PORT
         ControllerCameraStreamManager(
             context = androidContext(),
-            serverUrl = "ws://192.168.178.63:8765"
+            serverUrl = "ws://$ip:$port"
                                      )
     }
 
@@ -133,9 +136,11 @@ val appModule = module {
     }
 
     single {
+        val ip = BuildConfig.SERVER_IP
+        val port = BuildConfig.SERVER_PORT
         PatrolCameraStreamManager(
             context = get(),
-            serverUrl = "ws://192.168.178.63:8765"
+            serverUrl = "ws://$ip:$port"
         )
     }
 }
