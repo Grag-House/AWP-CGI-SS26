@@ -214,6 +214,9 @@ dependencies {
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
 
+    // QR code generation for Photobox photo links
+    implementation(libs.zxing.core)
+
     // api desugaring
     coreLibraryDesugaring(libs.android.desugarJdkLibs)
 

@@ -16,6 +16,7 @@ import androidx.camera.core.UseCaseGroup
 import androidx.camera.core.ViewPort
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.scale
 import androidx.lifecycle.LifecycleOwner
 import hka.awp.cgi.temi.app.R
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -46,7 +47,9 @@ class PhotoboxCameraManager(private val context: Context) {
     private val captureExecutor = Executors.newSingleThreadExecutor()
     private val imageCapture = ImageCapture.Builder().build()
     private var cameraProvider: ProcessCameraProvider? = null
-    private var isFrontCamera = true
+
+    private val _isFrontCamera = MutableStateFlow(true)
+    val isFrontCamera: StateFlow<Boolean> = _isFrontCamera.asStateFlow()
 
     private val shutterSoundPool = SoundPool.Builder()
         .setMaxStreams(1)
@@ -90,7 +93,7 @@ class PhotoboxCameraManager(private val context: Context) {
                     .build()
                 provider.bindToLifecycle(lifecycleOwner, cameraSelector, useCaseGroup)
                 cameraProvider = provider
-                isFrontCamera = useFrontCamera
+                _isFrontCamera.value = useFrontCamera
                 _cameraState.value = PhotoboxCameraState.READY
             } catch (e: IllegalStateException) {
                 Timber.e(e, "Camera binding failed")
@@ -112,11 +115,20 @@ class PhotoboxCameraManager(private val context: Context) {
             captureExecutor,
             object : ImageCapture.OnImageCapturedCallback() {
                 override fun onCaptureSuccess(image: ImageProxy) {
-                    val bitmap = image.toBitmap()
+                    val rawBitmap = image.toBitmap()
+                    val cropRect = image.cropRect
+                    // The ViewPort crop is metadata on the ImageProxy, not baked into the raw
+                    // buffer — toBitmap() returns the full, uncropped sensor frame, so we have to
+                    // crop to cropRect ourselves or the uncropped margin shows up as a black band.
+                    val bitmap = if (cropRect.width() != rawBitmap.width || cropRect.height() != rawBitmap.height) {
+                        Bitmap.createBitmap(rawBitmap, cropRect.left, cropRect.top, cropRect.width(), cropRect.height())
+                    } else {
+                        rawBitmap
+                    }
                     val rotation = image.imageInfo.rotationDegrees
                     image.close()
                     var result = rotatedBitmap(bitmap, rotation)
-                    if (isFrontCamera) result = mirroredBitmap(result)
+                    if (_isFrontCamera.value) result = mirroredBitmap(result)
                     result = downscaledIfNeeded(result)
                     onResult(Result.success(result))
                 }
@@ -152,7 +164,7 @@ class PhotoboxCameraManager(private val context: Context) {
         val scale = MAX_OUTPUT_LONG_EDGE.toFloat() / longEdge
         val newWidth = (bitmap.width * scale).roundToInt()
         val newHeight = (bitmap.height * scale).roundToInt()
-        return Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
+        return bitmap.scale(newWidth, newHeight)
     }
 
     @Suppress("DEPRECATION")

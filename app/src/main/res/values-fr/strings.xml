@@ -257,6 +257,16 @@
     <string name="photobox_camera_unavailable">Caméra non disponible</string>
     <string name="photobox_overlay_title">Superposition Temi</string>
     <string name="photobox_overlay_description">Place une image de Temi sur la photo prise, pour donner l\'impression que Temi se trouve à vos côtés.</string>
+    <string name="photobox_upload_section_title">Téléchargement des photos</string>
+    <string name="photobox_drive_folder_label">Lien du dossier Google Drive</string>
+    <string name="photobox_drive_upload_url_label">URL du webhook d\'envoi</string>
+    <string name="photobox_upload_save_button">Enregistrer</string>
+    <string name="photobox_upload_description">Les photos sont automatiquement envoyées dans ce dossier Drive après la prise de vue.</string>
+    <string name="photobox_show_qr_button">Afficher le code QR</string>
+    <string name="photobox_upload_in_progress">Envoi de la photo…</string>
+    <string name="photobox_upload_failed">Envoi échoué</string>
+    <string name="photobox_qr_dialog_title">Ta photo</string>
+    <string name="photobox_qr_dialog_subtitle">Scanne le code QR pour voir et télécharger la photo.</string>
     <string name="photobox_new_photo_button">Nouvelle photo</string>
     <string name="photobox_to_dashboard">Vers le dashboard</string>
     <string name="photobox_photo_count">%1$d photos prises</string>
