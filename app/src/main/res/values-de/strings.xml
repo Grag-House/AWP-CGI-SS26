@@ -284,6 +284,15 @@
     <string name="photobox_upload_failed">Hochladen fehlgeschlagen</string>
     <string name="photobox_qr_dialog_title">Dein Foto</string>
     <string name="photobox_qr_dialog_subtitle">QR-Code scannen, um das Foto anzusehen und herunterzuladen.</string>
+    <string name="photobox_mode_select_title">Wähle einen Modus</string>
+    <string name="photobox_mode_standard_title">Standard</string>
+    <string name="photobox_mode_standard_description">Ein einzelnes Foto</string>
+    <string name="photobox_mode_strip_title">3er-Streifen</string>
+    <string name="photobox_mode_strip_description">3 Fotos auf einem Streifen</string>
+    <string name="photobox_change_mode_button">Modus ändern</string>
+    <string name="photobox_strip_delay_label">PAUSE ZWISCHEN FOTOS</string>
+    <string name="photobox_change_pose_label">Pose ändern!</string>
+    <string name="photobox_shot_progress">Foto %1$d von %2$d</string>
     <string name="photobox_new_photo_button">Neues Foto</string>
     <string name="photobox_to_dashboard">Zum Dashboard</string>
     <string name="photobox_photo_count">%1$d Fotos aufgenommen</string>

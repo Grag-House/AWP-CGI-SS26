@@ -106,7 +106,8 @@ class PhotoboxUploadRepository(
         return Base64.encodeToString(outputStream.toByteArray(), Base64.NO_WRAP)
     }
 
-    private fun bakeOverlay(photo: Bitmap): Bitmap {
+    /** Burns the Temi cutout into [photo] itself (e.g. so each strip frame carries its own copy). */
+    internal fun bakeOverlay(photo: Bitmap): Bitmap {
         val overlay = BitmapFactory.decodeResource(context.resources, R.drawable.temi_photo)
         val result = photo.copy(photo.config ?: Bitmap.Config.ARGB_8888, true)
         val canvas = Canvas(result)
