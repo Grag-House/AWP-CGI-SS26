@@ -1,27 +1,40 @@
 package hka.awp.cgi.temi.app.feature.webserver
 
-import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import hka.awp.cgi.temi.app.BuildConfig
+import hka.awp.cgi.temi.app.utils.AppConfigRepository
+import hka.awp.cgi.temi.app.utils.extractHostSafely
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.net.InetAddress
 
-class WebserverViewModel : ViewModel() {
+class WebserverViewModel(appConfigRepository: AppConfigRepository) : ViewModel() {
     private val _serverState = MutableStateFlow(ServerState())
     val serverState = _serverState.asStateFlow()
-    private val hostname = BuildConfig.WEBVIEW_URL.toUri().host
+    val urlState: StateFlow<String> = appConfigRepository.currentUrl.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(SUBSCRIPTION_TIMEOUT),
+        BuildConfig.WEBVIEW_URL
+    )
 
     companion object {
+        // The interval at which the server status is checked (in milliseconds)
         private const val POLLING_INTERVALL: Long = 10000
 
+        // The timeout for the server ping operation (in milliseconds)
         private const val TIMEOUT: Int = 2000
+
+        // The time to wait after the last subscriber disappeared before stopping the upstream flow (in milliseconds)
+        private const val SUBSCRIPTION_TIMEOUT = 5000L
     }
 
     private fun startMonitoring() {
@@ -29,7 +42,7 @@ class WebserverViewModel : ViewModel() {
             while (isActive) {
                 try {
                     // DNS Query
-                    val address = InetAddress.getByName(hostname)
+                    val address = InetAddress.getByName(extractHostSafely(urlState.value))
                     val ip = address.hostAddress
 
                     // ping
@@ -49,7 +62,7 @@ class WebserverViewModel : ViewModel() {
     }
 
     init {
-        Timber.d("hostname: $hostname")
+        Timber.d("hostname: %s", extractHostSafely(urlState.value))
         startMonitoring()
     }
 }

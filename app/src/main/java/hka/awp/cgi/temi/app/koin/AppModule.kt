@@ -1,16 +1,26 @@
 package hka.awp.cgi.temi.app.koin
 
 import com.robotemi.sdk.Robot
-import hka.awp.cgi.temi.app.R
+import hka.awp.cgi.temi.app.data.repository.RobotRepository
+import hka.awp.cgi.temi.app.feature.controller.BluetoothControllerManager
+import hka.awp.cgi.temi.app.feature.controller.ControllerViewModel
+import hka.awp.cgi.temi.app.feature.hideandseek.HideAndSeekViewModel
+import hka.awp.cgi.temi.app.feature.hideandseek.HidingSpotRepository
 import hka.awp.cgi.temi.app.feature.navigation.NavigationViewModel
 import hka.awp.cgi.temi.app.feature.settings.SettingsViewModel
-import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherRepository
-import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherViewModel
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.AdminPanelViewModel
+import hka.awp.cgi.temi.app.feature.settings.battery.BatteryViewModel
+import hka.awp.cgi.temi.app.feature.settings.display.DisplayViewModel
+import hka.awp.cgi.temi.app.feature.settings.language.LanguageViewModel
 import hka.awp.cgi.temi.app.feature.webserver.WebserverViewModel
 import hka.awp.cgi.temi.app.ui.shell.AppViewModel
 import hka.awp.cgi.temi.app.utils.NetworkManager
 import hka.awp.cgi.temi.app.utils.TemiBatteryMonitor
-import okhttp3.OkHttpClient
+import hka.awp.cgi.temi.app.utils.TemiMovementController
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -22,57 +32,95 @@ import java.time.format.DateTimeFormatter
 /**
  * Main Koin module for the application.
  */
-val appModule =
-    module {
-        single<NetworkManager> { NetworkManager(androidContext()) }
+val appModule = module {
+    single<NetworkManager> { NetworkManager(androidContext()) }
 
-        single<Clock> { Clock.systemDefaultZone() }
+    single { RobotRepository() }
 
-        single<DateTimeFormatter> {
-            DateTimeFormatter.ofPattern("HH:mm").withZone(ZoneId.systemDefault())
-        }
+    single<Clock> { Clock.systemDefaultZone() }
 
-        single<Robot?> {
-            try {
-                Robot.getInstance()
-            } catch (
-                @Suppress("TooGenericExceptionCaught")
-                e: Exception,
-            ) {
-                Timber.e(e, "Temi SDK not available, probably running locally")
-                null
-            }
-        }
-
-        single<TemiBatteryMonitor> { TemiBatteryMonitor(robot = get()) }
-
-        single<OkHttpClient> {
-            OkHttpClient()
-        }
-
-        single<WeatherRepository> { WeatherRepository(client = get(), hourlyFormatter = get()) }
-
-        viewModel<AppViewModel> {
-            AppViewModel(
-                networkManager = get(),
-                clock = get(),
-                datetimeFormatter = get(),
-                temiBatteryMonitor = get()
-            )
-        }
-
-        viewModel<SettingsViewModel> {
-            SettingsViewModel()
-        }
-
-        viewModel<NavigationViewModel> {
-            NavigationViewModel(
-                robot = get(),
-                defaultMapName = androidContext().getString(R.string.default_map_name)
-            )
-        }
-
-        viewModel<WebserverViewModel> { WebserverViewModel() }
-
-        viewModel<WeatherViewModel> { WeatherViewModel(repository = get()) }
+    single<DateTimeFormatter> {
+        DateTimeFormatter.ofPattern("HH:mm").withZone(ZoneId.systemDefault())
     }
+
+    single<Robot?> {
+        try {
+            Robot.getInstance()
+        } catch (
+            @Suppress("TooGenericExceptionCaught") e: Exception,
+        ) {
+            Timber.e(e, "Temi SDK not available, probably running locally")
+            null
+        }
+    }
+
+    single<TemiBatteryMonitor> { TemiBatteryMonitor(robot = get()) }
+
+    single {
+        CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    }
+
+    single {
+        TemiMovementController(
+            robot = get(),
+            scope = get(),
+        )
+    }
+
+    viewModel {
+        AppViewModel(
+            networkManager = get(),
+            clock = get(),
+            datetimeFormatter = get(),
+            temiBatteryMonitor = get(),
+        )
+    }
+
+    viewModel {
+        SettingsViewModel(get(), robot = get())
+    }
+
+    viewModel {
+        DisplayViewModel(androidApplication(), get())
+    }
+
+    viewModel {
+        LanguageViewModel()
+    }
+
+    viewModel {
+        NavigationViewModel(get(), get(), get())
+    }
+
+    viewModel {
+        AdminPanelViewModel(
+            appConfigRepository = get(),
+            mqttManager = get(),
+            robot = get(),
+            hidingSpotRepository = get()
+        )
+    }
+
+    single { HidingSpotRepository(androidContext()) }
+
+    viewModel { HideAndSeekViewModel(robot = get(), hidingSpotRepository = get()) }
+
+    viewModel<WebserverViewModel> { WebserverViewModel(get()) }
+
+    viewModel {
+        BatteryViewModel(get())
+    }
+
+    single {
+        BluetoothControllerManager(
+            context = androidContext(),
+        )
+    }
+
+    viewModel {
+        ControllerViewModel(
+            movementController = get(),
+            bluetoothControllerManager = get(),
+        )
+    }
+}

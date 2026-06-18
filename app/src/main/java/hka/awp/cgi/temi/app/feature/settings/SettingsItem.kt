@@ -2,10 +2,10 @@ package hka.awp.cgi.temi.app.feature.settings
 
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AdminPanelSettings
 import androidx.compose.material.icons.rounded.BatteryFull
 import androidx.compose.material.icons.rounded.Brightness6
 import androidx.compose.material.icons.rounded.Info
-import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.ui.graphics.vector.ImageVector
 import hka.awp.cgi.temi.app.R
@@ -24,15 +24,15 @@ sealed class SettingsItem(
                 Notifications,
                 Display,
                 Battery,
-                Location,
-                About
+                About,
+                AdminPanel
             )
         }
     }
 
     data object Notifications : SettingsItem(
-        titleRes = R.string.settings_notifications_title,
-        subtitleRes = R.string.settings_notifications_subtitle,
+        titleRes = R.string.settings_languages_title,
+        subtitleRes = R.string.settings_languages_subtitle,
         icon = Icons.Rounded.Notifications
     )
 
@@ -48,10 +48,10 @@ sealed class SettingsItem(
         icon = Icons.Rounded.BatteryFull
     )
 
-    data object Location : SettingsItem(
-        titleRes = R.string.settings_location_title,
-        subtitleRes = R.string.settings_location_subtitle,
-        icon = Icons.Rounded.LocationOn
+    data object AdminPanel : SettingsItem(
+        titleRes = R.string.admin_panel,
+        subtitleRes = R.string.admin_panel_description,
+        icon = Icons.Rounded.AdminPanelSettings
     )
 
     data object About : SettingsItem(

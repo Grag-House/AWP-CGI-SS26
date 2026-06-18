@@ -14,7 +14,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Navigation
 import androidx.compose.material.icons.rounded.Settings
-import androidx.compose.material.icons.rounded.SmartToy
+import androidx.compose.material.icons.rounded.SportsEsports
 import androidx.compose.material.icons.rounded.Storage
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -48,7 +48,8 @@ import hka.awp.cgi.temi.app.ui.shell.Screen
 fun MainContent(
     modifier: Modifier = Modifier,
     onClick: (Screen) -> Unit = {},
-    serverState: ServerState
+    serverState: ServerState,
+    currentTemperatureState: Int
 ) {
     Column(
         modifier = modifier
@@ -57,7 +58,7 @@ fun MainContent(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
-                Icons.Rounded.SmartToy,
+                painter = painterResource(R.drawable.ic_temi_robot),
                 contentDescription = stringResource(R.string.robot_description),
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(48.dp)
@@ -82,12 +83,12 @@ fun MainContent(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        ContentGrid(serverState, onClick)
+        ContentGrid(serverState, onClick, currentTemperatureState)
     }
 }
 
 @Composable
-private fun ContentGrid(serverState: ServerState, onClick: (Screen) -> Unit) {
+private fun ContentGrid(serverState: ServerState, onClick: (Screen) -> Unit, currentTemperatureState: Int) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(GRIDCELL_COUNT),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -124,7 +125,7 @@ private fun ContentGrid(serverState: ServerState, onClick: (Screen) -> Unit) {
                         contentDescription = stringResource(R.string.weather_icon_description)
                     )
                 },
-                bottomText = stringResource(R.string.temp_unit, 21),
+                bottomText = stringResource(R.string.temp_unit, currentTemperatureState),
                 isTemp = true,
                 onClick = { onClick(Screen.Weather) }
             )
@@ -140,11 +141,36 @@ private fun ContentGrid(serverState: ServerState, onClick: (Screen) -> Unit) {
         }
         item {
             DashboardCard(
+                title = stringResource(R.string.hide_and_seek),
+                subtitle = stringResource(R.string.hide_and_seek_sub),
+                icon = Icons.Rounded.SportsEsports,
+                onClick = { onClick(Screen.HideAndSeek) }
+            )
+        }
+        item {
+            DashboardCard(
                 stringResource(R.string.settings),
                 stringResource(R.string.settingsSub),
                 Icons.Rounded.Settings,
                 onClick = {
                     onClick(Screen.Settings)
+                }
+            )
+        }
+        item {
+            DashboardCard(
+                title = "Controller",
+                subtitle = "Gamepad verbinden und Steuerung aktivieren",
+                customIcon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.joystick_24dp_000000_fill0_wght400_grad0_opsz24),
+                        tint = MaterialTheme.colorScheme.primary,
+                        contentDescription = stringResource(R.string.controller_description)
+                    )
+                },
+                bottomText = "Bluetooth Controller",
+                onClick = {
+                    onClick(Screen.Controller)
                 }
             )
         }

@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import android.webkit.WebView
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -34,20 +35,28 @@ fun WebViewScreen(url: String) {
                 // this is needed for the webserver backend to work
                 settings.javaScriptEnabled = true
                 settings.domStorageEnabled = true
-
-                if (!isUrlBlocked(url)) {
-                    loadUrl(url)
-                } else {
-                    loadDataWithBaseURL(
-                        null,
-                        STYLED_ERROR,
-                        "text/html",
-                        "UTF-8",
-                        null
-                    )
-                }
             }
         }
+
+    LaunchedEffect(url) {
+        val sanitizedUrl = if (!url.startsWith("http") && !url.startsWith("file")) {
+            "https://$url"
+        } else {
+            url
+        }
+
+        if (!isUrlBlocked(sanitizedUrl)) {
+            view.loadUrl(sanitizedUrl)
+        } else {
+            view.loadDataWithBaseURL(
+                null,
+                STYLED_ERROR,
+                "text/html",
+                "UTF-8",
+                null
+            )
+        }
+    }
 
     AndroidView(factory = { view }, modifier = Modifier.fillMaxSize())
 }
@@ -59,7 +68,6 @@ private const val STYLED_ERROR = """
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
-            /* Grundlegende CSS-Zurücksetzung und volle Höhe */
             html, body {
                 height: 100%;
                 margin: 0;

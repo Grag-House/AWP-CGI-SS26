@@ -42,7 +42,7 @@ android {
         // --> The App will only run on sdk 23 due to the limits of TEMI
         //noinspection OldTargetApi,ExpiredTargetSdkVersion
         targetSdk = 36
-        compileSdk = 36
+        compileSdk = 37
         versionCode = 1
         versionName = "1.0"
 
@@ -61,6 +61,26 @@ android {
             val httpEnabledIpAddress = props.getProperty("HTTP_ALLOWED_IP")
                 ?: throw GradleException("Missing property 'HTTP_ALLOWED_IP' in .env")
             buildConfigField("String", "HTTP_ALLOWED_IP", "\"$httpEnabledIpAddress\"")
+
+            val mqttHost = props.getProperty("MQTT_HOST")
+                ?: throw GradleException("Missing property 'MQTT_HOST' in .env")
+            buildConfigField("String", "MQTT_HOST", "\"$mqttHost\"")
+
+            val mqttPort = props.getProperty("MQTT_PORT")
+                ?: throw GradleException("Missing property 'MQTT_PORT' in .env")
+            buildConfigField("Integer", "MQTT_PORT", mqttPort)
+
+            val mqttUsername = props.getProperty("MQTT_USERNAME")
+                ?: throw GradleException("Missing property 'MQTT_USERNAME' in .env")
+            buildConfigField("String", "MQTT_USERNAME", "\"$mqttUsername\"")
+
+            val mqttPassword = props.getProperty("MQTT_PASSWORD")
+                ?: throw GradleException("Missing property 'MQTT_PASSWORD' in .env")
+            buildConfigField("String", "MQTT_PASSWORD", "\"$mqttPassword\"")
+
+            val adminPassword = props.getProperty("DEFAULT_ADMIN_PASSWORD")
+                ?: throw GradleException("Missing property 'DEFAULT_ADMIN_PASSWORD' in .env")
+            buildConfigField("String", "DEFAULT_ADMIN_PASSWORD", "\"$adminPassword\"")
         } else {
             throw GradleException(
                 "Missing .env file! please create it and include the 'WEBVIEW_URL"
@@ -100,6 +120,15 @@ android {
         includeInApk = false
         includeInBundle = false
     }
+
+    // this is to exclude unwanted files from the resulting package
+    packaging {
+        resources {
+            excludes += "META-INF/INDEX.LIST"
+            excludes += "META-INF/io.netty.versions.properties"
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+    }
 }
 
 detekt {
@@ -130,7 +159,8 @@ kotlin {
 }
 
 dependencies {
-    // runtime dependencies
+    implementation(libs.androidx.ui)
+    implementation(libs.firebase.annotations)
     implementation(libs.koin.android)
     implementation(platform(libs.koin.bom))
     implementation(libs.koin.compose.viewmodel)
@@ -147,21 +177,34 @@ dependencies {
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.timber)
+    implementation(libs.androidx.datastore.preferences)
+
+    // mqtt
+    implementation(libs.hivemq)
+
+    // api call dependencies
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.tls)
+    implementation(libs.kotlinx.serialization.json)
+
     // temi dependency
     implementation(libs.temi.sdk)
     implementation(libs.androidx.compose.ui.text)
-    implementation(libs.androidx.material.icons.extended)
+    implementation(libs.androidx.compose.material.icons.extended)
+
+    // ----------------- DEBUG / Compile time dependencies -----------------------
 
     // unit test dependencies
-    testImplementation(libs.mokk)
+    testImplementation(libs.mockk)
     testImplementation(libs.junit.jupiter.api)
+    testImplementation(libs.kotlinx.coroutines.test)
     testRuntimeOnly(libs.junit.jupiter.engine)
     testRuntimeOnly(libs.junit.platform.launcher)
     testImplementation(libs.junit.jupiter.params)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
 
-    // debug depedencies
+    // debug dependencies
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
@@ -171,10 +214,6 @@ dependencies {
     // linting and formatting
     detektPlugins(libs.detekt.ktlint)
     detektPlugins(libs.detekt.compose)
-
-    // api call dependencies
-    implementation(libs.okhttp)
-    implementation(libs.kotlinx.serialization.json)
 }
 
 tasks.withType<Detekt>().configureEach {
@@ -194,4 +233,15 @@ tasks.register("qualityCheck") {
     dependsOn("dokkaGenerate")
 
     tasks.findByName("dokkaGenerate")?.mustRunAfter("detekt")
+}
+
+tasks.register<Sync>("copyDokkaReports") {
+    group = "documentation"
+    description = "Copy the dokka reports to the assets folder"
+
+    dependsOn("dokkaGenerate")
+
+    println("Copying dokka reports!")
+    from(layout.buildDirectory.dir("dokka/html"))
+    into(layout.projectDirectory.dir("src/main/assets/html"))
 }

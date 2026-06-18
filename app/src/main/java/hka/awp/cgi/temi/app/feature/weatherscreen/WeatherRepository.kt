@@ -30,18 +30,12 @@ import kotlin.math.roundToInt
 class WeatherRepository(
     private val client: OkHttpClient,
     private val json: Json = Json { ignoreUnknownKeys = true },
-    private val hourlyFormatter: DateTimeFormatter
+    private val hourlyFormatter: DateTimeFormatter,
+    private val locationNameResolver: LocationNameResolver
 ) {
     companion object {
-        // TODO replace with CGI specific user agent
-        private const val USER_AGENT = "https://github.com/Grag-House/AWP-CGI-SS26"
+        private const val USER_AGENT = "jonas.mueller@cgi.com"
 
-        // TODO move  to  method which reads the current location from temi
-        @Suppress("MagicNumber")
-        val LATITUDE: Double by lazy { 49.0138 }
-
-        @Suppress("MagicNumber")
-        val LONGITUDE: Double by lazy { 8.3573 }
         private const val MET_API_ENDPOINT = "https://api.met.no/weatherapi/locationforecast/2.0/compact"
 
         private val API_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd")
@@ -49,11 +43,16 @@ class WeatherRepository(
 
     private val weekdayFormatter = DateTimeFormatter.ofPattern("EEEE", Locale.getDefault())
 
-    suspend fun getWeatherData(): Result<WeatherState> = withContext(Dispatchers.IO) {
+    suspend fun getWeatherData(
+        latitude: Double,
+        longitude: Double
+    ): Result<WeatherState> = withContext(Dispatchers.IO) {
         return@withContext try {
-            val request =
-                Request.Builder().url("$MET_API_ENDPOINT?lat=$LATITUDE&lon=$LONGITUDE").header("User-Agent", USER_AGENT)
-                    .get().build()
+            val request = Request.Builder()
+                .url("$MET_API_ENDPOINT?lat=$latitude&lon=$longitude")
+                .header("User-Agent", USER_AGENT)
+                .get()
+                .build()
 
             val response = client.newCall(request).execute()
             if (!response.isSuccessful) {
@@ -64,14 +63,14 @@ class WeatherRepository(
 
             val body = response.body.string()
             val metResponse = json.decodeFromString<MetResponse>(body)
-            Result.success(transformToState(metResponse))
+            Result.success(transformToState(metResponse, latitude, longitude))
         } catch (e: CancellationException) {
             throw e
         } catch (e: UnknownHostException) {
-            Timber.e("Possibly no internet connection: ${e.message}")
+            Timber.e("Possibly no internet connection: %s", e.message)
             Result.failure(Exception("Check your internet connection"))
         } catch (e: SerializationException) {
-            Timber.e("Error during JSON deserialization occured: ${e.message}")
+            Timber.e("Error during JSON deserialization occured: %s", e.message)
             Result.failure(Exception("An Error occurred while parsing the JSON data"))
         } catch (
             @Suppress("TooGenericExceptionCaught") e: Exception
@@ -81,7 +80,11 @@ class WeatherRepository(
         }
     }
 
-    private fun transformToState(response: MetResponse): WeatherState {
+    private suspend fun transformToState(
+        response: MetResponse,
+        latitude: Double,
+        longitude: Double
+    ): WeatherState {
         val timeseries = response.properties.timeseries
         val today = LocalDate.now()
         val now = ZonedDateTime.now(ZoneId.systemDefault())
@@ -90,14 +93,12 @@ class WeatherRepository(
         val endDate = today.plusDays(7)
 
         val hourly = timeseries.filter {
-            val entryTime = parse(it.time)
-                .atZone(ZoneId.systemDefault())
+            val entryTime = parse(it.time).atZone(ZoneId.systemDefault())
 
             @Suppress("MagicNumber")
             entryTime.isAfter(now.minusMinutes(59))
         }.take(
-            @Suppress("MagicNumber")
-            10
+            @Suppress("MagicNumber") 10
         ).map {
             val localTime = parse(it.time).atZone(ZoneId.systemDefault()).toLocalTime()
 
@@ -137,8 +138,11 @@ class WeatherRepository(
                 low = temps.minOrNull()?.roundToInt()?.toString() ?: "0"
             )
         }
+        val resolvedLocation = locationNameResolver.resolveLocationName(latitude, longitude)
+        val fallbackLocation = "Länge: $longitude Breite: $latitude"
 
         return WeatherState(
+            location = resolvedLocation ?: fallbackLocation,
             hourlyForecast = hourly,
             weeklyForecast = weekly
         )

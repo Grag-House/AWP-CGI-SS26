@@ -35,6 +35,11 @@ jobs:
           echo "RELEASE_STORE_PASSWORD=${{ secrets.RELEASE_STORE_PASSWORD }}" >> .env
           echo "RELEASE_KEY_ALIAS=${{ secrets.RELEASE_KEY_ALIAS }}" >> .env
           echo "RELEASE_KEY_PASSWORD=${{ secrets.RELEASE_KEY_PASSWORD }}" >> .env
+          echo "MQTT_HOST"=${{ secrets.MQTT_HOST }} >> .env
+          echo "MQTT_PORT"=${{ secrets.MQTT_PORT }} >> .env
+          echo "MQTT_USERNAME"=${{ secrets.MQTT_USERNAME }} >> .env
+          echo "MQTT_PASSWORD"=${{ secrets.MQTT_PASSWORD }} >> .env
+          echo "DEFAULT_ADMIN_PASSWORD"=${{ secrets.ADMIN_PASSWORD }} >> .env
       
       
 
@@ -46,6 +51,10 @@ jobs:
       # detekt linter + dokka
       - name: Run Code Analysis
         run: ./gradlew qualityCheck
+
+      - name: Place Dokka files in the assets folder
+        if: success()
+        run: ./gradlew copyDokkaReports
 
       - name: Upload HTML Report
         uses: actions/upload-artifact@v4
