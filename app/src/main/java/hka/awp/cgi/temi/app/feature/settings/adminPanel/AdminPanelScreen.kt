@@ -11,7 +11,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import hka.awp.cgi.temi.app.feature.hideandseek.HidingSpotFilterCallbacks
+import hka.awp.cgi.temi.app.feature.hideandseek.HidingSpotFilterContent
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.AdminPasswordPrompt
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.ChangePasswordDialog
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.EditCoordinatesDialog
@@ -32,6 +35,8 @@ fun AdminPanelScreen(
 
     val isAuthorized by viewModel.isAuthorized.collectAsStateWithLifecycle()
     val passwordError by viewModel.passwordError.collectAsStateWithLifecycle()
+    val filterState by viewModel.filterManager.filterState.collectAsStateWithLifecycle()
+    val showHidingSpotFilter by viewModel.filterManager.isOpen.collectAsStateWithLifecycle()
 
     var showCoordinateDialog by remember { mutableStateOf(false) }
     var showPasswordDialog by remember { mutableStateOf(false) }
@@ -111,6 +116,20 @@ fun AdminPanelScreen(
             onDismiss = { showRestartDialog = false }
         )
     }
+    if (showHidingSpotFilter) {
+        Dialog(onDismissRequest = viewModel.filterManager::dismiss) {
+            HidingSpotFilterContent(
+                state = filterState,
+                callbacks = HidingSpotFilterCallbacks(
+                    onToggle = viewModel.filterManager::toggle,
+                    onSelectAll = viewModel.filterManager::selectAll,
+                    onDeselectAll = viewModel.filterManager::deselectAll,
+                    onSave = viewModel.filterManager::save,
+                    onDismiss = viewModel.filterManager::dismiss
+                )
+            )
+        }
+    }
 
     AdminPanelContent(
         uiState = uiState,
@@ -119,6 +138,7 @@ fun AdminPanelScreen(
         onOpenMqtt = viewModel::onOpenMqttReports,
         onChangePassword = { showPasswordDialog = true },
         onEditCoordinates = { showCoordinateDialog = true },
+        onOpenHidingSpotFilter = viewModel.filterManager::open,
         onRestartRequest = { showRestartDialog = true }
     )
 }
