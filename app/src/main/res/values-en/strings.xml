@@ -37,6 +37,8 @@
     <string name="settings_location_subtitle">Location services and navigation</string>
     <string name="settings_about_title">About</string>
     <string name="settings_about_subtitle">System information</string>
+    <string name="settings_photobox_title">Photobox</string>
+    <string name="settings_photobox_subtitle">Theme &amp; Overlay</string>
     <string name="display_brightness">Screen brightness</string>
     <string name="display_screensaver">Screensaver</string>
     <string name="display_screensaver_after">Starts after %1$s of inactivity</string>
@@ -253,6 +255,8 @@
     <string name="photobox_preview_message">Stand in front of Temi again when you\'re ready for the next photo.</string>
     <string name="photobox_camera_permission_required">Camera permission required</string>
     <string name="photobox_camera_unavailable">Camera unavailable</string>
+    <string name="photobox_overlay_title">Temi Overlay</string>
+    <string name="photobox_overlay_description">Places an image of Temi over the captured photo, so it looks like Temi is standing next to you.</string>
     <string name="photobox_new_photo_button">New Photo</string>
     <string name="photobox_to_dashboard">To Dashboard</string>
     <string name="photobox_photo_count">%1$d photos taken</string>

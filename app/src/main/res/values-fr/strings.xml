@@ -37,6 +37,8 @@
     <string name="settings_location_subtitle">Services de localisation</string>
     <string name="settings_about_title">À propos</string>
     <string name="settings_about_subtitle">Informations système</string>
+    <string name="settings_photobox_title">Photobox</string>
+    <string name="settings_photobox_subtitle">Thème &amp; superposition</string>
     <string name="display_brightness">Luminosité</string>
     <string name="display_screensaver">Écran de veille</string>
     <string name="display_screensaver_after">Démarre après %1$s</string>
@@ -253,6 +255,8 @@
     <string name="photobox_preview_message">Remettez-vous devant Temi lorsque vous êtes prêt pour la prochaine photo.</string>
     <string name="photobox_camera_permission_required">Permission caméra requise</string>
     <string name="photobox_camera_unavailable">Caméra non disponible</string>
+    <string name="photobox_overlay_title">Superposition Temi</string>
+    <string name="photobox_overlay_description">Place une image de Temi sur la photo prise, pour donner l\'impression que Temi se trouve à vos côtés.</string>
     <string name="photobox_new_photo_button">Nouvelle photo</string>
     <string name="photobox_to_dashboard">Vers le dashboard</string>
     <string name="photobox_photo_count">%1$d photos prises</string>

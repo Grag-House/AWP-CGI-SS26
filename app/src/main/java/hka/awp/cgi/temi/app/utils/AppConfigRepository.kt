@@ -2,6 +2,7 @@ package hka.awp.cgi.temi.app.utils
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -20,6 +21,7 @@ class AppConfigRepository(private val dataStore: DataStore<Preferences>) {
     private val longitudeKey = doublePreferencesKey("longitude")
     private val adminPasswordHashKey = stringPreferencesKey("admin_password_hash")
     private val adminPasswordLegacyKey = stringPreferencesKey("admin_password")
+    private val photoboxOverlayEnabledKey = booleanPreferencesKey("photobox_overlay_enabled")
 
     // --- Webview URL ---
 
@@ -73,6 +75,18 @@ class AppConfigRepository(private val dataStore: DataStore<Preferences>) {
             preferences[webviewUrlKey] = BuildConfig.WEBVIEW_URL
             preferences[adminPasswordHashKey] = hashPassword(BuildConfig.DEFAULT_ADMIN_PASSWORD)
             preferences.remove(adminPasswordLegacyKey)
+        }
+    }
+
+    // --- Photobox ---
+
+    val photoboxOverlayEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[photoboxOverlayEnabledKey] ?: false
+    }
+
+    suspend fun setPhotoboxOverlayEnabled(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[photoboxOverlayEnabledKey] = enabled
         }
     }
 

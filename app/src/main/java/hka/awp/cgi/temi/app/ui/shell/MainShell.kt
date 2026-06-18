@@ -29,6 +29,7 @@ import hka.awp.cgi.temi.app.feature.settings.adminPanel.AdminPanelScreen
 import hka.awp.cgi.temi.app.feature.settings.battery.BatteryScreen
 import hka.awp.cgi.temi.app.feature.settings.display.DisplayScreen
 import hka.awp.cgi.temi.app.feature.settings.language.LanguageScreen
+import hka.awp.cgi.temi.app.feature.settings.photobox.PhotoboxSettingsScreen
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherContent
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherState
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherViewModel
@@ -161,7 +162,8 @@ private fun RenderSelectedRoute(
         Screen.DisplaySettings.route,
         Screen.BatterySettings.route,
         Screen.AdminPanel.route,
-        Screen.LanguageSettings.route -> RenderSettingsSubRoute(
+        Screen.LanguageSettings.route,
+        Screen.PhotoboxSettings.route -> RenderSettingsSubRoute(
             selectedRoute = selectedRoute,
             onNavigateBack = { routeDeps.appViewModel.onRouteSelect(Screen.Settings) }
         )
@@ -198,6 +200,7 @@ private fun RenderSettingsSubRoute(selectedRoute: String, onNavigateBack: () -> 
         Screen.DisplaySettings.route -> DisplayScreen(onBackClick = onNavigateBack)
         Screen.BatterySettings.route -> BatteryScreen(onBackClick = onNavigateBack)
         Screen.AdminPanel.route -> AdminPanelScreen(onBackClick = onNavigateBack)
+        Screen.PhotoboxSettings.route -> PhotoboxSettingsScreen(onBackClick = onNavigateBack)
         else -> LanguageScreen(onBackClick = onNavigateBack)
     }
 }
@@ -226,6 +229,7 @@ private fun HandleSettingsNavigationEvents(
                 is SettingsNavigationEvent.NavigateToBattery -> onNavigate(Screen.BatterySettings)
                 is SettingsNavigationEvent.NavigateToAdminPanel -> onNavigate(Screen.AdminPanel)
                 is SettingsNavigationEvent.NavigateToLanguage -> onNavigate(Screen.LanguageSettings)
+                is SettingsNavigationEvent.NavigateToPhotobox -> onNavigate(Screen.PhotoboxSettings)
             }
         }
     }

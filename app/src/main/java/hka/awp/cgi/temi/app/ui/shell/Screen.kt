@@ -131,4 +131,11 @@ sealed class Screen(
         icon = Icons.Rounded.PhotoCamera,
         contentDescription = R.string.photobox_description
     )
+
+    data object PhotoboxSettings : Screen(
+        route = "photobox_settings",
+        title = R.string.settings_photobox_title,
+        icon = Icons.Rounded.PhotoCamera,
+        contentDescription = R.string.settings_photobox_subtitle
+    )
 }
