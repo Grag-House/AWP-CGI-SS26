@@ -106,9 +106,12 @@ class PhotoboxUploadRepository(
         return Base64.encodeToString(outputStream.toByteArray(), Base64.NO_WRAP)
     }
 
+    // Decoded once and reused — a strip bakes this into 3 frames per session.
+    private val overlayBitmap by lazy { BitmapFactory.decodeResource(context.resources, R.drawable.temi_photo) }
+
     /** Burns the Temi cutout into [photo] itself (e.g. so each strip frame carries its own copy). */
     internal fun bakeOverlay(photo: Bitmap): Bitmap {
-        val overlay = BitmapFactory.decodeResource(context.resources, R.drawable.temi_photo)
+        val overlay = overlayBitmap
         val result = photo.copy(photo.config ?: Bitmap.Config.ARGB_8888, true)
         val canvas = Canvas(result)
         val targetHeight = result.height * PHOTOBOX_OVERLAY_HEIGHT_FRACTION

@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.media.AudioAttributes
 import android.media.SoundPool
+import android.util.Size
 import android.view.Surface
 import android.view.WindowManager
 import androidx.camera.core.CameraSelector
@@ -14,6 +15,8 @@ import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.core.UseCaseGroup
 import androidx.camera.core.ViewPort
+import androidx.camera.core.resolutionselector.ResolutionSelector
+import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.scale
@@ -33,6 +36,16 @@ enum class PhotoboxCameraState { UNINITIALIZED, BINDING, READY, UNAVAILABLE }
 // from the unconstrained live Preview).
 private const val MAX_OUTPUT_LONG_EDGE = 1600
 
+// The device's (legacy) camera HAL defaults to its maximum sensor resolution (12+ MP) for
+// ImageCapture, which can take several seconds to encode to JPEG — long enough to blow past
+// CameraX's internal "jpeg callback" timeout and leave the request hanging indefinitely. Capping
+// the requested resolution keeps capture fast and reliable. Safe to combine with the shared
+// ViewPort below: that already keeps Preview/ImageCapture cropped consistently regardless of
+// whichever resolution gets picked here.
+private const val CAPTURE_TARGET_WIDTH = 1920
+private const val CAPTURE_TARGET_HEIGHT = 1080
+private val CAPTURE_TARGET_SIZE = Size(CAPTURE_TARGET_WIDTH, CAPTURE_TARGET_HEIGHT)
+
 /**
  * Owns the CameraX lifecycle for the Photobox feature: binds the device camera to a
  * preview surface, takes photos and reports state via [cameraState]. Kept independent of
@@ -45,7 +58,15 @@ class PhotoboxCameraManager(private val context: Context) {
 
     private val mainExecutor = ContextCompat.getMainExecutor(context)
     private val captureExecutor = Executors.newSingleThreadExecutor()
-    private val imageCapture = ImageCapture.Builder().build()
+    private val imageCapture = ImageCapture.Builder()
+        .setResolutionSelector(
+            ResolutionSelector.Builder()
+                .setResolutionStrategy(
+                    ResolutionStrategy(CAPTURE_TARGET_SIZE, ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER)
+                )
+                .build()
+        )
+        .build()
     private var cameraProvider: ProcessCameraProvider? = null
 
     private val _isFrontCamera = MutableStateFlow(true)

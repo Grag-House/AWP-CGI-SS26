@@ -7,8 +7,14 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withTimeoutOrNull
 
 private const val TICK_MS = 1000L
+
+// Some camera HALs (notably legacy/compatibility ones) can occasionally fail to deliver a
+// takePicture() result at all — neither success nor error. Without a timeout on our side, that
+// leaves the session stuck forever waiting for a callback that never comes.
+private const val CAPTURE_TIMEOUT_MS = 8000L
 
 /** The callbacks a [PhotoboxCaptureSequencer] reports session progress through. */
 internal data class PhotoboxCaptureCallbacks(
@@ -67,7 +73,9 @@ internal class PhotoboxCaptureSequencer(
         job?.cancel()
     }
 
-    private suspend fun captureOnce(): Bitmap? = suspendCancellableCoroutine { continuation ->
-        cameraManager.capturePhoto { result -> continuation.resumeWith(Result.success(result.getOrNull())) }
+    private suspend fun captureOnce(): Bitmap? = withTimeoutOrNull(CAPTURE_TIMEOUT_MS) {
+        suspendCancellableCoroutine { continuation ->
+            cameraManager.capturePhoto { result -> continuation.resumeWith(Result.success(result.getOrNull())) }
+        }
     }
 }
