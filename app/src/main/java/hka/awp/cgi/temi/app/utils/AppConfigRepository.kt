@@ -11,6 +11,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.security.MessageDigest
 
+private const val DEFAULT_DRIVE_FOLDER_LINK =
+    "https://drive.google.com/drive/folders/1k8g1Yqg8wMwvgY8urcnDer1RYke5voAp?usp=drive_link"
+private const val DEFAULT_DRIVE_UPLOAD_URL =
+    "https://script.google.com/macros/s/AKfycbxBnCIKutMCfloxpVtW50EIyFF45z3OGsY-t4bTGQYqvTQABHB-taPuWtyP2BelWLJ9sQ/exec"
+
 /**
  * Central repository for application configurations stored in Jetpack DataStore.
  * Handles URL settings, coordinates for weather, and admin credentials.
@@ -22,6 +27,8 @@ class AppConfigRepository(private val dataStore: DataStore<Preferences>) {
     private val adminPasswordHashKey = stringPreferencesKey("admin_password_hash")
     private val adminPasswordLegacyKey = stringPreferencesKey("admin_password")
     private val photoboxOverlayEnabledKey = booleanPreferencesKey("photobox_overlay_enabled")
+    private val driveFolderLinkKey = stringPreferencesKey("photobox_drive_folder_link")
+    private val driveUploadUrlKey = stringPreferencesKey("photobox_drive_upload_url")
 
     // --- Webview URL ---
 
@@ -87,6 +94,29 @@ class AppConfigRepository(private val dataStore: DataStore<Preferences>) {
     suspend fun setPhotoboxOverlayEnabled(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[photoboxOverlayEnabledKey] = enabled
+        }
+    }
+
+    // The Drive folder photos get uploaded to. Swappable so the destination can change without
+    // a code change — just paste a new folder share-link in the Photobox settings.
+    val driveFolderLink: Flow<String> = dataStore.data.map { preferences ->
+        preferences[driveFolderLinkKey] ?: DEFAULT_DRIVE_FOLDER_LINK
+    }
+
+    suspend fun setDriveFolderLink(link: String) {
+        dataStore.edit { preferences ->
+            preferences[driveFolderLinkKey] = link
+        }
+    }
+
+    // URL of the Apps Script web app that accepts the upload and writes it into the Drive folder.
+    val driveUploadUrl: Flow<String> = dataStore.data.map { preferences ->
+        preferences[driveUploadUrlKey] ?: DEFAULT_DRIVE_UPLOAD_URL
+    }
+
+    suspend fun setDriveUploadUrl(url: String) {
+        dataStore.edit { preferences ->
+            preferences[driveUploadUrlKey] = url
         }
     }
 

@@ -257,6 +257,16 @@
     <string name="photobox_camera_unavailable">Camera unavailable</string>
     <string name="photobox_overlay_title">Temi Overlay</string>
     <string name="photobox_overlay_description">Places an image of Temi over the captured photo, so it looks like Temi is standing next to you.</string>
+    <string name="photobox_upload_section_title">Photo upload</string>
+    <string name="photobox_drive_folder_label">Google Drive folder link</string>
+    <string name="photobox_drive_upload_url_label">Upload webhook URL</string>
+    <string name="photobox_upload_save_button">Save</string>
+    <string name="photobox_upload_description">Photos are automatically uploaded to this Drive folder after they are taken.</string>
+    <string name="photobox_show_qr_button">Show QR code</string>
+    <string name="photobox_upload_in_progress">Uploading photo …</string>
+    <string name="photobox_upload_failed">Upload failed</string>
+    <string name="photobox_qr_dialog_title">Your photo</string>
+    <string name="photobox_qr_dialog_subtitle">Scan the QR code to view and download the photo.</string>
     <string name="photobox_new_photo_button">New Photo</string>
     <string name="photobox_to_dashboard">To Dashboard</string>
     <string name="photobox_photo_count">%1$d photos taken</string>

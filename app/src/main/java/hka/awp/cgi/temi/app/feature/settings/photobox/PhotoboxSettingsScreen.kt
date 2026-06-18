@@ -11,10 +11,18 @@ fun PhotoboxSettingsScreen(
     viewModel: PhotoboxSettingsViewModel = koinViewModel()
 ) {
     val overlayEnabled by viewModel.overlayEnabled.collectAsState()
+    val driveFolderLink by viewModel.driveFolderLink.collectAsState()
+    val driveUploadUrl by viewModel.driveUploadUrl.collectAsState()
 
     PhotoboxSettingsContent(
         onBackClick = onBackClick,
         overlayEnabled = overlayEnabled,
-        onOverlayEnabledChange = viewModel::setOverlayEnabled
+        onOverlayEnabledChange = viewModel::setOverlayEnabled,
+        driveFolderLink = driveFolderLink,
+        driveUploadUrl = driveUploadUrl,
+        onSaveUploadSettings = { folderLink, uploadUrl ->
+            viewModel.setDriveFolderLink(folderLink)
+            viewModel.setDriveUploadUrl(uploadUrl)
+        }
     )
 }
