@@ -2,7 +2,9 @@ package hka.awp.cgi.temi.app.feature.photobox
 
 import android.graphics.Bitmap
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 
 /**
@@ -21,10 +23,16 @@ internal class PhotoboxSessionFinalizer(
         onFinalImageReady: (Bitmap) -> Unit,
         onUploadResult: (Bitmap, PhotoboxUploadState, String?) -> Unit
     ) {
-        val (finalImage, overlayAlreadyHandled) = buildFinalImage(mode, shots, withOverlay)
-        onFinalImageReady(finalImage)
-
         scope.launch {
+            // Combining the strip and baking the overlay are pure CPU/bitmap work with no need
+            // for the main thread — running them inline on viewModelScope (Dispatchers.Main)
+            // would freeze the UI for the duration, which can be long enough for a stray touch
+            // (e.g. on the sidebar) to queue up and fire once the main thread frees up again.
+            val (finalImage, overlayAlreadyHandled) = withContext(Dispatchers.Default) {
+                buildFinalImage(mode, shots, withOverlay)
+            }
+            onFinalImageReady(finalImage)
+
             uploadRepository.uploadPhoto(finalImage, withOverlay && !overlayAlreadyHandled).fold(
                 onSuccess = { url -> onUploadResult(finalImage, PhotoboxUploadState.SUCCESS, url) },
                 onFailure = { error ->
