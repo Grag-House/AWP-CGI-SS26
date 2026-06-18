@@ -62,8 +62,8 @@ class TemiVoiceRecognitionViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        // clear the listener to free resources
         stopListening()
+        temiVoiceListener.release()
         voiceManager.release()
     }
 }

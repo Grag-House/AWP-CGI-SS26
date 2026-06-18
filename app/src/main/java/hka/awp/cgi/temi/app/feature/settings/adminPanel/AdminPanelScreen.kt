@@ -18,6 +18,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Lock
@@ -26,6 +27,7 @@ import androidx.compose.material.icons.outlined.Storage
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -230,50 +232,160 @@ fun SpeakerVerificationCard(
 }
 
 @Composable
-fun ResetVoiceProfilesCard(
-    profileCount: Int,
+fun VoiceProfilesManagementCard(
+    voiceProfiles: Map<String, SpeakerVector>,
     isEnrollmentActive: Boolean,
-    onReset: () -> Unit,
-    onToggleEnrollment: (Boolean) -> Unit
+    onLearnClick: () -> Unit,
+    onDeleteClick: (String) -> Unit
 ) {
     ConfigCard {
-        Row(
+        Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            ConfigIconBox(
-                icon = Icons.Outlined.Mic,
-                contentDescription = "Stimmen-Management"
-            )
-            Spacer(Modifier.width(12.dp))
-            Column(Modifier.weight(1f)) {
-                ConfigValue("Sprachprofile")
-                ConfigSubtext(
-                    if (isEnrollmentActive) {
-                        "Enrollment aktiv..."
-                    } else {
-                        "$profileCount Profile gespeichert"
-                    }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                ConfigIconBox(
+                    icon = Icons.Outlined.Mic,
+                    contentDescription = "Stimmen-Management"
                 )
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                Spacer(Modifier.width(12.dp))
+                Column(Modifier.weight(1f)) {
+                    ConfigValue("Sprachprofile")
+                    ConfigSubtext(
+                        if (isEnrollmentActive) {
+                            "Enrollment aktiv..."
+                        } else if (voiceProfiles.isEmpty()) {
+                            "Keine Profile gespeichert"
+                        } else {
+                            "${voiceProfiles.size} Profile gespeichert"
+                        }
+                    )
+                }
                 Text(
                     text = if (isEnrollmentActive) "Stopp" else "Lernen",
                     color = MaterialTheme.colorScheme.primary,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
-                    modifier = Modifier.clickable { onToggleEnrollment(!isEnrollmentActive) }
+                    modifier = Modifier.clickable(onClick = onLearnClick)
                 )
-                Text(
-                    text = "Reset",
-                    color = MaterialTheme.colorScheme.error,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.clickable(onClick = onReset)
-                )
+            }
+            if (voiceProfiles.isNotEmpty()) {
+                Spacer(Modifier.height(8.dp))
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    voiceProfiles.keys.forEach { profileName ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = profileName,
+                                fontSize = 13.sp,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            IconButton(
+                                onClick = { onDeleteClick(profileName) },
+                                modifier = Modifier.width(32.dp).height(32.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Delete,
+                                    contentDescription = "Profile löschen",
+                                    tint = MaterialTheme.colorScheme.error,
+                                    modifier = Modifier.width(16.dp).height(16.dp)
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
     }
+}
+
+@Composable
+fun ProfileNameInputDialog(
+    onConfirm: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var nameInput by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Neues Profil erstellen") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(text = "Geben Sie einen Namen für das Sprachprofil ein:")
+                OutlinedTextField(
+                    value = nameInput,
+                    onValueChange = { nameInput = it },
+                    label = { Text("Profilname") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    if (nameInput.trim().isNotEmpty()) {
+                        onConfirm(nameInput.trim())
+                    }
+                },
+                enabled = nameInput.trim().isNotEmpty()
+            ) {
+                Text("Lernen starten")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Abbrechen")
+            }
+        }
+    )
+}
+
+@Composable
+fun DeleteProfileConfirmDialog(
+    profileName: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Profil löschen") },
+        text = {
+            Text(
+                text = "Möchten Sie das Profil \"$profileName\" wirklich löschen? " +
+                    "Diese Aktion kann nicht rückgängig gemacht werden."
+            )
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    onConfirm()
+                    onDismiss()
+                },
+                colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error
+                )
+            ) {
+                Text("Löschen")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Abbrechen")
+            }
+        }
+    )
 }
 
 @Composable
@@ -468,6 +580,87 @@ fun EditUrlDialog(
 }
 
 @Composable
+private fun AdminPanelDialogs(
+    uiState: AdminPanelState,
+    viewModel: AdminPanelViewModel,
+    showCoordinateDialog: Boolean,
+    onCoordinateDialogDismiss: () -> Unit,
+    showPasswordDialog: Boolean,
+    onPasswordDialogDismiss: () -> Unit,
+    showUrlDialog: Boolean,
+    onUrlDialogDismiss: () -> Unit,
+    showMqttReportsDialog: Boolean,
+    onMqttReportsDialogDismiss: () -> Unit,
+    showResetVoiceProfilesDialog: Boolean,
+    onResetVoiceProfilesDialogDismiss: () -> Unit,
+    showProfileNameDialog: Boolean,
+    onProfileNameDialogDismiss: () -> Unit,
+    showDeleteConfirmDialog: Boolean,
+    onDeleteConfirmDialogDismiss: () -> Unit,
+    selectedProfileToDelete: String
+) {
+    if (showUrlDialog) {
+        EditUrlDialog(initialUrl = uiState.webserverUrl, onConfirm = { url ->
+            viewModel.onEditWebserverUrl(url)
+            onUrlDialogDismiss()
+        }, onDismiss = onUrlDialogDismiss)
+    }
+    if (showCoordinateDialog) {
+        EditCoordinatesDialog(
+            initialLatitude = uiState.latitude,
+            initialLongitude = uiState.longitude,
+            onConfirm = { lat, lon ->
+                viewModel.onEditCoordinates(lat, lon)
+                onCoordinateDialogDismiss()
+            },
+            onReset = {
+                viewModel.onResetCoordinates()
+                onCoordinateDialogDismiss()
+            },
+            onDismiss = onCoordinateDialogDismiss
+        )
+    }
+    if (showPasswordDialog) {
+        ChangePasswordDialog(
+            onConfirm = { viewModel.onChangePassword(it) },
+            onDismiss = onPasswordDialogDismiss
+        )
+    }
+    if (showMqttReportsDialog) {
+        MqttReportsDialog(
+            monitoredTopics = uiState.mqttReportTopics,
+            events = uiState.mqttTrafficEvents,
+            onClear = viewModel::onClearMqttReports,
+            onDismiss = onMqttReportsDialogDismiss
+        )
+    }
+    if (showResetVoiceProfilesDialog) {
+        ResetVoiceProfilesDialog(
+            onConfirm = viewModel::onResetVoiceProfiles,
+            onDismiss = onResetVoiceProfilesDialogDismiss
+        )
+    }
+    if (showProfileNameDialog) {
+        ProfileNameInputDialog(
+            onConfirm = { name ->
+                viewModel.onToggleEnrollment(true, name)
+                onProfileNameDialogDismiss()
+            },
+            onDismiss = onProfileNameDialogDismiss
+        )
+    }
+    if (showDeleteConfirmDialog) {
+        DeleteProfileConfirmDialog(
+            profileName = selectedProfileToDelete,
+            onConfirm = {
+                viewModel.onDeleteVoiceProfile(selectedProfileToDelete)
+            },
+            onDismiss = onDeleteConfirmDialogDismiss
+        )
+    }
+}
+
+@Composable
 fun AdminPanelScreen(
     onBackClick: () -> Unit,
     viewModel: AdminPanelViewModel = koinViewModel()
@@ -478,6 +671,9 @@ fun AdminPanelScreen(
     var showUrlDialog by remember { mutableStateOf(false) }
     var showMqttReportsDialog by remember { mutableStateOf(false) }
     var showResetVoiceProfilesDialog by remember { mutableStateOf(false) }
+    var showProfileNameDialog by remember { mutableStateOf(false) }
+    var showDeleteConfirmDialog by remember { mutableStateOf(false) }
+    var selectedProfileToDelete by remember { mutableStateOf("") }
 
     LaunchedEffect(viewModel) {
         viewModel.events.collectLatest { event ->
@@ -493,45 +689,25 @@ fun AdminPanelScreen(
         }
     }
 
-    if (showUrlDialog) {
-        EditUrlDialog(initialUrl = uiState.webserverUrl, onConfirm = { url ->
-            viewModel.onEditWebserverUrl(url)
-            showUrlDialog = false
-        }, onDismiss = { showUrlDialog = false })
-    }
-    if (showCoordinateDialog) {
-        EditCoordinatesDialog(
-            initialLatitude = uiState.latitude,
-            initialLongitude = uiState.longitude,
-            onConfirm = { lat, lon ->
-                viewModel.onEditCoordinates(lat, lon)
-                showCoordinateDialog = false
-            },
-            onReset = {
-                viewModel.onResetCoordinates()
-                showCoordinateDialog = false
-            },
-            onDismiss = { showCoordinateDialog = false }
-        )
-    }
-    if (showPasswordDialog) {
-        ChangePasswordDialog(onConfirm = { viewModel.onChangePassword(it) }, onDismiss = { showPasswordDialog = false })
-    }
-    if (showMqttReportsDialog) {
-        MqttReportsDialog(
-            monitoredTopics = uiState.mqttReportTopics,
-            events = uiState.mqttTrafficEvents,
-            onClear = viewModel::onClearMqttReports,
-            onDismiss = { showMqttReportsDialog = false }
-        )
-    }
-
-    if (showResetVoiceProfilesDialog) {
-        ResetVoiceProfilesDialog(
-            onConfirm = viewModel::onResetVoiceProfiles,
-            onDismiss = { showResetVoiceProfilesDialog = false }
-        )
-    }
+    AdminPanelDialogs(
+        uiState = uiState,
+        viewModel = viewModel,
+        showCoordinateDialog = showCoordinateDialog,
+        onCoordinateDialogDismiss = { showCoordinateDialog = false },
+        showPasswordDialog = showPasswordDialog,
+        onPasswordDialogDismiss = { showPasswordDialog = false },
+        showUrlDialog = showUrlDialog,
+        onUrlDialogDismiss = { showUrlDialog = false },
+        showMqttReportsDialog = showMqttReportsDialog,
+        onMqttReportsDialogDismiss = { showMqttReportsDialog = false },
+        showResetVoiceProfilesDialog = showResetVoiceProfilesDialog,
+        onResetVoiceProfilesDialogDismiss = { showResetVoiceProfilesDialog = false },
+        showProfileNameDialog = showProfileNameDialog,
+        onProfileNameDialogDismiss = { showProfileNameDialog = false },
+        showDeleteConfirmDialog = showDeleteConfirmDialog,
+        onDeleteConfirmDialogDismiss = { showDeleteConfirmDialog = false },
+        selectedProfileToDelete = selectedProfileToDelete
+    )
 
     Row(
         modifier = Modifier
@@ -581,11 +757,14 @@ fun AdminPanelScreen(
                     onToggle = { viewModel.onToggleSpeakerVerification(it) }
                 )
 
-                ResetVoiceProfilesCard(
-                    profileCount = uiState.voiceProfileCount,
+                VoiceProfilesManagementCard(
+                    voiceProfiles = uiState.voiceProfiles,
                     isEnrollmentActive = uiState.isEnrollmentActive,
-                    onReset = { showResetVoiceProfilesDialog = true },
-                    onToggleEnrollment = { viewModel.onToggleEnrollment(it) }
+                    onLearnClick = { showProfileNameDialog = true },
+                    onDeleteClick = { profileName ->
+                        selectedProfileToDelete = profileName
+                        showDeleteConfirmDialog = true
+                    }
                 )
             }
         }
