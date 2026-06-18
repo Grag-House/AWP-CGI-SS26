@@ -27,35 +27,47 @@ class AdminPanelViewModel(
     private val _events = MutableSharedFlow<AdminPanelEvent>()
     val events = _events.asSharedFlow()
 
-    // TODO this is ugly and potentially unsafe --> maybe create a data class for this instead of relying on the order
-    // of the combine arguments?
-    // Or at least add some comments to clarify the order and types of the arguments
+    private data class AdminPanelFlows(
+        val url: String,
+        val latitude: Double,
+        val longitude: Double,
+        val speakerEnabled: Boolean,
+        val trafficEvents: List<MqttTrafficEvent>,
+        val voiceProfiles: Map<String, SpeakerVector>,
+        val isEnrollmentActive: Boolean
+    )
+
     val uiState: StateFlow<AdminPanelState> = combine(
-        appConfigRepository.currentUrl,
-        appConfigRepository.latitude,
-        appConfigRepository.longitude,
-        appConfigRepository.isSpeakerVerificationEnabled,
-        mqttManager.trafficEvents,
+        combine(
+            appConfigRepository.currentUrl,
+            appConfigRepository.latitude,
+            appConfigRepository.longitude,
+            appConfigRepository.isSpeakerVerificationEnabled,
+            mqttManager.trafficEvents
+        ) { url, lat, lon, speakerEnabled, trafficEvents ->
+            AdminPanelFlows(
+                url = url,
+                latitude = lat,
+                longitude = lon,
+                speakerEnabled = speakerEnabled,
+                trafficEvents = trafficEvents,
+                voiceProfiles = emptyMap(),
+                isEnrollmentActive = false
+            )
+        },
         voiceProfileRepository.voiceProfiles,
         voiceRecognitionViewModel.isEnrollmentActive
-    ) { args: Array<*> ->
-        val url = args[0] as String
-        val lat = args[1] as Double
-        val lon = args[2] as Double
-        val speakerEnabled = args[3] as Boolean
-        val trafficEvents = args[4] as List<MqttTrafficEvent>
-        val voiceProfiles = args[5] as Map<String, List<Float>>
-        val isEnrollmentActive = args[6] as Boolean
-
+    ) { flows, voiceProfiles, isEnrollmentActive ->
         AdminPanelState(
-            webserverUrl = url,
-            latitude = lat,
-            longitude = lon,
-            coordinates = "Länge: $lon Breite: $lat",
-            isSpeakerVerificationEnabled = speakerEnabled,
+            webserverUrl = flows.url,
+            latitude = flows.latitude,
+            longitude = flows.longitude,
+            coordinates = "Länge: ${flows.longitude} Breite: ${flows.latitude}",
+            isSpeakerVerificationEnabled = flows.speakerEnabled,
             mqttReportTopics = MqttManager.reportTopics,
-            mqttTrafficEvents = trafficEvents.filter { it.topic in MqttManager.reportTopics },
+            mqttTrafficEvents = flows.trafficEvents.filter { it.topic in MqttManager.reportTopics },
             voiceProfileCount = voiceProfiles.size,
+            voiceProfiles = voiceProfiles,
             isEnrollmentActive = isEnrollmentActive
         )
     }.stateIn(
@@ -122,6 +134,12 @@ class AdminPanelViewModel(
         voiceRecognitionViewModel.toggleEnrollment(active, name)
     }
 
+    fun onDeleteVoiceProfile(name: String) {
+        viewModelScope.launch {
+            voiceProfileRepository.deleteVoiceProfile(name)
+        }
+    }
+
     companion object {
         private const val STATE_TIMEOUT = 5000L
     }
@@ -140,6 +158,7 @@ data class AdminPanelState(
     val coordinates: String = "",
     val isSpeakerVerificationEnabled: Boolean = false,
     val voiceProfileCount: Int = 0,
+    val voiceProfiles: Map<String, SpeakerVector> = emptyMap(),
     val isEnrollmentActive: Boolean = false,
     @Suppress("MagicNumber")
     var longitude: Double = 8.3573,
