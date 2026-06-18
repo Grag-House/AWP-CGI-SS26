@@ -266,6 +266,15 @@
     <string name="photobox_upload_failed">Caricamento non riuscito</string>
     <string name="photobox_qr_dialog_title">La tua foto</string>
     <string name="photobox_qr_dialog_subtitle">Scansiona il codice QR per visualizzare e scaricare la foto.</string>
+    <string name="photobox_mode_select_title">Scegli una modalità</string>
+    <string name="photobox_mode_standard_title">Standard</string>
+    <string name="photobox_mode_standard_description">Una singola foto</string>
+    <string name="photobox_mode_strip_title">Striscia da 3 foto</string>
+    <string name="photobox_mode_strip_description">3 foto su una striscia</string>
+    <string name="photobox_change_mode_button">Cambia modalità</string>
+    <string name="photobox_strip_delay_label">PAUSA TRA LE FOTO</string>
+    <string name="photobox_change_pose_label">Cambia posa!</string>
+    <string name="photobox_shot_progress">Foto %1$d di %2$d</string>
     <string name="photobox_new_photo_button">Nuova foto</string>
     <string name="photobox_to_dashboard">Al dashboard</string>
     <string name="photobox_photo_count">%1$d foto scattate</string>

@@ -267,6 +267,15 @@
     <string name="photobox_upload_failed">Upload failed</string>
     <string name="photobox_qr_dialog_title">Your photo</string>
     <string name="photobox_qr_dialog_subtitle">Scan the QR code to view and download the photo.</string>
+    <string name="photobox_mode_select_title">Choose a mode</string>
+    <string name="photobox_mode_standard_title">Standard</string>
+    <string name="photobox_mode_standard_description">A single photo</string>
+    <string name="photobox_mode_strip_title">3-photo strip</string>
+    <string name="photobox_mode_strip_description">3 photos on one strip</string>
+    <string name="photobox_change_mode_button">Change mode</string>
+    <string name="photobox_strip_delay_label">PAUSE BETWEEN PHOTOS</string>
+    <string name="photobox_change_pose_label">Change your pose!</string>
+    <string name="photobox_shot_progress">Photo %1$d of %2$d</string>
     <string name="photobox_new_photo_button">New Photo</string>
     <string name="photobox_to_dashboard">To Dashboard</string>
     <string name="photobox_photo_count">%1$d photos taken</string>

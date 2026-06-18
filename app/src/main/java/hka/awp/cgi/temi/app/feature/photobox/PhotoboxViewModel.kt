@@ -7,40 +7,43 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import hka.awp.cgi.temi.app.utils.AppConfigRepository
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
-import timber.log.Timber
 
-enum class PhotoboxPhase { IDLE, COUNTDOWN, CAPTURE, PREVIEW }
+enum class PhotoboxPhase { MODE_SELECT, IDLE, COUNTDOWN, CAPTURE, PREVIEW }
+
+enum class PhotoboxMode { STANDARD, STRIP }
 
 enum class PhotoboxUploadState { NONE, UPLOADING, SUCCESS, FAILED }
 
 data class PhotoboxUiState(
-    val phase: PhotoboxPhase = PhotoboxPhase.IDLE,
+    val phase: PhotoboxPhase = PhotoboxPhase.MODE_SELECT,
+    val mode: PhotoboxMode = PhotoboxMode.STANDARD,
     val selectedDuration: Int = DEFAULT_DURATION,
     val countdownRemaining: Int = DEFAULT_DURATION,
+    val stripDelaySeconds: Int = DEFAULT_STRIP_DELAY,
+    val isBetweenShots: Boolean = false,
+    val shotsTaken: Int = 0,
     val capturedBitmap: Bitmap? = null,
     val uploadState: PhotoboxUploadState = PhotoboxUploadState.NONE,
     val uploadedPhotoUrl: String? = null,
     val showQrCode: Boolean = false
-)
+) {
+    val totalShots: Int get() = if (mode == PhotoboxMode.STRIP) STRIP_SHOT_COUNT else 1
+}
 
+const val STRIP_SHOT_COUNT = 3
 private const val DEFAULT_DURATION = 3
-private const val TICK_MS = 1000L
+private const val DEFAULT_STRIP_DELAY = 10
 
-@Suppress("TooManyFunctions")
 class PhotoboxViewModel(
     private val cameraManager: PhotoboxCameraManager,
     appConfigRepository: AppConfigRepository,
-    private val uploadRepository: PhotoboxUploadRepository
+    uploadRepository: PhotoboxUploadRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(PhotoboxUiState())
     val uiState: StateFlow<PhotoboxUiState> = _uiState.asStateFlow()
@@ -52,27 +55,92 @@ class PhotoboxViewModel(
     val overlayEnabled: StateFlow<Boolean> = appConfigRepository.photoboxOverlayEnabled
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
-    private var countdownJob: Job? = null
+    private val captureSequencer = PhotoboxCaptureSequencer(cameraManager, viewModelScope)
+    private val sessionFinalizer = PhotoboxSessionFinalizer(uploadRepository, viewModelScope)
 
     fun bindCamera(lifecycleOwner: LifecycleOwner, surfaceProvider: Preview.SurfaceProvider, viewPort: ViewPort?) {
         cameraManager.bindToLifecycle(lifecycleOwner, surfaceProvider, viewPort)
+    }
+
+    fun selectMode(mode: PhotoboxMode) {
+        _uiState.update { it.copy(mode = mode, phase = PhotoboxPhase.IDLE) }
+    }
+
+    fun backToModeSelect() {
+        _uiState.update { it.copy(phase = PhotoboxPhase.MODE_SELECT) }
     }
 
     fun setDuration(seconds: Int) {
         _uiState.update { it.copy(selectedDuration = seconds, countdownRemaining = seconds) }
     }
 
-    fun startSession() = startCountdown()
+    fun setStripDelay(seconds: Int) {
+        _uiState.update { it.copy(stripDelaySeconds = seconds) }
+    }
 
-    // Returns to the duration picker instead of immediately re-starting the countdown.
-    fun takeAnotherPhoto() = reset()
+    fun startSession() {
+        val state = _uiState.value
+        captureSequencer.start(
+            mode = state.mode,
+            firstShotDelaySeconds = state.selectedDuration,
+            betweenShotsDelaySeconds = state.stripDelaySeconds,
+            callbacks = PhotoboxCaptureCallbacks(
+                onTick = { remaining, isBetweenShots, shotsTaken ->
+                    _uiState.update {
+                        it.copy(
+                            phase = PhotoboxPhase.COUNTDOWN,
+                            countdownRemaining = remaining,
+                            isBetweenShots = isBetweenShots,
+                            shotsTaken = shotsTaken
+                        )
+                    }
+                },
+                onCapturing = {
+                    _uiState.update { it.copy(phase = PhotoboxPhase.CAPTURE) }
+                },
+                onShotsReady = { shots ->
+                    sessionFinalizer.finalizeAndUpload(
+                        mode = state.mode,
+                        shots = shots,
+                        withOverlay = overlayEnabled.value,
+                        onFinalImageReady = { finalImage ->
+                            _uiState.update {
+                                it.copy(
+                                    phase = PhotoboxPhase.PREVIEW,
+                                    capturedBitmap = finalImage,
+                                    uploadState = PhotoboxUploadState.UPLOADING,
+                                    uploadedPhotoUrl = null
+                                )
+                            }
+                        },
+                        onUploadResult = { finalImage, uploadState, url ->
+                            // Guards against a slow upload finishing after the user moved on.
+                            _uiState.update {
+                                if (it.capturedBitmap === finalImage) {
+                                    it.copy(uploadState = uploadState, uploadedPhotoUrl = url)
+                                } else {
+                                    it
+                                }
+                            }
+                        }
+                    )
+                },
+                onFailed = {
+                    _uiState.update { it.copy(phase = PhotoboxPhase.IDLE) }
+                }
+            )
+        )
+    }
 
+    // Resets back to the mode/duration picker — used both for "take another photo" and "cancel".
     fun reset() {
-        countdownJob?.cancel()
+        captureSequencer.cancel()
         _uiState.update { state ->
             PhotoboxUiState(
+                mode = state.mode,
                 selectedDuration = state.selectedDuration,
-                countdownRemaining = state.selectedDuration
+                countdownRemaining = state.selectedDuration,
+                stripDelaySeconds = state.stripDelaySeconds
             )
         }
     }
@@ -83,88 +151,13 @@ class PhotoboxViewModel(
         cameraManager.unbind()
     }
 
-    private fun startCountdown() {
-        countdownJob?.cancel()
-        val duration = _uiState.value.selectedDuration
-        _uiState.update {
-            it.copy(
-                phase = PhotoboxPhase.COUNTDOWN,
-                countdownRemaining = duration,
-                capturedBitmap = null
-            )
-        }
-        countdownJob = viewModelScope.launch {
-            var remaining = duration
-            while (remaining > 0 && isActive) {
-                _uiState.update { it.copy(countdownRemaining = remaining) }
-                delay(TICK_MS)
-                remaining--
-            }
-            if (!isActive) return@launch
-            // Enter CAPTURE — stays here until the camera callback resolves the photo
-            _uiState.update { it.copy(phase = PhotoboxPhase.CAPTURE) }
-            capturePhoto()
-        }
-    }
-
-    private fun capturePhoto() {
-        cameraManager.capturePhoto { result ->
-            result.fold(
-                onSuccess = { bitmap ->
-                    _uiState.update {
-                        it.copy(
-                            phase = PhotoboxPhase.PREVIEW,
-                            capturedBitmap = bitmap,
-                            uploadState = PhotoboxUploadState.UPLOADING,
-                            uploadedPhotoUrl = null
-                        )
-                    }
-                    uploadPhoto(bitmap)
-                },
-                onFailure = { error ->
-                    Timber.e(error, "Failed to capture photobox photo")
-                    _uiState.update { it.copy(phase = PhotoboxPhase.IDLE) }
-                }
-            )
-        }
-    }
-
-    private fun uploadPhoto(bitmap: Bitmap) {
-        val withOverlay = overlayEnabled.value
-        viewModelScope.launch {
-            uploadRepository.uploadPhoto(bitmap, withOverlay).fold(
-                onSuccess = { url -> applyUploadResult(bitmap, PhotoboxUploadState.SUCCESS, url) },
-                onFailure = { error ->
-                    Timber.e(error, "Failed to upload photobox photo")
-                    applyUploadResult(bitmap, PhotoboxUploadState.FAILED, null)
-                }
-            )
-        }
-    }
-
-    // Guards against a slow upload finishing after the user already moved on to a new photo.
-    private fun applyUploadResult(bitmap: Bitmap, state: PhotoboxUploadState, url: String?) {
-        _uiState.update {
-            if (it.capturedBitmap === bitmap) {
-                it.copy(uploadState = state, uploadedPhotoUrl = url)
-            } else {
-                it
-            }
-        }
-    }
-
-    fun showQrCode() {
-        if (_uiState.value.uploadedPhotoUrl != null) {
-            _uiState.update { it.copy(showQrCode = true) }
-        }
-    }
-
-    fun hideQrCode() {
-        _uiState.update { it.copy(showQrCode = false) }
+    fun setQrCodeVisible(visible: Boolean) {
+        if (visible && _uiState.value.uploadedPhotoUrl == null) return
+        _uiState.update { it.copy(showQrCode = visible) }
     }
 
     override fun onCleared() {
-        countdownJob?.cancel()
+        captureSequencer.cancel()
         cameraManager.unbind()
         super.onCleared()
     }
