@@ -14,6 +14,7 @@ import hka.awp.cgi.temi.app.feature.settings.adminPanel.AdminPanelViewModel
 import hka.awp.cgi.temi.app.feature.settings.battery.BatteryViewModel
 import hka.awp.cgi.temi.app.feature.settings.display.DisplayViewModel
 import hka.awp.cgi.temi.app.feature.settings.language.LanguageViewModel
+import hka.awp.cgi.temi.app.feature.settings.photobox.PhotoboxSettingsViewModel
 import hka.awp.cgi.temi.app.feature.webserver.WebserverViewModel
 import hka.awp.cgi.temi.app.ui.shell.AppViewModel
 import hka.awp.cgi.temi.app.utils.NetworkManager
@@ -102,7 +103,9 @@ val appModule = module {
 
     single { PhotoboxCameraManager(androidContext()) }
 
-    viewModel { PhotoboxViewModel(cameraManager = get()) }
+    viewModel { PhotoboxViewModel(cameraManager = get(), appConfigRepository = get()) }
+
+    viewModel { PhotoboxSettingsViewModel(appConfigRepository = get()) }
 
     viewModel<WebserverViewModel> { WebserverViewModel(get()) }
 

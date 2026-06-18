@@ -6,6 +6,7 @@ import android.graphics.Bitmap
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.Preview
+import androidx.camera.core.ViewPort
 import androidx.camera.view.PreviewView
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.Animatable
@@ -19,9 +20,11 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -55,6 +58,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -81,6 +85,7 @@ fun PhotoboxScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val cameraState by viewModel.cameraState.collectAsStateWithLifecycle()
+    val overlayEnabled by viewModel.overlayEnabled.collectAsStateWithLifecycle()
 
     DisposableEffect(viewModel) {
         onDispose { viewModel.onScreenStopped() }
@@ -92,6 +97,11 @@ fun PhotoboxScreen(
             cameraState = cameraState,
             onBindCamera = viewModel::bindCamera
         )
+
+        // The PREVIEW phase renders its own copy over the captured photo (see PreviewOverlay).
+        if (overlayEnabled && uiState.phase != PhotoboxPhase.PREVIEW) {
+            TemiOverlayImage()
+        }
 
         when (uiState.phase) {
             PhotoboxPhase.IDLE -> IdleOverlay(
@@ -106,6 +116,7 @@ fun PhotoboxScreen(
             PhotoboxPhase.CAPTURE -> CaptureFlashOverlay(modifier = Modifier.fillMaxSize())
             PhotoboxPhase.PREVIEW -> PreviewOverlay(
                 capturedBitmap = uiState.capturedBitmap,
+                overlayEnabled = overlayEnabled,
                 onTakeAnother = viewModel::takeAnotherPhoto,
                 onToDashboard = {
                     viewModel.reset()
@@ -122,7 +133,7 @@ fun PhotoboxScreen(
 private fun CameraSection(
     modifier: Modifier = Modifier,
     cameraState: PhotoboxCameraState,
-    onBindCamera: (LifecycleOwner, Preview.SurfaceProvider) -> Unit
+    onBindCamera: (LifecycleOwner, Preview.SurfaceProvider, ViewPort?) -> Unit
 ) {
     val context = LocalContext.current
     var hasCameraPermission by remember {
@@ -179,7 +190,7 @@ private fun CameraMessageOverlay(modifier: Modifier = Modifier, textRes: Int) {
 @Composable
 private fun CameraPreviewView(
     modifier: Modifier = Modifier,
-    onBindCamera: (LifecycleOwner, Preview.SurfaceProvider) -> Unit
+    onBindCamera: (LifecycleOwner, Preview.SurfaceProvider, ViewPort?) -> Unit
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
 
@@ -187,7 +198,8 @@ private fun CameraPreviewView(
         factory = { ctx ->
             PreviewView(ctx).apply {
                 scaleType = PreviewView.ScaleType.FILL_CENTER
-                onBindCamera(lifecycleOwner, surfaceProvider)
+                // Deferred to post() so the view is laid out and viewPort reflects its real size.
+                post { onBindCamera(lifecycleOwner, surfaceProvider, viewPort) }
             }
         },
         modifier = modifier
@@ -358,11 +370,32 @@ private fun CaptureFlashOverlay(modifier: Modifier = Modifier) {
     Box(modifier = modifier.background(Color.White.copy(alpha = alpha.value)))
 }
 
+// ─── Temi overlay ────────────────────────────────────────────────────────────
+
+private const val OVERLAY_HEIGHT_FRACTION = 0.78f
+
+/**
+ * Renders the Temi cutout at a fixed screen position so it lines up identically whether
+ * shown over the live camera feed or over the final captured photo.
+ */
+@Composable
+private fun BoxScope.TemiOverlayImage() {
+    Image(
+        painter = painterResource(R.drawable.temi_photo),
+        contentDescription = null,
+        contentScale = ContentScale.FillHeight,
+        modifier = Modifier
+            .align(Alignment.BottomEnd)
+            .fillMaxHeight(OVERLAY_HEIGHT_FRACTION)
+    )
+}
+
 // ─── PREVIEW overlay ─────────────────────────────────────────────────────────
 
 @Composable
 private fun PreviewOverlay(
     capturedBitmap: Bitmap?,
+    overlayEnabled: Boolean,
     onTakeAnother: () -> Unit,
     onToDashboard: () -> Unit
 ) {
@@ -371,9 +404,15 @@ private fun PreviewOverlay(
             Image(
                 bitmap = capturedBitmap.asImageBitmap(),
                 contentDescription = null,
-                contentScale = ContentScale.Fit,
+                // Matches the live preview's FILL_CENTER behavior: fill the screen, crop instead
+                // of letterboxing, so no black bars appear if the aspect ratio doesn't match exactly.
+                contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
             )
+        }
+
+        if (overlayEnabled) {
+            TemiOverlayImage()
         }
 
         BottomBar(modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()) {

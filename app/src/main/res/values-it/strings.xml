@@ -37,6 +37,8 @@
     <string name="settings_location_subtitle">Servizi di localizzazione e navigazione</string>
     <string name="settings_about_title">Informazioni</string>
     <string name="settings_about_subtitle">Informazioni sul sistema</string>
+    <string name="settings_photobox_title">Photobox</string>
+    <string name="settings_photobox_subtitle">Tema e overlay</string>
     <string name="display_brightness">Luminosità schermo</string>
     <string name="display_screensaver">Salvaschermo</string>
     <string name="display_screensaver_after">Si avvia dopo %1$s di inattività</string>
@@ -252,6 +254,8 @@
     <string name="photobox_preview_message">Torna davanti a Temi quando sei pronto per la prossima foto.</string>
     <string name="photobox_camera_permission_required">Permesso fotocamera richiesto</string>
     <string name="photobox_camera_unavailable">Fotocamera non disponibile</string>
+    <string name="photobox_overlay_title">Overlay di Temi</string>
+    <string name="photobox_overlay_description">Sovrappone un\'immagine di Temi alla foto scattata, in modo che sembri che Temi sia al tuo fianco.</string>
     <string name="photobox_new_photo_button">Nuova foto</string>
     <string name="photobox_to_dashboard">Al dashboard</string>
     <string name="photobox_photo_count">%1$d foto scattate</string>

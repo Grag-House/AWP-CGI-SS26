@@ -2,14 +2,18 @@ package hka.awp.cgi.temi.app.feature.photobox
 
 import android.graphics.Bitmap
 import androidx.camera.core.Preview
+import androidx.camera.core.ViewPort
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import hka.awp.cgi.temi.app.utils.AppConfigRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -28,17 +32,21 @@ private const val DEFAULT_DURATION = 3
 private const val TICK_MS = 1000L
 
 class PhotoboxViewModel(
-    private val cameraManager: PhotoboxCameraManager
+    private val cameraManager: PhotoboxCameraManager,
+    private val appConfigRepository: AppConfigRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(PhotoboxUiState())
     val uiState: StateFlow<PhotoboxUiState> = _uiState.asStateFlow()
 
     val cameraState: StateFlow<PhotoboxCameraState> = cameraManager.cameraState
 
+    val overlayEnabled: StateFlow<Boolean> = appConfigRepository.photoboxOverlayEnabled
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
     private var countdownJob: Job? = null
 
-    fun bindCamera(lifecycleOwner: LifecycleOwner, surfaceProvider: Preview.SurfaceProvider) {
-        cameraManager.bindToLifecycle(lifecycleOwner, surfaceProvider)
+    fun bindCamera(lifecycleOwner: LifecycleOwner, surfaceProvider: Preview.SurfaceProvider, viewPort: ViewPort?) {
+        cameraManager.bindToLifecycle(lifecycleOwner, surfaceProvider, viewPort)
     }
 
     fun setDuration(seconds: Int) {
