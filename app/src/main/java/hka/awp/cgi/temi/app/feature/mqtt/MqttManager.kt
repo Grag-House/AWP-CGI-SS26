@@ -41,6 +41,7 @@ class MqttManager(private val robot: Robot?, private val client: Mqtt5BlockingCl
         private const val TILT_ANGLE_TOPIC = "$BASE_TOPIC/temi_tilt_angle/set"
         private const val SPEAK_TOPIC = "$BASE_TOPIC/temi_speak/set"
         private const val TTS_LISTENER_TOPIC = "$BASE_TOPIC/ttsListener"
+        const val BATTERY_TOPIC = "$BASE_TOPIC/temi_battery_level"
         private val json = Json { ignoreUnknownKeys = true }
         private const val MAX_TRAFFIC_EVENTS = 200
 
