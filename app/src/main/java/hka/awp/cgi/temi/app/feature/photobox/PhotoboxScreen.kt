@@ -47,6 +47,15 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import hka.awp.cgi.temi.app.R
+import hka.awp.cgi.temi.app.feature.photobox.capture.PhotoboxCameraState
+import hka.awp.cgi.temi.app.feature.photobox.ui.CaptureFlashOverlay
+import hka.awp.cgi.temi.app.feature.photobox.ui.CountdownOverlay
+import hka.awp.cgi.temi.app.feature.photobox.ui.IdleOverlay
+import hka.awp.cgi.temi.app.feature.photobox.ui.ModeSelectOverlay
+import hka.awp.cgi.temi.app.feature.photobox.ui.PreviewOverlay
+import hka.awp.cgi.temi.app.feature.photobox.ui.PreviewPhotoState
+import hka.awp.cgi.temi.app.feature.photobox.ui.QrCodeDialog
+import hka.awp.cgi.temi.app.feature.photobox.upload.PHOTOBOX_OVERLAY_HEIGHT_FRACTION
 
 private val OVERLAY_HIDDEN_PHASES = setOf(PhotoboxPhase.MODE_SELECT, PhotoboxPhase.PREVIEW)
 
@@ -114,7 +123,11 @@ fun PhotoboxScreen(
 
         val photoUrl = uiState.uploadedPhotoUrl
         if (uiState.showQrCode && photoUrl != null) {
-            QrCodeDialog(photoUrl = photoUrl, onDismiss = { viewModel.setQrCodeVisible(false) })
+            QrCodeDialog(
+                photoUrl = photoUrl,
+                expiresAtMillis = uiState.uploadedPhotoExpiresAt,
+                onDismiss = { viewModel.setQrCodeVisible(false) }
+            )
         }
     }
 }

@@ -217,6 +217,9 @@ dependencies {
     // QR code generation for Photobox photo links
     implementation(libs.zxing.core)
 
+    // Offline upload retry queue for Photobox (survives app restarts and waits for network)
+    implementation(libs.androidx.work.runtime.ktx)
+
     // api desugaring
     coreLibraryDesugaring(libs.android.desugarJdkLibs)
 

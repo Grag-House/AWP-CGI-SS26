@@ -1,4 +1,4 @@
-package hka.awp.cgi.temi.app.feature.photobox
+package hka.awp.cgi.temi.app.feature.photobox.upload
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -31,6 +31,14 @@ private const val UPLOAD_TIMEOUT_SECONDS = 30L
 internal const val PHOTOBOX_OVERLAY_HEIGHT_FRACTION = 0.68f
 
 /**
+ * Result of a successful upload. [expiresAtMillis] is the backend's own enforcement of how long
+ * [viewUrl] stays reachable — today that's a signed token checked by the Apps Script webhook, but
+ * the contract (a URL good only until a point in time) is written so it still holds if the
+ * backend is ever swapped for something with native expiring links (e.g. S3 presigned URLs).
+ */
+data class PhotoboxUploadResult(val viewUrl: String, val expiresAtMillis: Long)
+
+/**
  * Uploads Photobox photos to a Google Drive folder via a Google Apps Script web app acting as a
  * webhook — the app never needs Google credentials, it just POSTs the image as base64 JSON.
  * Both the target folder and the webhook URL are read fresh from [AppConfigRepository] on every
@@ -49,8 +57,18 @@ class PhotoboxUploadRepository(
         .readTimeout(UPLOAD_TIMEOUT_SECONDS, TimeUnit.SECONDS)
         .build()
 
-    /** Returns the public, shareable Drive view URL for the uploaded photo on success. */
-    suspend fun uploadPhoto(photo: Bitmap, withOverlay: Boolean): Result<String> = withContext(Dispatchers.IO) {
+    /** Returns the time-limited, shareable view URL for the uploaded photo on success. */
+    suspend fun uploadPhoto(photo: Bitmap, withOverlay: Boolean): Result<PhotoboxUploadResult> {
+        val finalBitmap = if (withOverlay) bakeOverlay(photo) else photo
+        return uploadFinalPhoto(finalBitmap)
+    }
+
+    /**
+     * Uploads a photo that's already in its final form (overlay baked in, strip combined, if
+     * applicable) — used both by [uploadPhoto] and by [PhotoboxUploadWorker] when retrying a
+     * photo that was cached to disk after a failed first attempt.
+     */
+    suspend fun uploadFinalPhoto(finalBitmap: Bitmap): Result<PhotoboxUploadResult> = withContext(Dispatchers.IO) {
         try {
             val webhookUrl = appConfigRepository.driveUploadUrl.first()
             val folderLink = appConfigRepository.driveFolderLink.first()
@@ -63,7 +81,6 @@ class PhotoboxUploadRepository(
                 return@withContext Result.failure(IllegalStateException("Invalid Drive folder link: $folderLink"))
             }
 
-            val finalBitmap = if (withOverlay) bakeOverlay(photo) else photo
             val requestJson = JSONObject().apply {
                 put("folderId", folderId)
                 put("fileName", "photobox_${System.currentTimeMillis()}.jpg")
@@ -87,7 +104,11 @@ class PhotoboxUploadRepository(
                 if (viewUrl.isBlank()) {
                     return@withContext Result.failure(IOException("Upload response did not include a viewUrl"))
                 }
-                return@withContext Result.success(viewUrl)
+                val expiresAt = responseJson.optLong("expiresAt", -1L)
+                if (expiresAt < 0L) {
+                    return@withContext Result.failure(IOException("Upload response did not include an expiresAt"))
+                }
+                return@withContext Result.success(PhotoboxUploadResult(viewUrl, expiresAt))
             }
         } catch (e: CancellationException) {
             throw e

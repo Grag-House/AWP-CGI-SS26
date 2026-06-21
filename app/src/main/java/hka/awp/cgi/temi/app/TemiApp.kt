@@ -2,6 +2,7 @@ package hka.awp.cgi.temi.app
 
 import android.app.Application
 import android.util.Log
+import hka.awp.cgi.temi.app.feature.photobox.upload.PhotoboxUploadQueue
 import hka.awp.cgi.temi.app.koin.appModule
 import hka.awp.cgi.temi.app.koin.navigationModule
 import hka.awp.cgi.temi.app.koin.weatherModule
@@ -24,6 +25,11 @@ class TemiApp : Application() {
             androidContext(this@TemiApp)
             modules(appModule, weatherModule, navigationModule, webserverModule)
         }
+
+        // Resumes any Photobox uploads that were still cached on disk when the process last
+        // died (e.g. app killed mid-retry) — without this they'd sit on disk forever since
+        // nothing else triggers a re-enqueue.
+        GlobalContext.get().get<PhotoboxUploadQueue>().reconcileOrphans()
 
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())

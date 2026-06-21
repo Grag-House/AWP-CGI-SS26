@@ -1,6 +1,8 @@
-package hka.awp.cgi.temi.app.feature.photobox
+package hka.awp.cgi.temi.app.feature.photobox.capture
 
 import android.graphics.Bitmap
+import hka.awp.cgi.temi.app.feature.photobox.PhotoboxMode
+import hka.awp.cgi.temi.app.feature.photobox.STRIP_SHOT_COUNT
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -8,13 +10,14 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlin.time.Duration.Companion.seconds
 
-private const val TICK_MS = 1000L
+private val TICK = 1.seconds
 
 // Some camera HALs (notably legacy/compatibility ones) can occasionally fail to deliver a
 // takePicture() result at all — neither success nor error. Without a timeout on our side, that
 // leaves the session stuck forever waiting for a callback that never comes.
-private const val CAPTURE_TIMEOUT_MS = 8000L
+private val CAPTURE_TIMEOUT = 8.seconds
 
 /** The callbacks a [PhotoboxCaptureSequencer] reports session progress through. */
 internal data class PhotoboxCaptureCallbacks(
@@ -51,7 +54,7 @@ internal class PhotoboxCaptureSequencer(
                 var remaining = delaySeconds
                 while (remaining > 0 && isActive) {
                     callbacks.onTick(remaining, shots.isNotEmpty(), shots.size)
-                    delay(TICK_MS)
+                    delay(TICK)
                     remaining--
                 }
                 if (!isActive) return@launch
@@ -73,7 +76,7 @@ internal class PhotoboxCaptureSequencer(
         job?.cancel()
     }
 
-    private suspend fun captureOnce(): Bitmap? = withTimeoutOrNull(CAPTURE_TIMEOUT_MS) {
+    private suspend fun captureOnce(): Bitmap? = withTimeoutOrNull(CAPTURE_TIMEOUT) {
         suspendCancellableCoroutine { continuation ->
             cameraManager.capturePhoto { result -> continuation.resumeWith(Result.success(result.getOrNull())) }
         }

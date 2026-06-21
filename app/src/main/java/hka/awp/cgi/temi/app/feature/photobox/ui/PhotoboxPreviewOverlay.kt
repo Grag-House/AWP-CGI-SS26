@@ -1,4 +1,4 @@
-package hka.awp.cgi.temi.app.feature.photobox
+package hka.awp.cgi.temi.app.feature.photobox.ui
 
 import android.graphics.Bitmap
 import androidx.compose.foundation.Image
@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.CloudOff
 import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.material.icons.rounded.QrCode2
 import androidx.compose.material3.Button
@@ -40,6 +41,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import hka.awp.cgi.temi.app.R
+import hka.awp.cgi.temi.app.feature.photobox.BottomBar
+import hka.awp.cgi.temi.app.feature.photobox.PhotoboxMode
+import hka.awp.cgi.temi.app.feature.photobox.PhotoboxUploadState
+import hka.awp.cgi.temi.app.feature.photobox.TemiOverlayImage
 
 private const val COLOR_SUCCESS = 0xFF4CAF50L
 private val ColorSuccess = Color(COLOR_SUCCESS)
@@ -169,12 +174,29 @@ private fun UploadStatusRow(
             color = MaterialTheme.colorScheme.error
         )
 
+        PhotoboxUploadState.QUEUED -> Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.CloudOff,
+                contentDescription = null,
+                modifier = Modifier.size(16.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+            )
+            Text(
+                text = stringResource(R.string.photobox_upload_queued),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+            )
+        }
+
         PhotoboxUploadState.NONE -> Unit
     }
 }
 
 @Composable
-internal fun QrCodeDialog(photoUrl: String, onDismiss: () -> Unit) {
+internal fun QrCodeDialog(photoUrl: String, expiresAtMillis: Long?, onDismiss: () -> Unit) {
     val qrBitmap = remember(photoUrl) { generateQrCodeBitmap(photoUrl) }
 
     Dialog(onDismissRequest = onDismiss) {
@@ -198,6 +220,15 @@ internal fun QrCodeDialog(photoUrl: String, onDismiss: () -> Unit) {
                     textAlign = TextAlign.Center,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                if (expiresAtMillis != null) {
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = stringResource(R.string.photobox_qr_dialog_expiry),
+                        style = MaterialTheme.typography.bodySmall,
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
                 Spacer(Modifier.height(16.dp))
                 Image(
                     bitmap = qrBitmap.asImageBitmap(),

@@ -264,8 +264,10 @@
     <string name="photobox_show_qr_button">Mostra codice QR</string>
     <string name="photobox_upload_in_progress">Caricamento foto…</string>
     <string name="photobox_upload_failed">Caricamento non riuscito</string>
+    <string name="photobox_upload_queued">Nessuna connessione – la foto verrà caricata automaticamente non appena la connessione sarà di nuovo disponibile.</string>
     <string name="photobox_qr_dialog_title">La tua foto</string>
     <string name="photobox_qr_dialog_subtitle">Scansiona il codice QR per visualizzare e scaricare la foto.</string>
+    <string name="photobox_qr_dialog_expiry">Questo link è valido solo per 30 minuti.</string>
     <string name="photobox_mode_select_title">Scegli una modalità</string>
     <string name="photobox_mode_standard_title">Standard</string>
     <string name="photobox_mode_standard_description">Una singola foto</string>

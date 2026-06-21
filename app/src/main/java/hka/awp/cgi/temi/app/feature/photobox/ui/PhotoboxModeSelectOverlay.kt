@@ -1,4 +1,4 @@
-package hka.awp.cgi.temi.app.feature.photobox
+package hka.awp.cgi.temi.app.feature.photobox.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -29,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import hka.awp.cgi.temi.app.R
+import hka.awp.cgi.temi.app.feature.photobox.PhotoboxMode
 
 private const val MODE_CARD_WIDTH_DP = 220
 

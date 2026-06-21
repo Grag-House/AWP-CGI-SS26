@@ -1,4 +1,4 @@
-package hka.awp.cgi.temi.app.feature.photobox
+package hka.awp.cgi.temi.app.feature.photobox.ui
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.Animatable
@@ -34,6 +34,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import hka.awp.cgi.temi.app.R
+import hka.awp.cgi.temi.app.feature.photobox.PhotoboxUiState
 
 private const val COUNTDOWN_RING_SIZE_DP = 200
 private const val COUNTDOWN_RING_STROKE_DP = 10

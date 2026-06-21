@@ -1,4 +1,4 @@
-package hka.awp.cgi.temi.app.feature.photobox
+package hka.awp.cgi.temi.app.feature.photobox.ui
 
 import android.graphics.Bitmap
 import androidx.core.graphics.createBitmap

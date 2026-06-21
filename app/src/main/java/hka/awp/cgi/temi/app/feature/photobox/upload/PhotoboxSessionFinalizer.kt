@@ -1,11 +1,21 @@
-package hka.awp.cgi.temi.app.feature.photobox
+package hka.awp.cgi.temi.app.feature.photobox.upload
 
 import android.graphics.Bitmap
+import hka.awp.cgi.temi.app.feature.photobox.PhotoboxMode
+import hka.awp.cgi.temi.app.feature.photobox.capture.PhotoboxCaptureSequencer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+
+/** Outcome of a finalize-and-upload run, distinguishing a genuine failure from one that's been
+ * queued for an automatic retry once the network is back. */
+internal sealed interface PhotoboxUploadOutcome {
+    data class Success(val result: PhotoboxUploadResult) : PhotoboxUploadOutcome
+    data class Queued(val pendingId: String) : PhotoboxUploadOutcome
+    data object Failed : PhotoboxUploadOutcome
+}
 
 /**
  * Turns the raw shots from a [PhotoboxCaptureSequencer] run into the final image (baking in the
@@ -14,6 +24,7 @@ import timber.log.Timber
  */
 internal class PhotoboxSessionFinalizer(
     private val uploadRepository: PhotoboxUploadRepository,
+    private val uploadQueue: PhotoboxUploadQueue,
     private val scope: CoroutineScope
 ) {
     fun finalizeAndUpload(
@@ -21,7 +32,7 @@ internal class PhotoboxSessionFinalizer(
         shots: List<Bitmap>,
         withOverlay: Boolean,
         onFinalImageReady: (Bitmap) -> Unit,
-        onUploadResult: (Bitmap, PhotoboxUploadState, String?) -> Unit
+        onUploadResult: (Bitmap, PhotoboxUploadOutcome) -> Unit
     ) {
         scope.launch {
             // Combining the strip and baking the overlay are pure CPU/bitmap work with no need
@@ -34,10 +45,23 @@ internal class PhotoboxSessionFinalizer(
             onFinalImageReady(finalImage)
 
             uploadRepository.uploadPhoto(finalImage, withOverlay && !overlayAlreadyHandled).fold(
-                onSuccess = { url -> onUploadResult(finalImage, PhotoboxUploadState.SUCCESS, url) },
+                onSuccess = { result ->
+                    onUploadResult(finalImage, PhotoboxUploadOutcome.Success(result))
+                },
                 onFailure = { error ->
-                    Timber.e(error, "Failed to upload photobox photo")
-                    onUploadResult(finalImage, PhotoboxUploadState.FAILED, null)
+                    // A misconfigured webhook/folder will fail the exact same way every retry —
+                    // queuing it would just hammer the server forever for no benefit. Anything
+                    // else (network blip, transient server error) is worth retrying once the
+                    // connection is back.
+                    if (error is IllegalStateException) {
+                        Timber.e(error, "Photobox upload misconfigured, not queuing for retry")
+                        onUploadResult(finalImage, PhotoboxUploadOutcome.Failed)
+                    } else {
+                        Timber.w(error, "Failed to upload photobox photo, queuing for retry")
+                        // enqueue() compresses the bitmap to disk — blocking I/O, off the main thread.
+                        val pendingId = withContext(Dispatchers.IO) { uploadQueue.enqueue(finalImage) }
+                        onUploadResult(finalImage, PhotoboxUploadOutcome.Queued(pendingId))
+                    }
                 }
             )
         }
