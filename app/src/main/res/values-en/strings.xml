@@ -265,8 +265,10 @@
     <string name="photobox_show_qr_button">Show QR code</string>
     <string name="photobox_upload_in_progress">Uploading photo …</string>
     <string name="photobox_upload_failed">Upload failed</string>
+    <string name="photobox_upload_queued">No internet – the photo will upload automatically once the connection is back.</string>
     <string name="photobox_qr_dialog_title">Your photo</string>
     <string name="photobox_qr_dialog_subtitle">Scan the QR code to view and download the photo.</string>
+    <string name="photobox_qr_dialog_expiry">This link is only valid for 30 minutes.</string>
     <string name="photobox_mode_select_title">Choose a mode</string>
     <string name="photobox_mode_standard_title">Standard</string>
     <string name="photobox_mode_standard_description">A single photo</string>

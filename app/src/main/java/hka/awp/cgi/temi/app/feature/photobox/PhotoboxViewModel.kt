@@ -6,6 +6,14 @@ import androidx.camera.core.ViewPort
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import hka.awp.cgi.temi.app.feature.photobox.capture.PhotoboxCameraManager
+import hka.awp.cgi.temi.app.feature.photobox.capture.PhotoboxCameraState
+import hka.awp.cgi.temi.app.feature.photobox.capture.PhotoboxCaptureCallbacks
+import hka.awp.cgi.temi.app.feature.photobox.capture.PhotoboxCaptureSequencer
+import hka.awp.cgi.temi.app.feature.photobox.upload.PhotoboxSessionFinalizer
+import hka.awp.cgi.temi.app.feature.photobox.upload.PhotoboxUploadOutcomeHandler
+import hka.awp.cgi.temi.app.feature.photobox.upload.PhotoboxUploadQueue
+import hka.awp.cgi.temi.app.feature.photobox.upload.PhotoboxUploadRepository
 import hka.awp.cgi.temi.app.utils.AppConfigRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -18,7 +26,7 @@ enum class PhotoboxPhase { MODE_SELECT, IDLE, COUNTDOWN, CAPTURE, PREVIEW }
 
 enum class PhotoboxMode { STANDARD, STRIP }
 
-enum class PhotoboxUploadState { NONE, UPLOADING, SUCCESS, FAILED }
+enum class PhotoboxUploadState { NONE, UPLOADING, SUCCESS, FAILED, QUEUED }
 
 data class PhotoboxUiState(
     val phase: PhotoboxPhase = PhotoboxPhase.MODE_SELECT,
@@ -31,6 +39,7 @@ data class PhotoboxUiState(
     val capturedBitmap: Bitmap? = null,
     val uploadState: PhotoboxUploadState = PhotoboxUploadState.NONE,
     val uploadedPhotoUrl: String? = null,
+    val uploadedPhotoExpiresAt: Long? = null,
     val showQrCode: Boolean = false
 ) {
     val totalShots: Int get() = if (mode == PhotoboxMode.STRIP) STRIP_SHOT_COUNT else 1
@@ -43,7 +52,8 @@ private const val DEFAULT_STRIP_DELAY = 10
 class PhotoboxViewModel(
     private val cameraManager: PhotoboxCameraManager,
     appConfigRepository: AppConfigRepository,
-    uploadRepository: PhotoboxUploadRepository
+    uploadRepository: PhotoboxUploadRepository,
+    uploadQueue: PhotoboxUploadQueue
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(PhotoboxUiState())
     val uiState: StateFlow<PhotoboxUiState> = _uiState.asStateFlow()
@@ -56,7 +66,8 @@ class PhotoboxViewModel(
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     private val captureSequencer = PhotoboxCaptureSequencer(cameraManager, viewModelScope)
-    private val sessionFinalizer = PhotoboxSessionFinalizer(uploadRepository, viewModelScope)
+    private val sessionFinalizer = PhotoboxSessionFinalizer(uploadRepository, uploadQueue, viewModelScope)
+    private val uploadOutcomeHandler = PhotoboxUploadOutcomeHandler(uploadQueue, _uiState, viewModelScope)
 
     fun bindCamera(lifecycleOwner: LifecycleOwner, surfaceProvider: Preview.SurfaceProvider, viewPort: ViewPort?) {
         cameraManager.bindToLifecycle(lifecycleOwner, surfaceProvider, viewPort)
@@ -109,20 +120,12 @@ class PhotoboxViewModel(
                                     phase = PhotoboxPhase.PREVIEW,
                                     capturedBitmap = finalImage,
                                     uploadState = PhotoboxUploadState.UPLOADING,
-                                    uploadedPhotoUrl = null
+                                    uploadedPhotoUrl = null,
+                                    uploadedPhotoExpiresAt = null
                                 )
                             }
                         },
-                        onUploadResult = { finalImage, uploadState, url ->
-                            // Guards against a slow upload finishing after the user moved on.
-                            _uiState.update {
-                                if (it.capturedBitmap === finalImage) {
-                                    it.copy(uploadState = uploadState, uploadedPhotoUrl = url)
-                                } else {
-                                    it
-                                }
-                            }
-                        }
+                        onUploadResult = uploadOutcomeHandler::handle
                     )
                 },
                 onFailed = {
@@ -135,6 +138,7 @@ class PhotoboxViewModel(
     // Resets back to the mode/duration picker — used both for "take another photo" and "cancel".
     fun reset() {
         captureSequencer.cancel()
+        uploadOutcomeHandler.cancel()
         _uiState.update { state ->
             PhotoboxUiState(
                 mode = state.mode,

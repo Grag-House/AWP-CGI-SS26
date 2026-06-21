@@ -265,8 +265,10 @@
     <string name="photobox_show_qr_button">Afficher le code QR</string>
     <string name="photobox_upload_in_progress">Envoi de la photo…</string>
     <string name="photobox_upload_failed">Envoi échoué</string>
+    <string name="photobox_upload_queued">Pas d\'internet – la photo sera envoyée automatiquement dès que la connexion sera rétablie.</string>
     <string name="photobox_qr_dialog_title">Ta photo</string>
     <string name="photobox_qr_dialog_subtitle">Scanne le code QR pour voir et télécharger la photo.</string>
+    <string name="photobox_qr_dialog_expiry">Ce lien n\'est valable que pendant 30 minutes.</string>
     <string name="photobox_mode_select_title">Choisis un mode</string>
     <string name="photobox_mode_standard_title">Standard</string>
     <string name="photobox_mode_standard_description">Une seule photo</string>

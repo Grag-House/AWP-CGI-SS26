@@ -7,9 +7,11 @@ import hka.awp.cgi.temi.app.feature.controller.ControllerViewModel
 import hka.awp.cgi.temi.app.feature.hideandseek.HideAndSeekViewModel
 import hka.awp.cgi.temi.app.feature.hideandseek.HidingSpotRepository
 import hka.awp.cgi.temi.app.feature.navigation.NavigationViewModel
-import hka.awp.cgi.temi.app.feature.photobox.PhotoboxCameraManager
-import hka.awp.cgi.temi.app.feature.photobox.PhotoboxUploadRepository
 import hka.awp.cgi.temi.app.feature.photobox.PhotoboxViewModel
+import hka.awp.cgi.temi.app.feature.photobox.capture.PhotoboxCameraManager
+import hka.awp.cgi.temi.app.feature.photobox.upload.PhotoboxPendingUploadStore
+import hka.awp.cgi.temi.app.feature.photobox.upload.PhotoboxUploadQueue
+import hka.awp.cgi.temi.app.feature.photobox.upload.PhotoboxUploadRepository
 import hka.awp.cgi.temi.app.feature.settings.SettingsViewModel
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.AdminPanelViewModel
 import hka.awp.cgi.temi.app.feature.settings.battery.BatteryViewModel
@@ -112,11 +114,16 @@ val appModule = module {
         )
     }
 
+    single { PhotoboxPendingUploadStore(androidContext()) }
+
+    single { PhotoboxUploadQueue(context = androidContext(), pendingUploadStore = get()) }
+
     viewModel {
         PhotoboxViewModel(
             cameraManager = get(),
             appConfigRepository = get(),
-            uploadRepository = get()
+            uploadRepository = get(),
+            uploadQueue = get()
         )
     }
 
