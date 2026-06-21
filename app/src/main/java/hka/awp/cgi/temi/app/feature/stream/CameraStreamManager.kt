@@ -1,6 +1,8 @@
 package hka.awp.cgi.temi.app.core.camera // Jetzt im Core-Paket!
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.ImageFormat
 import android.graphics.Rect
 import android.graphics.YuvImage
@@ -23,8 +25,10 @@ import java.util.concurrent.Executors
 class CameraStreamManager(
     private val context: Context,
     private val serverUrl: String,
-    private val onMessageReceived: (String) -> Unit // Callback für eingehende Server-Nachrichten
-                         ) {
+    private val onStringMessageReceived: (String) -> Unit, // CALLBACK
+    private val onByteMessageReceived: (Bitmap) -> Unit, // CALLBACK
+
+) {
     private val client = OkHttpClient()
     private val cameraExecutor = Executors.newSingleThreadExecutor()
 
@@ -50,7 +54,13 @@ class CameraStreamManager(
                 }
 
                 override fun onMessage(webSocket: WebSocket, text: String) {
-                    onMessageReceived(text) // Weiterleiten nach außen
+                    onStringMessageReceived(text) // Weiterleiten nach außen
+                }
+
+                override fun onMessage(webSocket: WebSocket, bytes: okio.ByteString) {
+                    val kotlinBytes = bytes.toByteArray()
+                    val bitmap = BitmapFactory.decodeByteArray(kotlinBytes, 0, kotlinBytes.size)
+                    onByteMessageReceived(bitmap)
                 }
 
                 override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
@@ -66,7 +76,7 @@ class CameraStreamManager(
                     this@CameraStreamManager.webSocket = null
                 }
             }
-                                       )
+        )
     }
 
     fun startStream() {
@@ -76,24 +86,24 @@ class CameraStreamManager(
 
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
         cameraProviderFuture.addListener({
-                                             val cameraProvider = cameraProviderFuture.get()
+            val cameraProvider = cameraProviderFuture.get()
 
-                                             imageAnalysis = ImageAnalysis.Builder()
-                                                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                                                 .build()
-                                                 .also { analysis ->
-                                                     analysis.setAnalyzer(cameraExecutor) { imageProxy ->
-                                                         handleFrame(imageProxy)
-                                                     }
-                                                 }
+            imageAnalysis = ImageAnalysis.Builder()
+                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                .build()
+                .also { analysis ->
+                    analysis.setAnalyzer(cameraExecutor) { imageProxy ->
+                        handleFrame(imageProxy)
+                    }
+                }
 
-                                             cameraProvider.unbindAll()
-                                             cameraProvider.bindToLifecycle(
-                                                 ProcessLifecycleOwner.get(),
-                                                 CameraSelector.DEFAULT_FRONT_CAMERA,
-                                                 imageAnalysis
-                                                                           )
-                                         }, ContextCompat.getMainExecutor(context))
+            cameraProvider.unbindAll()
+            cameraProvider.bindToLifecycle(
+                ProcessLifecycleOwner.get(),
+                CameraSelector.DEFAULT_FRONT_CAMERA,
+                imageAnalysis
+            )
+        }, ContextCompat.getMainExecutor(context))
     }
 
     private fun handleFrame(imageProxy: ImageProxy) {
@@ -113,7 +123,6 @@ class CameraStreamManager(
                 val jpegBytes = imageProxy.toJpegBytes(JPEG_QUALITY)
                 currentWebSocket.send(jpegBytes.toByteString())
             }
-
         } catch (e: Exception) {
             Timber.e(e, "Frame konnte nicht gesendet werden")
         } finally {
@@ -136,13 +145,13 @@ class CameraStreamManager(
 
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
         cameraProviderFuture.addListener({
-                                             cameraProviderFuture.get().unbindAll()
-                                             imageAnalysis = null
+            cameraProviderFuture.get().unbindAll()
+            imageAnalysis = null
 
-                                             // Socket schließen, wenn der Stream stoppt
-                                             webSocket?.close(1000, "Stream stopped")
-                                             webSocket = null
-                                         }, ContextCompat.getMainExecutor(context))
+            // Socket schließen, wenn der Stream stoppt
+            webSocket?.close(1000, "Stream stopped")
+            webSocket = null
+        }, ContextCompat.getMainExecutor(context))
     }
 
     fun disconnect() {

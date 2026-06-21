@@ -1,5 +1,6 @@
 package hka.awp.cgi.temi.app.feature.settings.adminPanel
 
+import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.robotemi.sdk.Robot
@@ -7,6 +8,7 @@ import hka.awp.cgi.temi.app.BuildConfig
 import hka.awp.cgi.temi.app.feature.mqtt.MqttManager
 import hka.awp.cgi.temi.app.feature.mqtt.MqttTrafficEvent
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.DialogPatrolMode
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolCameraStreamManager
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolManager
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolMode
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolSettings
@@ -28,7 +30,8 @@ class AdminPanelViewModel(
     private val appConfigRepository: AppConfigRepository,
     private val mqttManager: MqttManager,
     private val robot: Robot?,
-    private val patrolManager: PatrolManager
+    private val patrolManager: PatrolManager,
+    private val patrolCameraStreamManager: PatrolCameraStreamManager
 ) : ViewModel() {
 
     private val _events = MutableSharedFlow<AdminPanelEvent>()
@@ -41,6 +44,7 @@ class AdminPanelViewModel(
 
     private val patrolRouteSettings = MutableStateFlow(PatrolRouteSettingsState())
     private val patrolLocationPrefix = "patrol_"
+    val videoFrame: StateFlow<Bitmap?> = patrolCameraStreamManager.videoFrame
 
     fun loadPatrolLocations() {
         patrolRouteSettings.update {
@@ -63,7 +67,8 @@ class AdminPanelViewModel(
         appConfigRepository.minPatrolMinutes,
         appConfigRepository.maxPatrolMinutes,
         appConfigRepository.selectedPatrolHours,
-        patrolRouteSettings
+        patrolRouteSettings,
+        videoFrame
     ) { args ->
         val url = args[0] as String
         val lat = args[1] as Double
@@ -75,6 +80,7 @@ class AdminPanelViewModel(
         val max = args[7] as Int
         val hours = args[8] as Set<Int>
         val patrolRoute = args[9] as PatrolRouteSettingsState
+        val currentFrame = args[10] as Bitmap?
 
         AdminPanelState(
             webserverUrl = url,
@@ -89,6 +95,7 @@ class AdminPanelViewModel(
             maxMinutes = max,
             selectedHours = hours,
             savedLocations = patrolRoute.savedLocations,
+            videoFrame = currentFrame,
             patrolRoute = patrolRoute.route,
             patrolRouteText = patrolRoute.routeText,
             patrolModeText = if (!isEnabled) {
@@ -259,6 +266,7 @@ data class AdminPanelState(
     val patrolRoute: List<String> = emptyList(),
     val isPatrolEnabled: Boolean = false,
     val patrolMode: DialogPatrolMode = DialogPatrolMode.RANDOM,
+    val videoFrame: Bitmap? = null,
     val minMinutes: Int = 40,
     val maxMinutes: Int = 60,
     val selectedHours: Set<Int> = emptySet(),

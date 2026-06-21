@@ -70,7 +70,7 @@ fun AdminPanelScreen(
         }
     }
 
-    if (isAuthorized) {
+    if (!isAuthorized) {
         AdminPasswordPrompt(
             isError = passwordError,
             onConfirm = { enteredPassword -> viewModel.checkPassword(enteredPassword) },
@@ -128,7 +128,7 @@ fun AdminPanelScreen(
             initialMinMinutes = uiState.minMinutes,
             initialMaxMinutes = uiState.maxMinutes,
             initialHours = uiState.selectedHours,
-            onTriggerPatrol = { viewModel.onTriggerImmediatePatrol() }, // Callback [cite: 4, 6]
+            onTriggerPatrol = { viewModel.onTriggerImmediatePatrol() },
             onSave = { isEnabled, mode, minMin, maxMin, hours ->
                 viewModel.onSavePatrolSettings(
                     isEnabled = isEnabled,

@@ -1,21 +1,39 @@
 package hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol
 
 import android.content.Context
+import android.graphics.Bitmap
 import hka.awp.cgi.temi.app.core.camera.CameraStreamManager
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 
 class PatrolCameraStreamManager(context: Context, serverUrl: String) {
 
     private val _events = MutableSharedFlow<PatrolAnalysisEvent>()
     val events: SharedFlow<PatrolAnalysisEvent> = _events
 
-    private val baseStreamManager = CameraStreamManager(context, serverUrl) { text ->
-        _events.tryEmit(parseEvent(text))
-    }
+    private val _videoFrame = MutableStateFlow<Bitmap?>(null)
+    val videoFrame: StateFlow<Bitmap?> = _videoFrame
+
+    private val baseStreamManager = CameraStreamManager(
+        context = context,
+        serverUrl = serverUrl,
+        onStringMessageReceived = { text ->
+            _events.tryEmit(parseEvent(text))
+        },
+        onByteMessageReceived = { bitmap ->
+            if (bitmap != null) {
+                _videoFrame.value = bitmap
+            }
+        }
+    )
 
     fun startStream() = baseStreamManager.startStream()
-    fun stopStream() = baseStreamManager.stopStream()
+    fun stopStream() {
+        baseStreamManager.stopStream()
+        _videoFrame.value = null
+    }
     fun disconnect() = baseStreamManager.disconnect()
 
     fun sendPatrolPointReached(location: String) {

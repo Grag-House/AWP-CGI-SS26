@@ -4,8 +4,8 @@ import com.robotemi.sdk.Robot
 import hka.awp.cgi.temi.app.BuildConfig
 import hka.awp.cgi.temi.app.data.repository.RobotRepository
 import hka.awp.cgi.temi.app.feature.controller.BluetoothControllerManager
-import hka.awp.cgi.temi.app.feature.controller.stream.ControllerCameraStreamManager
 import hka.awp.cgi.temi.app.feature.controller.ControllerViewModel
+import hka.awp.cgi.temi.app.feature.controller.stream.ControllerCameraStreamManager
 import hka.awp.cgi.temi.app.feature.hideandseek.HideAndSeekViewModel
 import hka.awp.cgi.temi.app.feature.hideandseek.HidingSpotRepository
 import hka.awp.cgi.temi.app.feature.navigation.NavigationViewModel
@@ -97,7 +97,13 @@ val appModule = module {
     }
 
     viewModel {
-        AdminPanelViewModel(appConfigRepository = get(), mqttManager = get(), patrolManager = get(), robot = get())
+        AdminPanelViewModel(
+            appConfigRepository = get(),
+            mqttManager = get(),
+            patrolManager = get(),
+            robot = get(),
+            patrolCameraStreamManager = get()
+        )
     }
 
     single { PatrolManager(robot = get(), cameraStreamManager = get()) }
@@ -124,7 +130,7 @@ val appModule = module {
         ControllerCameraStreamManager(
             context = androidContext(),
             serverUrl = "ws://$ip:$port"
-                                     )
+        )
     }
 
     viewModel {
