@@ -6,6 +6,9 @@ import hka.awp.cgi.temi.app.feature.webserver.AppConfigRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,7 +16,6 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
 import org.vosk.Recognizer
 import org.vosk.android.RecognitionListener
 import org.vosk.android.SpeechService
@@ -27,45 +29,56 @@ class TemiVoiceListener(
     private val appConfigRepository: AppConfigRepository
 ) : RecognitionListener {
 
+    enum class EnrollmentStatus {
+        IDLE,
+        TOO_SHORT,
+        NO_VECTOR,
+        SUCCESS
+    }
+
     companion object {
         private const val SAMPLE_RATE = 16000.0f
         private const val WAKE_WORD = "hey temi"
 
-        // Enrollment requires ~3-5 seconds of audio for robust speaker embedding
-        // At 16kHz: 3s = 48000 frames, 5s = 80000 frames
-        // Using 48000 to match ~3 seconds of continuous speech
-        private const val MIN_ENROLLMENT_FRAMES = 48000
+        // NOTE: Vosk `spk_frames` are speaker-feature frames (~100 frames/second),
+        // not raw 16kHz PCM samples. 300 frames ~= 3 seconds of valid voiced speech.
+        private const val SPK_FRAMES_PER_SECOND = 100.0f
+        private const val MIN_ENROLLMENT_FRAMES = 300
 
         // Threshold for speaker verification (Cosine Similarity)
         private const val SIMILARITY_THRESHOLD = 0.82
-
-        private val jsonParser = Json {
-            ignoreUnknownKeys = true
-            isLenient = true
-        }
+        private const val TEMI_ASR_GATE_WINDOW_MS = 10_000L
     }
 
     private var speechService: SpeechService? = null
 
     private val _isEnrollmentActive = MutableStateFlow(false)
     val isEnrollmentActive: StateFlow<Boolean> = _isEnrollmentActive.asStateFlow()
+    private val _enrollmentStatus = MutableStateFlow(EnrollmentStatus.IDLE)
+    val enrollmentStatus: StateFlow<EnrollmentStatus> = _enrollmentStatus.asStateFlow()
+
+    private val _isSpeakerGateOpen = MutableStateFlow(false)
 
     // Cached voice profiles and verification setting updated by collectors below
     private var voiceProfiles: Map<String, SpeakerVector> = emptyMap()
     private var isSpeakerVerificationEnabled: Boolean = false
     private var enrollmentName: String = "Default"
+    private var lastEnrollmentPartial: String = ""
 
     // Flag to track when initial data load is complete (prevents race conditions)
     private var isInitialized = false
 
-    // Job handle to cancel the initialization coroutine when listener is released
-    private var initializationJob: Job? = null
+    // Single lifecycle-bound scope for all listener coroutines.
+    private val listenerScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+
+    private var gateResetJob: Job? = null
+    private var enrollmentSaveJob: Job? = null
 
     init {
         // Wait for first combined value from both repos
         // This ensures voiceProfiles and isSpeakerVerificationEnabled have real data before
         // startListening() is called. Without this, startListening() could use stale/empty values.
-        initializationJob = CoroutineScope(Dispatchers.IO).launch {
+        listenerScope.launch(Dispatchers.IO) {
             combine(
                 voiceProfileRepository.voiceProfiles,
                 appConfigRepository.isSpeakerVerificationEnabled
@@ -81,17 +94,24 @@ class TemiVoiceListener(
                 "TemiVoiceListener initialization completed. Profiles: ${voiceProfiles.size}, " +
                     "Verification: $isSpeakerVerificationEnabled"
             )
+            // Retry listening once initialization data is ready and feature is enabled.
+            if (isSpeakerVerificationEnabled) {
+                Timber.i("🔄 Init complete. Starting listening because Verification=true")
+                startListening()
+            } else {
+                Timber.i("⏸️ Init complete. Verification=false. Waiting for manual start or toggle.")
+            }
         }
 
         // Keep profiles and verification settings in sync
         // These collectors run indefinitely to handle updates after initialization
-        CoroutineScope(Dispatchers.IO).launch {
+        listenerScope.launch(Dispatchers.IO) {
             voiceProfileRepository.voiceProfiles.collect {
                 voiceProfiles = it
             }
         }
 
-        CoroutineScope(Dispatchers.IO).launch {
+        listenerScope.launch(Dispatchers.IO) {
             appConfigRepository.isSpeakerVerificationEnabled.collect {
                 isSpeakerVerificationEnabled = it
             }
@@ -106,7 +126,10 @@ class TemiVoiceListener(
             return
         }
 
-        if (speechService != null) return
+        if (speechService != null) {
+            Timber.d("SpeechService läuft bereits.")
+            return
+        }
 
         val model = voiceManager.model
         val spkModel = voiceManager.speakerModel
@@ -120,6 +143,11 @@ class TemiVoiceListener(
             val recognizer = Recognizer(model, SAMPLE_RATE, spkModel)
             speechService = SpeechService(recognizer, SAMPLE_RATE)
             speechService?.startListening(this)
+            Timber.i(
+                "🎤 SpeechService gestartet. Enrollment=%s, Verification=%s",
+                _isEnrollmentActive.value,
+                isSpeakerVerificationEnabled
+            )
 
             Timber.d("Mikrofon offen. Verification: $isSpeakerVerificationEnabled. Lausche auf '$WAKE_WORD'...")
         } catch (
@@ -138,20 +166,48 @@ class TemiVoiceListener(
 
     fun release() {
         // Clean up resources when this listener is no longer needed.
-        // Cancels the initialization job to prevent ongoing coroutines holding references.
+        // Cancels all listener jobs (collectors, timers, pending async writes).
         stopListening()
-        initializationJob?.cancel()
+        gateResetJob?.cancel()
+        enrollmentSaveJob?.cancel()
+        closeSpeakerGate()
+        listenerScope.cancel()
         Timber.d("TemiVoiceListener released and cleaned up.")
     }
 
-    fun setEnrollmentMode(active: Boolean, name: String = "Default") {
-        _isEnrollmentActive.value = active
-        enrollmentName = name
-        if (active) {
-            Timber.i("Enrollment Mode started for '$name'. Please speak one full sentence.")
-        } else {
-            Timber.i("Enrollment Mode stopped for '$name'")
+    fun setEnrollmentMode(active: Boolean, name: String? = null) {
+        if (!active) {
+            enrollmentSaveJob?.cancel()
+            enrollmentSaveJob = null
         }
+        _isEnrollmentActive.value = active
+        if (active) {
+            val normalizedName = name?.trim().orEmpty()
+            if (normalizedName.isNotEmpty()) {
+                enrollmentName = normalizedName
+            }
+            lastEnrollmentPartial = ""
+            _enrollmentStatus.value = EnrollmentStatus.IDLE
+            Timber.i(
+                "🎓 Enrollment Mode STARTED für '%s'. speechService=%s, Listening=%b",
+                enrollmentName,
+                (speechService != null),
+                isSpeakerVerificationEnabled
+            )
+            // Enrollment braucht Audio, unabhängig von isSpeakerVerificationEnabled.
+            // Starte Listening falls nicht schon läuft.
+            if (speechService == null) {
+                Timber.w("⚠️ Enrollment aktiv aber SpeechService ist null. Force-Start...")
+                startListening()
+            }
+        } else {
+            lastEnrollmentPartial = ""
+            Timber.i("Enrollment Mode stopped for '$enrollmentName'")
+        }
+    }
+
+    fun clearEnrollmentStatus() {
+        _enrollmentStatus.value = EnrollmentStatus.IDLE
     }
 
     // --- Vosk Audio Callbacks ---
@@ -162,37 +218,58 @@ class TemiVoiceListener(
     override fun onPartialResult(hypothesis: String) {
         // Partial results are fired during speech - used for fast wake-word detection
         val partialResult =
-            runCatching { jsonParser.decodeFromString<VoskPartialResult>(hypothesis) }.getOrNull()
+            runCatching { VoskJsonParser.json.decodeFromString<VoskPartialResult>(hypothesis) }.getOrNull()
 
-        if (partialResult?.partial?.lowercase()?.contains(WAKE_WORD) == true) {
-            val vector = partialResult.spk
-            if (vector != null) {
-                // Early trigger on partial result if: verification disabled OR speaker authorized
-                if (!isSpeakerVerificationEnabled || isAnySpeakerAuthorized(vector)) {
-                    Timber.i("Wake Word erkannt und Speaker verifiziert (oder Gatekeeper aus)!")
-                    handleWakeWordDetected()
-                }
+        if (_isEnrollmentActive.value && !partialResult?.partial.isNullOrBlank()) {
+            val partial = partialResult.partial.trim()
+            if (partial != lastEnrollmentPartial) {
+                lastEnrollmentPartial = partial
+                Timber.d("Enrollment partial erkannt: '%s'", partial)
             }
+        }
+
+        if (!isSpeakerVerificationEnabled && partialResult?.partial?.lowercase()?.contains(WAKE_WORD) == true) {
+            Timber.i("Wake Word erkannt (Verification aus) via Partial Result.")
+            handleWakeWordDetected()
         }
     }
 
     override fun onResult(hypothesis: String) {
         // Final result from Vosk after speech processing complete
-        val result = runCatching { jsonParser.decodeFromString<VoskFinalResult>(hypothesis) }.getOrNull()
+        val result = parseFinalResult(hypothesis)
+
+        if (result == null && _isEnrollmentActive.value) {
+            return
+        }
         val text = result?.text
         val vector = result?.spk
 
-        Timber.d("Vosk onResult: text='$text', spkFrames=${result?.spkFrames}, vectorSize=${vector?.values?.size}")
+        val frames = result?.spkFrames?.toInt() ?: 0
 
         // ENROLLMENT: Vosk provides enrollment quality via spk_frames for this utterance.
-        if (_isEnrollmentActive.value && vector != null) {
-            val frames = result.spkFrames
-            if (frames >= MIN_ENROLLMENT_FRAMES) {
-                Timber.i("Enrollment erfolgreich! $frames Frames gesammelt.")
-                saveReferenceVector(enrollmentName, vector)
-                setEnrollmentMode(false)
+        if (_isEnrollmentActive.value) {
+            if (vector == null) {
+                _enrollmentStatus.value = EnrollmentStatus.NO_VECTOR
+                Timber.w("Enrollment fehlgeschlagen: Kein Speaker-Vector im Ergebnis.")
             } else {
-                Timber.w("Enrollment zu kurz: $frames/$MIN_ENROLLMENT_FRAMES Frames. Bitte längeren Satz sprechen.")
+                logEnrollmentSummary(text.orEmpty(), frames, true)
+                if (frames >= MIN_ENROLLMENT_FRAMES) {
+                    Timber.i("Enrollment erfolgreich! $frames Frames gesammelt.")
+                    saveReferenceVector(enrollmentName, vector)
+                } else {
+                    _enrollmentStatus.value = EnrollmentStatus.TOO_SHORT
+                    Timber.w(
+                        "⏱️ Enrollment zu kurz: %d/%d frames (~%.2f Sekunden gültige Sprache). " +
+                            "Mögliche Gründe: zu leise, undeutlich, Rauschen oder Pausen. " +
+                            "Versuche: lauter, deutlicher, Stille vermeiden.",
+                        frames,
+                        MIN_ENROLLMENT_FRAMES,
+                        frames / SPK_FRAMES_PER_SECOND
+                    )
+                }
+            }
+            if (vector == null) {
+                logEnrollmentSummary(text.orEmpty(), frames, false)
             }
         }
 
@@ -211,16 +288,20 @@ class TemiVoiceListener(
     }
 
     override fun onFinalResult(hypothesis: String) {
-        val result = runCatching { jsonParser.decodeFromString<VoskFinalResult>(hypothesis) }.getOrNull()
+        val result = runCatching { VoskJsonParser.json.decodeFromString<VoskFinalResult>(hypothesis) }.getOrNull()
         Timber.d("Endgültiges Ergebnis: ${result?.text}")
     }
 
     override fun onError(e: Exception) {
-        Timber.e(e, "Fehler bei der Audio-Erkennung")
+        Timber.e(e, "❌ Fehler bei der Audio-Erkennung: %s", e.message)
     }
 
     override fun onTimeout() {
-        Timber.v("Audio-Erkennung hat ein Timeout erreicht")
+        Timber.w("⏱️ Audio-Erkennung hat ein Timeout erreicht. Starte neu...")
+        stopListening()
+        if (isSpeakerVerificationEnabled) {
+            startListening()
+        }
     }
 
     private fun isAnySpeakerAuthorized(currentVector: SpeakerVector): Boolean {
@@ -244,20 +325,99 @@ class TemiVoiceListener(
 
     private fun saveReferenceVector(name: String, vector: SpeakerVector) {
         // Persist the enrolled speaker vector to repository asynchronously
-        CoroutineScope(Dispatchers.IO).launch {
+        enrollmentSaveJob?.cancel()
+        enrollmentSaveJob = listenerScope.launch(Dispatchers.IO) {
+            if (!_isEnrollmentActive.value) {
+                Timber.i("Enrollment gestoppt. Speichern abgebrochen.")
+                return@launch
+            }
             voiceProfileRepository.saveVoiceProfile(name, vector.values)
+            if (!_isEnrollmentActive.value) {
+                Timber.i("Enrollment während Speichern gestoppt. Ergebnis wird verworfen.")
+                return@launch
+            }
+            _enrollmentStatus.value = EnrollmentStatus.SUCCESS
+            _isEnrollmentActive.value = false
+            enrollmentSaveJob = null
             Timber.i("Voice Profile '$name' erfolgreich gespeichert!")
         }
+    }
+
+    private fun parseFinalResult(hypothesis: String): VoskFinalResult? {
+        return runCatching {
+            VoskJsonParser.json.decodeFromString<VoskFinalResult>(hypothesis)
+        }.onFailure { e ->
+            if (_isEnrollmentActive.value) {
+                Timber.w("❌ JSON Parse error: %s", e.message)
+            }
+        }.getOrNull()
+    }
+
+    private fun logEnrollmentSummary(text: String, frames: Int, hasVector: Boolean) {
+        Timber.d(
+            "Enrollment final text='%s', frames=%d, vector=%s",
+            text,
+            frames,
+            hasVector
+        )
+        Timber.i(
+            "📊 spk_frames=%d (~%.2fs). Das ist NUR valide Sprache. Text: '%s'",
+            frames,
+            frames / SPK_FRAMES_PER_SECOND,
+            text
+        )
     }
 
     private fun handleWakeWordDetected() {
         // Wake word detected and speaker verified - wake up the robot
         // Stop listening to prevent further audio processing
         stopListening()
+        openSpeakerGateWithTimeout()
         // Execute on Main thread since robot.wakeup() may update UI
-        CoroutineScope(Dispatchers.Main).launch {
+        listenerScope.launch {
             Timber.v("Wecke Temi auf...")
             robot?.wakeup()
         }
+    }
+
+    fun consumeSpeakerGate(): Boolean {
+        if (!_isSpeakerGateOpen.value) {
+            return false
+        }
+        gateResetJob?.cancel()
+        closeSpeakerGate()
+        return true
+    }
+
+    fun allowTemiAsrResult(): Boolean {
+        if (!isSpeakerVerificationEnabled) {
+            return true
+        }
+        return consumeSpeakerGate()
+    }
+
+    fun resumeWakeWordListening() {
+        if (isSpeakerVerificationEnabled) {
+            startListening()
+        }
+    }
+
+    private fun openSpeakerGateWithTimeout() {
+        _isSpeakerGateOpen.value = true
+        gateResetJob?.cancel()
+        gateResetJob = listenerScope.launch {
+            delay(TEMI_ASR_GATE_WINDOW_MS)
+            if (_isSpeakerGateOpen.value) {
+                Timber.w("Temi ASR Gate Timeout erreicht. Schließe Gate und starte Wake-Listening neu.")
+                closeSpeakerGate()
+                if (isSpeakerVerificationEnabled) {
+                    startListening()
+                }
+            }
+        }
+    }
+
+    private fun closeSpeakerGate() {
+        _isSpeakerGateOpen.value = false
     }
 }

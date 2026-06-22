@@ -88,7 +88,7 @@ val appModule = module {
     }
 
     viewModel {
-        NavigationViewModel(get(), get(), get())
+        NavigationViewModel(get(), get(), get(), get())
     }
 
     viewModel {

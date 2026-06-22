@@ -8,12 +8,12 @@ import kotlinx.serialization.Serializable
 data class VoskPartialResult(
     val partial: String = "",
     val spk: SpeakerVector? = null,
-    @SerialName("spk_frames") val spkFrames: Int = 0
+    @SerialName("spk_frames") val spkFrames: Float = 0f
 )
 
 @Serializable
 data class VoskFinalResult(
     val text: String = "",
     val spk: SpeakerVector? = null,
-    @SerialName("spk_frames") val spkFrames: Int = 0
+    @SerialName("spk_frames") val spkFrames: Float = 0f
 )
