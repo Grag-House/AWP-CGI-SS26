@@ -19,6 +19,7 @@ class TemiVoiceRecognitionViewModel(
     val isModelLoaded: StateFlow<Boolean> = _isModelLoaded.asStateFlow()
 
     val isEnrollmentActive: StateFlow<Boolean> = temiVoiceListener.isEnrollmentActive
+    val enrollmentStatus: StateFlow<TemiVoiceListener.EnrollmentStatus> = temiVoiceListener.enrollmentStatus
 
     init {
         viewModelScope.launch {
@@ -56,8 +57,12 @@ class TemiVoiceRecognitionViewModel(
         temiVoiceListener.stopListening()
     }
 
-    fun toggleEnrollment(active: Boolean, name: String = "Default") {
+    fun toggleEnrollment(active: Boolean, name: String? = null) {
         temiVoiceListener.setEnrollmentMode(active, name)
+    }
+
+    fun clearEnrollmentStatus() {
+        temiVoiceListener.clearEnrollmentStatus()
     }
 
     override fun onCleared() {

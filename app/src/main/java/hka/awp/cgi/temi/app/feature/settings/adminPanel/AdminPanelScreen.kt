@@ -760,7 +760,13 @@ fun AdminPanelScreen(
                 VoiceProfilesManagementCard(
                     voiceProfiles = uiState.voiceProfiles,
                     isEnrollmentActive = uiState.isEnrollmentActive,
-                    onLearnClick = { showProfileNameDialog = true },
+                    onLearnClick = {
+                        if (uiState.isEnrollmentActive) {
+                            viewModel.onToggleEnrollment(false)
+                        } else {
+                            showProfileNameDialog = true
+                        }
+                    },
                     onDeleteClick = { profileName ->
                         selectedProfileToDelete = profileName
                         showDeleteConfirmDialog = true

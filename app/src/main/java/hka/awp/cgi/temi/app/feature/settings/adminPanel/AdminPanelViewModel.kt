@@ -130,7 +130,7 @@ class AdminPanelViewModel(
         }
     }
 
-    fun onToggleEnrollment(active: Boolean, name: String = "Default") {
+    fun onToggleEnrollment(active: Boolean, name: String? = null) {
         voiceRecognitionViewModel.toggleEnrollment(active, name)
     }
 

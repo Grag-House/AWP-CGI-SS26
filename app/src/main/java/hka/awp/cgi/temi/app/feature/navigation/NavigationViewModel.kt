@@ -15,6 +15,7 @@ import com.robotemi.sdk.navigation.listener.OnDistanceToLocationChangedListener
 import com.robotemi.sdk.navigation.model.Position
 import hka.awp.cgi.temi.app.R
 import hka.awp.cgi.temi.app.feature.mqtt.MqttManager
+import hka.awp.cgi.temi.app.feature.voiceRecognition.TemiVoiceListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -27,6 +28,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import kotlin.coroutines.resume
+import kotlin.time.Duration.Companion.milliseconds
 
 /** Represents a location on the map with name and X/Y coordinates from Temi map data. */
 data class LocationMarker(val name: String, val x: Float, val y: Float)
@@ -61,7 +63,8 @@ data class NavigationUiState(
 class NavigationViewModel(
     private val robot: Robot?,
     private val mqttManager: MqttManager,
-    private val defaultMapName: String
+    private val defaultMapName: String,
+    private val temiVoiceListener: TemiVoiceListener
 ) : ViewModel(),
     OnRobotReadyListener,
     OnDistanceToLocationChangedListener,
@@ -78,7 +81,7 @@ class NavigationViewModel(
     private var pendingTerminalPublishJob: Job? = null
 
     companion object {
-        private const val ABORT_DEBOUNCE_MS = 1500L
+        private val ABORT_DEBOUNCE_MS = 1500L.milliseconds
     }
 
     init {
@@ -107,7 +110,12 @@ class NavigationViewModel(
     }
 
     override fun onAsrResult(asrResult: String, sttLanguage: SttLanguage) {
-        robot?.finishConversation()
+        if (!temiVoiceListener.allowTemiAsrResult()) {
+            Timber.w("Ignoriere Temi-ASR Ergebnis ohne offenes Speaker-Gate.")
+            robot?.finishConversation()
+            return
+        }
+
         Timber.d("ASR Result: %s (%s)", asrResult, sttLanguage)
 
         viewModelScope.launch {
@@ -119,10 +127,14 @@ class NavigationViewModel(
         if (textLower.contains("gehe zu") || textLower.contains("go to")) {
             val location = textLower.split("gehe zu", "go to").last().trim()
             if (location.isNotEmpty()) {
+                robot?.finishConversation()
                 robot?.speak(TtsRequest.create(speech = "Ich fahre zu $location", isShowOnConversationLayer = false))
                 goToLocation(location)
             }
         }
+
+        // Return to wake-word listening after Temi ASR command handling.
+        temiVoiceListener.resumeWakeWordListening()
     }
 
     override fun onTtsStatusChanged(ttsRequest: TtsRequest) {
