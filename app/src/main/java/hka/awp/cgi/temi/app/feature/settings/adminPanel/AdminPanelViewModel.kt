@@ -63,7 +63,8 @@ class AdminPanelViewModel(
         appConfigRepository.minPatrolMinutes,
         appConfigRepository.maxPatrolMinutes,
         appConfigRepository.selectedPatrolHours,
-        patrolRouteSettings
+        patrolRouteSettings,
+        appConfigRepository.patrolRoute,
     ) { args ->
         val url = args[0] as String
         val lat = args[1] as Double
@@ -74,7 +75,8 @@ class AdminPanelViewModel(
         val min = args[6] as Int
         val max = args[7] as Int
         val hours = args[8] as Set<Int>
-        val patrolRoute = args[9] as PatrolRouteSettingsState
+        val routeSettings = args[9] as PatrolRouteSettingsState
+        val patrolRoute = args[10] as List<String>
 
         AdminPanelState(
             webserverUrl = url,
@@ -88,9 +90,13 @@ class AdminPanelViewModel(
             minMinutes = min,
             maxMinutes = max,
             selectedHours = hours,
-            savedLocations = patrolRoute.savedLocations,
-            patrolRoute = patrolRoute.route,
-            patrolRouteText = patrolRoute.routeText,
+            savedLocations = routeSettings.savedLocations,
+            patrolRoute = patrolRoute,
+            patrolRouteText = if (patrolRoute.isEmpty()) {
+                "Keine Route ausgewählt"
+            } else {
+                patrolRoute.joinToString(" → ")
+            },
             patrolModeText = if (!isEnabled) {
                 "Deaktiviert"
             } else {
@@ -215,25 +221,25 @@ class AdminPanelViewModel(
     }
 
     fun onSavePatrolRoute(route: List<String>) {
-        patrolRouteSettings.update {
-            it.copy(route = route)
-        }
+        viewModelScope.launch {
+            appConfigRepository.updatePatrolRoute(route)
 
-        val state = uiState.value
+            val state = uiState.value
 
-        patrolManager.updateSchedule(
-            PatrolSettings(
-                isEnabled = state.isPatrolEnabled,
-                mode = when (state.patrolMode) {
-                    DialogPatrolMode.RANDOM -> PatrolMode.RANDOM
-                    DialogPatrolMode.FIXED -> PatrolMode.FIXED
-                },
-                minMinutes = state.minMinutes,
-                maxMinutes = state.maxMinutes,
-                hours = state.selectedHours,
-                route = route
+            patrolManager.updateSchedule(
+                PatrolSettings(
+                    isEnabled = state.isPatrolEnabled,
+                    mode = when (state.patrolMode) {
+                        DialogPatrolMode.RANDOM -> PatrolMode.RANDOM
+                        DialogPatrolMode.FIXED -> PatrolMode.FIXED
+                    },
+                    minMinutes = state.minMinutes,
+                    maxMinutes = state.maxMinutes,
+                    hours = state.selectedHours,
+                    route = route
+                )
             )
-        )
+        }
     }
     companion object {
         private const val STATE_TIMEOUT = 5000L
@@ -269,13 +275,5 @@ data class AdminPanelState(
 )
 
 private data class PatrolRouteSettingsState(
-    val route: List<String> = emptyList(),
     val savedLocations: List<String> = emptyList()
-) {
-    val routeText: String
-        get() = if (route.isEmpty()) {
-            "Keine Route ausgewählt"
-        } else {
-            route.joinToString(" → ")
-        }
-}
+)

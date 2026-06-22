@@ -1,8 +1,7 @@
 package hka.awp.cgi.temi.app.feature.controller.stream
 
 import android.content.Context
-import hka.awp.cgi.temi.app.core.camera.CameraStreamManager
-import kotlinx.coroutines.delay
+import hka.awp.cgi.temi.app.feature.stream.CameraStreamManager
 
 class ControllerCameraStreamManager(context: Context, serverUrl: String) {
 

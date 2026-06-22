@@ -1,4 +1,4 @@
-package hka.awp.cgi.temi.app.core.camera // Jetzt im Core-Paket!
+package hka.awp.cgi.temi.app.feature.stream // Jetzt im Core-Paket!
 
 import android.content.Context
 import android.graphics.ImageFormat

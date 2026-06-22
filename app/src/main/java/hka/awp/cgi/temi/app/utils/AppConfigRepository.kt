@@ -29,7 +29,10 @@ class AppConfigRepository(private val dataStore: DataStore<Preferences>) {
     private val KEY_MIN_MINUTES = intPreferencesKey("min_minutes")
     private val KEY_MAX_MINUTES = intPreferencesKey("max_minutes")
     private val KEY_SELECTED_HOURS = stringPreferencesKey("selected_hours")
-
+    private val PATROL_ROUTE = stringPreferencesKey("patrol_route")
+    private companion object {
+        const val ROUTE_SEPARATOR = "|"
+    }
     // --- Webview URL ---
 
     val currentUrl: Flow<String> = dataStore.data.map { preferences ->
@@ -122,5 +125,17 @@ class AppConfigRepository(private val dataStore: DataStore<Preferences>) {
     val maxPatrolMinutes: Flow<Int> = dataStore.data.map { it[KEY_MAX_MINUTES] ?: 60 }
     val selectedPatrolHours: Flow<Set<Int>> = dataStore.data.map {
         it[KEY_SELECTED_HOURS]?.split(",")?.filter { s -> s.isNotEmpty() }?.map { s -> s.toInt() }?.toSet() ?: emptySet()
+    }
+    val patrolRoute: Flow<List<String>> = dataStore.data.map { preferences ->
+        preferences[PATROL_ROUTE]
+            ?.split(ROUTE_SEPARATOR)
+            ?.filter { it.isNotBlank() }
+            ?: emptyList()
+    }
+
+    suspend fun updatePatrolRoute(route: List<String>) {
+        dataStore.edit { preferences ->
+            preferences[PATROL_ROUTE] = route.joinToString(ROUTE_SEPARATOR)
+        }
     }
 }

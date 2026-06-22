@@ -1,7 +1,7 @@
 package hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol
 
 import android.content.Context
-import hka.awp.cgi.temi.app.core.camera.CameraStreamManager
+import hka.awp.cgi.temi.app.feature.stream.CameraStreamManager
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 
