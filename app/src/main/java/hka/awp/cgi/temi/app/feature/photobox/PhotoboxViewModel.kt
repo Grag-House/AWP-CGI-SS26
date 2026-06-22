@@ -10,6 +10,7 @@ import hka.awp.cgi.temi.app.feature.photobox.capture.PhotoboxCameraManager
 import hka.awp.cgi.temi.app.feature.photobox.capture.PhotoboxCameraState
 import hka.awp.cgi.temi.app.feature.photobox.capture.PhotoboxCaptureCallbacks
 import hka.awp.cgi.temi.app.feature.photobox.capture.PhotoboxCaptureSequencer
+import hka.awp.cgi.temi.app.feature.photobox.filter.PhotoboxPhotoFilter
 import hka.awp.cgi.temi.app.feature.photobox.upload.PhotoboxSessionFinalizer
 import hka.awp.cgi.temi.app.feature.photobox.upload.PhotoboxUploadOutcomeHandler
 import hka.awp.cgi.temi.app.feature.photobox.upload.PhotoboxUploadQueue
@@ -40,6 +41,7 @@ data class PhotoboxUiState(
     val uploadState: PhotoboxUploadState = PhotoboxUploadState.NONE,
     val uploadedPhotoUrl: String? = null,
     val uploadedPhotoExpiresAt: Long? = null,
+    val selectedFilter: PhotoboxPhotoFilter = PhotoboxPhotoFilter.NONE,
     val showQrCode: Boolean = false
 ) {
     val totalShots: Int get() = if (mode == PhotoboxMode.STRIP) STRIP_SHOT_COUNT else 1
@@ -68,6 +70,9 @@ class PhotoboxViewModel(
     private val captureSequencer = PhotoboxCaptureSequencer(cameraManager, viewModelScope)
     private val sessionFinalizer = PhotoboxSessionFinalizer(uploadRepository, uploadQueue, viewModelScope)
     private val uploadOutcomeHandler = PhotoboxUploadOutcomeHandler(uploadQueue, _uiState, viewModelScope)
+
+    internal val pendingUploadController =
+        PhotoboxPendingUploadController(sessionFinalizer, _uiState, uploadOutcomeHandler::handle)
 
     fun bindCamera(lifecycleOwner: LifecycleOwner, surfaceProvider: Preview.SurfaceProvider, viewPort: ViewPort?) {
         cameraManager.bindToLifecycle(lifecycleOwner, surfaceProvider, viewPort)
@@ -110,22 +115,23 @@ class PhotoboxViewModel(
                     _uiState.update { it.copy(phase = PhotoboxPhase.CAPTURE) }
                 },
                 onShotsReady = { shots ->
-                    sessionFinalizer.finalizeAndUpload(
+                    sessionFinalizer.finalize(
                         mode = state.mode,
                         shots = shots,
                         withOverlay = overlayEnabled.value,
-                        onFinalImageReady = { finalImage ->
+                        onFinalImageReady = { finalImage, needsOverlayBakeAtUpload ->
+                            pendingUploadController.begin(finalImage, needsOverlayBakeAtUpload)
                             _uiState.update {
                                 it.copy(
                                     phase = PhotoboxPhase.PREVIEW,
                                     capturedBitmap = finalImage,
-                                    uploadState = PhotoboxUploadState.UPLOADING,
+                                    uploadState = PhotoboxUploadState.NONE,
                                     uploadedPhotoUrl = null,
-                                    uploadedPhotoExpiresAt = null
+                                    uploadedPhotoExpiresAt = null,
+                                    selectedFilter = PhotoboxPhotoFilter.NONE
                                 )
                             }
-                        },
-                        onUploadResult = uploadOutcomeHandler::handle
+                        }
                     )
                 },
                 onFailed = {
@@ -139,6 +145,7 @@ class PhotoboxViewModel(
     fun reset() {
         captureSequencer.cancel()
         uploadOutcomeHandler.cancel()
+        pendingUploadController.abandonAndClear()
         _uiState.update { state ->
             PhotoboxUiState(
                 mode = state.mode,

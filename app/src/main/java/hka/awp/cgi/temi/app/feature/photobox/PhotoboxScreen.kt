@@ -53,6 +53,7 @@ import hka.awp.cgi.temi.app.feature.photobox.ui.CountdownOverlay
 import hka.awp.cgi.temi.app.feature.photobox.ui.IdleOverlay
 import hka.awp.cgi.temi.app.feature.photobox.ui.ModeSelectOverlay
 import hka.awp.cgi.temi.app.feature.photobox.ui.PreviewOverlay
+import hka.awp.cgi.temi.app.feature.photobox.ui.PreviewOverlayCallbacks
 import hka.awp.cgi.temi.app.feature.photobox.ui.PreviewPhotoState
 import hka.awp.cgi.temi.app.feature.photobox.ui.QrCodeDialog
 import hka.awp.cgi.temi.app.feature.photobox.upload.PHOTOBOX_OVERLAY_HEIGHT_FRACTION
@@ -110,14 +111,19 @@ fun PhotoboxScreen(
                     capturedBitmap = uiState.capturedBitmap,
                     mode = uiState.mode,
                     overlayEnabled = overlayEnabled,
-                    uploadState = uiState.uploadState
+                    uploadState = uiState.uploadState,
+                    selectedFilter = uiState.selectedFilter
                 ),
-                onShowQrCode = { viewModel.setQrCodeVisible(true) },
-                onTakeAnother = viewModel::reset,
-                onToDashboard = {
-                    viewModel.reset()
-                    onNavigateToDashboard()
-                }
+                callbacks = PreviewOverlayCallbacks(
+                    onSelectFilter = viewModel.pendingUploadController::selectFilter,
+                    onConfirmUpload = viewModel.pendingUploadController::confirmUpload,
+                    onShowQrCode = { viewModel.setQrCodeVisible(true) },
+                    onTakeAnother = viewModel::reset,
+                    onToDashboard = {
+                        viewModel.reset()
+                        onNavigateToDashboard()
+                    }
+                )
             )
         }
 

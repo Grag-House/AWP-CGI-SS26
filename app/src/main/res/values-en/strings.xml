@@ -266,6 +266,11 @@
     <string name="photobox_upload_in_progress">Uploading photo …</string>
     <string name="photobox_upload_failed">Upload failed</string>
     <string name="photobox_upload_queued">No internet – the photo will upload automatically once the connection is back.</string>
+    <string name="photobox_generate_qr_button">Generate QR code</string>
+    <string name="photobox_filter_none">Original</string>
+    <string name="photobox_filter_grayscale">Black &amp; White</string>
+    <string name="photobox_filter_sepia">Sepia</string>
+    <string name="photobox_filter_vintage">Vintage</string>
     <string name="photobox_qr_dialog_title">Your photo</string>
     <string name="photobox_qr_dialog_subtitle">Scan the QR code to view and download the photo.</string>
     <string name="photobox_qr_dialog_expiry">This link is only valid for 30 minutes.</string>
