@@ -32,6 +32,7 @@ import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.RestartAppCar
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.WebserverPasswordCard
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.WebserverUrlCard
 import hka.awp.cgi.temi.app.ui.components.SettingsHeader
+import timber.log.Timber
 
 @Composable
 @Suppress("LongParameterList", "LongMethod")
@@ -46,7 +47,7 @@ fun AdminPanelContent(
     onNavigateToPatrolSettings: () -> Unit,
     onNavigateToPatrolRoute: () -> Unit,
     onCloseRequest: () -> Unit
-) {
+                     ) {
     Box(modifier = Modifier.fillMaxSize()) {
         if (uiState.videoFrame != null) {
             Image(
@@ -54,60 +55,49 @@ fun AdminPanelContent(
                 contentDescription = "Temi Patrol Video Stream",
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
-            )
-        } else {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color(0xFF121212)),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Kamera-Stream inaktiv",
-                    color = Color.Gray,
-                    style = MaterialTheme.typography.bodyLarge
-                )
-            }
+                 )
         }
 
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Transparent)
-        ) {
-            Column(
+        if (uiState.videoFrame == null) {
+            Timber.d("VideoFrame")
+            Row(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(32.dp)
-            ) {
-                SettingsHeader(
-                    title = stringResource(R.string.admin_panel_header),
-                    onBackClick = onBackClick
-                )
-
-                Spacer(modifier = Modifier.height(40.dp))
-
+               ) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    WebserverUrlCard(url = uiState.webserverUrl, onEdit = onEditUrl)
-                    MqttReportsCard(onNavigate = onOpenMqtt)
-                    WebserverPasswordCard(onChangePassword = onChangePassword)
-                    CoordinateManagementCard(coordinates = uiState.coordinates, onEdit = onEditCoordinates)
-                    PatrolSettingsCard(
-                        currentModeText = uiState.patrolModeText,
-                        onNavigate = onNavigateToPatrolSettings
-                    )
-                    PatrolRouteCard(
-                        currentRouteText = uiState.patrolRouteText,
-                        onNavigate = onNavigateToPatrolRoute
-                    )
-                    RestartAppCard(onRestartClick = onRestartRequest)
-                    CloseAppCard(onCloseClick = onCloseRequest)
+                        .padding(32.dp)
+                      ) {
+                    SettingsHeader(
+                        title = stringResource(R.string.admin_panel_header),
+                        onBackClick = onBackClick
+                                  )
+
+                    Spacer(modifier = Modifier.height(40.dp))
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                          ) {
+                        WebserverUrlCard(url = uiState.webserverUrl, onEdit = onEditUrl)
+                        MqttReportsCard(onNavigate = onOpenMqtt)
+                        WebserverPasswordCard(onChangePassword = onChangePassword)
+                        CoordinateManagementCard(coordinates = uiState.coordinates, onEdit = onEditCoordinates)
+                        PatrolSettingsCard(
+                            currentModeText = uiState.patrolModeText,
+                            onNavigate = onNavigateToPatrolSettings
+                                          )
+                        PatrolRouteCard(
+                            currentRouteText = uiState.patrolRouteText,
+                            onNavigate = onNavigateToPatrolRoute
+                                       )
+                        RestartAppCard(onRestartClick = onRestartRequest)
+                        CloseAppCard(onCloseClick = onCloseRequest)
+                    }
                 }
             }
         }
