@@ -22,6 +22,7 @@ import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.material.icons.rounded.QrCode2
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -45,6 +46,8 @@ import hka.awp.cgi.temi.app.feature.photobox.BottomBar
 import hka.awp.cgi.temi.app.feature.photobox.PhotoboxMode
 import hka.awp.cgi.temi.app.feature.photobox.PhotoboxUploadState
 import hka.awp.cgi.temi.app.feature.photobox.TemiOverlayImage
+import hka.awp.cgi.temi.app.feature.photobox.filter.PhotoboxPhotoFilter
+import hka.awp.cgi.temi.app.feature.photobox.filter.toComposeColorFilter
 
 private const val COLOR_SUCCESS = 0xFF4CAF50L
 private val ColorSuccess = Color(COLOR_SUCCESS)
@@ -55,15 +58,23 @@ internal data class PreviewPhotoState(
     val capturedBitmap: Bitmap?,
     val mode: PhotoboxMode,
     val overlayEnabled: Boolean,
-    val uploadState: PhotoboxUploadState
+    val uploadState: PhotoboxUploadState,
+    val selectedFilter: PhotoboxPhotoFilter
+)
+
+/** Everything [PreviewOverlay] needs to report user actions, grouped to keep it to one param. */
+internal data class PreviewOverlayCallbacks(
+    val onSelectFilter: (PhotoboxPhotoFilter) -> Unit,
+    val onConfirmUpload: () -> Unit,
+    val onShowQrCode: () -> Unit,
+    val onTakeAnother: () -> Unit,
+    val onToDashboard: () -> Unit
 )
 
 @Composable
 internal fun PreviewOverlay(
     photoState: PreviewPhotoState,
-    onShowQrCode: () -> Unit,
-    onTakeAnother: () -> Unit,
-    onToDashboard: () -> Unit
+    callbacks: PreviewOverlayCallbacks
 ) {
     Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
         if (photoState.capturedBitmap != null) {
@@ -75,6 +86,9 @@ internal fun PreviewOverlay(
                 // the same way would zoom in until only one of the three shots is visible, so
                 // it needs Fit instead to keep the whole strip on screen.
                 contentScale = if (photoState.mode == PhotoboxMode.STRIP) ContentScale.Fit else ContentScale.Crop,
+                // Filter is only baked into the actual file on upload (see PhotoboxViewModel) —
+                // here it's just a cheap GPU-composited preview so switching filters is instant.
+                colorFilter = photoState.selectedFilter.toComposeColorFilter(),
                 modifier = Modifier.fillMaxSize()
             )
         }
@@ -105,7 +119,7 @@ internal fun PreviewOverlay(
             Spacer(Modifier.height(4.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Button(
-                    onClick = onTakeAnother,
+                    onClick = callbacks.onTakeAnother,
                     modifier = Modifier.weight(1f).height(52.dp),
                     shape = RoundedCornerShape(14.dp)
                 ) {
@@ -121,7 +135,7 @@ internal fun PreviewOverlay(
                     )
                 }
                 OutlinedButton(
-                    onClick = onToDashboard,
+                    onClick = callbacks.onToDashboard,
                     modifier = Modifier.weight(1f).height(52.dp),
                     shape = RoundedCornerShape(14.dp)
                 ) {
@@ -131,7 +145,13 @@ internal fun PreviewOverlay(
 
             Spacer(Modifier.height(4.dp))
 
-            UploadStatusRow(uploadState = photoState.uploadState, onShowQrCode = onShowQrCode)
+            UploadStatusRow(
+                uploadState = photoState.uploadState,
+                selectedFilter = photoState.selectedFilter,
+                onSelectFilter = callbacks.onSelectFilter,
+                onConfirmUpload = callbacks.onConfirmUpload,
+                onShowQrCode = callbacks.onShowQrCode
+            )
         }
     }
 }
@@ -139,6 +159,9 @@ internal fun PreviewOverlay(
 @Composable
 private fun UploadStatusRow(
     uploadState: PhotoboxUploadState,
+    selectedFilter: PhotoboxPhotoFilter,
+    onSelectFilter: (PhotoboxPhotoFilter) -> Unit,
+    onConfirmUpload: () -> Unit,
     onShowQrCode: () -> Unit
 ) {
     when (uploadState) {
@@ -191,9 +214,44 @@ private fun UploadStatusRow(
             )
         }
 
-        PhotoboxUploadState.NONE -> Unit
+        // Upload hasn't started yet — let the user pick a filter and confirm before anything
+        // is sent out (see PhotoboxViewModel.confirmUpload).
+        PhotoboxUploadState.NONE -> Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            FilterPicker(selectedFilter = selectedFilter, onSelectFilter = onSelectFilter)
+            Button(
+                onClick = onConfirmUpload,
+                modifier = Modifier.fillMaxWidth().height(48.dp),
+                shape = RoundedCornerShape(14.dp)
+            ) {
+                Text(text = stringResource(R.string.photobox_generate_qr_button))
+            }
+        }
     }
 }
+
+@Composable
+private fun FilterPicker(
+    selectedFilter: PhotoboxPhotoFilter,
+    onSelectFilter: (PhotoboxPhotoFilter) -> Unit
+) {
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        PhotoboxPhotoFilter.entries.forEach { filter ->
+            FilterChip(
+                selected = filter == selectedFilter,
+                onClick = { onSelectFilter(filter) },
+                label = { Text(text = stringResource(filter.labelRes)) }
+            )
+        }
+    }
+}
+
+private val PhotoboxPhotoFilter.labelRes: Int
+    get() = when (this) {
+        PhotoboxPhotoFilter.NONE -> R.string.photobox_filter_none
+        PhotoboxPhotoFilter.GRAYSCALE -> R.string.photobox_filter_grayscale
+        PhotoboxPhotoFilter.SEPIA -> R.string.photobox_filter_sepia
+        PhotoboxPhotoFilter.VINTAGE -> R.string.photobox_filter_vintage
+    }
 
 @Composable
 internal fun QrCodeDialog(photoUrl: String, expiresAtMillis: Long?, onDismiss: () -> Unit) {
