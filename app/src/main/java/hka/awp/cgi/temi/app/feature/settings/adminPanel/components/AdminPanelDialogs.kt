@@ -287,7 +287,7 @@ fun EditUrlDialog(
 @Composable
 fun NoRouteSelectedDialog(
     onDismiss: () -> Unit
-                         ) {
+) {
     AlertDialog(
         onDismissRequest = onDismiss,
         icon = {
@@ -295,7 +295,7 @@ fun NoRouteSelectedDialog(
                 imageVector = Icons.Default.Warning,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary
-                )
+            )
         },
         title = {
             Text(text = "Keine Route ausgewählt")
@@ -304,12 +304,12 @@ fun NoRouteSelectedDialog(
             Text(
                 text = "Bitte wähle zuerst eine Route aus, bevor du fortfährst.",
                 style = MaterialTheme.typography.bodyMedium
-                )
+            )
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.admin_panel_confirm)) // Oder "OK"
+                Text(stringResource(R.string.admin_panel_confirm))
             }
         }
-               )
+    )
 }

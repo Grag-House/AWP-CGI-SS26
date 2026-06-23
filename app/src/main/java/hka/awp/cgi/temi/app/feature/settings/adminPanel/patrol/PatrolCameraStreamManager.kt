@@ -8,12 +8,12 @@ import kotlinx.coroutines.flow.StateFlow
 class PatrolCameraStreamManager(
     context: Context,
     serverUrl: String
-                               ) {
+) {
 
     private val baseStreamManager = CameraStreamManager(
         context = context,
         serverUrl = serverUrl
-                                                       )
+    )
 
     val videoFrame: StateFlow<Bitmap?> = baseStreamManager.processedBitmap
 

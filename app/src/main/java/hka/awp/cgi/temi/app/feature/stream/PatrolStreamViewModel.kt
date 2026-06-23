@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 class PatrolStreamViewModel(
     cameraStreamManager: CameraStreamManager,
-                           ) : ViewModel() {
+) : ViewModel() {
 
     val processedBitmap: StateFlow<Bitmap?> = cameraStreamManager.processedBitmap
 }

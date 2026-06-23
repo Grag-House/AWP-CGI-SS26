@@ -1,9 +1,5 @@
 package hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import com.robotemi.sdk.Robot
 import com.robotemi.sdk.listeners.OnGoToLocationStatusChangedListener
 import kotlinx.coroutines.CoroutineScope
@@ -34,7 +30,7 @@ class PatrolManager(
         robot = robot,
         scope = scope,
         cameraStreamManager = cameraStreamManager
-                                                       )
+    )
 
     init {
         robot?.addOnGoToLocationStatusChangedListener(this)
@@ -66,7 +62,6 @@ class PatrolManager(
     }
 
     private fun startAutomaticPatrol(route: List<String>) {
-        // Callback für den Scheduler (nutzt Standard-Tilt 0)
         startImmediatePatrol(route, cameraTiltAngle = 0)
     }
 
@@ -96,7 +91,6 @@ class PatrolManager(
         scanJob = scope.launch {
             val currentLoc = activeRoute[activeIndex]
 
-            // Aufruf des ausgelagerten Scanners
             scanner.executeScanSequence(activeCameraTiltAngle) {
                 cameraStreamManager.sendPatrolPointReached(currentLoc)
             }

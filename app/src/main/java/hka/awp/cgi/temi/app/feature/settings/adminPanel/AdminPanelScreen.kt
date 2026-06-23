@@ -19,8 +19,8 @@ import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.CloseAppConfi
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.EditCoordinatesDialog
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.EditUrlDialog
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.MqttReportsDialog
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.RestartAppConfirmationDialog
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.NoRouteSelectedDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.RestartAppConfirmationDialog
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolRouteDialog
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolSettingsDialog
 import kotlinx.coroutines.flow.collectLatest
@@ -138,7 +138,7 @@ fun AdminPanelScreen(
             onTriggerPatrol = {
                 viewModel.onTriggerImmediatePatrol()
                 showNoRouteDialog = true
-                              },
+            },
             onSave = { isEnabled, mode, minMin, maxMin, hours ->
                 viewModel.onSavePatrolSettings(
                     isEnabled = isEnabled,
@@ -189,6 +189,6 @@ fun AdminPanelScreen(
             showPatrolRouteDialog = true
         },
         onCloseRequest = { showCloseDialog = true },
-            onExitPatrol = viewModel::onExitPatrol
+        onExitPatrol = viewModel::onExitPatrol
     )
 }

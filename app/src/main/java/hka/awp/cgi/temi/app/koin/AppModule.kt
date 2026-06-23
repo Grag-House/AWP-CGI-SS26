@@ -154,6 +154,6 @@ val appModule = module {
     viewModel {
         PatrolStreamViewModel(
             cameraStreamManager = get(),
-                             )
+        )
     }
 }

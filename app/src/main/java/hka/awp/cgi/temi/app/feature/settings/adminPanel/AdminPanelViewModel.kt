@@ -239,11 +239,10 @@ class AdminPanelViewModel(
                     maxMinutes = state.maxMinutes,
                     hours = state.selectedHours,
                     route = route
+                )
             )
-        )
+        }
     }
-}
-
 
     fun onExitPatrol() {
         patrolManager.stopPatrol()
