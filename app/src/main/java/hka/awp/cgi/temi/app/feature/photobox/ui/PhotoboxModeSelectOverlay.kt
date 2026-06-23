@@ -13,9 +13,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Filter3
+import androidx.compose.material.icons.rounded.Filter4
 import androidx.compose.material.icons.rounded.GridView
 import androidx.compose.material.icons.rounded.PhotoCamera
-import androidx.compose.material.icons.rounded.ViewStream
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -31,13 +32,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import hka.awp.cgi.temi.app.R
 import hka.awp.cgi.temi.app.feature.photobox.PhotoboxMode
+import hka.awp.cgi.temi.app.feature.photobox.TemiOverlayPosition
 
 private const val MODE_CARD_WIDTH_DP = 220
 
 @Composable
 internal fun ModeSelectOverlay(
     selectedMode: PhotoboxMode,
-    onModeSelect: (PhotoboxMode) -> Unit
+    onModeSelect: (PhotoboxMode) -> Unit,
+    overlayEnabled: Boolean,
+    overlayPosition: TemiOverlayPosition,
+    onOverlayPositionSelect: (TemiOverlayPosition) -> Unit
 ) {
     Box(
         modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
@@ -48,6 +53,12 @@ internal fun ModeSelectOverlay(
                 text = stringResource(R.string.photobox_mode_select_title),
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = stringResource(R.string.photobox_mode_select_subtitle),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(Modifier.height(32.dp))
             Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
@@ -62,7 +73,7 @@ internal fun ModeSelectOverlay(
                     ModeOptionCard(
                         title = stringResource(R.string.photobox_mode_strip_title),
                         description = stringResource(R.string.photobox_mode_strip_description),
-                        icon = Icons.Rounded.ViewStream,
+                        icon = Icons.Rounded.Filter3,
                         selected = selectedMode == PhotoboxMode.STRIP,
                         onClick = { onModeSelect(PhotoboxMode.STRIP) }
                     )
@@ -71,7 +82,7 @@ internal fun ModeSelectOverlay(
                     ModeOptionCard(
                         title = stringResource(R.string.photobox_mode_strip4_title),
                         description = stringResource(R.string.photobox_mode_strip4_description),
-                        icon = Icons.Rounded.ViewStream,
+                        icon = Icons.Rounded.Filter4,
                         selected = selectedMode == PhotoboxMode.STRIP_1X4,
                         onClick = { onModeSelect(PhotoboxMode.STRIP_1X4) }
                     )
@@ -84,9 +95,62 @@ internal fun ModeSelectOverlay(
                     )
                 }
             }
+            if (overlayEnabled) {
+                Spacer(Modifier.height(32.dp))
+                OverlayPositionSelector(
+                    selected = overlayPosition,
+                    onSelect = onOverlayPositionSelect
+                )
+            }
         }
     }
 }
+
+@Composable
+private fun OverlayPositionSelector(
+    selected: TemiOverlayPosition,
+    onSelect: (TemiOverlayPosition) -> Unit
+) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = stringResource(R.string.photobox_overlay_position_label),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(Modifier.height(8.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            TemiOverlayPosition.entries.forEach { position ->
+                val isSelected = position == selected
+                Surface(
+                    onClick = { onSelect(position) },
+                    shape = RoundedCornerShape(10.dp),
+                    color = if (isSelected) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.surfaceVariant
+                    }
+                ) {
+                    Box(modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)) {
+                        Text(
+                            text = stringResource(position.labelRes),
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+private val TemiOverlayPosition.labelRes: Int
+    get() = when (this) {
+        TemiOverlayPosition.LEFT -> R.string.photobox_overlay_position_left
+        TemiOverlayPosition.CENTER -> R.string.photobox_overlay_position_center
+        TemiOverlayPosition.RIGHT -> R.string.photobox_overlay_position_right
+    }
 
 @Composable
 private fun ModeOptionCard(

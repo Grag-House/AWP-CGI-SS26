@@ -17,10 +17,8 @@ import hka.awp.cgi.temi.app.feature.photobox.upload.PhotoboxUploadQueue
 import hka.awp.cgi.temi.app.feature.photobox.upload.PhotoboxUploadRepository
 import hka.awp.cgi.temi.app.utils.AppConfigRepository
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 
 enum class PhotoboxPhase { MODE_SELECT, IDLE, COUNTDOWN, CAPTURE, PREVIEW }
@@ -69,8 +67,9 @@ class PhotoboxViewModel(
 
     val cameraState: StateFlow<PhotoboxCameraState> = cameraManager.cameraState
 
-    val overlayEnabled: StateFlow<Boolean> = appConfigRepository.photoboxOverlayEnabled
-        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    internal val overlaySettings = PhotoboxOverlaySettings(appConfigRepository, viewModelScope)
+    val overlayEnabled: StateFlow<Boolean> = overlaySettings.enabled
+    val overlayPosition: StateFlow<TemiOverlayPosition> = overlaySettings.position
 
     private val captureSequencer = PhotoboxCaptureSequencer(cameraManager, viewModelScope)
     private val sessionFinalizer = PhotoboxSessionFinalizer(uploadRepository, uploadQueue, viewModelScope)
@@ -120,12 +119,18 @@ class PhotoboxViewModel(
                     _uiState.update { it.copy(phase = PhotoboxPhase.CAPTURE) }
                 },
                 onShotsReady = { shots ->
+                    val overlayPositionAtCapture = overlayPosition.value
                     sessionFinalizer.finalize(
                         mode = state.mode,
                         shots = shots,
                         withOverlay = overlayEnabled.value,
+                        overlayPosition = overlayPositionAtCapture,
                         onFinalImageReady = { finalImage, needsOverlayBakeAtUpload ->
-                            pendingUploadController.begin(finalImage, needsOverlayBakeAtUpload)
+                            pendingUploadController.begin(
+                                finalImage,
+                                needsOverlayBakeAtUpload,
+                                overlayPositionAtCapture
+                            )
                             _uiState.update {
                                 it.copy(
                                     phase = PhotoboxPhase.PREVIEW,

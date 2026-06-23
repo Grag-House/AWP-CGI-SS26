@@ -14,12 +14,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import kotlin.time.Duration.Companion.seconds
 
+private val TICK = 1.seconds
 private const val HIDING_COUNTDOWN_SECONDS = 40
 private const val DEFAULT_SEARCH_MINUTES = 3
 private const val MIN_SEARCH_MINUTES = 1
 private const val MAX_SEARCH_MINUTES = 10
-private const val MILLIS_PER_SECOND = 1000L
 private const val SECONDS_PER_MINUTE = 60
 private const val MIN_HIDING_DISTANCE_METERS = 4f
 
@@ -32,7 +33,7 @@ data class HideAndSeekUiState(
     val searchSecondsRemaining: Int = 0,
     val elapsedSeconds: Int = 0,
     val hidingSpotName: String = "",
-    val errorMessage: String? = null
+    val navigationError: Boolean = false
 )
 
 @Suppress("TooManyFunctions")
@@ -93,14 +94,14 @@ class HideAndSeekViewModel(
         _uiState.update {
             it.copy(
                 gameState = GameState.SETUP,
-                errorMessage = "Navigation zum Versteck fehlgeschlagen.",
+                navigationError = true,
                 hidingSpotName = ""
             )
         }
     }
 
     fun clearError() {
-        _uiState.update { it.copy(errorMessage = null) }
+        _uiState.update { it.copy(navigationError = false) }
     }
 
     fun adjustSearchTime(delta: Int) {
@@ -129,7 +130,7 @@ class HideAndSeekViewModel(
             var remaining = HIDING_COUNTDOWN_SECONDS
             while (remaining > 0 && isActive) {
                 _uiState.update { it.copy(hidingSecondsRemaining = remaining) }
-                delay(MILLIS_PER_SECOND)
+                delay(TICK)
                 remaining--
             }
             if (!isActive) return@launch
@@ -155,7 +156,7 @@ class HideAndSeekViewModel(
         timerJob?.cancel()
         timerJob = viewModelScope.launch {
             while (isActive) {
-                delay(MILLIS_PER_SECOND)
+                delay(TICK)
                 _uiState.update { state ->
                     if (state.gameState != GameState.WAITING) return@update state
                     val newRemaining = state.searchSecondsRemaining - 1
