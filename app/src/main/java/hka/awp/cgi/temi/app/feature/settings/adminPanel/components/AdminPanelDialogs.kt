@@ -119,10 +119,55 @@ fun RestartAppConfirmationDialog(
         }
     )
 }
+@Suppress("LongMethod")
+@Composable
+fun ChangeAdminPasswordDialog(
+    onConfirm: (newPassword: String) -> Unit,
+    onDismiss: () -> Unit
+                                 ) {
+    var newPassword by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = {
+            Icon(
+                imageVector = Icons.Outlined.Lock,
+                contentDescription = null
+                )
+        },
+        title = {
+            Text(text = "t")
+        },
+        text = {
+            OutlinedTextField(
+                value = newPassword,
+                onValueChange = { newPassword = it },
+                label = { Text("test") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                visualTransformation = PasswordVisualTransformation(),
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+                             )
+        },
+        confirmButton = {
+            Button(
+                onClick = { onConfirm(newPassword) },
+                enabled = newPassword.isNotBlank()
+                  ) {
+                Text(stringResource(R.string.admin_panel_confirm))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.admin_panel_cancel))
+            }
+        }
+               )
+}
 
 @Suppress("LongMethod")
 @Composable
-fun ChangePasswordDialog(
+fun ChangeWebserverPasswordDialog(
     onConfirm: (newPassword: String) -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -302,7 +347,7 @@ fun NoRouteSelectedDialog(
         },
         text = {
             Text(
-                text = "Bitte wähle zuerst eine Route aus, bevor du fortfährst.",
+                text = "Bitte wähle eine Route aus, damit die Kontrollfahrt starten kann.",
                 style = MaterialTheme.typography.bodyMedium
             )
         },

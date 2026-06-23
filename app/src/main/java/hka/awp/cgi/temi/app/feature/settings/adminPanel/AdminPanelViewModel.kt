@@ -34,6 +34,13 @@ class AdminPanelViewModel(
     private val patrolCameraStreamManager: PatrolCameraStreamManager
 ) : ViewModel() {
 
+    init {
+        // Starte die Migration asynchron beim Initialisieren des ViewModels
+        viewModelScope.launch {
+            appConfigRepository.performMigrationIfNeeded()
+        }
+    }
+
     private val _events = MutableSharedFlow<AdminPanelEvent>()
     val events = _events.asSharedFlow()
     private val _isAuthorized = MutableStateFlow(false)
@@ -119,11 +126,26 @@ class AdminPanelViewModel(
         initialValue = AdminPanelState()
     )
 
-    fun checkPassword(input: String) {
+    fun checkWebserverPassword(input: String) {
         viewModelScope.launch {
-            val currentHash = appConfigRepository.adminPasswordHash.first()
+            val currentHash = appConfigRepository.webserverPasswordHash.first()
 
-            val isValid = appConfigRepository.isValidAdminPassword(input, currentHash)
+            val isValid = appConfigRepository.isValidPassword(input, currentHash)
+
+            if (isValid) {
+                _passwordError.value = false
+                _isAuthorized.value = true
+            } else {
+                _passwordError.value = true
+            }
+        }
+    }
+
+    fun checkAdminPassword(input: String) {
+        viewModelScope.launch {
+            val currentHash = appConfigRepository.adminPanelPasswordHash.first()
+
+            val isValid = appConfigRepository.isValidPassword(input, currentHash)
 
             if (isValid) {
                 _passwordError.value = false
@@ -180,16 +202,15 @@ class AdminPanelViewModel(
 
     fun onChangePassword(newPassword: String) {
         viewModelScope.launch {
-            appConfigRepository.updateAdminPassword(newPassword)
+            appConfigRepository.updateAdminPanelPassword(newPassword)
             _events.emit(AdminPanelEvent.PasswordChanged)
         }
     }
 
-    // TODO Funktion des PW resetten möglich machen per viewModel.onResetPassword
-    fun onResetPassword(standardPassword: String) {
+    fun onUpdateWebserverPassword(newPassword: String) {
         viewModelScope.launch {
-            appConfigRepository.resetAdminPassword(standardPassword)
-            _events.emit(AdminPanelEvent.PasswordChanged)
+            appConfigRepository.updateWebserverPassword(newPassword)
+            _events.emit(AdminPanelEvent.WebserverPasswordChanged)
         }
     }
 
@@ -268,6 +289,7 @@ class AdminPanelViewModel(
 
 sealed interface AdminPanelEvent {
     data object OpenMqttReports : AdminPanelEvent
+    data object WebserverPasswordChanged : AdminPanelEvent
     data object PasswordChanged : AdminPanelEvent
     data object RestartAppTriggered : AdminPanelEvent
     data object CloseAppTriggered : AdminPanelEvent

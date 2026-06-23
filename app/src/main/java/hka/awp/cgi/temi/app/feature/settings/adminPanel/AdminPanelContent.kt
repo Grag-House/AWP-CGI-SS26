@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import hka.awp.cgi.temi.app.R
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.AdminPasswordCard
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.CloseAppCard
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.CoordinateManagementCard
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.MqttReportsCard
@@ -31,6 +32,7 @@ fun AdminPanelContent(
     onBackClick: () -> Unit,
     onEditUrl: () -> Unit,
     onOpenMqtt: () -> Unit,
+    onUpdateWebserverPassword: () -> Unit,
     onChangePassword: () -> Unit,
     onEditCoordinates: () -> Unit,
     onRestartRequest: () -> Unit,
@@ -68,9 +70,11 @@ fun AdminPanelContent(
                 MqttReportsCard(onNavigate = onOpenMqtt)
 
                 WebserverPasswordCard(
-                    onChangePassword = onChangePassword
+                    onUpdateWebserverPassword = onUpdateWebserverPassword
                                      )
-
+                AdminPasswordCard(
+                    onChangePassword = onChangePassword
+                                 )
                 CoordinateManagementCard(
                     coordinates = uiState.coordinates,
                     onEdit = onEditCoordinates

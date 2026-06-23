@@ -131,7 +131,7 @@ fun MqttReportsCard(onNavigate: () -> Unit) {
 
 @Composable
 fun WebserverPasswordCard(
-    onChangePassword: () -> Unit
+    onUpdateWebserverPassword: () -> Unit
 ) {
     ConfigCard {
         Row(
@@ -152,11 +152,41 @@ fun WebserverPasswordCard(
                 color = MaterialTheme.colorScheme.primary,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
-                modifier = Modifier.clickable(onClick = onChangePassword)
+                modifier = Modifier.clickable(onClick = onUpdateWebserverPassword)
             )
         }
     }
 }
+
+@Composable
+fun AdminPasswordCard(
+    onChangePassword: () -> Unit
+                         ) {
+    ConfigCard {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+           ) {
+            ConfigIconBox(
+                icon = Icons.Outlined.Lock,
+                contentDescription = "Admin-Password"
+                         )
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                ConfigValue("Admin-Password")
+                PasswordDots()
+            }
+            Text(
+                text = "Admin-Password ändern",
+                color = MaterialTheme.colorScheme.primary,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.clickable(onClick = onChangePassword)
+                )
+        }
+    }
+}
+
 
 @Composable
 fun CoordinateManagementCard(
