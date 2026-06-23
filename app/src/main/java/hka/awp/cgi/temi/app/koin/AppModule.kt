@@ -13,10 +13,10 @@ import hka.awp.cgi.temi.app.feature.settings.SettingsViewModel
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.AdminPanelViewModel
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolCameraStreamManager
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolManager
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolOverlayViewModel
 import hka.awp.cgi.temi.app.feature.settings.battery.BatteryViewModel
 import hka.awp.cgi.temi.app.feature.settings.display.DisplayViewModel
 import hka.awp.cgi.temi.app.feature.settings.language.LanguageViewModel
-import hka.awp.cgi.temi.app.feature.stream.PatrolStreamViewModel
 import hka.awp.cgi.temi.app.feature.webserver.WebserverViewModel
 import hka.awp.cgi.temi.app.ui.shell.AppViewModel
 import hka.awp.cgi.temi.app.utils.NetworkManager
@@ -146,14 +146,15 @@ val appModule = module {
         val ip = BuildConfig.SERVER_IP
         val port = BuildConfig.SERVER_PORT
         PatrolCameraStreamManager(
-            context = get(),
+            context = androidContext(),
             serverUrl = "ws://$ip:$port"
         )
     }
 
     viewModel {
-        PatrolStreamViewModel(
-            cameraStreamManager = get(),
-        )
+        PatrolOverlayViewModel(
+            patrolManager = get(),
+            patrolCameraStreamManager = get()
+                              )
     }
 }

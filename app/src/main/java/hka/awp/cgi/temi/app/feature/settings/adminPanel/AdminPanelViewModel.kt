@@ -105,6 +105,11 @@ class AdminPanelViewModel(
             } else {
                 patrolRoute.joinToString(" → ")
             },
+            patrolModeText = if (!isEnabled) {
+                "Deaktiviert"
+            } else {
+                patrolRoute.joinToString(" → ")
+            },
             videoFrame = currentFrame,
             isPatrolStreaming = isPatrolStreaming,
         )

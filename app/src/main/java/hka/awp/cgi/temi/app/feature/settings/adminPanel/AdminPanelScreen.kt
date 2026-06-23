@@ -192,6 +192,5 @@ fun AdminPanelScreen(
             showPatrolRouteDialog = true
         },
         onCloseRequest = { showCloseDialog = true },
-        onExitPatrol = viewModel::onExitPatrol
     )
 }

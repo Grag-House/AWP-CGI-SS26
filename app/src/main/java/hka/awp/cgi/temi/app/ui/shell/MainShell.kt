@@ -1,5 +1,6 @@
 package hka.awp.cgi.temi.app.ui.shell
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -24,6 +25,8 @@ import hka.awp.cgi.temi.app.feature.settings.SettingsNavigationEvent
 import hka.awp.cgi.temi.app.feature.settings.SettingsViewModel
 import hka.awp.cgi.temi.app.feature.settings.about.SettingsScreen
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.AdminPanelScreen
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolOverlayViewModel
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolStreamOverlay
 import hka.awp.cgi.temi.app.feature.settings.battery.BatteryScreen
 import hka.awp.cgi.temi.app.feature.settings.display.DisplayScreen
 import hka.awp.cgi.temi.app.feature.settings.language.LanguageScreen
@@ -59,7 +62,8 @@ fun MainShell(
     navigationViewModel: NavigationViewModel = koinViewModel(),
     webserverViewModel: WebserverViewModel = koinViewModel(),
     weatherViewModel: WeatherViewModel = koinViewModel(),
-    hideAndSeekViewModel: HideAndSeekViewModel = koinViewModel()
+    hideAndSeekViewModel: HideAndSeekViewModel = koinViewModel(),
+    patrolOverlayViewModel: PatrolOverlayViewModel = koinViewModel()
 ) {
     val wifiLevel by appViewModel.wifiLevel.collectAsStateWithLifecycle()
     val currentTime by appViewModel.currentTime.collectAsStateWithLifecycle()
@@ -68,6 +72,9 @@ fun MainShell(
     val serverState by webserverViewModel.serverState.collectAsStateWithLifecycle()
     val currentTemperatureState by weatherViewModel.uiState.collectAsStateWithLifecycle()
     val webserverUrlState by webserverViewModel.urlState.collectAsStateWithLifecycle()
+    val videoFrame by patrolOverlayViewModel.videoFrame.collectAsStateWithLifecycle()
+    val isPatrolRunning by patrolOverlayViewModel.isRunning.collectAsStateWithLifecycle()
+    val isOverlayVisible by patrolOverlayViewModel.isOverlayVisible.collectAsStateWithLifecycle()
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -78,41 +85,53 @@ fun MainShell(
                 currentTime = currentTime,
                 batteryLevel = batteryLevel,
                 isCharging = isCharging
-            )
+                        )
         }
-    ) { paddingValues ->
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            Sidebar(
-                isExpanded = appViewModel.isSidebarExpanded,
-                selectedRoute = appViewModel.selectedRoute,
-                onRouteSelected = { screen -> appViewModel.onRouteSelect(screen) },
-                onSidebarToggle = { appViewModel.onSideBarToggle() },
-                modifier = Modifier.width(260.dp)
-            )
-
+            ) { paddingValues ->
+        Box(
+            modifier = Modifier.fillMaxSize()
+           ) {
             Row(
                 modifier = Modifier
-                    .weight(1f)
-                    .padding(top = 12.dp, bottom = 12.dp, end = 12.dp)
-                    .clip(RoundedCornerShape(24.dp))
-            ) {
-                RenderSelectedRoute(
+                    .fillMaxSize()
+                    .padding(paddingValues)
+               ) {
+                Sidebar(
+                    isExpanded = appViewModel.isSidebarExpanded,
                     selectedRoute = appViewModel.selectedRoute,
-                    routeDeps = MainShellRouteDeps(
-                        appViewModel = appViewModel,
-                        settingsViewModel = settingsViewModel,
-                        navigationViewModel = navigationViewModel,
-                        weatherViewModel = weatherViewModel,
-                        hideAndSeekViewModel = hideAndSeekViewModel,
-                        serverState = serverState,
-                        currentTemperatureState = currentTemperatureState,
-                        webserverUrlState = webserverUrlState
-                    ),
-                    modifier = Modifier.weight(1f)
+                    onRouteSelected = { screen -> appViewModel.onRouteSelect(screen) },
+                    onSidebarToggle = { appViewModel.onSideBarToggle() },
+                    modifier = Modifier.width(260.dp)
+                       )
+
+                Row(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(top = 12.dp, bottom = 12.dp, end = 12.dp)
+                        .clip(RoundedCornerShape(24.dp))
+                   ) {
+                    RenderSelectedRoute(
+                        selectedRoute = appViewModel.selectedRoute,
+                        routeDeps = MainShellRouteDeps(
+                            appViewModel = appViewModel,
+                            settingsViewModel = settingsViewModel,
+                            navigationViewModel = navigationViewModel,
+                            weatherViewModel = weatherViewModel,
+                            hideAndSeekViewModel = hideAndSeekViewModel,
+                            serverState = serverState,
+                            currentTemperatureState = currentTemperatureState,
+                            webserverUrlState = webserverUrlState
+                                                      ),
+                        modifier = Modifier.weight(1f)
+                                       )
+                }
+            }
+
+            if (isPatrolRunning) {
+                PatrolStreamOverlay(
+                    videoFrame = videoFrame,
+                    onBackClick = patrolOverlayViewModel::hideOverlay,
+                    onStopPatrol = patrolOverlayViewModel::stopPatrol
                 )
             }
         }

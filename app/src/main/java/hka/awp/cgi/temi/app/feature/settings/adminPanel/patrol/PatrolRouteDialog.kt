@@ -28,7 +28,7 @@ fun PatrolRouteDialog(
     onDismiss: () -> Unit,
     onSave: (List<String>) -> Unit
 ) {
-    val selectedRoute = remember {
+    val selectedRoute = remember(initialRoute) {
         mutableStateListOf<String>().apply {
             addAll(initialRoute)
         }
