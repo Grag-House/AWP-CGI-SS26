@@ -69,6 +69,7 @@ fun PhotoboxScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val cameraState by viewModel.cameraState.collectAsStateWithLifecycle()
     val overlayEnabled by viewModel.overlayEnabled.collectAsStateWithLifecycle()
+    val overlayPosition by viewModel.overlayPosition.collectAsStateWithLifecycle()
 
     DisposableEffect(viewModel) {
         onDispose { viewModel.onScreenStopped() }
@@ -84,13 +85,16 @@ fun PhotoboxScreen(
         // The PREVIEW phase renders its own copy over the captured photo (see PreviewOverlay).
         // MODE_SELECT fully covers the camera feed with its own opaque background.
         if (overlayEnabled && uiState.phase !in OVERLAY_HIDDEN_PHASES) {
-            TemiOverlayImage()
+            TemiOverlayImage(overlayPosition)
         }
 
         when (uiState.phase) {
             PhotoboxPhase.MODE_SELECT -> ModeSelectOverlay(
                 selectedMode = uiState.mode,
-                onModeSelect = viewModel::selectMode
+                onModeSelect = viewModel::selectMode,
+                overlayEnabled = overlayEnabled,
+                overlayPosition = overlayPosition,
+                onOverlayPositionSelect = viewModel.overlaySettings::setPosition
             )
             PhotoboxPhase.IDLE -> IdleOverlay(
                 uiState = uiState,
@@ -109,6 +113,7 @@ fun PhotoboxScreen(
                     capturedBitmap = uiState.capturedBitmap,
                     mode = uiState.mode,
                     overlayEnabled = overlayEnabled,
+                    overlayPosition = overlayPosition,
                     uploadState = uiState.uploadState,
                     selectedFilter = uiState.selectedFilter
                 ),
@@ -234,13 +239,18 @@ private fun CameraPreviewView(
  * shown over the live camera feed or over the final captured photo.
  */
 @Composable
-internal fun BoxScope.TemiOverlayImage() {
+internal fun BoxScope.TemiOverlayImage(position: TemiOverlayPosition) {
+    val alignment = when (position) {
+        TemiOverlayPosition.LEFT -> Alignment.BottomStart
+        TemiOverlayPosition.CENTER -> Alignment.BottomCenter
+        TemiOverlayPosition.RIGHT -> Alignment.BottomEnd
+    }
     Image(
         painter = painterResource(R.drawable.temi_photo),
         contentDescription = null,
         contentScale = ContentScale.FillHeight,
         modifier = Modifier
-            .align(Alignment.BottomEnd)
+            .align(alignment)
             .fillMaxHeight(PHOTOBOX_OVERLAY_HEIGHT_FRACTION)
     )
 }

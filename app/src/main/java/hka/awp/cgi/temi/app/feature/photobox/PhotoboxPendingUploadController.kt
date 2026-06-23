@@ -18,10 +18,14 @@ internal class PhotoboxPendingUploadController(
 ) {
     private var pending: PendingUpload? = null
 
-    private data class PendingUpload(val finalImage: Bitmap, val needsOverlayBake: Boolean)
+    private data class PendingUpload(
+        val finalImage: Bitmap,
+        val needsOverlayBake: Boolean,
+        val overlayPosition: TemiOverlayPosition
+    )
 
-    fun begin(finalImage: Bitmap, needsOverlayBake: Boolean) {
-        pending = PendingUpload(finalImage, needsOverlayBake)
+    fun begin(finalImage: Bitmap, needsOverlayBake: Boolean, overlayPosition: TemiOverlayPosition) {
+        pending = PendingUpload(finalImage, needsOverlayBake, overlayPosition)
     }
 
     fun selectFilter(filter: PhotoboxPhotoFilter) {
@@ -35,6 +39,7 @@ internal class PhotoboxPendingUploadController(
             finalImage = current.finalImage,
             filter = uiState.value.selectedFilter,
             needsOverlayBake = current.needsOverlayBake,
+            overlayPosition = current.overlayPosition,
             onUploadResult = onUploadResult
         )
     }
@@ -49,6 +54,7 @@ internal class PhotoboxPendingUploadController(
                 finalImage = current.finalImage,
                 filter = PhotoboxPhotoFilter.NONE,
                 needsOverlayBake = current.needsOverlayBake,
+                overlayPosition = current.overlayPosition,
                 onUploadResult = { _, _ -> }
             )
         }

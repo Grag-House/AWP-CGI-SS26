@@ -2,6 +2,7 @@ package hka.awp.cgi.temi.app.feature.photobox.upload
 
 import android.graphics.Bitmap
 import hka.awp.cgi.temi.app.feature.photobox.PhotoboxMode
+import hka.awp.cgi.temi.app.feature.photobox.TemiOverlayPosition
 import hka.awp.cgi.temi.app.feature.photobox.capture.PhotoboxCaptureSequencer
 import hka.awp.cgi.temi.app.feature.photobox.filter.PhotoboxPhotoFilter
 import hka.awp.cgi.temi.app.feature.photobox.filter.bake
@@ -37,6 +38,7 @@ internal class PhotoboxSessionFinalizer(
         mode: PhotoboxMode,
         shots: List<Bitmap>,
         withOverlay: Boolean,
+        overlayPosition: TemiOverlayPosition,
         onFinalImageReady: (finalImage: Bitmap, needsOverlayBakeAtUpload: Boolean) -> Unit
     ) {
         scope.launch {
@@ -45,7 +47,7 @@ internal class PhotoboxSessionFinalizer(
             // would freeze the UI for the duration, which can be long enough for a stray touch
             // (e.g. on the sidebar) to queue up and fire once the main thread frees up again.
             val (finalImage, needsOverlayBakeAtUpload) = withContext(Dispatchers.Default) {
-                buildFinalImage(mode, shots, withOverlay)
+                buildFinalImage(mode, shots, withOverlay, overlayPosition)
             }
             onFinalImageReady(finalImage, needsOverlayBakeAtUpload)
         }
@@ -60,11 +62,12 @@ internal class PhotoboxSessionFinalizer(
         finalImage: Bitmap,
         filter: PhotoboxPhotoFilter,
         needsOverlayBake: Boolean,
+        overlayPosition: TemiOverlayPosition,
         onUploadResult: (Bitmap, PhotoboxUploadOutcome) -> Unit
     ) {
         scope.launch {
             val filteredImage = withContext(Dispatchers.Default) { filter.bake(finalImage) }
-            uploadRepository.uploadPhoto(filteredImage, needsOverlayBake).fold(
+            uploadRepository.uploadPhoto(filteredImage, needsOverlayBake, overlayPosition).fold(
                 onSuccess = { result ->
                     onUploadResult(finalImage, PhotoboxUploadOutcome.Success(result))
                 },
@@ -94,11 +97,12 @@ internal class PhotoboxSessionFinalizer(
     private fun buildFinalImage(
         mode: PhotoboxMode,
         shots: List<Bitmap>,
-        withOverlay: Boolean
+        withOverlay: Boolean,
+        overlayPosition: TemiOverlayPosition
     ): Pair<Bitmap, Boolean> {
         if (mode == PhotoboxMode.STANDARD) return shots.first() to withOverlay
 
-        val frames = if (withOverlay) shots.map(uploadRepository::bakeOverlay) else shots
+        val frames = if (withOverlay) shots.map { uploadRepository.bakeOverlay(it, overlayPosition) } else shots
         val combined = if (mode == PhotoboxMode.GRID_2X2) {
             combinePhotoGrid(frames, columns = GRID_2X2_COLUMNS)
         } else {

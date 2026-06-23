@@ -46,6 +46,7 @@ import hka.awp.cgi.temi.app.feature.photobox.BottomBar
 import hka.awp.cgi.temi.app.feature.photobox.PhotoboxMode
 import hka.awp.cgi.temi.app.feature.photobox.PhotoboxUploadState
 import hka.awp.cgi.temi.app.feature.photobox.TemiOverlayImage
+import hka.awp.cgi.temi.app.feature.photobox.TemiOverlayPosition
 import hka.awp.cgi.temi.app.feature.photobox.filter.PhotoboxPhotoFilter
 import hka.awp.cgi.temi.app.feature.photobox.filter.toComposeColorFilter
 
@@ -58,6 +59,7 @@ internal data class PreviewPhotoState(
     val capturedBitmap: Bitmap?,
     val mode: PhotoboxMode,
     val overlayEnabled: Boolean,
+    val overlayPosition: TemiOverlayPosition,
     val uploadState: PhotoboxUploadState,
     val selectedFilter: PhotoboxPhotoFilter
 )
@@ -97,7 +99,7 @@ internal fun PreviewOverlay(
         // PhotoboxSessionFinalizer) — showing it again here would add one oversized Temi
         // floating next to the whole composite.
         if (photoState.overlayEnabled && photoState.mode == PhotoboxMode.STANDARD) {
-            TemiOverlayImage()
+            TemiOverlayImage(photoState.overlayPosition)
         }
 
         BottomBar(modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()) {

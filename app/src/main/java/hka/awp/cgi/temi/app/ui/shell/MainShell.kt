@@ -93,7 +93,15 @@ fun MainShell(
             Sidebar(
                 isExpanded = appViewModel.isSidebarExpanded,
                 selectedRoute = appViewModel.selectedRoute,
-                onRouteSelected = { screen -> appViewModel.onRouteSelect(screen) },
+                onRouteSelected = { screen ->
+                    // Clicking Photobox while already on it (e.g. mid-countdown/capture) doesn't
+                    // trigger a route change, so the screen wouldn't otherwise get disposed/reset
+                    // — reset explicitly so it always lands back on mode selection.
+                    if (screen == Screen.Photobox) {
+                        photoboxViewModel.reset()
+                    }
+                    appViewModel.onRouteSelect(screen)
+                },
                 onSidebarToggle = { appViewModel.onSideBarToggle() },
                 modifier = Modifier.width(260.dp)
             )

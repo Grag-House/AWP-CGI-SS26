@@ -7,6 +7,7 @@ import android.graphics.Canvas
 import android.graphics.RectF
 import android.util.Base64
 import hka.awp.cgi.temi.app.R
+import hka.awp.cgi.temi.app.feature.photobox.TemiOverlayPosition
 import hka.awp.cgi.temi.app.utils.AppConfigRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -58,8 +59,12 @@ class PhotoboxUploadRepository(
         .build()
 
     /** Returns the time-limited, shareable view URL for the uploaded photo on success. */
-    suspend fun uploadPhoto(photo: Bitmap, withOverlay: Boolean): Result<PhotoboxUploadResult> {
-        val finalBitmap = if (withOverlay) bakeOverlay(photo) else photo
+    suspend fun uploadPhoto(
+        photo: Bitmap,
+        withOverlay: Boolean,
+        overlayPosition: TemiOverlayPosition
+    ): Result<PhotoboxUploadResult> {
+        val finalBitmap = if (withOverlay) bakeOverlay(photo, overlayPosition) else photo
         return uploadFinalPhoto(finalBitmap)
     }
 
@@ -131,17 +136,22 @@ class PhotoboxUploadRepository(
     private val overlayBitmap by lazy { BitmapFactory.decodeResource(context.resources, R.drawable.temi_photo) }
 
     /** Burns the Temi cutout into [photo] itself (e.g. so each strip frame carries its own copy). */
-    internal fun bakeOverlay(photo: Bitmap): Bitmap {
+    internal fun bakeOverlay(photo: Bitmap, position: TemiOverlayPosition): Bitmap {
         val overlay = overlayBitmap
         val result = photo.copy(photo.config ?: Bitmap.Config.ARGB_8888, true)
         val canvas = Canvas(result)
         val targetHeight = result.height * PHOTOBOX_OVERLAY_HEIGHT_FRACTION
         val scale = targetHeight / overlay.height
         val targetWidth = overlay.width * scale
+        val left = when (position) {
+            TemiOverlayPosition.LEFT -> 0f
+            TemiOverlayPosition.CENTER -> (result.width - targetWidth) / 2f
+            TemiOverlayPosition.RIGHT -> result.width - targetWidth
+        }
         val destRect = RectF(
-            result.width - targetWidth,
+            left,
             result.height - targetHeight,
-            result.width.toFloat(),
+            left + targetWidth,
             result.height.toFloat()
         )
         canvas.drawBitmap(overlay, null, destRect, null)
