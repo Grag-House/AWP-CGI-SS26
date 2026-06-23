@@ -8,6 +8,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Lock
@@ -281,4 +282,34 @@ fun EditUrlDialog(
             Text(stringResource(R.string.admin_panel_cancel))
         }
     })
+}
+
+@Composable
+fun NoRouteSelectedDialog(
+    onDismiss: () -> Unit
+                         ) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = {
+            Icon(
+                imageVector = Icons.Default.Warning,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+                )
+        },
+        title = {
+            Text(text = "Keine Route ausgewählt")
+        },
+        text = {
+            Text(
+                text = "Bitte wähle zuerst eine Route aus, bevor du fortfährst.",
+                style = MaterialTheme.typography.bodyMedium
+                )
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.admin_panel_confirm)) // Oder "OK"
+            }
+        }
+               )
 }

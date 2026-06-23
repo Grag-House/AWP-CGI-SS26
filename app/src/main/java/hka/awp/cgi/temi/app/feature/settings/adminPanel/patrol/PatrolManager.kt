@@ -1,5 +1,9 @@
 package hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import com.robotemi.sdk.Robot
 import com.robotemi.sdk.listeners.OnGoToLocationStatusChangedListener
 import kotlinx.coroutines.CoroutineScope
@@ -36,14 +40,14 @@ class PatrolManager(
         robot?.addOnGoToLocationStatusChangedListener(this)
     }
 
-    fun startImmediatePatrol(route: List<String>, cameraTiltAngle: Int = 0) {
+    fun startImmediatePatrol(route: List<String>, cameraTiltAngle: Int = 0): Boolean {
         if (route.isEmpty()) {
             Timber.w("Keine Kontrollroute konfiguriert.")
-            return
+            return false
         }
         if (_isRunning.value) {
             Timber.w("Kontrollfahrt läuft bereits.")
-            return
+            return false
         }
 
         robot?.toggleNavigationBillboard(disabled = true)
@@ -58,6 +62,7 @@ class PatrolManager(
         analysisHandler.start()
 
         moveToCurrentLocation()
+        return true
     }
 
     private fun startAutomaticPatrol(route: List<String>) {
