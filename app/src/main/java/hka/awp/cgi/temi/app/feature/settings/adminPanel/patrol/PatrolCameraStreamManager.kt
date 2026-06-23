@@ -4,6 +4,9 @@ import android.content.Context
 import android.graphics.Bitmap
 import hka.awp.cgi.temi.app.feature.stream.CameraStreamManager
 import kotlinx.coroutines.flow.StateFlow
+import hka.awp.cgi.temi.app.feature.stream.CameraStreamManager
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 
 class PatrolCameraStreamManager(
     context: Context,
