@@ -7,18 +7,16 @@ import timber.log.Timber
 class PatrolScanner(private val robot: Robot?) {
 
     private companion object {
-        private const val MIN_TILT_ANGLE = -30
-        private const val MAX_TILT_ANGLE = 50
         private const val CAMERA_TILT_SPEED = 0.4f
         private const val TURN_DELAY = 2500L
+        private const val SCAN_TILT_ANGLE = 0
     }
 
     suspend fun executeScanSequence(cameraTiltAngle: Int, onPointReached: () -> Unit) {
         Timber.d("Starte Scan-Sequenz")
 
         // 1. Kamera neigen
-        val safeAngle = cameraTiltAngle.coerceIn(MIN_TILT_ANGLE, MAX_TILT_ANGLE)
-        robot?.tiltAngle(degrees = safeAngle, speed = CAMERA_TILT_SPEED)
+        robot?.tiltAngle(degrees = SCAN_TILT_ANGLE, speed = CAMERA_TILT_SPEED)
         delay(1500L)
 
         // 2. Event an Server senden (über Callback)

@@ -1,24 +1,16 @@
 package hka.awp.cgi.temi.app.feature.settings.adminPanel
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import hka.awp.cgi.temi.app.R
@@ -44,102 +36,63 @@ fun AdminPanelContent(
     onRestartRequest: () -> Unit,
     onNavigateToPatrolSettings: () -> Unit,
     onNavigateToPatrolRoute: () -> Unit,
-    onCloseRequest: () -> Unit,
-    onExitPatrol: () -> Unit
+    onCloseRequest: () -> Unit
                      ) {
-    Box(
+    Row(
         modifier = Modifier.fillMaxSize()
        ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(32.dp)
+              ) {
+            SettingsHeader(
+                title = stringResource(R.string.admin_panel_header),
+                onBackClick = onBackClick
+                          )
 
-        if (uiState.isPatrolStreaming && uiState.videoFrame != null) {
+            Spacer(modifier = Modifier.height(40.dp))
 
-            Image(
-                bitmap = uiState.videoFrame.asImageBitmap(),
-                contentDescription = "Temi Patrol Stream",
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Fit
-                 )
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
-               ) {
-
-                Button(
-                    onClick = onBackClick
-                      ) {
-                    Text("Zurück")
-                }
-
-                Button(
-                    onClick = onExitPatrol
-                      ) {
-                    Text("Stream beenden")
-                }
-            }
-
-            return@Box
-        }
-
-        Row(
-            modifier = Modifier.fillMaxSize()
-           ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(32.dp)
+                    .verticalScroll(rememberScrollState())
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
                   ) {
-                SettingsHeader(
-                    title = stringResource(R.string.admin_panel_header),
-                    onBackClick = onBackClick
-                              )
+                WebserverUrlCard(
+                    url = uiState.webserverUrl,
+                    onEdit = onEditUrl
+                                )
 
-                Spacer(modifier = Modifier.height(40.dp))
+                MqttReportsCard(onNavigate = onOpenMqtt)
 
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                      ) {
-                    WebserverUrlCard(
-                        url = uiState.webserverUrl,
-                        onEdit = onEditUrl
-                                    )
+                WebserverPasswordCard(
+                    onChangePassword = onChangePassword
+                                     )
 
-                    MqttReportsCard(onNavigate = onOpenMqtt)
+                CoordinateManagementCard(
+                    coordinates = uiState.coordinates,
+                    onEdit = onEditCoordinates
+                                        )
 
-                    WebserverPasswordCard(
-                        onChangePassword = onChangePassword
-                                         )
-
-                    CoordinateManagementCard(
-                        coordinates = uiState.coordinates,
-                        onEdit = onEditCoordinates
-                                            )
-
-                    PatrolSettingsCard(
-                        currentModeText = uiState.patrolModeText,
-                        onNavigate = onNavigateToPatrolSettings
-                                      )
-
-                    PatrolRouteCard(
-                        currentRouteText = uiState.patrolRouteText,
-                        onNavigate = onNavigateToPatrolRoute
-                                   )
-
-                    RestartAppCard(
-                        onRestartClick = onRestartRequest
+                PatrolSettingsCard(
+                    currentModeText = uiState.patrolModeText,
+                    onNavigate = onNavigateToPatrolSettings
                                   )
 
-                    CloseAppCard(
-                        onCloseClick = onCloseRequest
-                                )
-                }
+                PatrolRouteCard(
+                    currentRouteText = uiState.patrolRouteText,
+                    onNavigate = onNavigateToPatrolRoute
+                               )
+
+                RestartAppCard(
+                    onRestartClick = onRestartRequest
+                              )
+
+                CloseAppCard(
+                    onCloseClick = onCloseRequest
+                            )
             }
         }
     }

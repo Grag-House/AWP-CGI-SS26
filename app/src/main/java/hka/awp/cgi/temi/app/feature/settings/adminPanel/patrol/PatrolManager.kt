@@ -125,11 +125,4 @@ class PatrolManager(
         analysisHandler.stop()
         robot?.toggleNavigationBillboard(disabled = false)
     }
-
-    fun clear() {
-        scheduler.cancel()
-        stopPatrol()
-        robot?.removeOnGoToLocationStatusChangedListener(this)
-        cameraStreamManager.disconnect()
-    }
 }
