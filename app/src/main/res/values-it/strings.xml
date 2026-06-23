@@ -278,6 +278,10 @@
     <string name="photobox_mode_standard_description">Una singola foto</string>
     <string name="photobox_mode_strip_title">Striscia da 3 foto</string>
     <string name="photobox_mode_strip_description">3 foto su una striscia</string>
+    <string name="photobox_mode_strip4_title">Striscia da 4 foto</string>
+    <string name="photobox_mode_strip4_description">4 foto su una striscia</string>
+    <string name="photobox_mode_grid_title">Griglia 2x2</string>
+    <string name="photobox_mode_grid_description">4 foto in griglia</string>
     <string name="photobox_change_mode_button">Cambia modalità</string>
     <string name="photobox_strip_delay_label">PAUSA TRA LE FOTO</string>
     <string name="photobox_change_pose_label">Cambia posa!</string>

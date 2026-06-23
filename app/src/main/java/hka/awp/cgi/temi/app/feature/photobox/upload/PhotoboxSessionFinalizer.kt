@@ -19,11 +19,14 @@ internal sealed interface PhotoboxUploadOutcome {
     data object Failed : PhotoboxUploadOutcome
 }
 
+private const val GRID_2X2_COLUMNS = 2
+
 /**
  * Turns the raw shots from a [PhotoboxCaptureSequencer] run into the final image (baking in the
- * Temi overlay per-frame for a strip, or combining the strip itself), separately from uploading
- * it — the caller decides when (and with which [PhotoboxPhotoFilter]) the upload actually starts,
- * so the user can preview/pick a filter on the finished photo before anything leaves the device.
+ * Temi overlay per-frame for a multi-shot mode, or combining the shots into a strip/grid),
+ * separately from uploading it — the caller decides when (and with which [PhotoboxPhotoFilter])
+ * the upload actually starts, so the user can preview/pick a filter on the finished photo before
+ * anything leaves the device.
  */
 internal class PhotoboxSessionFinalizer(
     private val uploadRepository: PhotoboxUploadRepository,
@@ -84,8 +87,8 @@ internal class PhotoboxSessionFinalizer(
         }
     }
 
-    // For a strip, Temi is baked into each individual frame before combining — overlaying it
-    // once on the whole tall strip would put a single oversized Temi next to it instead of on
+    // For a strip/grid, Temi is baked into each individual frame before combining — overlaying
+    // it once on the whole composite would put a single oversized Temi next to it instead of on
     // each photo. Standard mode keeps the existing behavior: shown live via a separate Compose
     // layer, baked in only at upload time (needsOverlayBakeAtUpload = withOverlay).
     private fun buildFinalImage(
@@ -93,9 +96,14 @@ internal class PhotoboxSessionFinalizer(
         shots: List<Bitmap>,
         withOverlay: Boolean
     ): Pair<Bitmap, Boolean> {
-        if (mode != PhotoboxMode.STRIP) return shots.first() to withOverlay
+        if (mode == PhotoboxMode.STANDARD) return shots.first() to withOverlay
 
         val frames = if (withOverlay) shots.map(uploadRepository::bakeOverlay) else shots
-        return combinePhotoStrip(frames) to false
+        val combined = if (mode == PhotoboxMode.GRID_2X2) {
+            combinePhotoGrid(frames, columns = GRID_2X2_COLUMNS)
+        } else {
+            combinePhotoStrip(frames)
+        }
+        return combined to false
     }
 }

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.GridView
 import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.material.icons.rounded.ViewStream
 import androidx.compose.material3.Icon
@@ -49,21 +50,39 @@ internal fun ModeSelectOverlay(
                 fontWeight = FontWeight.Bold
             )
             Spacer(Modifier.height(32.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
-                ModeOptionCard(
-                    title = stringResource(R.string.photobox_mode_standard_title),
-                    description = stringResource(R.string.photobox_mode_standard_description),
-                    icon = Icons.Rounded.PhotoCamera,
-                    selected = selectedMode == PhotoboxMode.STANDARD,
-                    onClick = { onModeSelect(PhotoboxMode.STANDARD) }
-                )
-                ModeOptionCard(
-                    title = stringResource(R.string.photobox_mode_strip_title),
-                    description = stringResource(R.string.photobox_mode_strip_description),
-                    icon = Icons.Rounded.ViewStream,
-                    selected = selectedMode == PhotoboxMode.STRIP,
-                    onClick = { onModeSelect(PhotoboxMode.STRIP) }
-                )
+            Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
+                    ModeOptionCard(
+                        title = stringResource(R.string.photobox_mode_standard_title),
+                        description = stringResource(R.string.photobox_mode_standard_description),
+                        icon = Icons.Rounded.PhotoCamera,
+                        selected = selectedMode == PhotoboxMode.STANDARD,
+                        onClick = { onModeSelect(PhotoboxMode.STANDARD) }
+                    )
+                    ModeOptionCard(
+                        title = stringResource(R.string.photobox_mode_strip_title),
+                        description = stringResource(R.string.photobox_mode_strip_description),
+                        icon = Icons.Rounded.ViewStream,
+                        selected = selectedMode == PhotoboxMode.STRIP,
+                        onClick = { onModeSelect(PhotoboxMode.STRIP) }
+                    )
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
+                    ModeOptionCard(
+                        title = stringResource(R.string.photobox_mode_strip4_title),
+                        description = stringResource(R.string.photobox_mode_strip4_description),
+                        icon = Icons.Rounded.ViewStream,
+                        selected = selectedMode == PhotoboxMode.STRIP_1X4,
+                        onClick = { onModeSelect(PhotoboxMode.STRIP_1X4) }
+                    )
+                    ModeOptionCard(
+                        title = stringResource(R.string.photobox_mode_grid_title),
+                        description = stringResource(R.string.photobox_mode_grid_description),
+                        icon = Icons.Rounded.GridView,
+                        selected = selectedMode == PhotoboxMode.GRID_2X2,
+                        onClick = { onModeSelect(PhotoboxMode.GRID_2X2) }
+                    )
+                }
             }
         }
     }

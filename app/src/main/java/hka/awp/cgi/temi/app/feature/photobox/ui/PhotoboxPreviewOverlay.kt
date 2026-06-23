@@ -82,10 +82,10 @@ internal fun PreviewOverlay(
                 bitmap = photoState.capturedBitmap.asImageBitmap(),
                 contentDescription = null,
                 // A single photo roughly matches the screen's aspect ratio, so Crop fills the
-                // screen without visible black bars. A strip is tall and narrow — cropping it
-                // the same way would zoom in until only one of the three shots is visible, so
-                // it needs Fit instead to keep the whole strip on screen.
-                contentScale = if (photoState.mode == PhotoboxMode.STRIP) ContentScale.Fit else ContentScale.Crop,
+                // screen without visible black bars. A strip/grid composite has a different
+                // aspect ratio — cropping it the same way would zoom in until only part of it is
+                // visible, so it needs Fit instead to keep the whole composite on screen.
+                contentScale = if (photoState.mode == PhotoboxMode.STANDARD) ContentScale.Crop else ContentScale.Fit,
                 // Filter is only baked into the actual file on upload (see PhotoboxViewModel) —
                 // here it's just a cheap GPU-composited preview so switching filters is instant.
                 colorFilter = photoState.selectedFilter.toComposeColorFilter(),
@@ -93,8 +93,9 @@ internal fun PreviewOverlay(
             )
         }
 
-        // For a strip, Temi is already baked into each individual frame (see PhotoboxViewModel) —
-        // showing it again here would add one oversized Temi floating next to the whole strip.
+        // For a strip/grid, Temi is already baked into each individual frame (see
+        // PhotoboxSessionFinalizer) — showing it again here would add one oversized Temi
+        // floating next to the whole composite.
         if (photoState.overlayEnabled && photoState.mode == PhotoboxMode.STANDARD) {
             TemiOverlayImage()
         }

@@ -296,6 +296,10 @@
     <string name="photobox_mode_standard_description">Ein einzelnes Foto</string>
     <string name="photobox_mode_strip_title">3er-Streifen</string>
     <string name="photobox_mode_strip_description">3 Fotos auf einem Streifen</string>
+    <string name="photobox_mode_strip4_title">4er-Streifen</string>
+    <string name="photobox_mode_strip4_description">4 Fotos auf einem Streifen</string>
+    <string name="photobox_mode_grid_title">2x2-Raster</string>
+    <string name="photobox_mode_grid_description">4 Fotos im Raster</string>
     <string name="photobox_change_mode_button">Modus ändern</string>
     <string name="photobox_strip_delay_label">PAUSE ZWISCHEN FOTOS</string>
     <string name="photobox_change_pose_label">Pose ändern!</string>

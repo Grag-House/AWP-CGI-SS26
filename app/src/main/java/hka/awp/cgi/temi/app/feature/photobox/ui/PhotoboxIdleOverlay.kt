@@ -58,7 +58,7 @@ internal fun IdleOverlay(
                 selected = uiState.selectedDuration,
                 onSelect = onDurationSelect
             )
-            if (uiState.mode == PhotoboxMode.STRIP) {
+            if (uiState.mode != PhotoboxMode.STANDARD) {
                 DurationSelectorRow(
                     label = stringResource(R.string.photobox_strip_delay_label),
                     options = listOf(STRIP_DELAY_SHORT_S, STRIP_DELAY_MEDIUM_S, STRIP_DELAY_LONG_S),
