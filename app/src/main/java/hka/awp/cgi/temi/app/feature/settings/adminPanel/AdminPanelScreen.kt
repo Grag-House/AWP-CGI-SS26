@@ -136,8 +136,11 @@ fun AdminPanelScreen(
             initialMaxMinutes = uiState.maxMinutes,
             initialHours = uiState.selectedHours,
             onTriggerPatrol = {
-                viewModel.onTriggerImmediatePatrol()
-                showNoRouteDialog = true
+                val success = viewModel.onTriggerImmediatePatrol()
+                if (!success) {
+                    showPatrolSettingsDialog = false
+                    showNoRouteDialog = true
+                }
             },
             onSave = { isEnabled, mode, minMin, maxMin, hours ->
                 viewModel.onSavePatrolSettings(

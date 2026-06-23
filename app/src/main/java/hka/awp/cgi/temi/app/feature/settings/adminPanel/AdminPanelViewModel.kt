@@ -179,6 +179,7 @@ class AdminPanelViewModel(
             _events.emit(AdminPanelEvent.PasswordChanged)
         }
     }
+
     // TODO Funktion des PW resetten möglich machen per viewModel.onResetPassword
     fun onResetPassword(standardPassword: String) {
         viewModelScope.launch {
@@ -225,8 +226,9 @@ class AdminPanelViewModel(
         }
     }
 
-    fun onTriggerImmediatePatrol() {
-        patrolManager.startImmediatePatrol(uiState.value.patrolRoute)
+    fun onTriggerImmediatePatrol(): Boolean {
+        val success = patrolManager.startImmediatePatrol(uiState.value.patrolRoute)
+        return success
     }
 
     fun onSavePatrolRoute(route: List<String>) {
