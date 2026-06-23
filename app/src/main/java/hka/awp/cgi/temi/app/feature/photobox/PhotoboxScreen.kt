@@ -69,7 +69,6 @@ fun PhotoboxScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val cameraState by viewModel.cameraState.collectAsStateWithLifecycle()
     val overlayEnabled by viewModel.overlayEnabled.collectAsStateWithLifecycle()
-    val isFrontCamera by viewModel.isFrontCamera.collectAsStateWithLifecycle()
 
     DisposableEffect(viewModel) {
         onDispose { viewModel.onScreenStopped() }
@@ -79,7 +78,6 @@ fun PhotoboxScreen(
         CameraSection(
             modifier = Modifier.fillMaxSize(),
             cameraState = cameraState,
-            isFrontCamera = isFrontCamera,
             onBindCamera = viewModel::bindCamera
         )
 
@@ -144,7 +142,6 @@ fun PhotoboxScreen(
 private fun CameraSection(
     modifier: Modifier = Modifier,
     cameraState: PhotoboxCameraState,
-    isFrontCamera: Boolean,
     onBindCamera: (LifecycleOwner, Preview.SurfaceProvider, ViewPort?) -> Unit
 ) {
     val context = LocalContext.current
@@ -173,7 +170,6 @@ private fun CameraSection(
         )
         else -> CameraPreviewView(
             modifier = modifier,
-            isFrontCamera = isFrontCamera,
             onBindCamera = onBindCamera
         )
     }
@@ -206,7 +202,6 @@ private fun CameraMessageOverlay(modifier: Modifier = Modifier, textRes: Int) {
 @Composable
 private fun CameraPreviewView(
     modifier: Modifier = Modifier,
-    isFrontCamera: Boolean,
     onBindCamera: (LifecycleOwner, Preview.SurfaceProvider, ViewPort?) -> Unit
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -215,17 +210,19 @@ private fun CameraPreviewView(
         factory = { ctx ->
             PreviewView(ctx).apply {
                 scaleType = PreviewView.ScaleType.FILL_CENTER
-                // SurfaceView (the PERFORMANCE default) ignores scaleX/scaleY since it's
-                // composited as its own layer outside the normal View pipeline — switch to
-                // TextureView so the mirroring below actually has an effect.
+                // SurfaceView (the PERFORMANCE default) ignores scaleX since it's composited as
+                // its own layer outside the normal View pipeline — switch to TextureView so the
+                // mirroring below actually has an effect.
                 implementationMode = PreviewView.ImplementationMode.COMPATIBLE
+                // Temi's camera faces the user like a selfie cam regardless of how Android
+                // classifies the lens, so the live feed is always mirrored — otherwise moving
+                // your head left makes the preview look like you moved right, the opposite of
+                // how a mirror (or a selfie cam) works.
+                scaleX = -1f
                 // Deferred to post() so the view is laid out and viewPort reflects its real size.
                 post { onBindCamera(lifecycleOwner, surfaceProvider, viewPort) }
             }
         },
-        // Mirror the live feed for the front camera — otherwise moving your head left makes the
-        // preview look like you moved right, the opposite of how a mirror (or a selfie cam) works.
-        update = { previewView -> previewView.scaleX = if (isFrontCamera) -1f else 1f },
         modifier = modifier
     )
 }

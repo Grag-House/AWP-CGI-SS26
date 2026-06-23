@@ -69,9 +69,6 @@ class PhotoboxCameraManager(private val context: Context) {
         .build()
     private var cameraProvider: ProcessCameraProvider? = null
 
-    private val _isFrontCamera = MutableStateFlow(true)
-    val isFrontCamera: StateFlow<Boolean> = _isFrontCamera.asStateFlow()
-
     private val shutterSoundPool = SoundPool.Builder()
         .setMaxStreams(1)
         .setAudioAttributes(
@@ -114,7 +111,6 @@ class PhotoboxCameraManager(private val context: Context) {
                     .build()
                 provider.bindToLifecycle(lifecycleOwner, cameraSelector, useCaseGroup)
                 cameraProvider = provider
-                _isFrontCamera.value = useFrontCamera
                 _cameraState.value = PhotoboxCameraState.READY
             } catch (e: IllegalStateException) {
                 Timber.e(e, "Camera binding failed")
@@ -148,8 +144,10 @@ class PhotoboxCameraManager(private val context: Context) {
                     }
                     val rotation = image.imageInfo.rotationDegrees
                     image.close()
-                    var result = rotatedBitmap(bitmap, rotation)
-                    if (_isFrontCamera.value) result = mirroredBitmap(result)
+                    // Temi's camera faces the user like a selfie cam regardless of how Android
+                    // classifies the lens, so the saved photo is always mirrored to match what
+                    // was shown live (see scaleX in PhotoboxScreen's CameraPreviewView).
+                    var result = mirroredBitmap(rotatedBitmap(bitmap, rotation))
                     result = downscaledIfNeeded(result)
                     onResult(Result.success(result))
                 }

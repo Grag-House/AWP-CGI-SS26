@@ -62,8 +62,6 @@ class PhotoboxViewModel(
 
     val cameraState: StateFlow<PhotoboxCameraState> = cameraManager.cameraState
 
-    val isFrontCamera: StateFlow<Boolean> = cameraManager.isFrontCamera
-
     val overlayEnabled: StateFlow<Boolean> = appConfigRepository.photoboxOverlayEnabled
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
