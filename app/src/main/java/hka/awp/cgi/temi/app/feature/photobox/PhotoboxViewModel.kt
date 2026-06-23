@@ -25,7 +25,15 @@ import kotlinx.coroutines.flow.update
 
 enum class PhotoboxPhase { MODE_SELECT, IDLE, COUNTDOWN, CAPTURE, PREVIEW }
 
-enum class PhotoboxMode { STANDARD, STRIP }
+private const val STRIP_SHOT_COUNT = 3
+private const val FOUR_SHOT_COUNT = 4
+
+enum class PhotoboxMode(val shotCount: Int) {
+    STANDARD(1),
+    STRIP(STRIP_SHOT_COUNT),
+    STRIP_1X4(FOUR_SHOT_COUNT),
+    GRID_2X2(FOUR_SHOT_COUNT)
+}
 
 enum class PhotoboxUploadState { NONE, UPLOADING, SUCCESS, FAILED, QUEUED }
 
@@ -44,10 +52,9 @@ data class PhotoboxUiState(
     val selectedFilter: PhotoboxPhotoFilter = PhotoboxPhotoFilter.NONE,
     val showQrCode: Boolean = false
 ) {
-    val totalShots: Int get() = if (mode == PhotoboxMode.STRIP) STRIP_SHOT_COUNT else 1
+    val totalShots: Int get() = mode.shotCount
 }
 
-const val STRIP_SHOT_COUNT = 3
 private const val DEFAULT_DURATION = 3
 private const val DEFAULT_STRIP_DELAY = 10
 

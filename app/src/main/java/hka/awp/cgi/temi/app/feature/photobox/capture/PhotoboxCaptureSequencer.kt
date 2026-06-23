@@ -2,7 +2,6 @@ package hka.awp.cgi.temi.app.feature.photobox.capture
 
 import android.graphics.Bitmap
 import hka.awp.cgi.temi.app.feature.photobox.PhotoboxMode
-import hka.awp.cgi.temi.app.feature.photobox.STRIP_SHOT_COUNT
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -28,9 +27,9 @@ internal data class PhotoboxCaptureCallbacks(
 )
 
 /**
- * Runs the countdown(s) and camera capture(s) for one Photobox session: a single shot for
- * [PhotoboxMode.STANDARD], or [STRIP_SHOT_COUNT] shots with a delay between each for
- * [PhotoboxMode.STRIP]. Combining/uploading the result is the caller's responsibility.
+ * Runs the countdown(s) and camera capture(s) for one Photobox session: [PhotoboxMode.shotCount]
+ * shots, with a delay between each beyond the first. Combining/uploading the result is the
+ * caller's responsibility.
  */
 internal class PhotoboxCaptureSequencer(
     private val cameraManager: PhotoboxCameraManager,
@@ -45,7 +44,7 @@ internal class PhotoboxCaptureSequencer(
         callbacks: PhotoboxCaptureCallbacks
     ) {
         job?.cancel()
-        val totalShots = if (mode == PhotoboxMode.STRIP) STRIP_SHOT_COUNT else 1
+        val totalShots = mode.shotCount
         val shots = mutableListOf<Bitmap>()
 
         job = scope.launch {
