@@ -79,6 +79,14 @@ class AppConfigRepository(private val dataStore: DataStore<Preferences>) {
         }
     }
 
+    suspend fun resetAdminPassword(password: String) {
+        val hash = hashPassword(password)
+        dataStore.edit { preferences ->
+            preferences[adminPasswordHashKey] = hash
+            preferences.remove(adminPasswordLegacyKey)
+        }
+    }
+
     suspend fun resetWebserverDefaults() {
         dataStore.edit { preferences ->
             preferences[webviewUrlKey] = BuildConfig.WEBVIEW_URL

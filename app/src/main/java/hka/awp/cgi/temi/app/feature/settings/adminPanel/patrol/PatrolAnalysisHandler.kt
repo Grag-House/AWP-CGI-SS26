@@ -13,7 +13,7 @@ class PatrolAnalysisHandler(
     private val robot: Robot?,
     private val scope: CoroutineScope,
     private val cameraStreamManager: PatrolCameraStreamManager
-                           ) {
+) {
     private var observationJob: Job? = null
     private var latestState: String? = null
 
@@ -62,8 +62,8 @@ class PatrolAnalysisHandler(
             TtsRequest.create(
                 speech = "Alarm",
                 isShowOnConversationLayer = false
-                             )
-                    )
+            )
+        )
     }
 
     fun stop() {

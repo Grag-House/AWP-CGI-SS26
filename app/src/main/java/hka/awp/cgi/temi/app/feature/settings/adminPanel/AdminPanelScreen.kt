@@ -19,6 +19,7 @@ import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.CloseAppConfi
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.EditCoordinatesDialog
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.EditUrlDialog
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.MqttReportsDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.NoRouteSelectedDialog
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.RestartAppConfirmationDialog
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolRouteDialog
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolSettingsDialog
@@ -45,6 +46,7 @@ fun AdminPanelScreen(
     var showPatrolSettingsDialog by remember { mutableStateOf(false) }
     var showPatrolRouteDialog by remember { mutableStateOf(false) }
     var showCloseDialog by remember { mutableStateOf(false) }
+    var showNoRouteDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(viewModel) {
         viewModel.events.collectLatest { event ->
@@ -121,6 +123,11 @@ fun AdminPanelScreen(
             onDismiss = { showRestartDialog = false }
         )
     }
+
+    if (showNoRouteDialog) {
+        NoRouteSelectedDialog(onDismiss = { showNoRouteDialog = false })
+    }
+
     if (showPatrolSettingsDialog) {
         PatrolSettingsDialog(
             initialIsEnabled = uiState.isPatrolEnabled,
@@ -128,7 +135,10 @@ fun AdminPanelScreen(
             initialMinMinutes = uiState.minMinutes,
             initialMaxMinutes = uiState.maxMinutes,
             initialHours = uiState.selectedHours,
-            onTriggerPatrol = { viewModel.onTriggerImmediatePatrol() },
+            onTriggerPatrol = {
+                viewModel.onTriggerImmediatePatrol()
+                showNoRouteDialog = true
+            },
             onSave = { isEnabled, mode, minMin, maxMin, hours ->
                 viewModel.onSavePatrolSettings(
                     isEnabled = isEnabled,

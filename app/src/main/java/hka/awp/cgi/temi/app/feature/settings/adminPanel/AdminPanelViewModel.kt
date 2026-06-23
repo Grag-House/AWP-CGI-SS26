@@ -179,6 +179,13 @@ class AdminPanelViewModel(
             _events.emit(AdminPanelEvent.PasswordChanged)
         }
     }
+    // TODO Funktion des PW resetten möglich machen per viewModel.onResetPassword
+    fun onResetPassword(standardPassword: String) {
+        viewModelScope.launch {
+            appConfigRepository.resetAdminPassword(standardPassword)
+            _events.emit(AdminPanelEvent.PasswordChanged)
+        }
+    }
 
     fun onRestartAppRequested() {
         viewModelScope.launch {
@@ -239,11 +246,10 @@ class AdminPanelViewModel(
                     maxMinutes = state.maxMinutes,
                     hours = state.selectedHours,
                     route = route
+                )
             )
-        )
+        }
     }
-}
-
 
     fun onExitPatrol() {
         patrolManager.stopPatrol()

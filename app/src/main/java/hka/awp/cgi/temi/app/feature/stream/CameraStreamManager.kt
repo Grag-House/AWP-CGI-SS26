@@ -43,7 +43,7 @@ class CameraStreamManager(
     val processedBitmap: StateFlow<Bitmap?> = _processedBitmap.asStateFlow()
     private val _textMessages = MutableSharedFlow<String>(
         extraBufferCapacity = 10
-                                                         )
+    )
     val textMessages: SharedFlow<String> = _textMessages.asSharedFlow()
 
     // Verhindert mehrfache Verbindungsaufbaue während der Stream läuft

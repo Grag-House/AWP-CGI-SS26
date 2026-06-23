@@ -37,7 +37,7 @@ fun AdminPanelContent(
     onNavigateToPatrolSettings: () -> Unit,
     onNavigateToPatrolRoute: () -> Unit,
     onCloseRequest: () -> Unit
-                     ) {
+    ) {
     Row(
         modifier = Modifier.fillMaxSize()
        ) {
