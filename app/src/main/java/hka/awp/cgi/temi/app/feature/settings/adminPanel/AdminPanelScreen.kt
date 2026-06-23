@@ -70,7 +70,7 @@ fun AdminPanelScreen(
         }
     }
 
-    if (!isAuthorized) {
+    if (isAuthorized) {
         AdminPasswordPrompt(
             isError = passwordError,
             onConfirm = { enteredPassword -> viewModel.checkPassword(enteredPassword) },
@@ -178,6 +178,7 @@ fun AdminPanelScreen(
             viewModel.loadPatrolLocations()
             showPatrolRouteDialog = true
         },
-        onCloseRequest = { showCloseDialog = true }
+        onCloseRequest = { showCloseDialog = true },
+            onExitPatrol = viewModel::onExitPatrol
     )
 }

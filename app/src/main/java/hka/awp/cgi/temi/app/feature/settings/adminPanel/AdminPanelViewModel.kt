@@ -68,7 +68,9 @@ class AdminPanelViewModel(
         appConfigRepository.maxPatrolMinutes,
         appConfigRepository.selectedPatrolHours,
         patrolRouteSettings,
-        videoFrame
+        appConfigRepository.patrolRoute,
+        videoFrame,
+        patrolManager.isRunning
     ) { args ->
         val url = args[0] as String
         val lat = args[1] as Double
@@ -79,8 +81,10 @@ class AdminPanelViewModel(
         val min = args[6] as Int
         val max = args[7] as Int
         val hours = args[8] as Set<Int>
-        val patrolRoute = args[9] as PatrolRouteSettingsState
-        val currentFrame = args[10] as Bitmap?
+        val routeSettings = args[9] as PatrolRouteSettingsState
+        val patrolRoute = args[10] as List<String>
+        val currentFrame = args[11] as Bitmap?
+        val isPatrolStreaming = args[12] as Boolean
 
         AdminPanelState(
             webserverUrl = url,
@@ -94,18 +98,15 @@ class AdminPanelViewModel(
             minMinutes = min,
             maxMinutes = max,
             selectedHours = hours,
-            savedLocations = patrolRoute.savedLocations,
-            videoFrame = currentFrame,
-            patrolRoute = patrolRoute.route,
-            patrolRouteText = patrolRoute.routeText,
-            patrolModeText = if (!isEnabled) {
-                "Deaktiviert"
+            savedLocations = routeSettings.savedLocations,
+            patrolRoute = patrolRoute,
+            patrolRouteText = if (patrolRoute.isEmpty()) {
+                "Keine Route ausgewählt"
             } else {
-                when (mode) {
-                    DialogPatrolMode.RANDOM -> "Zufällig: $min-$max Min."
-                    DialogPatrolMode.FIXED -> "Feste Stunden: ${hours.size} ausgewählt"
-                }
-            }
+                patrolRoute.joinToString(" → ")
+            },
+            videoFrame = currentFrame,
+            isPatrolStreaming = isPatrolStreaming,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -222,25 +223,30 @@ class AdminPanelViewModel(
     }
 
     fun onSavePatrolRoute(route: List<String>) {
-        patrolRouteSettings.update {
-            it.copy(route = route)
-        }
+        viewModelScope.launch {
+            appConfigRepository.updatePatrolRoute(route)
 
-        val state = uiState.value
+            val state = uiState.value
 
-        patrolManager.updateSchedule(
-            PatrolSettings(
-                isEnabled = state.isPatrolEnabled,
-                mode = when (state.patrolMode) {
-                    DialogPatrolMode.RANDOM -> PatrolMode.RANDOM
-                    DialogPatrolMode.FIXED -> PatrolMode.FIXED
-                },
-                minMinutes = state.minMinutes,
-                maxMinutes = state.maxMinutes,
-                hours = state.selectedHours,
-                route = route
+            patrolManager.updateSchedule(
+                PatrolSettings(
+                    isEnabled = state.isPatrolEnabled,
+                    mode = when (state.patrolMode) {
+                        DialogPatrolMode.RANDOM -> PatrolMode.RANDOM
+                        DialogPatrolMode.FIXED -> PatrolMode.FIXED
+                    },
+                    minMinutes = state.minMinutes,
+                    maxMinutes = state.maxMinutes,
+                    hours = state.selectedHours,
+                    route = route
             )
         )
+    }
+}
+
+
+    fun onExitPatrol() {
+        patrolManager.stopPatrol()
     }
     companion object {
         private const val STATE_TIMEOUT = 5000L
@@ -267,6 +273,7 @@ data class AdminPanelState(
     val isPatrolEnabled: Boolean = false,
     val patrolMode: DialogPatrolMode = DialogPatrolMode.RANDOM,
     val videoFrame: Bitmap? = null,
+    val isPatrolStreaming: Boolean = false,
     val minMinutes: Int = 40,
     val maxMinutes: Int = 60,
     val selectedHours: Set<Int> = emptySet(),
@@ -277,13 +284,5 @@ data class AdminPanelState(
 )
 
 private data class PatrolRouteSettingsState(
-    val route: List<String> = emptyList(),
     val savedLocations: List<String> = emptyList()
-) {
-    val routeText: String
-        get() = if (route.isEmpty()) {
-            "Keine Route ausgewählt"
-        } else {
-            route.joinToString(" → ")
-        }
-}
+)

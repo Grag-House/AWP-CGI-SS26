@@ -5,6 +5,9 @@ import com.robotemi.sdk.listeners.OnGoToLocationStatusChangedListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -19,9 +22,15 @@ class PatrolManager(
 
     private var activeRoute: List<String> = emptyList()
     private var activeIndex = 0
-    private var isRunning = false
+    private val _isRunning = MutableStateFlow(false)
+    val isRunning: StateFlow<Boolean> = _isRunning.asStateFlow()
     private var scanJob: Job? = null
     private var activeCameraTiltAngle = 0
+    private val analysisHandler = PatrolAnalysisHandler(
+        robot = robot,
+        scope = scope,
+        cameraStreamManager = cameraStreamManager
+                                                       )
 
     init {
         robot?.addOnGoToLocationStatusChangedListener(this)
@@ -32,18 +41,21 @@ class PatrolManager(
             Timber.w("Keine Kontrollroute konfiguriert.")
             return
         }
-        if (isRunning) {
+        if (_isRunning.value) {
             Timber.w("Kontrollfahrt läuft bereits.")
             return
         }
 
+        robot?.toggleNavigationBillboard(disabled = true)
+
         activeRoute = route
         activeIndex = 0
-        isRunning = true
+        _isRunning.value = true
         activeCameraTiltAngle = cameraTiltAngle
 
         Timber.i("Starte Kontrollfahrt: $activeRoute")
         cameraStreamManager.startStream()
+        analysisHandler.start()
 
         moveToCurrentLocation()
     }
@@ -60,7 +72,7 @@ class PatrolManager(
     }
 
     override fun onGoToLocationStatusChanged(location: String, status: String, descriptionId: Int, description: String) {
-        if (!isRunning) return
+        if (!_isRunning.value) return
 
         when (status.lowercase()) {
             "complete" -> {
@@ -107,9 +119,11 @@ class PatrolManager(
         scanJob = null
         activeRoute = emptyList()
         activeIndex = 0
-        isRunning = false
+        _isRunning.value = false
         robot?.stopMovement()
         cameraStreamManager.stopStream()
+        analysisHandler.stop()
+        robot?.toggleNavigationBillboard(disabled = false)
     }
 
     fun clear() {

@@ -1,19 +1,12 @@
 package hka.awp.cgi.temi.app.feature.controller.stream
 
 import android.content.Context
-import hka.awp.cgi.temi.app.core.camera.CameraStreamManager
+import hka.awp.cgi.temi.app.feature.stream.CameraStreamManager
 
 class ControllerCameraStreamManager(context: Context, serverUrl: String) {
-
     private val baseStreamManager = CameraStreamManager(
         context = context,
-        serverUrl = serverUrl,
-        onStringMessageReceived = { text ->
-        },
-        onByteMessageReceived = { bitmap ->
-
-            }
-
+        serverUrl = serverUrl
                                                        )
 
     fun startLiveView() {
