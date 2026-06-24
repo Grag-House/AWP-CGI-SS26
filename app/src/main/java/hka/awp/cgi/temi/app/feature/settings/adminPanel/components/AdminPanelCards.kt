@@ -129,31 +129,69 @@ fun MqttReportsCard(onNavigate: () -> Unit) {
     }
 }
 
+//@Composable
+//fun WebserverPasswordCard(
+//    onUpdateWebserverPassword: () -> Unit,
+//    onWebserverLock: () -> Unit
+//) {
+//    ConfigCard {
+//        Row(
+//            modifier = Modifier.fillMaxWidth(),
+//            verticalAlignment = Alignment.CenterVertically
+//        ) {
+//            ConfigIconBox(
+//                icon = Icons.Outlined.Lock,
+//                contentDescription = stringResource(R.string.admin_panel_webserver_password)
+//            )
+//            Spacer(Modifier.width(12.dp))
+//            Column(Modifier.weight(1f)) {
+//                ConfigValue(stringResource(R.string.admin_panel_webserver_password))
+//                PasswordDots()
+//            }
+//            Text(
+//                text = stringResource(R.string.admin_panel_webserver_password_change),
+//                color = MaterialTheme.colorScheme.primary,
+//                fontSize = 14.sp,
+//                fontWeight = FontWeight.Medium,
+//                modifier = Modifier.clickable(onClick = onUpdateWebserverPassword)
+//            )
+//        }
+//    }
+//}
 @Composable
 fun WebserverPasswordCard(
-    onUpdateWebserverPassword: () -> Unit
-) {
+    onUpdateWebserverPassword: () -> Unit,
+    onWebserverLock: () -> Unit
+                         ) {
     ConfigCard {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
-        ) {
+           ) {
             ConfigIconBox(
                 icon = Icons.Outlined.Lock,
                 contentDescription = stringResource(R.string.admin_panel_webserver_password)
-            )
+                         )
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
                 ConfigValue(stringResource(R.string.admin_panel_webserver_password))
                 PasswordDots()
             }
             Text(
+                text = stringResource(R.string.admin_panel_webserver_lock),
+                color = MaterialTheme.colorScheme.error,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.clickable(onClick = onWebserverLock)
+                )
+            Spacer(Modifier.width(12.dp))
+            Text(
                 text = stringResource(R.string.admin_panel_webserver_password_change),
                 color = MaterialTheme.colorScheme.primary,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.clickable(onClick = onUpdateWebserverPassword)
-            )
+                )
         }
     }
 }

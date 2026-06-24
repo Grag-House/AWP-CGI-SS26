@@ -56,6 +56,7 @@ fun AdminPanelScreen(
                 AdminPanelEvent.OpenMqttReports -> showMqttReportsDialog = true
                 AdminPanelEvent.PasswordChanged -> showAdminPasswordDialog = false
                 AdminPanelEvent.WebserverPasswordChanged -> showWebserverPasswordDialog = false
+                AdminPanelEvent.WebserverAccessReset -> viewModel.resetAuthorizationWebserver()
                 AdminPanelEvent.RestartAppTriggered -> {
                     val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
                     val mainIntent = Intent.makeRestartActivityTask(intent?.component)
@@ -196,6 +197,7 @@ fun AdminPanelScreen(
         onEditUrl = { showUrlDialog = true },
         onOpenMqtt = viewModel::onOpenMqttReports,
         onUpdateWebserverPassword = { showWebserverPasswordDialog = true },
+        onWebserverLock = { viewModel.resetAuthorizationWebserver() },
         onChangePassword = { showAdminPasswordDialog = true },
         onEditCoordinates = { showCoordinateDialog = true },
         onRestartRequest = { showRestartDialog = true },

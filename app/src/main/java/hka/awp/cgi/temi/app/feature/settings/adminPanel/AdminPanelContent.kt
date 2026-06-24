@@ -33,6 +33,7 @@ fun AdminPanelContent(
     onEditUrl: () -> Unit,
     onOpenMqtt: () -> Unit,
     onUpdateWebserverPassword: () -> Unit,
+    onWebserverLock: () -> Unit,
     onChangePassword: () -> Unit,
     onEditCoordinates: () -> Unit,
     onRestartRequest: () -> Unit,
@@ -70,7 +71,8 @@ fun AdminPanelContent(
                 MqttReportsCard(onNavigate = onOpenMqtt)
 
                 WebserverPasswordCard(
-                    onUpdateWebserverPassword = onUpdateWebserverPassword
+                    onUpdateWebserverPassword = onUpdateWebserverPassword,
+                    onWebserverLock = onWebserverLock
                                      )
                 AdminPasswordCard(
                     onChangePassword = onChangePassword

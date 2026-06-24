@@ -300,6 +300,9 @@ class AdminPanelViewModel(
 sealed interface AdminPanelEvent {
     data object OpenMqttReports : AdminPanelEvent
     data object WebserverPasswordChanged : AdminPanelEvent
+
+    data object WebserverAccessReset : AdminPanelEvent
+
     data object PasswordChanged : AdminPanelEvent
     data object RestartAppTriggered : AdminPanelEvent
     data object CloseAppTriggered : AdminPanelEvent
