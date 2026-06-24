@@ -81,6 +81,14 @@ android {
             val adminPassword = props.getProperty("DEFAULT_ADMIN_PASSWORD")
                 ?: throw GradleException("Missing property 'DEFAULT_ADMIN_PASSWORD' in .env")
             buildConfigField("String", "DEFAULT_ADMIN_PASSWORD", "\"$adminPassword\"")
+
+            val driveFolderLink = props.getProperty("DEFAULT_DRIVE_FOLDER_LINK")
+                ?: throw GradleException("Missing property 'DEFAULT_DRIVE_FOLDER_LINK' in .env")
+            buildConfigField("String", "DEFAULT_DRIVE_FOLDER_LINK", "\"$driveFolderLink\"")
+
+            val driveUploadUrl = props.getProperty("DEFAULT_DRIVE_UPLOAD_URL")
+                ?: throw GradleException("Missing property 'DEFAULT_DRIVE_UPLOAD_URL' in .env")
+            buildConfigField("String", "DEFAULT_DRIVE_UPLOAD_URL", "\"$driveUploadUrl\"")
         } else {
             throw GradleException(
                 "Missing .env file! please create it and include the 'WEBVIEW_URL"
