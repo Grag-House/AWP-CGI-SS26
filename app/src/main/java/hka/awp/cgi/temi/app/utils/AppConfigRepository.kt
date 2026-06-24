@@ -14,7 +14,8 @@ import java.security.MessageDigest
 private const val DEFAULT_DRIVE_FOLDER_LINK = BuildConfig.DEFAULT_DRIVE_FOLDER_LINK
 private const val DEFAULT_DRIVE_UPLOAD_URL = BuildConfig.DEFAULT_DRIVE_UPLOAD_URL
 // DEFAULT_DRIVE_FOLDER_LINK=https://drive.google.com/drive/folders/1k8g1Yqg8wMwvgY8urcnDer1RYke5voAp?usp=drive_link
-// DEFAULT_DRIVE_UPLOAD_URL=https://script.google.com/macros/s/AKfycbxBnCIKutMCfloxpVtW50EIyFF45z3OGsY-t4bTGQYqvTQABHB-taPuWtyP2BelWLJ9sQ/exec
+// DEFAULT_DRIVE_UPLOAD_URL=
+// https://script.google.com/macros/s/AKfycbxBnCIKutMCfloxpVtW50EIyFF45z3OGsY-t4bTGQYqvTQABHB-taPuWtyP2BelWLJ9sQ/exec
 // für die .env zum kopieren
 // TODO
 /**
