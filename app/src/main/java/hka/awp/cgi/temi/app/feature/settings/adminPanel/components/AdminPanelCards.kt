@@ -161,7 +161,7 @@ fun WebserverPasswordCard(
 @Composable
 fun AdminPasswordCard(
     onChangePassword: () -> Unit
-                         ) {
+                     ) {
     ConfigCard {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -186,7 +186,6 @@ fun AdminPasswordCard(
         }
     }
 }
-
 
 @Composable
 fun CoordinateManagementCard(

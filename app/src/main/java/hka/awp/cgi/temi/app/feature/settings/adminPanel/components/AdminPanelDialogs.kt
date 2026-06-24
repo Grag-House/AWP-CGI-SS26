@@ -119,12 +119,13 @@ fun RestartAppConfirmationDialog(
         }
     )
 }
+
 @Suppress("LongMethod")
 @Composable
 fun ChangeAdminPasswordDialog(
     onConfirm: (newPassword: String) -> Unit,
     onDismiss: () -> Unit
-                                 ) {
+                             ) {
     var newPassword by remember { mutableStateOf("") }
 
     AlertDialog(
