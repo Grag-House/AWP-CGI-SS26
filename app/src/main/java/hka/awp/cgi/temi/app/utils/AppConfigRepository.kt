@@ -1,7 +1,12 @@
 package hka.awp.cgi.temi.app.utils
 
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.*
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.doublePreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import hka.awp.cgi.temi.app.BuildConfig
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.DialogPatrolMode
 import kotlinx.coroutines.flow.Flow
@@ -100,7 +105,9 @@ class AppConfigRepository(private val dataStore: DataStore<Preferences>) {
 
     val isPatrolEnabled: Flow<Boolean> = dataStore.data.map { it[KEY_IS_PATROL_ENABLED] ?: false }
     val patrolMode: Flow<DialogPatrolMode> = dataStore.data.map {
-        try { DialogPatrolMode.valueOf(it[KEY_PATROL_MODE] ?: DialogPatrolMode.RANDOM.name) } catch (e: Exception) { DialogPatrolMode.RANDOM }
+        try {
+            DialogPatrolMode.valueOf(it[KEY_PATROL_MODE] ?: DialogPatrolMode.RANDOM.name)
+        } catch (e: Exception) { DialogPatrolMode.RANDOM }
     }
     val minPatrolMinutes: Flow<Int> = dataStore.data.map { it[KEY_MIN_MINUTES] ?: 40 }
     val maxPatrolMinutes: Flow<Int> = dataStore.data.map { it[KEY_MAX_MINUTES] ?: 60 }

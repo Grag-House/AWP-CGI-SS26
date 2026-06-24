@@ -14,7 +14,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import hka.awp.cgi.temi.app.R
 
 @Composable
 fun PatrolStreamOverlay(
@@ -26,7 +28,7 @@ fun PatrolStreamOverlay(
         videoFrame?.let { frame ->
             Image(
                 bitmap = frame.asImageBitmap(),
-                contentDescription = "Patrol Stream",
+                contentDescription = stringResource(R.string.patrol_stream_content_description),
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
@@ -39,11 +41,11 @@ fun PatrolStreamOverlay(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Button(onClick = onBackClick) {
-                Text("Zurück")
+                Text(stringResource(R.string.patrol_stream_back_button))
             }
 
             Button(onClick = onStopPatrol) {
-                Text("Patruille abbrechen")
+                Text(stringResource(R.string.patrol_stream_stop_button))
             }
         }
     }

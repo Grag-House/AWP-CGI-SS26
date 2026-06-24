@@ -76,17 +76,29 @@ fun AdminPanelContent(
                     onChangePassword = onChangePassword
                 )
                 CoordinateManagementCard(
-                    coordinates = uiState.coordinates,
+                    coordinates = stringResource(
+                        R.string.admin_panel_coordinates_format,
+                        uiState.longitude,
+                        uiState.latitude
+                    ),
                     onEdit = onEditCoordinates
                 )
 
                 PatrolSettingsCard(
-                    currentModeText = uiState.patrolModeText,
+                    currentModeText = if (!uiState.isPatrolEnabled) {
+                        stringResource(R.string.admin_panel_patrol_disabled)
+                    } else {
+                        uiState.patrolRoute.joinToString(" → ")
+                    },
                     onNavigate = onNavigateToPatrolSettings
                 )
 
                 PatrolRouteCard(
-                    currentRouteText = uiState.patrolRouteText,
+                    currentRouteText = if (uiState.patrolRoute.isEmpty()) {
+                        stringResource(R.string.admin_panel_no_route_selected_title)
+                    } else {
+                        uiState.patrolRoute.joinToString(" → ")
+                    },
                     onNavigate = onNavigateToPatrolRoute
                 )
 

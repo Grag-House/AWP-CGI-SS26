@@ -97,7 +97,6 @@ class AdminPanelViewModel(
             webserverUrl = url,
             latitude = lat,
             longitude = lon,
-            coordinates = "Länge: $lon Breite: $lat",
             mqttReportTopics = MqttManager.reportTopics,
             mqttTrafficEvents = trafficEvents.filter { it.topic in MqttManager.reportTopics },
             isPatrolEnabled = isEnabled,
@@ -107,16 +106,6 @@ class AdminPanelViewModel(
             selectedHours = hours,
             savedLocations = routeSettings.savedLocations,
             patrolRoute = patrolRoute,
-            patrolRouteText = if (patrolRoute.isEmpty()) {
-                "Keine Route ausgewählt"
-            } else {
-                patrolRoute.joinToString(" → ")
-            },
-            patrolModeText = if (!isEnabled) {
-                "Deaktiviert"
-            } else {
-                patrolRoute.joinToString(" → ")
-            },
             videoFrame = currentFrame,
             isPatrolStreaming = isPatrolStreaming,
         )
@@ -300,9 +289,6 @@ data class AdminPanelState(
     val appVersion: String = BuildConfig.VERSION_NAME,
     val mqttReportTopics: Set<String> = emptySet(),
     val mqttTrafficEvents: List<MqttTrafficEvent> = emptyList(),
-    val coordinates: String = "",
-    val patrolModeText: String = "Deaktiviert",
-    val patrolRouteText: String = "Keine Route ausgewählt",
     val savedLocations: List<String> = emptyList(),
     val patrolRoute: List<String> = emptyList(),
     val isPatrolEnabled: Boolean = false,

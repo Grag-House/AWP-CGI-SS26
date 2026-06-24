@@ -53,11 +53,11 @@ fun CloseAppConfirmationDialog(
             )
         },
         title = {
-            Text(text = "App schließen")
+            Text(text = stringResource(R.string.admin_panel_close_app))
         },
         text = {
             Text(
-                text = "Möchtest du die Anwendung wirklich schließen?",
+                text = stringResource(R.string.admin_panel_close_app_confirm_text),
                 style = MaterialTheme.typography.bodyMedium
             )
         },
@@ -68,7 +68,7 @@ fun CloseAppConfirmationDialog(
                     containerColor = MaterialTheme.colorScheme.error
                 )
             ) {
-                Text("App beenden")
+                Text(stringResource(R.string.admin_panel_confirm_close_app))
             }
         },
         dismissButton = {
@@ -137,13 +137,13 @@ fun ChangeAdminPasswordDialog(
             )
         },
         title = {
-            Text(text = "t")
+            Text(text = stringResource(R.string.admin_panel_admin_password_change))
         },
         text = {
             OutlinedTextField(
                 value = newPassword,
                 onValueChange = { newPassword = it },
-                label = { Text("test") },
+                label = { Text(stringResource(R.string.admin_panel_new_admin_password)) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 visualTransformation = PasswordVisualTransformation(),
                 singleLine = true,
@@ -344,11 +344,11 @@ fun NoRouteSelectedDialog(
             )
         },
         title = {
-            Text(text = "Keine Route ausgewählt")
+            Text(text = stringResource(R.string.admin_panel_no_route_selected_title))
         },
         text = {
             Text(
-                text = "Bitte wähle eine Route aus, damit die Kontrollfahrt starten kann.",
+                text = stringResource(R.string.admin_panel_no_route_selected_text),
                 style = MaterialTheme.typography.bodyMedium
             )
         },

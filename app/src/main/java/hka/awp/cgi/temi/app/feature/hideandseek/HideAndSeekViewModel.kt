@@ -32,7 +32,7 @@ data class HideAndSeekUiState(
     val searchSecondsRemaining: Int = 0,
     val elapsedSeconds: Int = 0,
     val hidingSpotName: String = "",
-    val errorMessage: String? = null
+    val navigationError: Boolean = false
 )
 
 @Suppress("TooManyFunctions")
@@ -93,14 +93,14 @@ class HideAndSeekViewModel(
         _uiState.update {
             it.copy(
                 gameState = GameState.SETUP,
-                errorMessage = "Navigation zum Versteck fehlgeschlagen.",
+                navigationError = true,
                 hidingSpotName = ""
             )
         }
     }
 
     fun clearError() {
-        _uiState.update { it.copy(errorMessage = null) }
+        _uiState.update { it.copy(navigationError = false) }
     }
 
     fun adjustSearchTime(delta: Int) {
