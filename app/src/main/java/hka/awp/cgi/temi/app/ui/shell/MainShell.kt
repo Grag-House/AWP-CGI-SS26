@@ -25,6 +25,7 @@ import hka.awp.cgi.temi.app.feature.settings.SettingsNavigationEvent
 import hka.awp.cgi.temi.app.feature.settings.SettingsViewModel
 import hka.awp.cgi.temi.app.feature.settings.about.SettingsScreen
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.AdminPanelScreen
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.AdminPanelViewModel
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolOverlayViewModel
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolStreamOverlay
 import hka.awp.cgi.temi.app.feature.settings.battery.BatteryScreen
@@ -33,7 +34,6 @@ import hka.awp.cgi.temi.app.feature.settings.language.LanguageScreen
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherContent
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherState
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherViewModel
-import hka.awp.cgi.temi.app.feature.webserver.PasswordGateViewModel
 import hka.awp.cgi.temi.app.feature.webserver.PasswordGatedWebView
 import hka.awp.cgi.temi.app.feature.webserver.ServerState
 import hka.awp.cgi.temi.app.feature.webserver.WebViewScreen
@@ -66,7 +66,7 @@ fun MainShell(
     weatherViewModel: WeatherViewModel = koinViewModel(),
     hideAndSeekViewModel: HideAndSeekViewModel = koinViewModel(),
     patrolOverlayViewModel: PatrolOverlayViewModel = koinViewModel(),
-    passwordGateViewModel: PasswordGateViewModel = koinViewModel()
+    adminPanelViewModel: AdminPanelViewModel = koinViewModel()
 ) {
     val wifiLevel by appViewModel.wifiLevel.collectAsStateWithLifecycle()
     val currentTime by appViewModel.currentTime.collectAsStateWithLifecycle()
@@ -124,7 +124,7 @@ fun MainShell(
                             serverState = serverState,
                             currentTemperatureState = currentTemperatureState,
                             webserverUrlState = webserverUrlState,
-                            passwordGateViewModel = passwordGateViewModel
+                            adminPanelViewModel = adminPanelViewModel
                                                       ),
                         modifier = Modifier.weight(1f)
                                        )
@@ -160,7 +160,7 @@ private fun RenderSelectedRoute(
 
         Screen.Webserver.route -> PasswordGatedWebView(
             url = routeDeps.webserverUrlState,
-            viewModel = routeDeps.passwordGateViewModel,
+            viewModel = routeDeps.adminPanelViewModel,
                                                       )
 
         Screen.Navigation.route -> NavigationContent(
@@ -225,7 +225,7 @@ private data class MainShellRouteDeps(
     val serverState: ServerState,
     val currentTemperatureState: WeatherState,
     val webserverUrlState: String,
-    val passwordGateViewModel: PasswordGateViewModel
+    val adminPanelViewModel: AdminPanelViewModel
 )
 
 @Composable

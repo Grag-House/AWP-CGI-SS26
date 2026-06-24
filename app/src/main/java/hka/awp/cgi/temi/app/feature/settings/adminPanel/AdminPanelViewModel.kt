@@ -46,6 +46,10 @@ class AdminPanelViewModel(
     private val _isAuthorized = MutableStateFlow(false)
     val isAuthorized = _isAuthorized.asStateFlow()
 
+    private val _isAuthorizedWebserver = MutableStateFlow(false)
+
+    val isAuthorizedWebserver = _isAuthorized.asStateFlow()
+
     private val _passwordError = MutableStateFlow(false)
     val passwordError = _passwordError.asStateFlow()
 
@@ -134,7 +138,7 @@ class AdminPanelViewModel(
 
             if (isValid) {
                 _passwordError.value = false
-                _isAuthorized.value = true
+                _isAuthorizedWebserver.value = true
             } else {
                 _passwordError.value = true
             }
@@ -162,6 +166,11 @@ class AdminPanelViewModel(
 
     fun resetAuthorization() {
         _isAuthorized.value = false
+        _passwordError.value = false
+    }
+
+    fun resetAuthorizationWebserver() {
+        _isAuthorizedWebserver.value = false
         _passwordError.value = false
     }
 
@@ -211,6 +220,7 @@ class AdminPanelViewModel(
         viewModelScope.launch {
             appConfigRepository.updateWebserverPassword(newPassword)
             _events.emit(AdminPanelEvent.WebserverPasswordChanged)
+            resetAuthorizationWebserver()
         }
     }
 

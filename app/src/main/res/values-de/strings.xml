@@ -255,4 +255,5 @@
     <string name="admin_panel_password_input">Admin-Bereich geschützt, bitte Passwort eingeben.</string>
     <string name="admin_panel_enter_password">Password eingeben</string>
     <string name="password_wrong">Falsches Passwort</string>
+    <string name="webserver_panel_passwort_input">Bereich geschützt, bitte Passwort eingeben.</string>
 </resources>

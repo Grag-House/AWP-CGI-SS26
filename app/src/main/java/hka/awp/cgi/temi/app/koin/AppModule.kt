@@ -17,7 +17,6 @@ import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolOverlayView
 import hka.awp.cgi.temi.app.feature.settings.battery.BatteryViewModel
 import hka.awp.cgi.temi.app.feature.settings.display.DisplayViewModel
 import hka.awp.cgi.temi.app.feature.settings.language.LanguageViewModel
-import hka.awp.cgi.temi.app.feature.webserver.PasswordGateViewModel
 import hka.awp.cgi.temi.app.feature.webserver.WebserverViewModel
 import hka.awp.cgi.temi.app.ui.shell.AppViewModel
 import hka.awp.cgi.temi.app.utils.NetworkManager
@@ -157,9 +156,5 @@ val appModule = module {
             patrolManager = get(),
             patrolCameraStreamManager = get()
                               )
-    }
-
-    viewModel {
-        PasswordGateViewModel(get())
     }
 }
