@@ -33,6 +33,8 @@ import hka.awp.cgi.temi.app.feature.settings.language.LanguageScreen
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherContent
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherState
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherViewModel
+import hka.awp.cgi.temi.app.feature.webserver.PasswordGateViewModel
+import hka.awp.cgi.temi.app.feature.webserver.PasswordGatedWebView
 import hka.awp.cgi.temi.app.feature.webserver.ServerState
 import hka.awp.cgi.temi.app.feature.webserver.WebViewScreen
 import hka.awp.cgi.temi.app.feature.webserver.WebserverViewModel
@@ -63,7 +65,8 @@ fun MainShell(
     webserverViewModel: WebserverViewModel = koinViewModel(),
     weatherViewModel: WeatherViewModel = koinViewModel(),
     hideAndSeekViewModel: HideAndSeekViewModel = koinViewModel(),
-    patrolOverlayViewModel: PatrolOverlayViewModel = koinViewModel()
+    patrolOverlayViewModel: PatrolOverlayViewModel = koinViewModel(),
+    passwordGateViewModel: PasswordGateViewModel = koinViewModel()
 ) {
     val wifiLevel by appViewModel.wifiLevel.collectAsStateWithLifecycle()
     val currentTime by appViewModel.currentTime.collectAsStateWithLifecycle()
@@ -120,7 +123,8 @@ fun MainShell(
                             hideAndSeekViewModel = hideAndSeekViewModel,
                             serverState = serverState,
                             currentTemperatureState = currentTemperatureState,
-                            webserverUrlState = webserverUrlState
+                            webserverUrlState = webserverUrlState,
+                            passwordGateViewModel = passwordGateViewModel
                                                       ),
                         modifier = Modifier.weight(1f)
                                        )
@@ -154,7 +158,10 @@ private fun RenderSelectedRoute(
             currentTemperatureState = routeDeps.currentTemperatureState
         )
 
-        Screen.Webserver.route -> WebViewScreen(routeDeps.webserverUrlState)
+        Screen.Webserver.route -> PasswordGatedWebView(
+            url = routeDeps.webserverUrlState,
+            viewModel = routeDeps.passwordGateViewModel,
+                                                      )
 
         Screen.Navigation.route -> NavigationContent(
             modifier = modifier,
@@ -217,7 +224,8 @@ private data class MainShellRouteDeps(
     val hideAndSeekViewModel: HideAndSeekViewModel,
     val serverState: ServerState,
     val currentTemperatureState: WeatherState,
-    val webserverUrlState: String
+    val webserverUrlState: String,
+    val passwordGateViewModel: PasswordGateViewModel
 )
 
 @Composable
