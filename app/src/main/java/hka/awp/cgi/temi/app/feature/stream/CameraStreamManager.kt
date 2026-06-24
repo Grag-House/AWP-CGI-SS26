@@ -42,7 +42,7 @@ class CameraStreamManager(
     private val _processedBitmap = MutableStateFlow<Bitmap?>(null)
     val processedBitmap: StateFlow<Bitmap?> = _processedBitmap.asStateFlow()
     private val _textMessages = MutableSharedFlow<String>(
-        extraBufferCapacity = 10
+        extraBufferCapacity = 20
     )
     val textMessages: SharedFlow<String> = _textMessages.asSharedFlow()
 

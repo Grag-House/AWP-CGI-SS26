@@ -12,12 +12,16 @@ import timber.log.Timber
 class PatrolAnalysisHandler(
     private val robot: Robot?,
     private val scope: CoroutineScope,
-    private val cameraStreamManager: PatrolCameraStreamManager
+    private val cameraStreamManager: PatrolCameraStreamManager,
+    private val onEmergencyDetected: () -> Unit
 ) {
     private var observationJob: Job? = null
     private var latestState: String? = null
 
     private var collectJob: Job? = null
+
+    private var lyingCountAfterFirstDetection = 0
+    private var isObservingLying = false
 
     fun start() {
         if (collectJob?.isActive == true) return
@@ -27,43 +31,87 @@ class PatrolAnalysisHandler(
                 val state = message.trim().lowercase()
                 latestState = state
 
-                if (state == SITTING_STATE) {
-                    handleSittingDetected()
+                if (state == LYING_STATE) {
+                    handleLyingDetected()
                 }
             }
         }
     }
 
-    private fun handleSittingDetected() {
-        if (observationJob?.isActive == true) return
+    private fun handleLyingDetected() {
+        if (!isObservingLying) {
+            isObservingLying = true
+            lyingCountAfterFirstDetection = 0
 
+            Timber.w("Lying erstmals erkannt. Stoppe Temi und starte Beobachtung.")
+
+            onEmergencyDetected()
+            robot?.stopMovement()
+            speak("ALARM")
+
+            startObservationTimer()
+            return
+        }
+
+        lyingCountAfterFirstDetection++
+
+        Timber.w(
+            "Lying weiterhin erkannt: %s/%s",
+            lyingCountAfterFirstDetection,
+            REQUIRED_LYING_CONFIRMATIONS
+                )
+
+        if (lyingCountAfterFirstDetection >= REQUIRED_LYING_CONFIRMATIONS) {
+            triggerFinalAlarm()
+        }
+    }
+
+    private fun startObservationTimer() {
+        observationJob?.cancel()
         observationJob = scope.launch {
-            Timber.w("Sitting erkannt. Beobachte Zustand 10 Sekunden.")
-
-            speakAlarm()
-
             delay(OBSERVATION_TIME_MS)
 
-            if (latestState == SITTING_STATE) {
-                Timber.w("Sitting nach 10 Sekunden weiterhin erkannt. Starte Alarm-Wiederholung.")
-
-                repeat(ALARM_REPEAT_COUNT) {
-                    speakAlarm()
-                    delay(ALARM_REPEAT_DELAY_MS)
-                }
+            if (isObservingLying && lyingCountAfterFirstDetection >= REQUIRED_LYING_CONFIRMATIONS) {
+                triggerFinalAlarm()
             } else {
-                Timber.d("Sitting-Zustand hat sich geändert. Kein weiterer Alarm.")
+                Timber.d("Beobachtungszeit vorbei, aber Lying nicht oft genug bestätigt.")
             }
+
+            resetLyingObservation()
         }
     }
 
-    private fun speakAlarm() {
+    private fun triggerFinalAlarm() {
+        if (observationJob?.isActive != true && !isObservingLying) return
+
+        Timber.w("Lying bestätigt. Starte finalen Alarm.")
+
+        observationJob?.cancel()
+
+        scope.launch {
+            repeat(FINAL_ALARM_REPEAT_COUNT) {
+                speak("ALARM, Arbeitsverweigerer erkannt, ALARM!")
+                delay(FINAL_ALARM_DELAY_MS)
+            }
+
+            resetLyingObservation()
+        }
+    }
+
+    private fun resetLyingObservation() {
+        isObservingLying = false
+        lyingCountAfterFirstDetection = 0
+        observationJob?.cancel()
+        observationJob = null
+    }
+
+    private fun speak(text: String) {
         robot?.speak(
             TtsRequest.create(
-                speech = "Alarm",
+                speech = text,
                 isShowOnConversationLayer = false
-            )
-        )
+                             )
+                    )
     }
 
     fun stop() {
@@ -75,9 +123,10 @@ class PatrolAnalysisHandler(
     }
 
     private companion object {
-        private const val SITTING_STATE = "sitting"
+        private const val LYING_STATE = "Lying"
         private const val OBSERVATION_TIME_MS = 10_000L
-        private const val ALARM_REPEAT_COUNT = 3
-        private const val ALARM_REPEAT_DELAY_MS = 1_500L
+        private const val REQUIRED_LYING_CONFIRMATIONS = 5
+        private const val FINAL_ALARM_REPEAT_COUNT = 3
+        private const val FINAL_ALARM_DELAY_MS = 1_500L
     }
 }

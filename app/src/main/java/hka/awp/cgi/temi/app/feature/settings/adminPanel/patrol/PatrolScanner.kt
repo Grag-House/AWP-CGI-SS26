@@ -12,8 +12,8 @@ class PatrolScanner(private val robot: Robot?) {
         private const val SCAN_TILT_ANGLE = 0
     }
 
-    suspend fun executeScanSequence(cameraTiltAngle: Int, onPointReached: () -> Unit) {
-        Timber.d("Starte Scan-Sequenz")
+    suspend fun executeScanSequence(onPointReached: () -> Unit) {
+        Timber.d("Starte Scan-Sequenz, setze Tilt auf $SCAN_TILT_ANGLE")
 
         // 1. Kamera neigen
         robot?.tiltAngle(degrees = SCAN_TILT_ANGLE, speed = CAMERA_TILT_SPEED)
@@ -26,7 +26,10 @@ class PatrolScanner(private val robot: Robot?) {
         repeat(4) {
             robot?.turnBy(90)
             delay(TURN_DELAY)
+            robot?.tiltAngle(degrees = SCAN_TILT_ANGLE, speed = CAMERA_TILT_SPEED)
         }
+
+        robot?.tiltAngle(degrees = SCAN_TILT_ANGLE, speed = CAMERA_TILT_SPEED)
 
         Timber.d("Scan-Sequenz beendet")
     }

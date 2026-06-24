@@ -25,6 +25,7 @@ import hka.awp.cgi.temi.app.feature.settings.SettingsNavigationEvent
 import hka.awp.cgi.temi.app.feature.settings.SettingsViewModel
 import hka.awp.cgi.temi.app.feature.settings.about.SettingsScreen
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.AdminPanelScreen
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolCountdownOverlay
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolOverlayViewModel
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolStreamOverlay
 import hka.awp.cgi.temi.app.feature.settings.battery.BatteryScreen
@@ -75,6 +76,7 @@ fun MainShell(
     val videoFrame by patrolOverlayViewModel.videoFrame.collectAsStateWithLifecycle()
     val isPatrolRunning by patrolOverlayViewModel.isRunning.collectAsStateWithLifecycle()
     val isOverlayVisible by patrolOverlayViewModel.isOverlayVisible.collectAsStateWithLifecycle()
+    val countdownSeconds by patrolOverlayViewModel.countdownSeconds.collectAsStateWithLifecycle()
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -127,7 +129,19 @@ fun MainShell(
                 }
             }
 
-            if (isPatrolRunning) {
+            if (countdownSeconds != null) {
+                PatrolCountdownOverlay(
+                    seconds = countdownSeconds!!
+                                      )
+            }
+
+            LaunchedEffect(isPatrolRunning) {
+                if (isPatrolRunning) {
+                    patrolOverlayViewModel.showOverlay()
+                }
+            }
+
+            if (isPatrolRunning && isOverlayVisible) {
                 PatrolStreamOverlay(
                     videoFrame = videoFrame,
                     onBackClick = patrolOverlayViewModel::hideOverlay,

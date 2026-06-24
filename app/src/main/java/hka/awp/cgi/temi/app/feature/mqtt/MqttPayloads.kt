@@ -26,7 +26,7 @@ data class MqttStatus(
  */
 @Serializable
 data class MqttAsr(
-    val text: String
+    val asrResult: String
 )
 
 /**

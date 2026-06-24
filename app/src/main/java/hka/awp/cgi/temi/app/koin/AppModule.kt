@@ -107,7 +107,7 @@ val appModule = module {
         )
     }
 
-    single { PatrolManager(robot = get(), cameraStreamManager = get()) }
+    single { PatrolManager(robot = get(), cameraStreamManager = get(), mqttManager = get()) }
 
     single { HidingSpotRepository(androidContext()) }
 
