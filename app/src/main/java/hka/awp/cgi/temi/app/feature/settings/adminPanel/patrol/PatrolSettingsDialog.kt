@@ -144,16 +144,14 @@ fun PatrolSettingsDialog(
                             Slider(
                                 value = minMinutes,
                                 onValueChange = { minMinutes = it.coerceAtMost(maxMinutes) },
-                                valueRange = 10f..120f,
-                                steps = 11
+                                valueRange = 10f..120f
                             )
 
                             Text("Maximaler Abstand: ${maxMinutes.toInt()} Min.")
                             Slider(
                                 value = maxMinutes,
                                 onValueChange = { maxMinutes = it.coerceAtLeast(minMinutes) },
-                                valueRange = 10f..120f,
-                                steps = 11
+                                valueRange = 10f..120f
                             )
                         }
                     } else {
