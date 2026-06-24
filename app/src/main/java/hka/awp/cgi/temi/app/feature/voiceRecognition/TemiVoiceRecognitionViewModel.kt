@@ -4,8 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import hka.awp.cgi.temi.app.feature.webserver.AppConfigRepository
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class TemiVoiceRecognitionViewModel(
@@ -16,10 +14,7 @@ class TemiVoiceRecognitionViewModel(
     ViewModel() {
 
     private val _isModelLoaded = MutableStateFlow(false)
-    val isModelLoaded: StateFlow<Boolean> = _isModelLoaded.asStateFlow()
-
-    val isEnrollmentActive: StateFlow<Boolean> = temiVoiceListener.isEnrollmentActive
-    val enrollmentStatus: StateFlow<TemiVoiceListener.EnrollmentStatus> = temiVoiceListener.enrollmentStatus
+    val isEnrollmentActive = temiVoiceListener.isEnrollmentActive
 
     init {
         viewModelScope.launch {
@@ -37,20 +32,16 @@ class TemiVoiceRecognitionViewModel(
         viewModelScope.launch {
             if (voiceManager.isReady()) {
                 _isModelLoaded.value = true
-                startListening()
+                temiVoiceListener.startListening()
                 return@launch
             }
 
             val success = voiceManager.initModel()
             if (success) {
                 _isModelLoaded.value = true
-                startListening()
+                temiVoiceListener.startListening()
             }
         }
-    }
-
-    fun startListening() {
-        temiVoiceListener.startListening()
     }
 
     fun stopListening() {
@@ -58,11 +49,24 @@ class TemiVoiceRecognitionViewModel(
     }
 
     fun toggleEnrollment(active: Boolean, name: String? = null) {
-        temiVoiceListener.setEnrollmentMode(active, name)
-    }
+        if (!active) {
+            temiVoiceListener.setEnrollmentMode(false, name)
+            return
+        }
 
-    fun clearEnrollmentStatus() {
-        temiVoiceListener.clearEnrollmentStatus()
+        viewModelScope.launch {
+            if (!voiceManager.isReady()) {
+                val success = voiceManager.initModel()
+                if (!success) {
+                    return@launch
+                }
+                _isModelLoaded.value = true
+            } else {
+                _isModelLoaded.value = true
+            }
+
+            temiVoiceListener.setEnrollmentMode(true, name)
+        }
     }
 
     override fun onCleared() {

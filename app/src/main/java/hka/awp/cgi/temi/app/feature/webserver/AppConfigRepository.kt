@@ -22,6 +22,7 @@ class AppConfigRepository(private val dataStore: DataStore<Preferences>) {
     private val adminPasswordHashKey = stringPreferencesKey("admin_password_hash")
     private val adminPasswordLegacyKey = stringPreferencesKey("admin_password")
     private val speakerVerificationEnabledKey = booleanPreferencesKey("speaker_verification_enabled")
+    private val speakerVerificationThresholdKey = doublePreferencesKey("speaker_verification_threshold")
 
     // --- Webview URL ---
 
@@ -76,9 +77,19 @@ class AppConfigRepository(private val dataStore: DataStore<Preferences>) {
         preferences[speakerVerificationEnabledKey] ?: false // Default off
     }
 
+    val speakerVerificationThreshold: Flow<Double> = dataStore.data.map { preferences ->
+        preferences[speakerVerificationThresholdKey] ?: DEFAULT_SPEAKER_VERIFICATION_THRESHOLD
+    }
+
     suspend fun updateSpeakerVerificationEnabled(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[speakerVerificationEnabledKey] = enabled
+        }
+    }
+
+    suspend fun updateSpeakerVerificationThreshold(threshold: Double) {
+        dataStore.edit { preferences ->
+            preferences[speakerVerificationThresholdKey] = threshold.coerceIn(0.0, 1.0)
         }
     }
 
@@ -105,5 +116,9 @@ class AppConfigRepository(private val dataStore: DataStore<Preferences>) {
 
     suspend fun clear() {
         dataStore.edit { it.clear() }
+    }
+
+    companion object {
+        const val DEFAULT_SPEAKER_VERIFICATION_THRESHOLD = 0.82
     }
 }

@@ -22,6 +22,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -94,6 +95,16 @@ class NavigationViewModel(
         viewModelScope.launch {
             mqttManager.connect()
         }
+        viewModelScope.launch {
+            temiVoiceListener.verifiedCommandFlow.collectLatest { command ->
+                if (command.isBlank()) {
+                    Timber.w("Verified Vosk command blank, ignoring.")
+                    return@collectLatest
+                }
+                Timber.i("🎙️ Verified Vosk command → MQTT: '%s'", command)
+                mqttManager.publishAsr(command)
+            }
+        }
     }
 
     override fun onCleared() {
@@ -110,16 +121,32 @@ class NavigationViewModel(
     }
 
     override fun onAsrResult(asrResult: String, sttLanguage: SttLanguage) {
+        // Log EVERYTHING from Temi SDK for debugging
+        Timber.i(
+            "🤖 Raw Temi SDK ASR received: '%s' (Lang: %s, len=%d)",
+            asrResult,
+            sttLanguage,
+            asrResult.length
+        )
+
+        if (asrResult.isBlank()) {
+            Timber.w("Temi SDK ASR callback returned blank text.")
+            return
+        }
+
         if (!temiVoiceListener.allowTemiAsrResult()) {
             Timber.w("Ignoriere Temi-ASR Ergebnis ohne offenes Speaker-Gate.")
             robot?.finishConversation()
             return
         }
 
+        Timber.i("Temi-ASR Ergebnis durch Speaker-Gate akzeptiert.")
         Timber.d("ASR Result: %s (%s)", asrResult, sttLanguage)
 
         viewModelScope.launch {
+            Timber.i("Sende ASR an MQTT Broker: '%s'", asrResult)
             mqttManager.publishAsr(asrResult)
+            Timber.i("ASR an MQTT Broker gesendet.")
         }
 
         // Simple local NLP example: "Go to [Location]"
