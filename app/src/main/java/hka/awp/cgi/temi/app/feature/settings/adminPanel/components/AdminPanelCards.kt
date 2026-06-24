@@ -129,11 +129,11 @@ fun MqttReportsCard(onNavigate: () -> Unit) {
     }
 }
 
-//@Composable
-//fun WebserverPasswordCard(
+// @Composable
+// fun WebserverPasswordCard(
 //    onUpdateWebserverPassword: () -> Unit,
 //    onWebserverLock: () -> Unit
-//) {
+// ) {
 //    ConfigCard {
 //        Row(
 //            modifier = Modifier.fillMaxWidth(),
@@ -157,7 +157,7 @@ fun MqttReportsCard(onNavigate: () -> Unit) {
 //            )
 //        }
 //    }
-//}
+// }
 @Composable
 fun WebserverPasswordCard(
     onUpdateWebserverPassword: () -> Unit,
