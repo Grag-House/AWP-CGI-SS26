@@ -155,6 +155,6 @@ val appModule = module {
         PatrolOverlayViewModel(
             patrolManager = get(),
             patrolCameraStreamManager = get()
-                              )
+        )
     }
 }

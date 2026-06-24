@@ -119,12 +119,13 @@ fun RestartAppConfirmationDialog(
         }
     )
 }
+
 @Suppress("LongMethod")
 @Composable
 fun ChangeAdminPasswordDialog(
     onConfirm: (newPassword: String) -> Unit,
     onDismiss: () -> Unit
-                                 ) {
+) {
     var newPassword by remember { mutableStateOf("") }
 
     AlertDialog(
@@ -133,7 +134,7 @@ fun ChangeAdminPasswordDialog(
             Icon(
                 imageVector = Icons.Outlined.Lock,
                 contentDescription = null
-                )
+            )
         },
         title = {
             Text(text = "t")
@@ -147,13 +148,13 @@ fun ChangeAdminPasswordDialog(
                 visualTransformation = PasswordVisualTransformation(),
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
-                             )
+            )
         },
         confirmButton = {
             Button(
                 onClick = { onConfirm(newPassword) },
                 enabled = newPassword.isNotBlank()
-                  ) {
+            ) {
                 Text(stringResource(R.string.admin_panel_confirm))
             }
         },
@@ -162,7 +163,7 @@ fun ChangeAdminPasswordDialog(
                 Text(stringResource(R.string.admin_panel_cancel))
             }
         }
-               )
+    )
 }
 
 @Suppress("LongMethod")

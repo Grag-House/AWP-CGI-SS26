@@ -6,7 +6,6 @@ import hka.awp.cgi.temi.app.BuildConfig
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.DialogPatrolMode
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.security.MessageDigest
 
@@ -101,15 +100,16 @@ class AppConfigRepository(private val dataStore: DataStore<Preferences>) {
 
     val isPatrolEnabled: Flow<Boolean> = dataStore.data.map { it[KEY_IS_PATROL_ENABLED] ?: false }
     val patrolMode: Flow<DialogPatrolMode> = dataStore.data.map {
-        try { DialogPatrolMode.valueOf(it[KEY_PATROL_MODE] ?: DialogPatrolMode.RANDOM.name) }
-        catch (e: Exception) { DialogPatrolMode.RANDOM }
+        try { DialogPatrolMode.valueOf(it[KEY_PATROL_MODE] ?: DialogPatrolMode.RANDOM.name) } catch (e: Exception) { DialogPatrolMode.RANDOM }
     }
     val minPatrolMinutes: Flow<Int> = dataStore.data.map { it[KEY_MIN_MINUTES] ?: 40 }
     val maxPatrolMinutes: Flow<Int> = dataStore.data.map { it[KEY_MAX_MINUTES] ?: 60 }
     val selectedPatrolHours: Flow<Set<Int>> = dataStore.data.map {
         it[KEY_SELECTED_HOURS]?.split(",")?.filter { s -> s.isNotEmpty() }?.map { s -> s.toInt() }?.toSet() ?: emptySet()
     }
-    val patrolRoute: Flow<List<String>> = dataStore.data.map { it[PATROL_ROUTE]?.split(ROUTE_SEPARATOR)?.filter { it.isNotBlank() } ?: emptyList() }
+    val patrolRoute: Flow<List<String>> = dataStore.data.map {
+        it[PATROL_ROUTE]?.split(ROUTE_SEPARATOR)?.filter { it.isNotBlank() } ?: emptyList()
+    }
 
     suspend fun updatePatrolRoute(route: List<String>) {
         dataStore.edit { it[PATROL_ROUTE] = route.joinToString(ROUTE_SEPARATOR) }

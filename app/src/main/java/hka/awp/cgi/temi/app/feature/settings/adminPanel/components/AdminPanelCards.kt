@@ -161,16 +161,16 @@ fun WebserverPasswordCard(
 @Composable
 fun AdminPasswordCard(
     onChangePassword: () -> Unit
-                         ) {
+) {
     ConfigCard {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
-           ) {
+        ) {
             ConfigIconBox(
                 icon = Icons.Outlined.Lock,
                 contentDescription = "Admin-Password"
-                         )
+            )
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
                 ConfigValue("Admin-Password")
@@ -182,11 +182,10 @@ fun AdminPasswordCard(
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.clickable(onClick = onChangePassword)
-                )
+            )
         }
     }
 }
-
 
 @Composable
 fun CoordinateManagementCard(

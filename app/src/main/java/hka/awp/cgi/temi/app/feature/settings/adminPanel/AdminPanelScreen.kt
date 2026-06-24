@@ -107,10 +107,16 @@ fun AdminPanelScreen(
         )
     }
     if (showWebserverPasswordDialog) {
-        ChangeWebserverPasswordDialog(onConfirm = { viewModel.onUpdateWebserverPassword(it) }, onDismiss = { showWebserverPasswordDialog = false })
+        ChangeWebserverPasswordDialog(
+            onConfirm = { viewModel.onUpdateWebserverPassword(it) },
+            onDismiss = { showWebserverPasswordDialog = false }
+        )
     }
     if (showAdminPasswordDialog) {
-        ChangeAdminPasswordDialog(onConfirm = {viewModel.onChangePassword(it) }, onDismiss = {showAdminPasswordDialog = false})
+        ChangeAdminPasswordDialog(
+            onConfirm = { viewModel.onChangePassword(it) },
+            onDismiss = { showAdminPasswordDialog = false }
+        )
     }
     if (showMqttReportsDialog) {
         MqttReportsDialog(
@@ -190,7 +196,7 @@ fun AdminPanelScreen(
         onEditUrl = { showUrlDialog = true },
         onOpenMqtt = viewModel::onOpenMqttReports,
         onUpdateWebserverPassword = { showWebserverPasswordDialog = true },
-        onChangePassword = {  showAdminPasswordDialog = true},
+        onChangePassword = { showAdminPasswordDialog = true },
         onEditCoordinates = { showCoordinateDialog = true },
         onRestartRequest = { showRestartDialog = true },
         onNavigateToPatrolSettings = { showPatrolSettingsDialog = true },

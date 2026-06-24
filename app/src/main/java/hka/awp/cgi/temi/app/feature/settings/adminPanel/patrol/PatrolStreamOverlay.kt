@@ -21,7 +21,7 @@ fun PatrolStreamOverlay(
     videoFrame: Bitmap?,
     onBackClick: () -> Unit,
     onStopPatrol: () -> Unit
-                       ) {
+) {
     Box(modifier = Modifier.fillMaxSize()) {
         videoFrame?.let { frame ->
             Image(
@@ -29,7 +29,7 @@ fun PatrolStreamOverlay(
                 contentDescription = "Patrol Stream",
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
-                 )
+            )
         }
 
         Row(
@@ -37,7 +37,7 @@ fun PatrolStreamOverlay(
                 .fillMaxWidth()
                 .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween
-           ) {
+        ) {
             Button(onClick = onBackClick) {
                 Text("Zurück")
             }

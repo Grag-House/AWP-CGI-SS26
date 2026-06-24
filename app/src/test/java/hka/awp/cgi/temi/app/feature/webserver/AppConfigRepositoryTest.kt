@@ -2,7 +2,9 @@ class AppConfigRepositoryTest {
 
     // Helper für DataStore Setup um Redundanz zu vermeiden
     @OptIn(ExperimentalPathApi::class)
-    private fun createTestRepository(scope: kotlinx.coroutines.CoroutineScope): Pair<AppConfigRepository, java.nio.file.Path> {
+    private fun createTestRepository(
+        scope: kotlinx.coroutines.CoroutineScope
+    ): Pair<AppConfigRepository, java.nio.file.Path> {
         val tmpDir = createTempDirectory(prefix = "app-config-test")
         val file = File(tmpDir.toString(), "preferences.preferences_pb")
         val dataStore = PreferenceDataStoreFactory.create(scope = scope, produceFile = { file })

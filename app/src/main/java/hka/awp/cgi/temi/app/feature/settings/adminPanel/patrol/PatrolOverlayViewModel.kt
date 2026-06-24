@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
 class PatrolOverlayViewModel(
     private val patrolManager: PatrolManager,
     private val patrolCameraStreamManager: PatrolCameraStreamManager
-                            ) : ViewModel() {
+) : ViewModel() {
 
     val isRunning: StateFlow<Boolean> = patrolManager.isRunning
     val videoFrame: StateFlow<Bitmap?> = patrolCameraStreamManager.videoFrame
