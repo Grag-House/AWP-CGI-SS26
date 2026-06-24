@@ -63,11 +63,11 @@ fun PasswordGatedWebView(
     url: String,
     viewModel: AdminPanelViewModel,
                         ) {
-    val isAuthenticated by viewModel.isAuthorizedWebserver.collectAsStateWithLifecycle()
+    val isAuthorized by viewModel.isAuthorizedWebserver.collectAsStateWithLifecycle()
 
     val passwordError by viewModel.passwordError.collectAsStateWithLifecycle()
 
-    if (!isAuthenticated) {
+    if (!isAuthorized) {
         AdminPasswordPromptWebserver(
             isError = passwordError,
             onConfirm = { enteredPassword -> viewModel.checkWebserverPassword(enteredPassword) },
@@ -78,14 +78,14 @@ fun PasswordGatedWebView(
 
     WebViewScreen(url = url)
 
-//    if (isAuthenticated) {
+//    if (isAuthorized) {
 //        WebViewScreen(url = url)
 //    } else {
-//        PasswordScreen(
-//            onSubmit = { viewModel.checkWebserverPassword(it) },
-//            errorMessage = viewModel.passwordError.collectAsStateWithLifecycle().value,
-//            onErrorShown = { viewModel.clearPasswordError() },
-//                      )
+//        AdminPasswordPromptWebserver(
+//            isError = passwordError,
+//            onConfirm = { enteredPassword -> viewModel.checkWebserverPassword(enteredPassword) },
+//            onValueChange = { viewModel.clearPasswordError() }
+//                                    )
 //    }
 }
 

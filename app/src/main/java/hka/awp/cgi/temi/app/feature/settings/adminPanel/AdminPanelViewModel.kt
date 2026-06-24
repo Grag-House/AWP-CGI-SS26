@@ -48,7 +48,7 @@ class AdminPanelViewModel(
 
     private val _isAuthorizedWebserver = MutableStateFlow(false)
 
-    val isAuthorizedWebserver = _isAuthorized.asStateFlow()
+    val isAuthorizedWebserver = _isAuthorizedWebserver.asStateFlow()
 
     private val _passwordError = MutableStateFlow(false)
     val passwordError = _passwordError.asStateFlow()
