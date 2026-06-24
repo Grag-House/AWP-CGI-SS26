@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlin.math.round
-
 class AdminPanelViewModel(
     private val appConfigRepository: AppConfigRepository,
     private val mqttManager: MqttManager,
@@ -32,40 +31,46 @@ class AdminPanelViewModel(
         val latitude: Double,
         val longitude: Double,
         val speakerEnabled: Boolean,
-        val trafficEvents: List<MqttTrafficEvent>,
-        val voiceProfiles: Map<String, SpeakerVector>,
-        val isEnrollmentActive: Boolean
+        val speakerThreshold: Double,
     )
 
+    private val baseConfigFlow = combine(
+        appConfigRepository.currentUrl,
+        appConfigRepository.latitude,
+        appConfigRepository.longitude,
+        appConfigRepository.isSpeakerVerificationEnabled,
+    ) { url, lat, lon, speakerEnabled ->
+        AdminPanelFlows(
+            url = url,
+            latitude = lat,
+            longitude = lon,
+            speakerEnabled = speakerEnabled,
+            speakerThreshold = AppConfigRepository.DEFAULT_SPEAKER_VERIFICATION_THRESHOLD,
+        )
+    }
+
+    private val configWithThresholdFlow = combine(
+        baseConfigFlow,
+        appConfigRepository.speakerVerificationThreshold,
+    ) { config, threshold ->
+        config.copy(speakerThreshold = threshold)
+    }
+
     val uiState: StateFlow<AdminPanelState> = combine(
-        combine(
-            appConfigRepository.currentUrl,
-            appConfigRepository.latitude,
-            appConfigRepository.longitude,
-            appConfigRepository.isSpeakerVerificationEnabled,
-            mqttManager.trafficEvents
-        ) { url, lat, lon, speakerEnabled, trafficEvents ->
-            AdminPanelFlows(
-                url = url,
-                latitude = lat,
-                longitude = lon,
-                speakerEnabled = speakerEnabled,
-                trafficEvents = trafficEvents,
-                voiceProfiles = emptyMap(),
-                isEnrollmentActive = false
-            )
-        },
+        configWithThresholdFlow,
+        mqttManager.trafficEvents,
         voiceProfileRepository.voiceProfiles,
-        voiceRecognitionViewModel.isEnrollmentActive
-    ) { flows, voiceProfiles, isEnrollmentActive ->
+        voiceRecognitionViewModel.isEnrollmentActive,
+    ) { config, trafficEvents, voiceProfiles, isEnrollmentActive ->
         AdminPanelState(
-            webserverUrl = flows.url,
-            latitude = flows.latitude,
-            longitude = flows.longitude,
-            coordinates = "Länge: ${flows.longitude} Breite: ${flows.latitude}",
-            isSpeakerVerificationEnabled = flows.speakerEnabled,
+            webserverUrl = config.url,
+            latitude = config.latitude,
+            longitude = config.longitude,
+            coordinates = "Länge: ${config.longitude} Breite: ${config.latitude}",
+            isSpeakerVerificationEnabled = config.speakerEnabled,
+            speakerVerificationThreshold = config.speakerThreshold,
             mqttReportTopics = MqttManager.reportTopics,
-            mqttTrafficEvents = flows.trafficEvents.filter { it.topic in MqttManager.reportTopics },
+            mqttTrafficEvents = trafficEvents.filter { it.topic in MqttManager.reportTopics },
             voiceProfileCount = voiceProfiles.size,
             voiceProfiles = voiceProfiles,
             isEnrollmentActive = isEnrollmentActive
@@ -124,6 +129,12 @@ class AdminPanelViewModel(
         }
     }
 
+    fun onEditSpeakerVerificationThreshold(threshold: Double) {
+        viewModelScope.launch {
+            appConfigRepository.updateSpeakerVerificationThreshold(threshold)
+        }
+    }
+
     fun onResetVoiceProfiles() {
         viewModelScope.launch {
             voiceProfileRepository.clearAllProfiles()
@@ -157,6 +168,7 @@ data class AdminPanelState(
     val mqttTrafficEvents: List<MqttTrafficEvent> = emptyList(),
     val coordinates: String = "",
     val isSpeakerVerificationEnabled: Boolean = false,
+    val speakerVerificationThreshold: Double = AppConfigRepository.DEFAULT_SPEAKER_VERIFICATION_THRESHOLD,
     val voiceProfileCount: Int = 0,
     val voiceProfiles: Map<String, SpeakerVector> = emptyMap(),
     val isEnrollmentActive: Boolean = false,

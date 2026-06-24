@@ -38,6 +38,15 @@
             android:name="com.robotemi.sdk.metadata.PERMISSIONS"
             android:value="com.robotemi.permission.map" />
 
+        <meta-data
+            android:name="com.robotemi.sdk.metadata.SKILL"
+            android:value="@string/app_name" />
+
+        <meta-data
+            android:name="com.robotemi.sdk.metadata.KIOSK"
+            android:value="TRUE" />
+
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

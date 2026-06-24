@@ -231,6 +231,7 @@ fun SpeakerVerificationCard(
     }
 }
 
+
 @Composable
 fun VoiceProfilesManagementCard(
     voiceProfiles: Map<String, SpeakerVector>,
@@ -585,6 +586,8 @@ private fun AdminPanelDialogs(
     viewModel: AdminPanelViewModel,
     showCoordinateDialog: Boolean,
     onCoordinateDialogDismiss: () -> Unit,
+    showThresholdDialog: Boolean,
+    onThresholdDialogDismiss: () -> Unit,
     showPasswordDialog: Boolean,
     onPasswordDialogDismiss: () -> Unit,
     showUrlDialog: Boolean,
@@ -618,6 +621,16 @@ private fun AdminPanelDialogs(
                 onCoordinateDialogDismiss()
             },
             onDismiss = onCoordinateDialogDismiss
+        )
+    }
+    if (showThresholdDialog) {
+        EditSpeakerVerificationThresholdDialog(
+            initialThreshold = uiState.speakerVerificationThreshold,
+            onConfirm = { threshold ->
+                viewModel.onEditSpeakerVerificationThreshold(threshold)
+                onThresholdDialogDismiss()
+            },
+            onDismiss = onThresholdDialogDismiss
         )
     }
     if (showPasswordDialog) {
@@ -667,6 +680,7 @@ fun AdminPanelScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showCoordinateDialog by remember { mutableStateOf(false) }
+    var showThresholdDialog by remember { mutableStateOf(false) }
     var showPasswordDialog by remember { mutableStateOf(false) }
     var showUrlDialog by remember { mutableStateOf(false) }
     var showMqttReportsDialog by remember { mutableStateOf(false) }
@@ -694,6 +708,8 @@ fun AdminPanelScreen(
         viewModel = viewModel,
         showCoordinateDialog = showCoordinateDialog,
         onCoordinateDialogDismiss = { showCoordinateDialog = false },
+        showThresholdDialog = showThresholdDialog,
+        onThresholdDialogDismiss = { showThresholdDialog = false },
         showPasswordDialog = showPasswordDialog,
         onPasswordDialogDismiss = { showPasswordDialog = false },
         showUrlDialog = showUrlDialog,
@@ -755,6 +771,11 @@ fun AdminPanelScreen(
                 SpeakerVerificationCard(
                     enabled = uiState.isSpeakerVerificationEnabled,
                     onToggle = { viewModel.onToggleSpeakerVerification(it) }
+                )
+
+                SpeakerVerificationThresholdCard(
+                    threshold = uiState.speakerVerificationThreshold,
+                    onEdit = { showThresholdDialog = true }
                 )
 
                 VoiceProfilesManagementCard(
