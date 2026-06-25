@@ -2,17 +2,23 @@ package hka.awp.cgi.temi.app.feature.settings.adminPanel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.robotemi.sdk.Robot
 import hka.awp.cgi.temi.app.BuildConfig
+import hka.awp.cgi.temi.app.feature.hideandseek.HidingSpotFilterManager
+import hka.awp.cgi.temi.app.feature.hideandseek.HidingSpotRepository
 import hka.awp.cgi.temi.app.feature.mqtt.MqttManager
 import hka.awp.cgi.temi.app.feature.mqtt.MqttTrafficEvent
 import hka.awp.cgi.temi.app.feature.voiceRecognition.TemiVoiceRecognitionViewModel
 import hka.awp.cgi.temi.app.feature.voiceRecognition.VoiceProfileRepository
-import hka.awp.cgi.temi.app.feature.webserver.AppConfigRepository
+import hka.awp.cgi.temi.app.utils.AppConfigRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlin.math.round
@@ -21,11 +27,21 @@ class AdminPanelViewModel(
     private val appConfigRepository: AppConfigRepository,
     private val mqttManager: MqttManager,
     private val voiceProfileRepository: VoiceProfileRepository,
-    private val voiceRecognitionViewModel: TemiVoiceRecognitionViewModel
+    private val voiceRecognitionViewModel: TemiVoiceRecognitionViewModel,
+    robot: Robot?,
+    hidingSpotRepository: HidingSpotRepository
 ) : ViewModel() {
+
+    val filterManager = HidingSpotFilterManager(robot, hidingSpotRepository)
 
     private val _events = MutableSharedFlow<AdminPanelEvent>()
     val events = _events.asSharedFlow()
+
+    private val _isAuthorized = MutableStateFlow(false)
+    val isAuthorized = _isAuthorized.asStateFlow()
+
+    private val _passwordError = MutableStateFlow(false)
+    val passwordError = _passwordError.asStateFlow()
 
     private data class AdminPanelFlows(
         val url: String,
@@ -82,6 +98,28 @@ class AdminPanelViewModel(
         initialValue = AdminPanelState()
     )
 
+    fun checkPassword(input: String) {
+        viewModelScope.launch {
+            val currentHash = appConfigRepository.adminPasswordHash.first()
+            val isValid = appConfigRepository.isValidAdminPassword(input, currentHash)
+            if (isValid) {
+                _passwordError.value = false
+                _isAuthorized.value = true
+            } else {
+                _passwordError.value = true
+            }
+        }
+    }
+
+    fun clearPasswordError() {
+        _passwordError.value = false
+    }
+
+    fun resetAuthorization() {
+        _isAuthorized.value = false
+        _passwordError.value = false
+    }
+
     fun onAction(action: AdminPanelAction) {
         when (action) {
             is AdminPanelAction.EditCoordinates -> updateCoordinates(action.latitude, action.longitude)
@@ -97,16 +135,15 @@ class AdminPanelViewModel(
                 voiceRecognitionViewModel.toggleEnrollment(action.active, action.name)
             }
             is AdminPanelAction.DeleteVoiceProfile -> deleteVoiceProfile(action.name)
+            AdminPanelAction.RequestRestart -> requestRestart()
         }
     }
 
     private fun updateCoordinates(latitude: Double, longitude: Double) {
         @Suppress("MagicNumber")
         val roundedLat = round(latitude * 10000.0) / 10000.0
-
         @Suppress("MagicNumber")
         val roundedLon = round(longitude * 10000.0) / 10000.0
-
         viewModelScope.launch {
             appConfigRepository.updateCoordinates(roundedLat, roundedLon)
         }
@@ -148,6 +185,10 @@ class AdminPanelViewModel(
         viewModelScope.launch { voiceProfileRepository.deleteVoiceProfile(name) }
     }
 
+    private fun requestRestart() {
+        viewModelScope.launch { _events.emit(AdminPanelEvent.RestartAppTriggered) }
+    }
+
     companion object {
         private const val STATE_TIMEOUT = 5000L
     }
@@ -165,11 +206,13 @@ sealed interface AdminPanelAction {
     data object ResetVoiceProfiles : AdminPanelAction
     data class ToggleEnrollment(val active: Boolean, val name: String? = null) : AdminPanelAction
     data class DeleteVoiceProfile(val name: String) : AdminPanelAction
+    data object RequestRestart : AdminPanelAction
 }
 
 sealed interface AdminPanelEvent {
     data object OpenMqttReports : AdminPanelEvent
     data object PasswordChanged : AdminPanelEvent
+    data object RestartAppTriggered : AdminPanelEvent
 }
 
 data class AdminPanelState(

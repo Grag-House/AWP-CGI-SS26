@@ -54,7 +54,12 @@ val appModule = module {
         }
     }
 
-    single<TemiBatteryMonitor> { TemiBatteryMonitor(robot = get()) }
+    single<TemiBatteryMonitor> {
+        TemiBatteryMonitor(
+            robot = get(),
+            mqttManager = get()
+        )
+    }
 
     single {
         CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -96,7 +101,9 @@ val appModule = module {
             appConfigRepository = get(),
             mqttManager = get(),
             voiceProfileRepository = get(),
-            voiceRecognitionViewModel = get()
+            voiceRecognitionViewModel = get(),
+            robot = get(),
+            hidingSpotRepository = get()
         )
     }
 

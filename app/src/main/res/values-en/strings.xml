@@ -230,4 +230,14 @@
     <string name="hiding_spot_filter_count">%1$d of %2$d places activated</string>
     <string name="hiding_spot_filter_cancel">Cancel</string>
     <string name="hiding_spot_filter_save">Save</string>
+    <string name="admin_panel_hiding_spots">Hiding Spot Configuration</string>
+    <string name="admin_panel_hiding_spots_subtitle">Manage allowed hiding spots</string>
+    <string name="admin_panel_restart_app">Restart App</string>
+    <string name="admin_panel_restart_app_subtitle">Restart once if experiencing issues</string>
+    <string name="admin_panel_restart_confirm_title">Restart app?</string>
+    <string name="admin_panel_restart_confirm_text">The application will be closed and restarted immediately. Running background processes will be interrupted.</string>
+    <string name="admin_panel_confirm_restart">Restart</string>
+    <string name="admin_panel_password_input">Admin area protected, please enter password.</string>
+    <string name="admin_panel_enter_password">Enter password</string>
+    <string name="password_wrong">Incorrect password</string>
 </resources>

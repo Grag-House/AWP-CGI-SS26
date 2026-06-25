@@ -4,8 +4,8 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
-import hka.awp.cgi.temi.app.feature.webserver.AppConfigRepository
 import hka.awp.cgi.temi.app.feature.webserver.WebserverViewModel
+import hka.awp.cgi.temi.app.utils.AppConfigRepository
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
