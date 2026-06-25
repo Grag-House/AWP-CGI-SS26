@@ -2,6 +2,7 @@ package hka.awp.cgi.temi.app.feature.photobox
 
 import android.graphics.Bitmap
 import hka.awp.cgi.temi.app.feature.photobox.filter.PhotoboxPhotoFilter
+import hka.awp.cgi.temi.app.feature.photobox.upload.PhotoboxOverlayOptions
 import hka.awp.cgi.temi.app.feature.photobox.upload.PhotoboxSessionFinalizer
 import hka.awp.cgi.temi.app.feature.photobox.upload.PhotoboxUploadOutcome
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,11 +22,11 @@ internal class PhotoboxPendingUploadController(
     private data class PendingUpload(
         val finalImage: Bitmap,
         val needsOverlayBake: Boolean,
-        val overlayPosition: TemiOverlayPosition
+        val overlayOptions: PhotoboxOverlayOptions
     )
 
-    fun begin(finalImage: Bitmap, needsOverlayBake: Boolean, overlayPosition: TemiOverlayPosition) {
-        pending = PendingUpload(finalImage, needsOverlayBake, overlayPosition)
+    fun begin(finalImage: Bitmap, needsOverlayBake: Boolean, overlayOptions: PhotoboxOverlayOptions) {
+        pending = PendingUpload(finalImage, needsOverlayBake, overlayOptions)
     }
 
     fun selectFilter(filter: PhotoboxPhotoFilter) {
@@ -39,7 +40,7 @@ internal class PhotoboxPendingUploadController(
             finalImage = current.finalImage,
             filter = uiState.value.selectedFilter,
             needsOverlayBake = current.needsOverlayBake,
-            overlayPosition = current.overlayPosition,
+            overlayOptions = current.overlayOptions,
             onUploadResult = onUploadResult
         )
     }
@@ -54,7 +55,7 @@ internal class PhotoboxPendingUploadController(
                 finalImage = current.finalImage,
                 filter = PhotoboxPhotoFilter.NONE,
                 needsOverlayBake = current.needsOverlayBake,
-                overlayPosition = current.overlayPosition,
+                overlayOptions = current.overlayOptions,
                 onUploadResult = { _, _ -> }
             )
         }

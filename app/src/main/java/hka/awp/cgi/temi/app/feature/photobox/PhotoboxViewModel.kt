@@ -11,6 +11,8 @@ import hka.awp.cgi.temi.app.feature.photobox.capture.PhotoboxCameraState
 import hka.awp.cgi.temi.app.feature.photobox.capture.PhotoboxCaptureCallbacks
 import hka.awp.cgi.temi.app.feature.photobox.capture.PhotoboxCaptureSequencer
 import hka.awp.cgi.temi.app.feature.photobox.filter.PhotoboxPhotoFilter
+import hka.awp.cgi.temi.app.feature.photobox.upload.PhotoboxFinalizeOptions
+import hka.awp.cgi.temi.app.feature.photobox.upload.PhotoboxOverlayOptions
 import hka.awp.cgi.temi.app.feature.photobox.upload.PhotoboxSessionFinalizer
 import hka.awp.cgi.temi.app.feature.photobox.upload.PhotoboxUploadOutcomeHandler
 import hka.awp.cgi.temi.app.feature.photobox.upload.PhotoboxUploadQueue
@@ -71,6 +73,8 @@ class PhotoboxViewModel(
     val overlayEnabled: StateFlow<Boolean> = overlaySettings.enabled
     val overlayPosition: StateFlow<TemiOverlayPosition> = overlaySettings.position
 
+    internal val bannerSettings = PhotoboxBannerSettings(appConfigRepository, viewModelScope)
+
     private val captureSequencer = PhotoboxCaptureSequencer(cameraManager, viewModelScope)
     private val sessionFinalizer = PhotoboxSessionFinalizer(uploadRepository, uploadQueue, viewModelScope)
     private val uploadOutcomeHandler = PhotoboxUploadOutcomeHandler(uploadQueue, _uiState, viewModelScope)
@@ -119,17 +123,20 @@ class PhotoboxViewModel(
                     _uiState.update { it.copy(phase = PhotoboxPhase.CAPTURE) }
                 },
                 onShotsReady = { shots ->
-                    val overlayPositionAtCapture = overlayPosition.value
+                    val bannerAtCapture = bannerSettings.banner.value.takeIf { bannerSettings.enabled.value }
+                    val overlayOptionsAtCapture = PhotoboxOverlayOptions(overlayPosition.value, bannerAtCapture)
                     sessionFinalizer.finalize(
                         mode = state.mode,
                         shots = shots,
-                        withOverlay = overlayEnabled.value,
-                        overlayPosition = overlayPositionAtCapture,
+                        options = PhotoboxFinalizeOptions(
+                            withOverlay = overlayEnabled.value,
+                            overlay = overlayOptionsAtCapture
+                        ),
                         onFinalImageReady = { finalImage, needsOverlayBakeAtUpload ->
                             pendingUploadController.begin(
                                 finalImage,
                                 needsOverlayBakeAtUpload,
-                                overlayPositionAtCapture
+                                overlayOptionsAtCapture
                             )
                             _uiState.update {
                                 it.copy(

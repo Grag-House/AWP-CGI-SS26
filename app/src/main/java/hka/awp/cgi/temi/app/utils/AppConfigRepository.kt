@@ -30,6 +30,8 @@ class AppConfigRepository(private val dataStore: DataStore<Preferences>) {
     private val adminPasswordLegacyKey = stringPreferencesKey("admin_password")
     private val photoboxOverlayEnabledKey = booleanPreferencesKey("photobox_overlay_enabled")
     private val photoboxOverlayPositionKey = stringPreferencesKey("photobox_overlay_position")
+    private val photoboxBannerEnabledKey = booleanPreferencesKey("photobox_banner_enabled")
+    private val photoboxBannerKey = stringPreferencesKey("photobox_banner")
     private val driveFolderLinkKey = stringPreferencesKey("photobox_drive_folder_link")
     private val driveUploadUrlKey = stringPreferencesKey("photobox_drive_upload_url")
 
@@ -94,21 +96,33 @@ class AppConfigRepository(private val dataStore: DataStore<Preferences>) {
         preferences[photoboxOverlayEnabledKey] ?: false
     }
 
-    suspend fun setPhotoboxOverlayEnabled(enabled: Boolean) {
-        dataStore.edit { preferences ->
-            preferences[photoboxOverlayEnabledKey] = enabled
-        }
-    }
-
     // Raw enum name (e.g. "LEFT"/"CENTER"/"RIGHT") — parsing and the default live with
     // PhotoboxOverlaySettings so this repository doesn't need to depend on that enum.
     val photoboxOverlayPosition: Flow<String> = dataStore.data.map { preferences ->
         preferences[photoboxOverlayPositionKey] ?: ""
     }
 
-    suspend fun setPhotoboxOverlayPosition(position: String) {
+    suspend fun setPhotoboxOverlay(enabled: Boolean, position: String) {
         dataStore.edit { preferences ->
+            preferences[photoboxOverlayEnabledKey] = enabled
             preferences[photoboxOverlayPositionKey] = position
+        }
+    }
+
+    val photoboxBannerEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[photoboxBannerEnabledKey] ?: false
+    }
+
+    // Raw enum name — parsing and the default live with PhotoboxBannerSettings so this
+    // repository doesn't need to depend on that enum.
+    val photoboxBanner: Flow<String> = dataStore.data.map { preferences ->
+        preferences[photoboxBannerKey] ?: ""
+    }
+
+    suspend fun setPhotoboxBanner(enabled: Boolean, banner: String) {
+        dataStore.edit { preferences ->
+            preferences[photoboxBannerEnabledKey] = enabled
+            preferences[photoboxBannerKey] = banner
         }
     }
 

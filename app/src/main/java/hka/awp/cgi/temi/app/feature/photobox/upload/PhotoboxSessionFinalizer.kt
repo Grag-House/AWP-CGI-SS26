@@ -22,12 +22,19 @@ internal sealed interface PhotoboxUploadOutcome {
 
 private const val GRID_2X2_COLUMNS = 2
 
+/** Everything [PhotoboxSessionFinalizer.finalize] needs to decorate the final image, grouped to
+ * keep its parameter list short. */
+internal data class PhotoboxFinalizeOptions(
+    val withOverlay: Boolean,
+    val overlay: PhotoboxOverlayOptions
+)
+
 /**
  * Turns the raw shots from a [PhotoboxCaptureSequencer] run into the final image (baking in the
- * Temi overlay per-frame for a multi-shot mode, or combining the shots into a strip/grid),
- * separately from uploading it — the caller decides when (and with which [PhotoboxPhotoFilter])
- * the upload actually starts, so the user can preview/pick a filter on the finished photo before
- * anything leaves the device.
+ * Temi overlay per-frame for a multi-shot mode, combining the shots into a strip/grid, and
+ * burning in the branding banner if one is enabled), separately from uploading it — the caller
+ * decides when (and with which [PhotoboxPhotoFilter]) the upload actually starts, so the user can
+ * preview/pick a filter on the finished photo before anything leaves the device.
  */
 internal class PhotoboxSessionFinalizer(
     private val uploadRepository: PhotoboxUploadRepository,
@@ -37,17 +44,24 @@ internal class PhotoboxSessionFinalizer(
     fun finalize(
         mode: PhotoboxMode,
         shots: List<Bitmap>,
-        withOverlay: Boolean,
-        overlayPosition: TemiOverlayPosition,
+        options: PhotoboxFinalizeOptions,
         onFinalImageReady: (finalImage: Bitmap, needsOverlayBakeAtUpload: Boolean) -> Unit
     ) {
         scope.launch {
-            // Combining the strip and baking the overlay are pure CPU/bitmap work with no need
-            // for the main thread — running them inline on viewModelScope (Dispatchers.Main)
+            // Combining the strip and baking the overlay/banner are pure CPU/bitmap work with no
+            // need for the main thread — running them inline on viewModelScope (Dispatchers.Main)
             // would freeze the UI for the duration, which can be long enough for a stray touch
             // (e.g. on the sidebar) to queue up and fire once the main thread frees up again.
             val (finalImage, needsOverlayBakeAtUpload) = withContext(Dispatchers.Default) {
-                buildFinalImage(mode, shots, withOverlay, overlayPosition)
+                val (combined, needsBake) = buildFinalImage(
+                    mode,
+                    shots,
+                    options.withOverlay,
+                    options.overlay.position
+                )
+                val banner = options.overlay.banner
+                val withBanner = if (banner != null) uploadRepository.bakeBanner(combined, banner) else combined
+                withBanner to needsBake
             }
             onFinalImageReady(finalImage, needsOverlayBakeAtUpload)
         }
@@ -62,12 +76,12 @@ internal class PhotoboxSessionFinalizer(
         finalImage: Bitmap,
         filter: PhotoboxPhotoFilter,
         needsOverlayBake: Boolean,
-        overlayPosition: TemiOverlayPosition,
+        overlayOptions: PhotoboxOverlayOptions,
         onUploadResult: (Bitmap, PhotoboxUploadOutcome) -> Unit
     ) {
         scope.launch {
             val filteredImage = withContext(Dispatchers.Default) { filter.bake(finalImage) }
-            uploadRepository.uploadPhoto(filteredImage, needsOverlayBake, overlayPosition).fold(
+            uploadRepository.uploadPhoto(filteredImage, needsOverlayBake, overlayOptions).fold(
                 onSuccess = { result ->
                     onUploadResult(finalImage, PhotoboxUploadOutcome.Success(result))
                 },
@@ -102,7 +116,10 @@ internal class PhotoboxSessionFinalizer(
     ): Pair<Bitmap, Boolean> {
         if (mode == PhotoboxMode.STANDARD) return shots.first() to withOverlay
 
-        val frames = if (withOverlay) shots.map { uploadRepository.bakeOverlay(it, overlayPosition) } else shots
+        // No banner exists yet at this point — it's only added to the combined image afterwards
+        // (see finalize) — so there's nothing for Temi to avoid overlapping with here.
+        val perFrameOptions = PhotoboxOverlayOptions(overlayPosition, banner = null)
+        val frames = if (withOverlay) shots.map { uploadRepository.bakeOverlay(it, perFrameOptions) } else shots
         val combined = if (mode == PhotoboxMode.GRID_2X2) {
             combinePhotoGrid(frames, columns = GRID_2X2_COLUMNS)
         } else {

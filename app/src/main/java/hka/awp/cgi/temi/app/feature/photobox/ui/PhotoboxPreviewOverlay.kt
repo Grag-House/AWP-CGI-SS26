@@ -4,7 +4,7 @@ import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import hka.awp.cgi.temi.app.R
 import hka.awp.cgi.temi.app.feature.photobox.BottomBar
+import hka.awp.cgi.temi.app.feature.photobox.PHOTOBOX_BANNER_ASPECT_RATIO
 import hka.awp.cgi.temi.app.feature.photobox.PhotoboxMode
 import hka.awp.cgi.temi.app.feature.photobox.PhotoboxUploadState
 import hka.awp.cgi.temi.app.feature.photobox.TemiOverlayImage
@@ -60,6 +61,7 @@ internal data class PreviewPhotoState(
     val mode: PhotoboxMode,
     val overlayEnabled: Boolean,
     val overlayPosition: TemiOverlayPosition,
+    val bannerEnabled: Boolean,
     val uploadState: PhotoboxUploadState,
     val selectedFilter: PhotoboxPhotoFilter
 )
@@ -78,7 +80,7 @@ internal fun PreviewOverlay(
     photoState: PreviewPhotoState,
     callbacks: PreviewOverlayCallbacks
 ) {
-    Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
+    BoxWithConstraints(modifier = Modifier.fillMaxSize().background(Color.Black)) {
         if (photoState.capturedBitmap != null) {
             Image(
                 bitmap = photoState.capturedBitmap.asImageBitmap(),
@@ -99,7 +101,18 @@ internal fun PreviewOverlay(
         // PhotoboxSessionFinalizer) — showing it again here would add one oversized Temi
         // floating next to the whole composite.
         if (photoState.overlayEnabled && photoState.mode == PhotoboxMode.STANDARD) {
-            TemiOverlayImage(photoState.overlayPosition)
+            // A banner is baked flush against the bottom edge (see PhotoboxUploadRepository) —
+            // shift Temi up by its approximate on-screen height so the live overlay doesn't end
+            // up rendered on top of it (the actual uploaded file is shifted exactly, using the
+            // real bitmap dimensions; this is just an approximation for the live preview here).
+            val bottomInset = if (photoState.bannerEnabled) {
+                val bitmap = photoState.capturedBitmap
+                val photoAspectRatio = if (bitmap != null) bitmap.width.toFloat() / bitmap.height else 1f
+                maxHeight * (photoAspectRatio / PHOTOBOX_BANNER_ASPECT_RATIO)
+            } else {
+                0.dp
+            }
+            TemiOverlayImage(photoState.overlayPosition, bottomInset)
         }
 
         BottomBar(modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()) {

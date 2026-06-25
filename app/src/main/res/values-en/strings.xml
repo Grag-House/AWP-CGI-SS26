@@ -259,6 +259,10 @@
     <string name="photobox_camera_unavailable">My camera isn\'t available right now.</string>
     <string name="photobox_overlay_title">Temi Overlay</string>
     <string name="photobox_overlay_description">Places an image of Temi over the captured photo, so it looks like Temi is standing next to you.</string>
+    <string name="photobox_banner_title">Banner</string>
+    <string name="photobox_banner_description">Shows a banner at the bottom of the photo.</string>
+    <string name="photobox_banner_50_years_cgi">50 Years of CGI</string>
+    <string name="photobox_banner_cgi_lab">CGI Lab</string>
     <string name="photobox_upload_section_title">Photo upload</string>
     <string name="photobox_drive_folder_label">Google Drive folder link</string>
     <string name="photobox_drive_upload_url_label">Upload webhook URL</string>

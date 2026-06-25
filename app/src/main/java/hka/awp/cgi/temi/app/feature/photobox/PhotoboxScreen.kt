@@ -40,6 +40,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
@@ -70,6 +71,7 @@ fun PhotoboxScreen(
     val cameraState by viewModel.cameraState.collectAsStateWithLifecycle()
     val overlayEnabled by viewModel.overlayEnabled.collectAsStateWithLifecycle()
     val overlayPosition by viewModel.overlayPosition.collectAsStateWithLifecycle()
+    val bannerEnabled by viewModel.bannerSettings.enabled.collectAsStateWithLifecycle()
 
     DisposableEffect(viewModel) {
         onDispose { viewModel.onScreenStopped() }
@@ -114,6 +116,7 @@ fun PhotoboxScreen(
                     mode = uiState.mode,
                     overlayEnabled = overlayEnabled,
                     overlayPosition = overlayPosition,
+                    bannerEnabled = bannerEnabled,
                     uploadState = uiState.uploadState,
                     selectedFilter = uiState.selectedFilter
                 ),
@@ -236,10 +239,12 @@ private fun CameraPreviewView(
 
 /**
  * Renders the Temi cutout at a fixed screen position so it lines up identically whether
- * shown over the live camera feed or over the final captured photo.
+ * shown over the live camera feed or over the final captured photo. [bottomInset] lifts it above
+ * a branding banner baked into that photo, if any (see PhotoboxPreviewOverlay), so Temi doesn't
+ * end up rendered behind/over the banner.
  */
 @Composable
-internal fun BoxScope.TemiOverlayImage(position: TemiOverlayPosition) {
+internal fun BoxScope.TemiOverlayImage(position: TemiOverlayPosition, bottomInset: Dp = 0.dp) {
     val alignment = when (position) {
         TemiOverlayPosition.LEFT -> Alignment.BottomStart
         TemiOverlayPosition.CENTER -> Alignment.BottomCenter
@@ -252,6 +257,7 @@ internal fun BoxScope.TemiOverlayImage(position: TemiOverlayPosition) {
         modifier = Modifier
             .align(alignment)
             .fillMaxHeight(PHOTOBOX_OVERLAY_HEIGHT_FRACTION)
+            .padding(bottom = bottomInset)
     )
 }
 
