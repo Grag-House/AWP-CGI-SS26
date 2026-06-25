@@ -60,7 +60,12 @@ val appModule = module {
         }
     }
 
-    single<TemiBatteryMonitor> { TemiBatteryMonitor(robot = get()) }
+    single<TemiBatteryMonitor> {
+        TemiBatteryMonitor(
+            robot = get(),
+            mqttManager = get()
+        )
+    }
 
     single {
         CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -72,7 +77,6 @@ val appModule = module {
             scope = get(),
         )
     }
-
     viewModel {
         AppViewModel(
             networkManager = get(),
@@ -95,10 +99,19 @@ val appModule = module {
     }
 
     viewModel {
-        NavigationViewModel(get(), get(), get())
+        NavigationViewModel(get(), get(), get(), get())
     }
 
-    viewModel { AdminPanelViewModel(appConfigRepository = get(), mqttManager = get()) }
+    viewModel {
+        AdminPanelViewModel(
+            appConfigRepository = get(),
+            mqttManager = get(),
+            voiceProfileRepository = get(),
+            voiceRecognitionViewModel = get(),
+            robot = get(),
+            hidingSpotRepository = get()
+        )
+    }
 
     single { HidingSpotRepository(androidContext()) }
 

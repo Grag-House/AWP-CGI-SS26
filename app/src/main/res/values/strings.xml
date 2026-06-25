@@ -112,6 +112,7 @@
     <string name="admin_panel_weather_coordinates">Wetterkoordinaten</string>
     <string name="admin_panel_webserver_coordiantes_change">Koordinaten ändern</string>
     <string name="admin_panel_webserver_url_change">URL ändern</string>
+    <string name="admin_panel_speaker_verification_threshold_change">Schwellwert ändern</string>
     <string name="admin_panel_header">Admin Panel</string>
     <string name="admin_panel_latitude">"Breite: "</string>
     <string name="admin_panel_longitude">Länge:</string>
@@ -132,6 +133,8 @@
     <string name="admin_panel_mqtt_reports_direction_out">OUT</string>
     <string name="admin_panel_mqtt_reports_clear">Leeren</string>
     <string name="admin_panel_close">Schließen</string>
+    <string name="admin_panel_speaker_verification">Speaker Verification</string>
+    <string name="admin_panel_speaker_verification_subtitle">Nur autorisierte Stimmen können den Roboter wecken</string>
 
     <!-- Navigation Page -->
     <string name="navigation_status_label">STATUS</string>
@@ -251,6 +254,8 @@
     <string name="hiding_spot_filter_count">%1$d von %2$d Orten aktiviert</string>
     <string name="hiding_spot_filter_cancel">Abbrechen</string>
     <string name="hiding_spot_filter_save">Speichern</string>
+    <string name="admin_panel_hiding_spots">Versteck-Konfiguration</string>
+    <string name="admin_panel_hiding_spots_subtitle">Erlaubte Versteckpositionen verwalten</string>
     <string name="admin_panel_restart_app">App neustarten</string>
     <string name="admin_panel_restart_app_subtitle">Bei Problemen, einmal neustarten</string>
     <string name="admin_panel_restart_confirm_title">App neustarten?</string>

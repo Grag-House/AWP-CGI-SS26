@@ -37,7 +37,6 @@ import hka.awp.cgi.temi.app.feature.webserver.ServerState
 import hka.awp.cgi.temi.app.feature.webserver.WebViewScreen
 import hka.awp.cgi.temi.app.feature.webserver.WebserverViewModel
 import org.koin.compose.viewmodel.koinViewModel
-import timber.log.Timber
 
 /**
  * The primary UI shell of the application.
@@ -138,8 +137,6 @@ private fun RenderSelectedRoute(
     routeDeps: MainShellRouteDeps,
     modifier: Modifier
 ) {
-    Timber.d("Selected route: %s", selectedRoute)
-
     when (selectedRoute) {
         Screen.Dashboard.route -> DashboardRouteContent(
             modifier = modifier,

@@ -101,6 +101,7 @@
     <string name="admin_panel_weather_coordinates">Weather coordinates</string>
     <string name="admin_panel_webserver_coordiantes_change">Change coordinates</string>
     <string name="admin_panel_webserver_url_change">Change URL</string>
+    <string name="admin_panel_speaker_verification_threshold_change">Change threshold</string>
     <string name="admin_panel_header">Admin Panel</string>
     <string name="admin_panel_latitude">"Latitude: "</string>
     <string name="admin_panel_longitude">Longitude:</string>
@@ -121,6 +122,8 @@
     <string name="admin_panel_mqtt_reports_direction_out">OUT</string>
     <string name="admin_panel_mqtt_reports_clear">Clear</string>
     <string name="admin_panel_close">Close</string>
+    <string name="admin_panel_speaker_verification">Speaker Verification</string>
+    <string name="admin_panel_speaker_verification_subtitle">Only authorized voices can wake up the robot</string>
 
     <string name="navigation_status_label">STATUS</string>
     <string name="current_location_prefix">Current location:</string>
@@ -234,6 +237,8 @@
     <string name="hiding_spot_filter_count">%1$d of %2$d places activated</string>
     <string name="hiding_spot_filter_cancel">Cancel</string>
     <string name="hiding_spot_filter_save">Save</string>
+    <string name="admin_panel_hiding_spots">Hiding Spot Configuration</string>
+    <string name="admin_panel_hiding_spots_subtitle">Manage allowed hiding spots</string>
     <string name="admin_panel_restart_app">Restart App</string>
     <string name="admin_panel_restart_app_subtitle">Restart once if experiencing issues</string>
     <string name="admin_panel_restart_confirm_title">Restart app?</string>

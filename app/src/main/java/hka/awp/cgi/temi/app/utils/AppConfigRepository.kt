@@ -34,6 +34,8 @@ class AppConfigRepository(private val dataStore: DataStore<Preferences>) {
     private val photoboxBannerKey = stringPreferencesKey("photobox_banner")
     private val driveFolderLinkKey = stringPreferencesKey("photobox_drive_folder_link")
     private val driveUploadUrlKey = stringPreferencesKey("photobox_drive_upload_url")
+    private val speakerVerificationEnabledKey = booleanPreferencesKey("speaker_verification_enabled")
+    private val speakerVerificationThresholdKey = doublePreferencesKey("speaker_verification_threshold")
 
     // --- Webview URL ---
 
@@ -82,11 +84,25 @@ class AppConfigRepository(private val dataStore: DataStore<Preferences>) {
         }
     }
 
-    suspend fun resetWebserverDefaults() {
+    // --- Speaker Verification ---
+
+    val isSpeakerVerificationEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[speakerVerificationEnabledKey] ?: false // Default off
+    }
+
+    val speakerVerificationThreshold: Flow<Double> = dataStore.data.map { preferences ->
+        preferences[speakerVerificationThresholdKey] ?: DEFAULT_SPEAKER_VERIFICATION_THRESHOLD
+    }
+
+    suspend fun updateSpeakerVerificationEnabled(enabled: Boolean) {
         dataStore.edit { preferences ->
-            preferences[webviewUrlKey] = BuildConfig.WEBVIEW_URL
-            preferences[adminPasswordHashKey] = hashPassword(BuildConfig.DEFAULT_ADMIN_PASSWORD)
-            preferences.remove(adminPasswordLegacyKey)
+            preferences[speakerVerificationEnabledKey] = enabled
+        }
+    }
+
+    suspend fun updateSpeakerVerificationThreshold(threshold: Double) {
+        dataStore.edit { preferences ->
+            preferences[speakerVerificationThresholdKey] = threshold.coerceIn(0.0, 1.0)
         }
     }
 
@@ -158,5 +174,19 @@ class AppConfigRepository(private val dataStore: DataStore<Preferences>) {
         return digest.digest(password.toByteArray()).joinToString(separator = "") { byte ->
             "%02x".format(byte)
         }
+    }
+
+    // --- General ---
+
+    @Suppress("unused")
+    /**
+     * Should only be used to clear the ENTIRE dataStore only use this if you know what you are doing :)
+     */
+    suspend fun clear() {
+        dataStore.edit { it.clear() }
+    }
+
+    companion object {
+        const val DEFAULT_SPEAKER_VERIFICATION_THRESHOLD = 0.82
     }
 }
