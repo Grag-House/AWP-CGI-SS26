@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlin.math.round
+
 class AdminPanelViewModel(
     private val appConfigRepository: AppConfigRepository,
     private val mqttManager: MqttManager,
@@ -81,10 +82,29 @@ class AdminPanelViewModel(
         initialValue = AdminPanelState()
     )
 
-    // Standard range for coordinates is -180 -> 180 and -90 -> 90
-    @Suppress("MagicNumber")
-    fun onEditCoordinates(latitude: Double, longitude: Double) {
+    fun onAction(action: AdminPanelAction) {
+        when (action) {
+            is AdminPanelAction.EditCoordinates -> updateCoordinates(action.latitude, action.longitude)
+            is AdminPanelAction.EditWebserverUrl -> updateUrl(action.url)
+            AdminPanelAction.ResetCoordinates -> resetCoordinates()
+            AdminPanelAction.OpenMqttReports -> openMqttReports()
+            AdminPanelAction.ClearMqttReports -> mqttManager.clearTrafficEvents()
+            is AdminPanelAction.ChangePassword -> changePassword(action.password)
+            is AdminPanelAction.ToggleSpeakerVerification -> updateSpeakerVerification(action.enabled)
+            is AdminPanelAction.EditSpeakerVerificationThreshold -> updateThreshold(action.threshold)
+            AdminPanelAction.ResetVoiceProfiles -> resetVoiceProfiles()
+            is AdminPanelAction.ToggleEnrollment -> {
+                voiceRecognitionViewModel.toggleEnrollment(action.active, action.name)
+            }
+            is AdminPanelAction.DeleteVoiceProfile -> deleteVoiceProfile(action.name)
+        }
+    }
+
+    private fun updateCoordinates(latitude: Double, longitude: Double) {
+        @Suppress("MagicNumber")
         val roundedLat = round(latitude * 10000.0) / 10000.0
+
+        @Suppress("MagicNumber")
         val roundedLon = round(longitude * 10000.0) / 10000.0
 
         viewModelScope.launch {
@@ -92,68 +112,59 @@ class AdminPanelViewModel(
         }
     }
 
-    fun onEditWebserverUrl(newUrl: String) {
-        viewModelScope.launch {
-            appConfigRepository.updateUrl(newUrl)
-        }
+    private fun updateUrl(newUrl: String) {
+        viewModelScope.launch { appConfigRepository.updateUrl(newUrl) }
     }
 
-    @Suppress("MagicNumber")
-    fun onResetCoordinates() {
-        viewModelScope.launch {
-            // Karlsruhe
-            appConfigRepository.updateCoordinates(49.0138, 8.3573)
-        }
+    private fun resetCoordinates() {
+        @Suppress("MagicNumber")
+        viewModelScope.launch { appConfigRepository.updateCoordinates(49.0138, 8.3573) }
     }
 
-    fun onOpenMqttReports() {
-        viewModelScope.launch {
-            _events.emit(AdminPanelEvent.OpenMqttReports)
-        }
+    private fun openMqttReports() {
+        viewModelScope.launch { _events.emit(AdminPanelEvent.OpenMqttReports) }
     }
 
-    fun onClearMqttReports() {
-        mqttManager.clearTrafficEvents()
-    }
-
-    fun onChangePassword(newPassword: String) {
+    private fun changePassword(newPassword: String) {
         viewModelScope.launch {
             appConfigRepository.updateAdminPassword(newPassword)
             _events.emit(AdminPanelEvent.PasswordChanged)
         }
     }
 
-    fun onToggleSpeakerVerification(enabled: Boolean) {
-        viewModelScope.launch {
-            appConfigRepository.updateSpeakerVerificationEnabled(enabled)
-        }
+    private fun updateSpeakerVerification(enabled: Boolean) {
+        viewModelScope.launch { appConfigRepository.updateSpeakerVerificationEnabled(enabled) }
     }
 
-    fun onEditSpeakerVerificationThreshold(threshold: Double) {
-        viewModelScope.launch {
-            appConfigRepository.updateSpeakerVerificationThreshold(threshold)
-        }
+    private fun updateThreshold(threshold: Double) {
+        viewModelScope.launch { appConfigRepository.updateSpeakerVerificationThreshold(threshold) }
     }
 
-    fun onResetVoiceProfiles() {
-        viewModelScope.launch {
-            voiceProfileRepository.clearAllProfiles()
-        }
+    private fun resetVoiceProfiles() {
+        viewModelScope.launch { voiceProfileRepository.clearAllProfiles() }
     }
 
-    fun onToggleEnrollment(active: Boolean, name: String? = null) {
-        voiceRecognitionViewModel.toggleEnrollment(active, name)
-    }
-
-    fun onDeleteVoiceProfile(name: String) {
-        viewModelScope.launch {
-            voiceProfileRepository.deleteVoiceProfile(name)
-        }
+    private fun deleteVoiceProfile(name: String) {
+        viewModelScope.launch { voiceProfileRepository.deleteVoiceProfile(name) }
     }
 
     companion object {
         private const val STATE_TIMEOUT = 5000L
     }
+}
+
+sealed interface AdminPanelAction {
+    data class EditCoordinates(val latitude: Double, val longitude: Double) : AdminPanelAction
+    data class EditWebserverUrl(val url: String) : AdminPanelAction
+    data object ResetCoordinates : AdminPanelAction
+    data object OpenMqttReports : AdminPanelAction
+    data object ClearMqttReports : AdminPanelAction
+    data class ChangePassword(val password: String) : AdminPanelAction
+    data class ToggleSpeakerVerification(val enabled: Boolean) : AdminPanelAction
+    data class EditSpeakerVerificationThreshold(val threshold: Double) : AdminPanelAction
+    data object ResetVoiceProfiles : AdminPanelAction
+    data class ToggleEnrollment(val active: Boolean, val name: String? = null) : AdminPanelAction
+    data class DeleteVoiceProfile(val name: String) : AdminPanelAction
 }
 
 sealed interface AdminPanelEvent {
