@@ -12,9 +12,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.vosk.Recognizer
@@ -75,7 +74,7 @@ class TemiVoiceListener(
                 voiceProfiles = profiles
                 isSpeakerVerificationEnabled = enabled
                 speakerVerificationThreshold = threshold
-            }.take(1).collect()
+            }.first()
 
             isInitialized = true
             Timber.d("TemiVoiceListener init. Profiles: %d", voiceProfiles.size)
