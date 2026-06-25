@@ -37,19 +37,19 @@ fun AdminPanelContent(
     onNavigateToPatrolSettings: () -> Unit,
     onNavigateToPatrolRoute: () -> Unit,
     onCloseRequest: () -> Unit
-    ) {
+) {
     Row(
         modifier = Modifier.fillMaxSize()
-       ) {
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(32.dp)
-              ) {
+        ) {
             SettingsHeader(
                 title = stringResource(R.string.admin_panel_header),
                 onBackClick = onBackClick
-                          )
+            )
 
             Spacer(modifier = Modifier.height(40.dp))
 
@@ -59,40 +59,40 @@ fun AdminPanelContent(
                     .verticalScroll(rememberScrollState())
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
-                  ) {
+            ) {
                 WebserverUrlCard(
                     url = uiState.webserverUrl,
                     onEdit = onEditUrl
-                                )
+                )
 
                 MqttReportsCard(onNavigate = onOpenMqtt)
 
                 WebserverPasswordCard(
                     onChangePassword = onChangePassword
-                                     )
+                )
 
                 CoordinateManagementCard(
                     coordinates = uiState.coordinates,
                     onEdit = onEditCoordinates
-                                        )
+                )
 
                 PatrolSettingsCard(
                     currentModeText = uiState.patrolModeText,
                     onNavigate = onNavigateToPatrolSettings
-                                  )
+                )
 
                 PatrolRouteCard(
                     currentRouteText = uiState.patrolRouteText,
                     onNavigate = onNavigateToPatrolRoute
-                               )
+                )
 
                 RestartAppCard(
                     onRestartClick = onRestartRequest
-                              )
+                )
 
                 CloseAppCard(
                     onCloseClick = onCloseRequest
-                            )
+                )
             }
         }
     }

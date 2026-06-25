@@ -13,7 +13,7 @@ import kotlin.random.Random
 class PatrolScheduler(
     private val scope: CoroutineScope,
     private val onTriggerPatrol: suspend (List<String>) -> Unit
-                     ) {
+) {
     private var schedulerJob: Job? = null
 
     fun updateSchedule(settings: PatrolSettings) {
@@ -34,17 +34,13 @@ class PatrolScheduler(
 
     private suspend fun runRandomSchedule(settings: PatrolSettings) {
         while (scope.isActive) {
-            val min = settings.minMinutes.coerceAtLeast(1)
+            val min = settings.minMinutes.coerceAtLeast(MIN_MINUTES_LIMIT)
             val max = settings.maxMinutes.coerceAtLeast(min)
             val delayMinutes = Random.nextInt(from = min, until = max + 1)
             val totalDelayMs = delayMinutes * MILLIS_PER_MINUTE
             val waitBeforeCountdownMs = (totalDelayMs - COUNTDOWN_MS).coerceAtLeast(0L)
 
-            Timber.d(
-                "Nächste zufällige Kontrollfahrt in $delayMinutes Minuten. " +
-                    "Countdown startet in ${waitBeforeCountdownMs / 1000} Sekunden."
-                    )
-
+            Timber.d("Nächste zufällige Kontrollfahrt in $delayMinutes Minuten.")
             delay(waitBeforeCountdownMs)
             onTriggerPatrol(settings.route)
         }
@@ -59,34 +55,31 @@ class PatrolScheduler(
             val delayMs = ChronoUnit.MILLIS.between(
                 LocalDateTime.now(),
                 countdownStart
-                                                   ).coerceAtLeast(0)
+            ).coerceAtLeast(0)
 
-            Timber.d(
-                "Nächste feste Kontrollfahrt um $nextRun. " +
-                    "Countdown startet in ${delayMs / 1000} Sekunden."
-                    )
-
+            Timber.d("Nächste feste Kontrollfahrt um $nextRun.")
             delay(delayMs)
             onTriggerPatrol(settings.route)
         }
     }
 
     private fun getNextFullHourRun(hours: Set<Int>): LocalDateTime {
-        val validHours = hours.filter { it in 0..23 }.sorted()
+        val validHours = hours.filter { it in HOUR_RANGE }.sorted()
         val now = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0)
 
         val nextToday = validHours
             .map { now.withHour(it) }
             .firstOrNull { it.isAfter(LocalDateTime.now()) }
 
-        if (nextToday != null) return nextToday
-
-        return now.plusDays(1).withHour(validHours.firstOrNull() ?: 0)
+        return nextToday ?: now.plusDays(1).withHour(validHours.firstOrNull() ?: DEFAULT_START_HOUR)
     }
 
     private companion object {
         private const val COUNTDOWN_SECONDS = 30L
         private const val COUNTDOWN_MS = COUNTDOWN_SECONDS * 1_000L
         private const val MILLIS_PER_MINUTE = 60_000L
+        private const val MIN_MINUTES_LIMIT = 1
+        private const val DEFAULT_START_HOUR = 0
+        private val HOUR_RANGE = 0..23
     }
 }

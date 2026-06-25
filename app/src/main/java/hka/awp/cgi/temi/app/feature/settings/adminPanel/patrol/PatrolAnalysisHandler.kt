@@ -30,7 +30,6 @@ class PatrolAnalysisHandler(
             cameraStreamManager.textMessages.collectLatest { message ->
                 val state = message.trim().lowercase()
                 latestState = state
-
                 if (state == LYING_STATE) {
                     handleLyingDetected()
                 }
@@ -59,7 +58,7 @@ class PatrolAnalysisHandler(
             "Lying weiterhin erkannt: %s/%s",
             lyingCountAfterFirstDetection,
             REQUIRED_LYING_CONFIRMATIONS
-                )
+        )
 
         if (lyingCountAfterFirstDetection >= REQUIRED_LYING_CONFIRMATIONS) {
             triggerFinalAlarm()
@@ -110,8 +109,8 @@ class PatrolAnalysisHandler(
             TtsRequest.create(
                 speech = text,
                 isShowOnConversationLayer = false
-                             )
-                    )
+            )
+        )
     }
 
     fun stop() {

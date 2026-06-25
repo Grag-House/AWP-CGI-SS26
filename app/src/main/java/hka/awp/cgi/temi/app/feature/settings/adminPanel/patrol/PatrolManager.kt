@@ -42,6 +42,13 @@ class PatrolManager(
     val countdownSeconds: StateFlow<Int?> = _countdownSeconds.asStateFlow()
     private companion object {
         private const val PATROL_COUNTDOWN_SECONDS = 30
+        private const val ANNOUNCEMENT_TIMEOUT_MS = 12_000L
+        private const val CAMERA_TILT_SPEED = 0.4f
+        private const val STABILIZATION_DELAY_MS = 700L
+        private const val STABILIZATION_REPEATS = 3
+        private const val DEFAULT_CAMERA_ANGLE = 0
+
+        private const val AUTOMATIC_PATROL_DELAY = 1_000L
     }
 
     init {
@@ -82,20 +89,20 @@ class PatrolManager(
         Timber.d("Sende Patrol Announcement Prompt über MQTT")
         mqttManager.publishPatrolAnnouncementPrompt()
 
-        mqttManager.waitForTtsCompleted(timeoutMs = 12_000L)
+        mqttManager.waitForTtsCompleted(timeoutMs = ANNOUNCEMENT_TIMEOUT_MS)
 
         robot?.finishConversation()
     }
 
     private suspend fun startAutomaticPatrol(route: List<String>) {
-            for (seconds in PATROL_COUNTDOWN_SECONDS downTo 1) {
-                _countdownSeconds.value = seconds
-                delay(1_000L)
-            }
+        for (seconds in PATROL_COUNTDOWN_SECONDS downTo 1) {
+            _countdownSeconds.value = seconds
+            delay(AUTOMATIC_PATROL_DELAY)
+        }
 
-            _countdownSeconds.value = null
+        _countdownSeconds.value = null
 
-            startImmediatePatrol(route, cameraTiltAngle = 0)
+        startImmediatePatrol(route, cameraTiltAngle = 0)
     }
 
     private fun moveToCurrentLocation() {
@@ -104,7 +111,12 @@ class PatrolManager(
         robot?.goTo(location)
     }
 
-    override fun onGoToLocationStatusChanged(location: String, status: String, descriptionId: Int, description: String) {
+    override fun onGoToLocationStatusChanged(
+        location: String,
+        status: String,
+        descriptionId: Int,
+        description: String
+    ) {
         if (!_isRunning.value) return
 
         when (status.lowercase()) {
@@ -122,9 +134,9 @@ class PatrolManager(
     private fun stabilizeCameraAndScan() {
         scanJob?.cancel()
         scanJob = scope.launch {
-            repeat(3) {
-                robot?.tiltAngle(degrees = 0, speed = 0.4f)
-                delay(700L)
+            repeat(STABILIZATION_REPEATS) {
+                robot?.tiltAngle(degrees = DEFAULT_CAMERA_ANGLE, speed = CAMERA_TILT_SPEED)
+                delay(STABILIZATION_DELAY_MS)
             }
 
             scanAtCurrentPoint()

@@ -123,7 +123,6 @@ class MqttManager(private val robot: Robot?, private val client: Mqtt5BlockingCl
     }
 
     private fun handleTtsListener(payload: String) {
-
         runCatching {
             val status = json.decodeFromString<MqttStatus>(payload).status
             _latestTtsStatus.value = status
@@ -238,8 +237,8 @@ class MqttManager(private val robot: Robot?, private val client: Mqtt5BlockingCl
     suspend fun publishPatrolAnnouncementPrompt() = withContext(Dispatchers.IO) {
         try {
             val prompt =
-            "Kündige auf kreative, freundliche, lustige und kurze Art eine automatische Kontrollfahrt an." +
-            " Sage, dass Temi jetzt eine Kontrollfahrt startet. Maximal zwei kurze Sätze.".trimIndent()
+                "Kündige auf kreative, freundliche, lustige und kurze Art eine automatische Kontrollfahrt an." +
+                    " Sage, dass Temi jetzt eine Kontrollfahrt startet. Maximal zwei kurze Sätze.".trimIndent()
 
             val payload = json.encodeToString(MqttAsr(prompt))
             publishMessage("$BASE_TOPIC/asrListener", payload)

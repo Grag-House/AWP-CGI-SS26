@@ -18,16 +18,16 @@ fun PatrolCountdownOverlay(seconds: Int) {
             .fillMaxSize()
             .padding(top = 60.dp),
         contentAlignment = Alignment.TopCenter
-       ) {
+    ) {
         Card {
             Text(
                 text = "Kontrollfahrt startet in $seconds Sekunden",
                 modifier = Modifier.padding(
                     horizontal = 24.dp,
                     vertical = 16.dp
-                                           ),
+                ),
                 style = MaterialTheme.typography.headlineSmall
-                )
+            )
         }
     }
 }
