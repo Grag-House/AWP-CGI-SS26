@@ -98,95 +98,105 @@ class AdminPanelViewModel(
         initialValue = AdminPanelState()
     )
 
-    fun checkPassword(input: String) {
-        viewModelScope.launch {
-            val currentHash = appConfigRepository.adminPasswordHash.first()
-            val isValid = appConfigRepository.isValidAdminPassword(input, currentHash)
-            if (isValid) {
-                _passwordError.value = false
-                _isAuthorized.value = true
-            } else {
-                _passwordError.value = true
-            }
+    fun onAction(action: AdminPanelAction) {
+        when (action) {
+            is AdminPanelAction.CheckPassword,
+            AdminPanelAction.ClearPasswordError,
+            AdminPanelAction.ResetAuthorization,
+            is AdminPanelAction.ChangePassword -> handleSecurityAction(action)
+
+            is AdminPanelAction.EditCoordinates,
+            is AdminPanelAction.EditWebserverUrl,
+            AdminPanelAction.ResetCoordinates,
+            AdminPanelAction.OpenMqttReports,
+            AdminPanelAction.ClearMqttReports,
+            AdminPanelAction.RequestRestart -> handleConfigAction(action)
+
+            is AdminPanelAction.ToggleSpeakerVerification,
+            is AdminPanelAction.EditSpeakerVerificationThreshold,
+            AdminPanelAction.ResetVoiceProfiles,
+            is AdminPanelAction.ToggleEnrollment,
+            is AdminPanelAction.DeleteVoiceProfile -> handleVoiceAction(action)
         }
     }
 
-    fun clearPasswordError() {
-        _passwordError.value = false
+    private fun handleSecurityAction(action: AdminPanelAction) {
+        when (action) {
+            is AdminPanelAction.CheckPassword -> handleCheckPassword(action.password)
+            AdminPanelAction.ClearPasswordError -> _passwordError.value = false
+            AdminPanelAction.ResetAuthorization -> {
+                _isAuthorized.value = false
+                _passwordError.value = false
+            }
+            is AdminPanelAction.ChangePassword -> viewModelScope.launch {
+                appConfigRepository.updateAdminPassword(action.password)
+                _events.emit(AdminPanelEvent.PasswordChanged)
+            }
+            else -> Unit
+        }
     }
 
-    fun resetAuthorization() {
-        _isAuthorized.value = false
-        _passwordError.value = false
-    }
-
-    fun onAction(action: AdminPanelAction) {
+    private fun handleConfigAction(action: AdminPanelAction) {
         when (action) {
             is AdminPanelAction.EditCoordinates -> updateCoordinates(action.latitude, action.longitude)
-            is AdminPanelAction.EditWebserverUrl -> updateUrl(action.url)
-            AdminPanelAction.ResetCoordinates -> resetCoordinates()
-            AdminPanelAction.OpenMqttReports -> openMqttReports()
+            is AdminPanelAction.EditWebserverUrl -> viewModelScope.launch {
+                appConfigRepository.updateUrl(action.url)
+            }
+            AdminPanelAction.ResetCoordinates -> viewModelScope.launch {
+                @Suppress("MagicNumber")
+                appConfigRepository.updateCoordinates(49.0138, 8.3573)
+            }
+            AdminPanelAction.OpenMqttReports -> viewModelScope.launch {
+                _events.emit(AdminPanelEvent.OpenMqttReports)
+            }
             AdminPanelAction.ClearMqttReports -> mqttManager.clearTrafficEvents()
-            is AdminPanelAction.ChangePassword -> changePassword(action.password)
-            is AdminPanelAction.ToggleSpeakerVerification -> updateSpeakerVerification(action.enabled)
-            is AdminPanelAction.EditSpeakerVerificationThreshold -> updateThreshold(action.threshold)
-            AdminPanelAction.ResetVoiceProfiles -> resetVoiceProfiles()
+            AdminPanelAction.RequestRestart -> viewModelScope.launch {
+                _events.emit(AdminPanelEvent.RestartAppTriggered)
+            }
+            else -> Unit
+        }
+    }
+
+    private fun handleVoiceAction(action: AdminPanelAction) {
+        when (action) {
+            is AdminPanelAction.ToggleSpeakerVerification -> viewModelScope.launch {
+                appConfigRepository.updateSpeakerVerificationEnabled(action.enabled)
+            }
+            is AdminPanelAction.EditSpeakerVerificationThreshold -> viewModelScope.launch {
+                appConfigRepository.updateSpeakerVerificationThreshold(action.threshold)
+            }
+            AdminPanelAction.ResetVoiceProfiles -> viewModelScope.launch {
+                voiceProfileRepository.clearAllProfiles()
+            }
             is AdminPanelAction.ToggleEnrollment -> {
                 voiceRecognitionViewModel.toggleEnrollment(action.active, action.name)
             }
-            is AdminPanelAction.DeleteVoiceProfile -> deleteVoiceProfile(action.name)
-            AdminPanelAction.RequestRestart -> requestRestart()
+            is AdminPanelAction.DeleteVoiceProfile -> viewModelScope.launch {
+                voiceProfileRepository.deleteVoiceProfile(action.name)
+            }
+            else -> Unit
+        }
+    }
+
+    private fun handleCheckPassword(input: String) {
+        viewModelScope.launch {
+            val currentHash = appConfigRepository.adminPasswordHash.first()
+            val isValid = appConfigRepository.isValidAdminPassword(input, currentHash)
+            _passwordError.value = !isValid
+            if (isValid) _isAuthorized.value = true
         }
     }
 
     private fun updateCoordinates(latitude: Double, longitude: Double) {
         @Suppress("MagicNumber")
         val roundedLat = round(latitude * 10000.0) / 10000.0
+
         @Suppress("MagicNumber")
         val roundedLon = round(longitude * 10000.0) / 10000.0
+
         viewModelScope.launch {
             appConfigRepository.updateCoordinates(roundedLat, roundedLon)
         }
-    }
-
-    private fun updateUrl(newUrl: String) {
-        viewModelScope.launch { appConfigRepository.updateUrl(newUrl) }
-    }
-
-    private fun resetCoordinates() {
-        @Suppress("MagicNumber")
-        viewModelScope.launch { appConfigRepository.updateCoordinates(49.0138, 8.3573) }
-    }
-
-    private fun openMqttReports() {
-        viewModelScope.launch { _events.emit(AdminPanelEvent.OpenMqttReports) }
-    }
-
-    private fun changePassword(newPassword: String) {
-        viewModelScope.launch {
-            appConfigRepository.updateAdminPassword(newPassword)
-            _events.emit(AdminPanelEvent.PasswordChanged)
-        }
-    }
-
-    private fun updateSpeakerVerification(enabled: Boolean) {
-        viewModelScope.launch { appConfigRepository.updateSpeakerVerificationEnabled(enabled) }
-    }
-
-    private fun updateThreshold(threshold: Double) {
-        viewModelScope.launch { appConfigRepository.updateSpeakerVerificationThreshold(threshold) }
-    }
-
-    private fun resetVoiceProfiles() {
-        viewModelScope.launch { voiceProfileRepository.clearAllProfiles() }
-    }
-
-    private fun deleteVoiceProfile(name: String) {
-        viewModelScope.launch { voiceProfileRepository.deleteVoiceProfile(name) }
-    }
-
-    private fun requestRestart() {
-        viewModelScope.launch { _events.emit(AdminPanelEvent.RestartAppTriggered) }
     }
 
     companion object {
@@ -195,6 +205,9 @@ class AdminPanelViewModel(
 }
 
 sealed interface AdminPanelAction {
+    data class CheckPassword(val password: String) : AdminPanelAction
+    data object ClearPasswordError : AdminPanelAction
+    data object ResetAuthorization : AdminPanelAction
     data class EditCoordinates(val latitude: Double, val longitude: Double) : AdminPanelAction
     data class EditWebserverUrl(val url: String) : AdminPanelAction
     data object ResetCoordinates : AdminPanelAction
@@ -226,8 +239,10 @@ data class AdminPanelState(
     val voiceProfileCount: Int = 0,
     val voiceProfiles: Map<String, SpeakerVector> = emptyMap(),
     val isEnrollmentActive: Boolean = false,
+
     @Suppress("MagicNumber")
     var longitude: Double = 8.3573,
+
     @Suppress("MagicNumber")
     var latitude: Double = 49.0138
 )

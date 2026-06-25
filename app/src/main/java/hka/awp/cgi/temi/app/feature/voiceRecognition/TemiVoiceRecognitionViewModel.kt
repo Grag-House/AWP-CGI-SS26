@@ -2,7 +2,7 @@ package hka.awp.cgi.temi.app.feature.voiceRecognition
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import hka.awp.cgi.temi.app.feature.webserver.AppConfigRepository
+import hka.awp.cgi.temi.app.utils.AppConfigRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
@@ -70,7 +70,6 @@ class TemiVoiceRecognitionViewModel(
     }
 
     override fun onCleared() {
-        super.onCleared()
         stopListening()
         temiVoiceListener.release()
         voiceManager.release()
