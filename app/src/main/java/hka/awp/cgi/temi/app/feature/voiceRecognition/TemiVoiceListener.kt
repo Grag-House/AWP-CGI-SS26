@@ -77,7 +77,7 @@ class TemiVoiceListener(
             }.first()
 
             isInitialized = true
-            Timber.d("TemiVoiceListener init. Profiles: %d", voiceProfiles.size)
+            Timber.d("TemiVoiceListener ready. Profiles: %d", voiceProfiles.size)
 
             listenerScope.launch {
                 robot?.addWakeupWordListener(internalListener)
@@ -132,14 +132,14 @@ class TemiVoiceListener(
             speechService?.startListening(internalListener)
             Timber.i("Vosk listening started")
         } catch (e: IOException) {
-            Timber.e(e, "Error starting Vosk")
+            Timber.e(e, "Vosk start failed")
         }
     }
 
     fun stopListening() {
         speechService?.stop()
         speechService = null
-        Timber.v("Vosk listening stopped")
+        Timber.v("Vosk stopped")
     }
 
     fun release() {
@@ -168,7 +168,7 @@ class TemiVoiceListener(
     private fun setTemiWakeupWordDisabled(disabled: Boolean) {
         try {
             robot?.toggleWakeup(disabled)
-            Timber.d("Temi wake-word disabled=%b", disabled)
+            Timber.v("Temi wake-word disabled=%b", disabled)
         } catch (e: IllegalStateException) {
             Timber.e(e, "Robot not available")
         }
@@ -176,7 +176,7 @@ class TemiVoiceListener(
 
     private inner class InternalListener : RecognitionListener, Robot.WakeupWordListener {
         override fun onWakeupWord(wakeupWord: String, direction: Int, origin: WakeupOrigin) {
-            Timber.v("Temi SDK Wake-Word: '%s'", wakeupWord)
+            Timber.v("Wake-Word: '%s'", wakeupWord)
             if (enrollment.isActive.value) return
             if (!isSpeakerVerificationEnabled) {
                 gate.open { if (shouldUseVoskOnly()) startListening() }
