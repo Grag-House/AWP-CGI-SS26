@@ -41,7 +41,8 @@ val navigationModule = module {
         NavigationViewModel(
             robot = get(),
             mqttManager = get(),
-            defaultMapName = androidApplication().getString(R.string.default_map_name)
+            defaultMapName = androidApplication().getString(R.string.default_map_name),
+            temiVoiceListener = get()
         )
     }
 }

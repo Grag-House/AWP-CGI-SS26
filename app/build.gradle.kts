@@ -192,6 +192,9 @@ dependencies {
     implementation(libs.androidx.compose.ui.text)
     implementation(libs.androidx.compose.material.icons.extended)
 
+    // Vosk speech recognition dependencies
+    implementation(libs.vosk.android)
+
     // ----------------- DEBUG / Compile time dependencies -----------------------
 
     // unit test dependencies

@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.time.Clock
 import java.time.format.DateTimeFormatter
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * ViewModel responsible for managing the global application state, including navigation,
@@ -37,7 +38,6 @@ class AppViewModel(
         private set
 
     fun onRouteSelect(screen: Screen) {
-        Timber.v("Navigating to: %s", screen.route)
         selectedRoute = screen.route
     }
 
@@ -57,7 +57,7 @@ class AppViewModel(
             while (isActive) {
                 _wifiLevel.value = networkManager.getWifiSignalLevel()
                 @Suppress("MagicNumber")
-                delay(5000L)
+                delay(5000L.milliseconds)
             }
         }
     }
@@ -70,7 +70,7 @@ class AppViewModel(
             while (isActive) {
                 _currentTime.value = getLocalTime(clock, dateTimeFormatter)
                 @Suppress("MagicNumber")
-                delay(15000L)
+                delay(15000L.milliseconds)
             }
         }
     }
