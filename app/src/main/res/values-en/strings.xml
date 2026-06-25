@@ -87,6 +87,7 @@
     <string name="notifications_description">Notifications</string>
     <string name="cgi">CGI</string>
     <string name="toggle_sidebar_description">Toggle sidebar</string>
+    <string name="back_description">Back</string>
 
     <string name="admin_panel">Admin Panel</string>
     <string name="admin_panel_description">Advanced settings for weather, webserver, MQTT</string>
@@ -151,6 +152,7 @@
     <string name="patrol_settings_select_hours_label">Select times (whole hours)</string>
     <string name="patrol_stream_content_description">Patrol video stream</string>
     <string name="patrol_stream_back_button">Back</string>
+    <string name="patrol_countdown_message">Patrol starts in %1$d seconds</string>
     <string name="patrol_stream_stop_button">Stop patrol</string>
 
     <string name="navigation_status_label">STATUS</string>
@@ -229,6 +231,7 @@
     <string name="controller_delete">Remove</string>
     <string name="controller_isNotBonded">Not paired</string>
     <string name="controller_status_label">Status: %1$s</string>
+    <string name="controller_bottom_text">Bluetooth Controller</string>
 
     <string name="hide_and_seek">Hide and Seek</string>
     <string name="hide_and_seek_sub">Find Temi!</string>

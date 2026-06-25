@@ -86,6 +86,7 @@
     <string name="notifications_description">Notifiche</string>
     <string name="cgi">CGI</string>
     <string name="toggle_sidebar_description">Toggle barra laterale</string>
+    <string name="back_description">Indietro</string>
 
     <string name="admin_panel">Admin Panel</string>
     <string name="admin_panel_description">Impostazioni avanzate</string>
@@ -150,6 +151,7 @@
     <string name="patrol_settings_select_hours_label">Seleziona gli orari (ore intere)</string>
     <string name="patrol_stream_content_description">Flusso video della ronda</string>
     <string name="patrol_stream_back_button">Indietro</string>
+    <string name="patrol_countdown_message">La ronda inizia in %1$d secondi</string>
     <string name="patrol_stream_stop_button">Interrompi la ronda</string>
 
     <string name="navigation_status_label">STATUS</string>
@@ -228,6 +230,7 @@
     <string name="controller_delete">Rimuovi</string>
     <string name="controller_isNotBonded">Non accoppiato</string>
     <string name="controller_status_label">Stato: %1$s</string>
+    <string name="controller_bottom_text">Controller Bluetooth</string>
 
     <string name="hide_and_seek">Nascondino</string>
     <string name="hide_and_seek_sub">Trova Temi!</string>

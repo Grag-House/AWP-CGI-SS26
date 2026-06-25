@@ -98,6 +98,7 @@
     <string name="notifications_description">Benachrichtigungen</string>
     <string name="cgi">CGI</string>
     <string name="toggle_sidebar_description">Schaltfläche zum Ein- oder Ausklappen der Seitenleiste</string>
+    <string name="back_description">Zurück</string>
 
     <string name="admin_panel">Admin Panel</string>
     <string name="admin_panel_description">Erweiterte Einstellungen für Wetterseite, Webserver, MQTT</string>
@@ -162,6 +163,7 @@
     <string name="patrol_settings_select_hours_label">Uhrzeiten auswählen (Ganze Stunden)</string>
     <string name="patrol_stream_content_description">Kontrollfahrt-Videostream</string>
     <string name="patrol_stream_back_button">Zurück</string>
+    <string name="patrol_countdown_message">Kontrollfahrt startet in %1$d Sekunden</string>
     <string name="patrol_stream_stop_button">Patrouille abbrechen</string>
 
     <!-- Navigation Page -->
@@ -244,6 +246,7 @@
     <string name="controller_delete">Entfernen</string>
     <string name="controller_isNotBonded">Nicht gekoppelt</string>
     <string name="controller_status_label">Status: %1$s</string>
+    <string name="controller_bottom_text">Bluetooth Controller</string>
 
     <!-- Hide and Seek Page -->
     <string name="hide_and_seek">Verstecken</string>

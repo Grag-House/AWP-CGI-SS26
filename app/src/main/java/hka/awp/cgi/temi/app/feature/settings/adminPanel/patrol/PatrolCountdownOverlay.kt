@@ -9,7 +9,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import hka.awp.cgi.temi.app.R
 
 @Composable
 fun PatrolCountdownOverlay(seconds: Int) {
@@ -21,7 +23,7 @@ fun PatrolCountdownOverlay(seconds: Int) {
     ) {
         Card {
             Text(
-                text = "Kontrollfahrt startet in $seconds Sekunden",
+                text = stringResource(R.string.patrol_countdown_message, seconds),
                 modifier = Modifier.padding(
                     horizontal = 24.dp,
                     vertical = 16.dp

@@ -86,6 +86,7 @@
     <string name="notifications_description">Notifications</string>
     <string name="cgi">CGI</string>
     <string name="toggle_sidebar_description">Barre latérale</string>
+    <string name="back_description">Retour</string>
 
     <string name="admin_panel">Admin Panel</string>
     <string name="admin_panel_description">Paramètres avancés</string>
@@ -150,6 +151,7 @@
     <string name="patrol_settings_select_hours_label">Sélectionner les heures (heures pleines)</string>
     <string name="patrol_stream_content_description">Flux vidéo de la ronde</string>
     <string name="patrol_stream_back_button">Retour</string>
+    <string name="patrol_countdown_message">La ronde démarre dans %1$d secondes</string>
     <string name="patrol_stream_stop_button">Arrêter la ronde</string>
 
     <string name="navigation_status_label">STATUS</string>
@@ -228,6 +230,7 @@
     <string name="controller_delete">Supprimer</string>
     <string name="controller_isNotBonded">Non appairé</string>
     <string name="controller_status_label">Statut : %1$s</string>
+    <string name="controller_bottom_text">Contrôleur Bluetooth</string>
 
     <string name="hide_and_seek">Cache-cache</string>
     <string name="hide_and_seek_sub">Trouve Temi !</string>
