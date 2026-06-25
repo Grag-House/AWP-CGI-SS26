@@ -259,6 +259,10 @@
     <string name="photobox_camera_unavailable">Ma caméra n\'est pas disponible pour le moment.</string>
     <string name="photobox_overlay_title">Superposition Temi</string>
     <string name="photobox_overlay_description">Place une image de Temi sur la photo prise, pour donner l\'impression que Temi se trouve à vos côtés.</string>
+    <string name="photobox_banner_title">Bannière</string>
+    <string name="photobox_banner_description">Affiche une bannière en bas de la photo.</string>
+    <string name="photobox_banner_50_years_cgi">50 ans de CGI</string>
+    <string name="photobox_banner_cgi_lab">CGI Lab</string>
     <string name="photobox_upload_section_title">Téléchargement des photos</string>
     <string name="photobox_drive_folder_label">Lien du dossier Google Drive</string>
     <string name="photobox_drive_upload_url_label">URL du webhook d\'envoi</string>

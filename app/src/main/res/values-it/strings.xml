@@ -258,6 +258,10 @@
     <string name="photobox_camera_unavailable">La mia fotocamera non è disponibile al momento.</string>
     <string name="photobox_overlay_title">Overlay di Temi</string>
     <string name="photobox_overlay_description">Sovrappone un\'immagine di Temi alla foto scattata, in modo che sembri che Temi sia al tuo fianco.</string>
+    <string name="photobox_banner_title">Banner</string>
+    <string name="photobox_banner_description">Mostra un banner in fondo alla foto.</string>
+    <string name="photobox_banner_50_years_cgi">50 anni di CGI</string>
+    <string name="photobox_banner_cgi_lab">CGI Lab</string>
     <string name="photobox_upload_section_title">Caricamento foto</string>
     <string name="photobox_drive_folder_label">Link della cartella Google Drive</string>
     <string name="photobox_drive_upload_url_label">URL webhook di caricamento</string>

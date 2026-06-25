@@ -1,5 +1,7 @@
 package hka.awp.cgi.temi.app.feature.settings.photobox
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -8,13 +10,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.BrandingWatermark
 import androidx.compose.material.icons.rounded.CloudUpload
 import androidx.compose.material.icons.rounded.Layers
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,9 +30,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import hka.awp.cgi.temi.app.R
+import hka.awp.cgi.temi.app.feature.photobox.PhotoboxBanner
 import hka.awp.cgi.temi.app.ui.components.SettingsCard
 import hka.awp.cgi.temi.app.ui.components.SettingsHeader
 import hka.awp.cgi.temi.app.ui.components.SettingsRow
@@ -38,6 +45,10 @@ fun PhotoboxSettingsContent(
     onBackClick: () -> Unit,
     overlayEnabled: Boolean,
     onOverlayEnabledChange: (Boolean) -> Unit,
+    bannerEnabled: Boolean,
+    onBannerEnabledChange: (Boolean) -> Unit,
+    banner: PhotoboxBanner,
+    onBannerSelect: (PhotoboxBanner) -> Unit,
     driveFolderLink: String,
     driveUploadUrl: String,
     onSaveUploadSettings: (folderLink: String, uploadUrl: String) -> Unit
@@ -83,6 +94,15 @@ fun PhotoboxSettingsContent(
 
         Spacer(modifier = Modifier.height(20.dp))
 
+        BannerSettingsCard(
+            bannerEnabled = bannerEnabled,
+            onBannerEnabledChange = onBannerEnabledChange,
+            banner = banner,
+            onBannerSelect = onBannerSelect
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
         UploadSettingsCard(
             driveFolderLink = driveFolderLink,
             driveUploadUrl = driveUploadUrl,
@@ -90,6 +110,72 @@ fun PhotoboxSettingsContent(
         )
     }
 }
+
+@Composable
+private fun BannerSettingsCard(
+    bannerEnabled: Boolean,
+    onBannerEnabledChange: (Boolean) -> Unit,
+    banner: PhotoboxBanner,
+    onBannerSelect: (PhotoboxBanner) -> Unit
+) {
+    SettingsCard {
+        SettingsRow(
+            icon = Icons.AutoMirrored.Rounded.BrandingWatermark,
+            title = stringResource(R.string.photobox_banner_title),
+            subtitle = if (bannerEnabled) {
+                stringResource(R.string.display_enabled)
+            } else {
+                stringResource(R.string.display_disabled)
+            },
+            action = {
+                Switch(
+                    checked = bannerEnabled,
+                    onCheckedChange = onBannerEnabledChange
+                )
+            }
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Text(
+            text = stringResource(R.string.photobox_banner_description),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+        )
+
+        if (bannerEnabled) {
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                PhotoboxBanner.entries.forEach { option ->
+                    val isSelected = option == banner
+                    Surface(
+                        onClick = { onBannerSelect(option) },
+                        shape = RoundedCornerShape(10.dp),
+                        color = if (isSelected) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.surfaceVariant
+                        }
+                    ) {
+                        Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)) {
+                            Text(
+                                text = stringResource(option.labelRes),
+                                color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+private val PhotoboxBanner.labelRes: Int
+    get() = when (this) {
+        PhotoboxBanner.FIFTY_YEARS_CGI -> R.string.photobox_banner_50_years_cgi
+        PhotoboxBanner.CGI_LAB -> R.string.photobox_banner_cgi_lab
+    }
 
 @Composable
 private fun UploadSettingsCard(

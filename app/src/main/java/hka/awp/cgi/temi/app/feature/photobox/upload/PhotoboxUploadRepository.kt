@@ -7,6 +7,7 @@ import android.graphics.Canvas
 import android.graphics.RectF
 import android.util.Base64
 import hka.awp.cgi.temi.app.R
+import hka.awp.cgi.temi.app.feature.photobox.PhotoboxBanner
 import hka.awp.cgi.temi.app.feature.photobox.TemiOverlayPosition
 import hka.awp.cgi.temi.app.utils.AppConfigRepository
 import kotlinx.coroutines.CancellationException
@@ -39,6 +40,13 @@ internal const val PHOTOBOX_OVERLAY_HEIGHT_FRACTION = 0.68f
  */
 data class PhotoboxUploadResult(val viewUrl: String, val expiresAtMillis: Long)
 
+/** [position] and [banner] of the Temi cutout/branding banner, grouped since both `bakeOverlay`
+ * and `bakeBanner` are needed together wherever a final photo gets decorated. */
+internal data class PhotoboxOverlayOptions(
+    val position: TemiOverlayPosition,
+    val banner: PhotoboxBanner?
+)
+
 /**
  * Uploads Photobox photos to a Google Drive folder via a Google Apps Script web app acting as a
  * webhook — the app never needs Google credentials, it just POSTs the image as base64 JSON.
@@ -59,12 +67,12 @@ class PhotoboxUploadRepository(
         .build()
 
     /** Returns the time-limited, shareable view URL for the uploaded photo on success. */
-    suspend fun uploadPhoto(
+    internal suspend fun uploadPhoto(
         photo: Bitmap,
         withOverlay: Boolean,
-        overlayPosition: TemiOverlayPosition
+        overlayOptions: PhotoboxOverlayOptions
     ): Result<PhotoboxUploadResult> {
-        val finalBitmap = if (withOverlay) bakeOverlay(photo, overlayPosition) else photo
+        val finalBitmap = if (withOverlay) bakeOverlay(photo, overlayOptions) else photo
         return uploadFinalPhoto(finalBitmap)
     }
 
@@ -135,27 +143,65 @@ class PhotoboxUploadRepository(
     // Decoded once and reused — a strip bakes this into 3 frames per session.
     private val overlayBitmap by lazy { BitmapFactory.decodeResource(context.resources, R.drawable.temi_photo) }
 
-    /** Burns the Temi cutout into [photo] itself (e.g. so each strip frame carries its own copy). */
-    internal fun bakeOverlay(photo: Bitmap, position: TemiOverlayPosition): Bitmap {
+    /**
+     * Burns the Temi cutout into [photo] itself (e.g. so each strip frame carries its own copy).
+     * If [PhotoboxOverlayOptions.banner] is set, Temi is shifted up to sit above the banner
+     * instead of overlapping it — the banner is assumed to already be baked into [photo] at its
+     * default (non-grid) size, which is the only case where Temi and the banner could collide
+     * (strip/grid bake Temi per-frame, well before the banner is added to the combined image).
+     */
+    internal fun bakeOverlay(photo: Bitmap, overlayOptions: PhotoboxOverlayOptions): Bitmap {
         val overlay = overlayBitmap
         val result = photo.copy(photo.config ?: Bitmap.Config.ARGB_8888, true)
         val canvas = Canvas(result)
+        val bannerHeight = overlayOptions.banner?.let { bannerHeightPx(result.width, it) } ?: 0f
+        val bottom = result.height - bannerHeight
         val targetHeight = result.height * PHOTOBOX_OVERLAY_HEIGHT_FRACTION
         val scale = targetHeight / overlay.height
         val targetWidth = overlay.width * scale
-        val left = when (position) {
+        val left = when (overlayOptions.position) {
             TemiOverlayPosition.LEFT -> 0f
             TemiOverlayPosition.CENTER -> (result.width - targetWidth) / 2f
             TemiOverlayPosition.RIGHT -> result.width - targetWidth
         }
-        val destRect = RectF(
-            left,
-            result.height - targetHeight,
-            left + targetWidth,
-            result.height.toFloat()
-        )
+        val destRect = RectF(left, bottom - targetHeight, left + targetWidth, bottom)
         canvas.drawBitmap(overlay, null, destRect, null)
         return result
+    }
+
+    // Decoded once per banner and reused — a strip/grid only bakes this into the final composite,
+    // not per frame, but a session could still bake more than one photo.
+    private val bannerBitmaps: Map<PhotoboxBanner, Bitmap> by lazy {
+        PhotoboxBanner.entries.associateWith { banner ->
+            BitmapFactory.decodeResource(context.resources, banner.drawableRes)
+        }
+    }
+
+    /**
+     * Draws [banner] flush against the bottom edge, spanning the full width and scaled to keep
+     * its aspect ratio. For a strip/grid this lands in the blank branding area [combinePhotoStrip]
+     * /[combinePhotoGrid] already leave at the bottom; for a standalone photo it overlays the
+     * bottom edge of the photo itself.
+     */
+    internal fun bakeBanner(photo: Bitmap, banner: PhotoboxBanner): Bitmap {
+        val bannerBitmap = bannerBitmaps.getValue(banner)
+        val result = photo.copy(photo.config ?: Bitmap.Config.ARGB_8888, true)
+        val canvas = Canvas(result)
+        val scale = result.width.toFloat() / bannerBitmap.width
+        val bannerHeight = bannerBitmap.height * scale
+        val destRect = RectF(
+            0f,
+            result.height - bannerHeight,
+            result.width.toFloat(),
+            result.height.toFloat()
+        )
+        canvas.drawBitmap(bannerBitmap, null, destRect, null)
+        return result
+    }
+
+    private fun bannerHeightPx(photoWidth: Int, banner: PhotoboxBanner): Float {
+        val bannerBitmap = bannerBitmaps.getValue(banner)
+        return bannerBitmap.height * (photoWidth.toFloat() / bannerBitmap.width)
     }
 }
 

@@ -26,7 +26,7 @@ internal class PhotoboxOverlaySettings(
 
     fun setPosition(position: TemiOverlayPosition) {
         scope.launch {
-            appConfigRepository.setPhotoboxOverlayPosition(position.name)
+            appConfigRepository.setPhotoboxOverlay(enabled.value, position.name)
         }
     }
 }
