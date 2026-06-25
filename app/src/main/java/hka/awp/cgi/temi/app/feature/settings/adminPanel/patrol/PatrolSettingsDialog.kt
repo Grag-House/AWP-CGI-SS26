@@ -29,23 +29,27 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import hka.awp.cgi.temi.app.R
+import java.util.Locale
 
-enum class DialogPatrolMode { RANDOM, FIXED }
+enum class PatrolSettingsDialog { RANDOM, FIXED }
 
 @OptIn(ExperimentalLayoutApi::class)
+@Suppress("LongMethod")
 @Composable
 fun PatrolSettingsDialog(
     initialIsEnabled: Boolean = false,
-    initialMode: DialogPatrolMode = DialogPatrolMode.RANDOM,
+    initialMode: PatrolSettingsDialog = PatrolSettingsDialog.RANDOM,
     initialMinMinutes: Int = 40,
     initialMaxMinutes: Int = 60,
     initialHours: Set<Int> = emptySet(),
     onTriggerPatrol: () -> Unit,
     onDismiss: () -> Unit,
-    onSave: (isEnabled: Boolean, mode: DialogPatrolMode, minMin: Int, maxMin: Int, hours: Set<Int>) -> Unit
+    onSave: (isEnabled: Boolean, mode: PatrolSettingsDialog, minMin: Int, maxMin: Int, hours: Set<Int>) -> Unit
 ) {
     var isEnabled by remember { mutableStateOf(initialIsEnabled) }
     var selectedMode by remember { mutableStateOf(initialMode) }
@@ -57,7 +61,7 @@ fun PatrolSettingsDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = "Kontrollfahrten konfigurieren",
+                text = stringResource(R.string.patrol_settings_dialog_title),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
@@ -70,7 +74,7 @@ fun PatrolSettingsDialog(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(
-                    text = "Wähle aus, wie die automatischen Rundgänge zur Überprüfung des Wohlbefindens geplant werden sollen.",
+                    text = stringResource(R.string.patrol_settings_dialog_subtitle),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -83,7 +87,7 @@ fun PatrolSettingsDialog(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = "Automatische Fahrten aktivieren",
+                        text = stringResource(R.string.patrol_settings_enable_label),
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 16.sp
                     )
@@ -102,64 +106,70 @@ fun PatrolSettingsDialog(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp)
                     ) {
-                        Text("Jetzt eine Kontrollfahrt starten")
+                        Text(stringResource(R.string.patrol_settings_trigger_now_button))
                     }
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text("Planungs-Modus", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                        Text(
+                            stringResource(R.string.patrol_settings_mode_label),
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 14.sp
+                        )
 
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable { selectedMode = DialogPatrolMode.RANDOM },
+                                .clickable { selectedMode = PatrolSettingsDialog.RANDOM },
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             RadioButton(
-                                selected = selectedMode == DialogPatrolMode.RANDOM,
-                                onClick = { selectedMode = DialogPatrolMode.RANDOM }
+                                selected = selectedMode == PatrolSettingsDialog.RANDOM,
+                                onClick = { selectedMode = PatrolSettingsDialog.RANDOM }
                             )
                             Spacer(Modifier.width(8.dp))
-                            Text("Zufalls-Intervall (z.B. alle 40-60 Min)")
+                            Text(stringResource(R.string.patrol_settings_mode_random))
                         }
 
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable { selectedMode = DialogPatrolMode.FIXED },
+                                .clickable { selectedMode = PatrolSettingsDialog.FIXED },
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             RadioButton(
-                                selected = selectedMode == DialogPatrolMode.FIXED,
-                                onClick = { selectedMode = DialogPatrolMode.FIXED }
+                                selected = selectedMode == PatrolSettingsDialog.FIXED,
+                                onClick = { selectedMode = PatrolSettingsDialog.FIXED }
                             )
                             Spacer(Modifier.width(8.dp))
-                            Text("Feste Stunden (jede gewählte Stunde)")
+                            Text(stringResource(R.string.patrol_settings_mode_fixed))
                         }
                     }
 
-                    if (selectedMode == DialogPatrolMode.RANDOM) {
+                    if (selectedMode == PatrolSettingsDialog.RANDOM) {
                         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            Text("Intervall-Grenzen (Minuten)", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                            Text(
+                                stringResource(R.string.patrol_settings_interval_bounds_label),
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 14.sp
+                            )
 
-                            Text("Minimaler Abstand: ${minMinutes.toInt()} Min.")
+                            Text(stringResource(R.string.patrol_settings_min_distance, minMinutes.toInt()))
                             Slider(
                                 value = minMinutes,
                                 onValueChange = { minMinutes = it.coerceAtMost(maxMinutes) },
-                                valueRange = 10f..120f,
-                                steps = 11
+                                valueRange = 10f..120f
                             )
 
-                            Text("Maximaler Abstand: ${maxMinutes.toInt()} Min.")
+                            Text(stringResource(R.string.patrol_settings_max_distance, maxMinutes.toInt()))
                             Slider(
                                 value = maxMinutes,
                                 onValueChange = { maxMinutes = it.coerceAtLeast(minMinutes) },
-                                valueRange = 10f..120f,
-                                steps = 11
+                                valueRange = 10f..120f
                             )
                         }
                     } else {
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Text(
-                                "Uhrzeiten auswählen (Ganze Stunden)",
+                                stringResource(R.string.patrol_settings_select_hours_label),
                                 fontWeight = FontWeight.SemiBold,
                                 fontSize = 14.sp
                             )
@@ -169,14 +179,19 @@ fun PatrolSettingsDialog(
                                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                                 verticalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
+                                @Suppress("MagicNumber")
                                 for (hour in 0..23) {
                                     val isSelected = hour in selectedHours
                                     FilterChip(
                                         selected = isSelected,
                                         onClick = {
-                                            selectedHours = if (isSelected) selectedHours - hour else selectedHours + hour
+                                            selectedHours = if (isSelected) {
+                                                selectedHours - hour
+                                            } else {
+                                                selectedHours + hour
+                                            }
                                         },
-                                        label = { Text(text = String.format("%02d:00", hour)) }
+                                        label = { Text(text = String.format(Locale.GERMANY, "%02d:00", hour)) }
                                     )
                                 }
                             }
@@ -193,12 +208,12 @@ fun PatrolSettingsDialog(
                 },
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text("Speichern", fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.save), fontWeight = FontWeight.Bold)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Abbrechen")
+                Text(stringResource(R.string.admin_panel_cancel))
             }
         }
     )

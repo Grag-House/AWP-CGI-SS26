@@ -1,6 +1,8 @@
 package hka.awp.cgi.temi.app.feature.stream // Jetzt im Core-Paket!
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.ImageFormat
 import android.graphics.Rect
 import android.graphics.YuvImage
@@ -10,6 +12,12 @@ import androidx.camera.core.ImageProxy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ProcessLifecycleOwner
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -23,14 +31,20 @@ import java.util.concurrent.Executors
 class CameraStreamManager(
     private val context: Context,
     private val serverUrl: String,
-    private val onMessageReceived: (String) -> Unit // Callback für eingehende Server-Nachrichten
-                         ) {
+) {
     private val client = OkHttpClient()
     private val cameraExecutor = Executors.newSingleThreadExecutor()
-
     private var webSocket: WebSocket? = null
     private var imageAnalysis: ImageAnalysis? = null
     private var isStreaming = false
+    private val mainExecutor = ContextCompat.getMainExecutor(context)
+    private var lastFrameSentAt = 0L
+    private val _processedBitmap = MutableStateFlow<Bitmap?>(null)
+    val processedBitmap: StateFlow<Bitmap?> = _processedBitmap.asStateFlow()
+    private val _textMessages = MutableSharedFlow<String>(
+        extraBufferCapacity = 20
+    )
+    val textMessages: SharedFlow<String> = _textMessages.asSharedFlow()
 
     // Verhindert mehrfache Verbindungsaufbaue während der Stream läuft
     @Volatile
@@ -38,7 +52,9 @@ class CameraStreamManager(
 
     // HINWEIS: Wird jetzt intern aufgerufen, wenn der erste Frame bereit ist!
     private fun connect() {
-        if (webSocket != null) return
+        if (webSocket != null || isWebSocketConnectingOrConnected) return
+
+        isWebSocketConnectingOrConnected = true
 
         val request = Request.Builder().url(serverUrl).build()
 
@@ -50,7 +66,21 @@ class CameraStreamManager(
                 }
 
                 override fun onMessage(webSocket: WebSocket, text: String) {
-                    onMessageReceived(text) // Weiterleiten nach außen
+                    Timber.d("Analyse: $text")
+                    _textMessages.tryEmit(text)
+                }
+
+                override fun onMessage(webSocket: WebSocket, bytes: okio.ByteString) {
+                    val kotlinBytes = bytes.toByteArray()
+                    val bitmap = BitmapFactory.decodeByteArray(kotlinBytes, 0, kotlinBytes.size)
+
+                    if (bitmap != null) {
+                        mainExecutor.execute {
+                            _processedBitmap.value = bitmap
+                        }
+                    } else {
+                        Timber.w("Empfangenes Binary konnte nicht als Bitmap decodiert werden.")
+                    }
                 }
 
                 override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
@@ -66,7 +96,7 @@ class CameraStreamManager(
                     this@CameraStreamManager.webSocket = null
                 }
             }
-                                       )
+        )
     }
 
     fun startStream() {
@@ -76,46 +106,49 @@ class CameraStreamManager(
 
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
         cameraProviderFuture.addListener({
-                                             val cameraProvider = cameraProviderFuture.get()
+            val cameraProvider = cameraProviderFuture.get()
 
-                                             imageAnalysis = ImageAnalysis.Builder()
-                                                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                                                 .build()
-                                                 .also { analysis ->
-                                                     analysis.setAnalyzer(cameraExecutor) { imageProxy ->
-                                                         handleFrame(imageProxy)
-                                                     }
-                                                 }
+            imageAnalysis = ImageAnalysis.Builder()
+                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                .build()
+                .also { analysis ->
+                    analysis.setAnalyzer(cameraExecutor) { imageProxy ->
+                        handleFrame(imageProxy)
+                    }
+                }
 
-                                             cameraProvider.unbindAll()
-                                             cameraProvider.bindToLifecycle(
-                                                 ProcessLifecycleOwner.get(),
-                                                 CameraSelector.DEFAULT_FRONT_CAMERA,
-                                                 imageAnalysis
-                                                                           )
-                                         }, ContextCompat.getMainExecutor(context))
+            cameraProvider.unbindAll()
+            cameraProvider.bindToLifecycle(
+                ProcessLifecycleOwner.get(),
+                CameraSelector.DEFAULT_FRONT_CAMERA,
+                imageAnalysis
+            )
+        }, ContextCompat.getMainExecutor(context))
     }
 
     private fun handleFrame(imageProxy: ImageProxy) {
         try {
             if (!isStreaming) return
 
-            // 1. Erst wenn wirklich Frames ankommen, starten wir den WebSocket
+            val now = System.currentTimeMillis()
+            if (now - lastFrameSentAt < FRAME_INTERVAL_MS) {
+                return
+            }
+
+            lastFrameSentAt = now
+
             if (!isWebSocketConnectingOrConnected) {
-                isWebSocketConnectingOrConnected = true
                 Timber.i("Erster Kamera-Frame empfangen! Starte WebSocket-Verbindung...")
                 connect()
             }
 
-            // 2. Nur senden, wenn der Socket auch tatsächlich bereit ist
             val currentWebSocket = webSocket
             if (currentWebSocket != null) {
                 val jpegBytes = imageProxy.toJpegBytes(JPEG_QUALITY)
                 currentWebSocket.send(jpegBytes.toByteString())
             }
-
-        } catch (e: Exception) {
-            Timber.e(e, "Frame konnte nicht gesendet werden")
+        } catch (e: IllegalStateException) {
+            Timber.e(e, "Fehler beim Verarbeiten des Frames: ${e.message}")
         } finally {
             imageProxy.close()
         }
@@ -132,17 +165,17 @@ class CameraStreamManager(
     fun stopStream() {
         if (!isStreaming) return
         isStreaming = false
+        _processedBitmap.value = null
         isWebSocketConnectingOrConnected = false
 
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
         cameraProviderFuture.addListener({
-                                             cameraProviderFuture.get().unbindAll()
-                                             imageAnalysis = null
+            cameraProviderFuture.get().unbindAll()
+            imageAnalysis = null
 
-                                             // Socket schließen, wenn der Stream stoppt
-                                             webSocket?.close(1000, "Stream stopped")
-                                             webSocket = null
-                                         }, ContextCompat.getMainExecutor(context))
+            webSocket?.close(WEBSOCKET_CODE, "Stream stopped")
+            webSocket = null
+        }, ContextCompat.getMainExecutor(context))
     }
 
     fun disconnect() {
@@ -152,6 +185,9 @@ class CameraStreamManager(
 
     private companion object {
         private const val JPEG_QUALITY = 60
+        private const val FRAME_INTERVAL_MS = 200L
+
+        private const val WEBSOCKET_CODE = 1000
     }
 }
 

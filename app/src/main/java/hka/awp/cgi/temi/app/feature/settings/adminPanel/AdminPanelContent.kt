@@ -1,6 +1,5 @@
 package hka.awp.cgi.temi.app.feature.settings.adminPanel
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,12 +9,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import hka.awp.cgi.temi.app.R
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.AdminPasswordCard
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.CloseAppCard
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.CoordinateManagementCard
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.MqttReportsCard
@@ -27,12 +26,13 @@ import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.WebserverUrlC
 import hka.awp.cgi.temi.app.ui.components.SettingsHeader
 
 @Composable
-@Suppress("LongParameterList")
+@Suppress("LongParameterList", "LongMethod")
 fun AdminPanelContent(
     uiState: AdminPanelState,
     onBackClick: () -> Unit,
     onEditUrl: () -> Unit,
     onOpenMqtt: () -> Unit,
+    onUpdateWebserverPassword: () -> Unit,
     onChangePassword: () -> Unit,
     onEditCoordinates: () -> Unit,
     onRestartRequest: () -> Unit,
@@ -41,9 +41,7 @@ fun AdminPanelContent(
     onCloseRequest: () -> Unit
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+        modifier = Modifier.fillMaxSize()
     ) {
         Column(
             modifier = Modifier
@@ -64,20 +62,55 @@ fun AdminPanelContent(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                WebserverUrlCard(url = uiState.webserverUrl, onEdit = onEditUrl)
+                WebserverUrlCard(
+                    url = uiState.webserverUrl,
+                    onEdit = onEditUrl
+                )
+
                 MqttReportsCard(onNavigate = onOpenMqtt)
-                WebserverPasswordCard(onChangePassword = onChangePassword)
-                CoordinateManagementCard(coordinates = uiState.coordinates, onEdit = onEditCoordinates)
+
+                WebserverPasswordCard(
+                    onUpdateWebserverPassword = onUpdateWebserverPassword
+                )
+                
+                AdminPasswordCard(
+                    onChangePassword = onChangePassword
+                )
+
+                CoordinateManagementCard(
+                    coordinates = stringResource(
+                        R.string.admin_panel_coordinates_format,
+                        uiState.longitude,
+                        uiState.latitude
+                    ),
+                    onEdit = onEditCoordinates
+                )
+
                 PatrolSettingsCard(
-                    currentModeText = uiState.patrolModeText,
+                    currentModeText = if (!uiState.isPatrolEnabled) {
+                        stringResource(R.string.admin_panel_patrol_disabled)
+                    } else {
+                        uiState.patrolRoute.joinToString(" → ")
+                    },
                     onNavigate = onNavigateToPatrolSettings
                 )
+
                 PatrolRouteCard(
-                    currentRouteText = uiState.patrolRouteText,
+                    currentRouteText = if (uiState.patrolRoute.isEmpty()) {
+                        stringResource(R.string.admin_panel_no_route_selected_title)
+                    } else {
+                        uiState.patrolRoute.joinToString(" → ")
+                    },
                     onNavigate = onNavigateToPatrolRoute
                 )
-                RestartAppCard(onRestartClick = onRestartRequest)
-                CloseAppCard(onCloseClick = onCloseRequest)
+
+                RestartAppCard(
+                    onRestartClick = onRestartRequest
+                )
+
+                CloseAppCard(
+                    onCloseClick = onCloseRequest
+                )
             }
         }
     }

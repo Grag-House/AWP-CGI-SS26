@@ -24,15 +24,15 @@ class PatrolSettingsRepository(
     }
 
     private fun loadSettings(): PatrolSettings {
-        val mode = prefs.getString(KEY_MODE, PatrolMode.RANDOM.name)
+        val mode = prefs.getString(KEY_MODE, DEFAULT_MODE.name)
             ?.let { PatrolMode.valueOf(it) }
-            ?: PatrolMode.RANDOM
+            ?: DEFAULT_MODE
 
         return PatrolSettings(
-            isEnabled = prefs.getBoolean(KEY_ENABLED, false),
+            isEnabled = prefs.getBoolean(KEY_ENABLED, DEFAULT_ENABLED),
             mode = mode,
-            minMinutes = prefs.getInt(KEY_MIN_MINUTES, 40),
-            maxMinutes = prefs.getInt(KEY_MAX_MINUTES, 60),
+            minMinutes = prefs.getInt(KEY_MIN_MINUTES, DEFAULT_MIN_MINUTES),
+            maxMinutes = prefs.getInt(KEY_MAX_MINUTES, DEFAULT_MAX_MINUTES),
             hours = prefs.getStringSet(KEY_HOURS, emptySet())
                 ?.mapNotNull { it.toIntOrNull() }
                 ?.toSet()
@@ -50,5 +50,9 @@ class PatrolSettingsRepository(
         const val KEY_MAX_MINUTES = "patrol_max_minutes"
         const val KEY_HOURS = "patrol_hours"
         const val KEY_ROUTE = "patrol_route"
+        private const val DEFAULT_ENABLED = false
+        private const val DEFAULT_MIN_MINUTES = 40
+        private const val DEFAULT_MAX_MINUTES = 60
+        private val DEFAULT_MODE = PatrolMode.RANDOM
     }
 }

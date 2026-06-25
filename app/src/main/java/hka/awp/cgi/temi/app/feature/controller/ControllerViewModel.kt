@@ -18,6 +18,12 @@ class ControllerViewModel(
     private val cameraStreamManager: ControllerCameraStreamManager
 ) : ViewModel() {
 
+    companion object {
+        private const val CONTROLLER_UPDATE_INTERVAL_MS = 20L
+        private const val BASE_SPEED_FACTOR = 1.0f
+        private const val TURN_EFFORT_PENALTY_WEIGHT = 0.3f
+        private const val TURN_MULTIPLIER = 2.0f
+    }
     val devices: StateFlow<List<ControllerDevice>> = bluetoothControllerManager.devices
     val isScanning: StateFlow<Boolean> = bluetoothControllerManager.isScanning
 
@@ -87,12 +93,10 @@ class ControllerViewModel(
     fun onControllerInput(x: Float, y: Float) {
         val steering = if (x > 0) x * x else -(x * x)
 
-        val turnMultiplier = 2.0f
-
         val turnEffort = abs(steering)
-        val linearSpeed = y * (1.0f - (turnEffort * 0.3f))
 
-        val turn = steering * turnMultiplier
+        val linearSpeed = y * (BASE_SPEED_FACTOR - (turnEffort * TURN_EFFORT_PENALTY_WEIGHT))
+        val turn = steering * TURN_MULTIPLIER
 
         lastX = turn
         lastY = linearSpeed
@@ -113,5 +117,3 @@ class ControllerViewModel(
         super.onCleared()
     }
 }
-
-private const val CONTROLLER_UPDATE_INTERVAL_MS = 20L

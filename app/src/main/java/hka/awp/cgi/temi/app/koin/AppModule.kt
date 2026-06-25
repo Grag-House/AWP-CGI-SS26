@@ -4,8 +4,8 @@ import com.robotemi.sdk.Robot
 import hka.awp.cgi.temi.app.BuildConfig
 import hka.awp.cgi.temi.app.data.repository.RobotRepository
 import hka.awp.cgi.temi.app.feature.controller.BluetoothControllerManager
-import hka.awp.cgi.temi.app.feature.controller.stream.ControllerCameraStreamManager
 import hka.awp.cgi.temi.app.feature.controller.ControllerViewModel
+import hka.awp.cgi.temi.app.feature.controller.stream.ControllerCameraStreamManager
 import hka.awp.cgi.temi.app.feature.hideandseek.HideAndSeekViewModel
 import hka.awp.cgi.temi.app.feature.hideandseek.HidingSpotRepository
 import hka.awp.cgi.temi.app.feature.navigation.NavigationViewModel
@@ -13,6 +13,7 @@ import hka.awp.cgi.temi.app.feature.settings.SettingsViewModel
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.AdminPanelViewModel
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolCameraStreamManager
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolManager
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolOverlayViewModel
 import hka.awp.cgi.temi.app.feature.settings.battery.BatteryViewModel
 import hka.awp.cgi.temi.app.feature.settings.display.DisplayViewModel
 import hka.awp.cgi.temi.app.feature.settings.language.LanguageViewModel
@@ -97,10 +98,16 @@ val appModule = module {
     }
 
     viewModel {
-        AdminPanelViewModel(appConfigRepository = get(), mqttManager = get(), patrolManager = get(), robot = get())
+        AdminPanelViewModel(
+            appConfigRepository = get(),
+            mqttManager = get(),
+            patrolManager = get(),
+            robot = get(),
+            patrolCameraStreamManager = get()
+        )
     }
 
-    single { PatrolManager(robot = get(), cameraStreamManager = get()) }
+    single { PatrolManager(robot = get(), cameraStreamManager = get(), mqttManager = get()) }
 
     single { HidingSpotRepository(androidContext()) }
 
@@ -124,7 +131,7 @@ val appModule = module {
         ControllerCameraStreamManager(
             context = androidContext(),
             serverUrl = "ws://$ip:$port"
-                                     )
+        )
     }
 
     viewModel {
@@ -139,8 +146,15 @@ val appModule = module {
         val ip = BuildConfig.SERVER_IP
         val port = BuildConfig.SERVER_PORT
         PatrolCameraStreamManager(
-            context = get(),
+            context = androidContext(),
             serverUrl = "ws://$ip:$port"
+        )
+    }
+
+    viewModel {
+        PatrolOverlayViewModel(
+            patrolManager = get(),
+            patrolCameraStreamManager = get()
         )
     }
 }

@@ -1,21 +1,30 @@
 package hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol
 
 import android.content.Context
+import android.graphics.Bitmap
 import hka.awp.cgi.temi.app.feature.stream.CameraStreamManager
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 
-class PatrolCameraStreamManager(context: Context, serverUrl: String) {
+class PatrolCameraStreamManager(
+    context: Context,
+    serverUrl: String
+) {
 
-    private val _events = MutableSharedFlow<PatrolAnalysisEvent>()
-    val events: SharedFlow<PatrolAnalysisEvent> = _events
+    private val baseStreamManager = CameraStreamManager(
+        context = context,
+        serverUrl = serverUrl
+    )
 
-    private val baseStreamManager = CameraStreamManager(context, serverUrl) { text ->
-        _events.tryEmit(parseEvent(text))
-    }
+    val videoFrame: StateFlow<Bitmap?> = baseStreamManager.processedBitmap
+
+    val textMessages = baseStreamManager.textMessages
 
     fun startStream() = baseStreamManager.startStream()
-    fun stopStream() = baseStreamManager.stopStream()
+
+    fun stopStream() {
+        baseStreamManager.stopStream()
+    }
+
     fun disconnect() = baseStreamManager.disconnect()
 
     fun sendPatrolPointReached(location: String) {
@@ -27,15 +36,6 @@ class PatrolCameraStreamManager(context: Context, serverUrl: String) {
         """.trimIndent()
 
         baseStreamManager.sendText(payload)
-    }
-
-    private fun parseEvent(raw: String): PatrolAnalysisEvent {
-        return when {
-            raw.contains("person_on_floor", ignoreCase = true) -> PatrolAnalysisEvent.PersonOnFloor
-            raw.contains("person_ok", ignoreCase = true) -> PatrolAnalysisEvent.PersonOk
-            raw.contains("no_person_detected", ignoreCase = true) -> PatrolAnalysisEvent.NoPersonDetected
-            else -> PatrolAnalysisEvent.Unknown(raw)
-        }
     }
 }
 

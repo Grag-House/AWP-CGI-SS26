@@ -18,8 +18,10 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import hka.awp.cgi.temi.app.R
 
 @Composable
 fun PatrolRouteDialog(
@@ -38,7 +40,7 @@ fun PatrolRouteDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = "Kontrollroute einstellen",
+                text = stringResource(R.string.patrol_route_dialog_title),
                 fontWeight = FontWeight.Bold
             )
         },
@@ -46,7 +48,7 @@ fun PatrolRouteDialog(
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text("Wähle die Orte aus, die Temi bei einer Kontrollfahrt anfahren soll.")
+                Text(stringResource(R.string.patrol_route_dialog_subtitle))
 
                 LazyColumn(
                     modifier = Modifier.heightIn(max = 360.dp)
@@ -89,12 +91,12 @@ fun PatrolRouteDialog(
                     onDismiss()
                 }
             ) {
-                Text("Speichern")
+                Text(stringResource(R.string.save))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Abbrechen")
+                Text(stringResource(R.string.admin_panel_cancel))
             }
         }
     )

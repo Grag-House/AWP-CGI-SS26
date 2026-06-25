@@ -1,15 +1,17 @@
 package hka.awp.cgi.temi.app.feature.settings.adminPanel
 
+import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.robotemi.sdk.Robot
 import hka.awp.cgi.temi.app.BuildConfig
 import hka.awp.cgi.temi.app.feature.mqtt.MqttManager
 import hka.awp.cgi.temi.app.feature.mqtt.MqttTrafficEvent
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.DialogPatrolMode
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolCameraStreamManager
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolManager
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolMode
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolSettings
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolSettingsDialog
 import hka.awp.cgi.temi.app.utils.AppConfigRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,12 +26,21 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.math.round
 
+@Suppress("TooManyFunctions")
 class AdminPanelViewModel(
     private val appConfigRepository: AppConfigRepository,
     private val mqttManager: MqttManager,
     private val robot: Robot?,
-    private val patrolManager: PatrolManager
+    private val patrolManager: PatrolManager,
+    private val patrolCameraStreamManager: PatrolCameraStreamManager
 ) : ViewModel() {
+
+    init {
+        // Starte die Migration asynchron beim Initialisieren des ViewModels
+        viewModelScope.launch {
+            appConfigRepository.performMigrationIfNeeded()
+        }
+    }
 
     private val _events = MutableSharedFlow<AdminPanelEvent>()
     val events = _events.asSharedFlow()
@@ -41,6 +52,7 @@ class AdminPanelViewModel(
 
     private val patrolRouteSettings = MutableStateFlow(PatrolRouteSettingsState())
     private val patrolLocationPrefix = "patrol_"
+    val videoFrame: StateFlow<Bitmap?> = patrolCameraStreamManager.videoFrame
 
     fun loadPatrolLocations() {
         patrolRouteSettings.update {
@@ -53,6 +65,7 @@ class AdminPanelViewModel(
         }
     }
 
+    @Suppress("MagicNumber") // TODO Umschreiben
     val uiState: StateFlow<AdminPanelState> = combine(
         appConfigRepository.currentUrl,
         appConfigRepository.latitude,
@@ -65,24 +78,27 @@ class AdminPanelViewModel(
         appConfigRepository.selectedPatrolHours,
         patrolRouteSettings,
         appConfigRepository.patrolRoute,
+        videoFrame,
+        patrolManager.isRunning
     ) { args ->
         val url = args[0] as String
         val lat = args[1] as Double
         val lon = args[2] as Double
         val trafficEvents = args[3] as List<MqttTrafficEvent>
         val isEnabled = args[4] as Boolean
-        val mode = args[5] as DialogPatrolMode
+        val mode = args[5] as PatrolSettingsDialog
         val min = args[6] as Int
         val max = args[7] as Int
         val hours = args[8] as Set<Int>
         val routeSettings = args[9] as PatrolRouteSettingsState
         val patrolRoute = args[10] as List<String>
+        val currentFrame = args[11] as Bitmap?
+        val isPatrolStreaming = args[12] as Boolean
 
         AdminPanelState(
             webserverUrl = url,
             latitude = lat,
             longitude = lon,
-            coordinates = "Länge: $lon Breite: $lat",
             mqttReportTopics = MqttManager.reportTopics,
             mqttTrafficEvents = trafficEvents.filter { it.topic in MqttManager.reportTopics },
             isPatrolEnabled = isEnabled,
@@ -92,19 +108,8 @@ class AdminPanelViewModel(
             selectedHours = hours,
             savedLocations = routeSettings.savedLocations,
             patrolRoute = patrolRoute,
-            patrolRouteText = if (patrolRoute.isEmpty()) {
-                "Keine Route ausgewählt"
-            } else {
-                patrolRoute.joinToString(" → ")
-            },
-            patrolModeText = if (!isEnabled) {
-                "Deaktiviert"
-            } else {
-                when (mode) {
-                    DialogPatrolMode.RANDOM -> "Zufällig: $min-$max Min."
-                    DialogPatrolMode.FIXED -> "Feste Stunden: ${hours.size} ausgewählt"
-                }
-            }
+            videoFrame = currentFrame,
+            isPatrolStreaming = isPatrolStreaming,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -112,11 +117,26 @@ class AdminPanelViewModel(
         initialValue = AdminPanelState()
     )
 
-    fun checkPassword(input: String) {
+    fun checkWebserverPassword(input: String) {
         viewModelScope.launch {
-            val currentHash = appConfigRepository.adminPasswordHash.first()
+            val currentHash = appConfigRepository.webserverPasswordHash.first()
 
-            val isValid = appConfigRepository.isValidAdminPassword(input, currentHash)
+            val isValid = appConfigRepository.isValidPassword(input, currentHash)
+
+            if (isValid) {
+                _passwordError.value = false
+                _isAuthorized.value = true
+            } else {
+                _passwordError.value = true
+            }
+        }
+    }
+
+    fun checkAdminPassword(input: String) {
+        viewModelScope.launch {
+            val currentHash = appConfigRepository.adminPanelPasswordHash.first()
+
+            val isValid = appConfigRepository.isValidPassword(input, currentHash)
 
             if (isValid) {
                 _passwordError.value = false
@@ -173,8 +193,15 @@ class AdminPanelViewModel(
 
     fun onChangePassword(newPassword: String) {
         viewModelScope.launch {
-            appConfigRepository.updateAdminPassword(newPassword)
+            appConfigRepository.updateAdminPanelPassword(newPassword)
             _events.emit(AdminPanelEvent.PasswordChanged)
+        }
+    }
+
+    fun onUpdateWebserverPassword(newPassword: String) {
+        viewModelScope.launch {
+            appConfigRepository.updateWebserverPassword(newPassword)
+            _events.emit(AdminPanelEvent.WebserverPasswordChanged)
         }
     }
 
@@ -192,7 +219,7 @@ class AdminPanelViewModel(
 
     fun onSavePatrolSettings(
         isEnabled: Boolean,
-        mode: DialogPatrolMode,
+        mode: PatrolSettingsDialog,
         minMin: Int,
         maxMin: Int,
         hours: Set<Int>
@@ -204,8 +231,8 @@ class AdminPanelViewModel(
                 PatrolSettings(
                     isEnabled = isEnabled,
                     mode = when (mode) {
-                        DialogPatrolMode.RANDOM -> PatrolMode.RANDOM
-                        DialogPatrolMode.FIXED -> PatrolMode.FIXED
+                        PatrolSettingsDialog.RANDOM -> PatrolMode.RANDOM
+                        PatrolSettingsDialog.FIXED -> PatrolMode.FIXED
                     },
                     minMinutes = minMin,
                     maxMinutes = maxMin,
@@ -216,8 +243,9 @@ class AdminPanelViewModel(
         }
     }
 
-    fun onTriggerImmediatePatrol() {
-        patrolManager.startImmediatePatrol(uiState.value.patrolRoute)
+    fun onTriggerImmediatePatrol(): Boolean {
+        val success = patrolManager.startImmediatePatrol(uiState.value.patrolRoute)
+        return success
     }
 
     fun onSavePatrolRoute(route: List<String>) {
@@ -230,8 +258,8 @@ class AdminPanelViewModel(
                 PatrolSettings(
                     isEnabled = state.isPatrolEnabled,
                     mode = when (state.patrolMode) {
-                        DialogPatrolMode.RANDOM -> PatrolMode.RANDOM
-                        DialogPatrolMode.FIXED -> PatrolMode.FIXED
+                        PatrolSettingsDialog.RANDOM -> PatrolMode.RANDOM
+                        PatrolSettingsDialog.FIXED -> PatrolMode.FIXED
                     },
                     minMinutes = state.minMinutes,
                     maxMinutes = state.maxMinutes,
@@ -241,6 +269,10 @@ class AdminPanelViewModel(
             )
         }
     }
+
+    fun onExitPatrol() {
+        patrolManager.stopPatrol()
+    }
     companion object {
         private const val STATE_TIMEOUT = 5000L
     }
@@ -248,6 +280,7 @@ class AdminPanelViewModel(
 
 sealed interface AdminPanelEvent {
     data object OpenMqttReports : AdminPanelEvent
+    data object WebserverPasswordChanged : AdminPanelEvent
     data object PasswordChanged : AdminPanelEvent
     data object RestartAppTriggered : AdminPanelEvent
     data object CloseAppTriggered : AdminPanelEvent
@@ -258,13 +291,12 @@ data class AdminPanelState(
     val appVersion: String = BuildConfig.VERSION_NAME,
     val mqttReportTopics: Set<String> = emptySet(),
     val mqttTrafficEvents: List<MqttTrafficEvent> = emptyList(),
-    val coordinates: String = "",
-    val patrolModeText: String = "Deaktiviert",
-    val patrolRouteText: String = "Keine Route ausgewählt",
     val savedLocations: List<String> = emptyList(),
     val patrolRoute: List<String> = emptyList(),
     val isPatrolEnabled: Boolean = false,
-    val patrolMode: DialogPatrolMode = DialogPatrolMode.RANDOM,
+    val patrolMode: PatrolSettingsDialog = PatrolSettingsDialog.RANDOM,
+    val videoFrame: Bitmap? = null,
+    val isPatrolStreaming: Boolean = false,
     val minMinutes: Int = 40,
     val maxMinutes: Int = 60,
     val selectedHours: Set<Int> = emptySet(),

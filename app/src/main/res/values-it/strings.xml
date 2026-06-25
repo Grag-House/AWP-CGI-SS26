@@ -101,6 +101,7 @@
     <string name="admin_panel_header">Admin Panel</string>
     <string name="admin_panel_latitude">"Latitudine: "</string>
     <string name="admin_panel_longitude">Longitudine:</string>
+    <string name="admin_panel_coordinates_format">Longitudine: %1$s Latitudine: %2$s</string>
     <string name="admin_panel_confirm">Conferma</string>
     <string name="admin_panel_reset_defaults">Predefinito</string>
     <string name="admin_panel_latitude_error">Range: -90 a 90</string>
@@ -118,6 +119,38 @@
     <string name="admin_panel_mqtt_reports_direction_out">OUT</string>
     <string name="admin_panel_mqtt_reports_clear">Svuota</string>
     <string name="admin_panel_close">Chiudi</string>
+    <string name="admin_panel_close_app">Chiudi app</string>
+    <string name="admin_panel_close_app_subtitle">L\'app verrà chiusa</string>
+    <string name="admin_panel_close_app_confirm_text">Vuoi davvero chiudere l\'app?</string>
+    <string name="admin_panel_confirm_close_app">Chiudi app</string>
+    <string name="admin_panel_admin_password">Password amministratore</string>
+    <string name="admin_panel_admin_password_change">Cambia password amministratore</string>
+    <string name="admin_panel_new_admin_password">Nuova password amministratore:</string>
+    <string name="admin_panel_patrol_settings">Ronde automatiche</string>
+    <string name="admin_panel_patrol_route">Configurazione del percorso di ronda</string>
+    <string name="admin_panel_active_prefix">Attivo: %1$s</string>
+    <string name="admin_panel_patrol_disabled">Disattivato</string>
+    <string name="admin_panel_no_route_selected_title">Nessun percorso selezionato</string>
+    <string name="admin_panel_no_route_selected_text">Seleziona un percorso per poter avviare la ronda.</string>
+
+    <!-- Patrol Route/Settings Dialogs -->
+    <string name="save">Salva</string>
+    <string name="patrol_route_dialog_title">Imposta percorso di ronda</string>
+    <string name="patrol_route_dialog_subtitle">Scegli i luoghi che Temi deve visitare durante una ronda.</string>
+    <string name="patrol_settings_dialog_title">Configura le ronde</string>
+    <string name="patrol_settings_dialog_subtitle">Scegli come pianificare i giri automatici di controllo del benessere.</string>
+    <string name="patrol_settings_enable_label">Attiva le ronde automatiche</string>
+    <string name="patrol_settings_trigger_now_button">Avvia subito una ronda</string>
+    <string name="patrol_settings_mode_label">Modalità di pianificazione</string>
+    <string name="patrol_settings_mode_random">Intervallo casuale (es. ogni 40–60 min)</string>
+    <string name="patrol_settings_mode_fixed">Ore fisse (ogni ora selezionata)</string>
+    <string name="patrol_settings_interval_bounds_label">Limiti dell\'intervallo (minuti)</string>
+    <string name="patrol_settings_min_distance">Intervallo minimo: %1$d min.</string>
+    <string name="patrol_settings_max_distance">Intervallo massimo: %1$d min.</string>
+    <string name="patrol_settings_select_hours_label">Seleziona gli orari (ore intere)</string>
+    <string name="patrol_stream_content_description">Flusso video della ronda</string>
+    <string name="patrol_stream_back_button">Indietro</string>
+    <string name="patrol_stream_stop_button">Interrompi la ronda</string>
 
     <string name="navigation_status_label">STATUS</string>
     <string name="current_location_prefix">Posizione attuale:</string>
@@ -194,6 +227,7 @@
     <string name="controller_connect">Connetti</string>
     <string name="controller_delete">Rimuovi</string>
     <string name="controller_isNotBonded">Non accoppiato</string>
+    <string name="controller_status_label">Stato: %1$s</string>
 
     <string name="hide_and_seek">Nascondino</string>
     <string name="hide_and_seek_sub">Trova Temi!</string>
@@ -219,6 +253,8 @@
     <string name="hide_and_seek_lost_location_unknown">rivelato più tardi</string>
     <string name="hide_and_seek_play_again">Gioca ancora</string>
     <string name="hide_and_seek_to_dashboard">Al cruscotto</string>
+    <string name="hide_and_seek_navigation_error_title">Navigazione non riuscita</string>
+    <string name="hide_and_seek_navigation_error_message">Navigazione verso il nascondiglio non riuscita.</string>
     <string name="hiding_spot_filter_button">Modifica nascondigli</string>
     <string name="hiding_spot_filter_button_active">Filtro attivo</string>
     <string name="hiding_spot_filter_title">Seleziona nascondigli</string>
