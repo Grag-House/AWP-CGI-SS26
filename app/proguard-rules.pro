@@ -43,3 +43,15 @@
 -dontwarn org.jctools.**
 -keep class hka.awp.cgi.temi.app.feature.mqtt.MqttCommand { *; }
 -keep class hka.awp.cgi.temi.app.feature.mqtt.MqttStatus { *; }
+
+# --- JNA (Java Native Access) for Vosk ---
+# Keep JNA classes and interfaces from being obfuscated/removed
+-keep class com.sun.jna.** { *; }
+-keep interface com.sun.jna.** { *; }
+-dontwarn com.sun.jna.**
+
+# --- Vosk Speech Recognition ---
+# Protect Vosk library from obfuscation
+-keep class org.vosk.** { *; }
+-keep interface org.vosk.** { *; }
+-dontwarn org.vosk.**

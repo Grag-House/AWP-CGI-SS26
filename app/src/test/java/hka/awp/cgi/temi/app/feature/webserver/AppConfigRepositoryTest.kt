@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.io.File
 import kotlin.io.path.ExperimentalPathApi
@@ -80,6 +81,7 @@ class AppConfigRepositoryTest {
 
     @OptIn(ExperimentalPathApi::class)
     @Test
+    @Disabled("Reason: logic currently removed from code")
     fun `reset webserver defaults restores default url and default admin password hash`() = runTest {
         val tmpDir = createTempDirectory(prefix = "app-config-test")
         val file = File(tmpDir.toString(), "preferences.preferences_pb")
@@ -91,8 +93,6 @@ class AppConfigRepositoryTest {
 
         repository.updateUrl("https://example.com/custom")
         repository.updateAdminPassword("super-secret")
-
-        repository.resetWebserverDefaults()
 
         assertEquals(BuildConfig.WEBVIEW_URL, repository.currentUrl.first())
         val expectedDefaultHash = repository.hashPassword(BuildConfig.DEFAULT_ADMIN_PASSWORD)

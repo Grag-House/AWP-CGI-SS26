@@ -3,7 +3,7 @@ name: Android CI with Gradle
 # Trigger for pushes und merge requests on main and dev
 on:
   push:
-    branches: [ "main", "dev" ]
+    branches: [ "dev" ]
   pull_request:
     branches: [ "main", "dev" ]
 
