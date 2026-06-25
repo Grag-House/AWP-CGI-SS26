@@ -1,4 +1,4 @@
-package hka.awp.cgi.temi.app.feature.webserver
+package hka.awp.cgi.temi.app.utils
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -111,7 +111,6 @@ class AppConfigRepository(private val dataStore: DataStore<Preferences>) {
             "%02x".format(byte)
         }
     }
-
     // --- General ---
 
     suspend fun clear() {

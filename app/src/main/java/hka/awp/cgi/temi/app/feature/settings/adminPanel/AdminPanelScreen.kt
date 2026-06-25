@@ -2,8 +2,8 @@
 
 package hka.awp.cgi.temi.app.feature.settings.adminPanel
 
+import android.content.Intent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,21 +12,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.outlined.Language
-import androidx.compose.material.icons.outlined.LocationOn
-import androidx.compose.material.icons.outlined.Lock
-import androidx.compose.material.icons.outlined.Mic
-import androidx.compose.material.icons.outlined.Storage
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,12 +24,33 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import hka.awp.cgi.temi.app.R
+import hka.awp.cgi.temi.app.feature.hideandseek.HidingSpotFilterCallbacks
+import hka.awp.cgi.temi.app.feature.hideandseek.HidingSpotFilterContent
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.AdminPasswordPrompt
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.ChangePasswordDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.CoordinateManagementCard
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.DeleteProfileConfirmDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.EditCoordinatesDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.EditSpeakerVerificationThresholdDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.EditUrlDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.HidingSpotFilterCard
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.MqttReportsCard
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.MqttReportsDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.ProfileNameInputDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.RestartAppCard
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.RestartAppConfirmationDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.ResetVoiceProfilesDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.SpeakerVerificationCard
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.SpeakerVerificationThresholdCard
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.VoiceProfilesManagementCard
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.WebserverPasswordCard
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.WebserverUrlCard
 import hka.awp.cgi.temi.app.ui.components.SettingsHeader
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.viewmodel.koinViewModel
@@ -55,177 +66,9 @@ private data class DialogState(
     val showResetVoiceProfiles: Boolean = false,
     val showProfileName: Boolean = false,
     val showDeleteConfirm: Boolean = false,
+    val showRestart: Boolean = false,
     val selectedProfileToDelete: String = ""
 )
-
-// ─── Cards ────────────────────────────────────────────────────────────────────
-
-@Composable
-fun WebserverUrlCard(url: String, onEdit: () -> Unit) {
-    ConfigCard {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            ConfigIconBox(
-                icon = Icons.Outlined.Language,
-                contentDescription = stringResource(R.string.admin_panel_webserver_url)
-            )
-            Spacer(Modifier.width(12.dp))
-            Column(Modifier.weight(1f)) {
-                ConfigLabel(stringResource(R.string.admin_panel_webserver_url))
-                ConfigValue(url)
-            }
-            Text(
-                text = stringResource(R.string.admin_panel_webserver_url_change),
-                color = MaterialTheme.colorScheme.primary,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier.clickable(onClick = onEdit)
-            )
-        }
-    }
-}
-
-@Composable
-fun MqttReportsCard(onNavigate: () -> Unit) {
-    ConfigCard(onClick = onNavigate) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            ConfigIconBox(
-                icon = Icons.Outlined.Storage,
-                contentDescription = stringResource(R.string.admin_panel_mqtt_reports)
-            )
-            Spacer(Modifier.width(12.dp))
-            Column(Modifier.weight(1f)) {
-                ConfigValue(stringResource(R.string.admin_panel_mqtt_reports))
-                ConfigSubtext(stringResource(R.string.admin_panel_mqtt_reports_subtitle))
-            }
-            Icon(
-                imageVector = Icons.Default.ChevronRight,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}
-
-@Composable
-fun WebserverPasswordCard(onChangePassword: () -> Unit) {
-    ConfigCard {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            ConfigIconBox(
-                icon = Icons.Outlined.Lock,
-                contentDescription = stringResource(R.string.admin_panel_webserver_password)
-            )
-            Spacer(Modifier.width(12.dp))
-            Column(Modifier.weight(1f)) {
-                ConfigValue(stringResource(R.string.admin_panel_webserver_password))
-                PasswordDots()
-            }
-            Text(
-                text = stringResource(R.string.admin_panel_webserver_password_change),
-                color = MaterialTheme.colorScheme.primary,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier.clickable(onClick = onChangePassword)
-            )
-        }
-    }
-}
-
-@Composable
-fun SpeakerVerificationCard(enabled: Boolean, onToggle: (Boolean) -> Unit) {
-    ConfigCard {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            ConfigIconBox(
-                icon = Icons.Outlined.Mic,
-                contentDescription = stringResource(R.string.admin_panel_speaker_verification)
-            )
-            Spacer(Modifier.width(12.dp))
-            Column(Modifier.weight(1f)) {
-                ConfigValue(stringResource(R.string.admin_panel_speaker_verification))
-                ConfigSubtext(stringResource(R.string.admin_panel_speaker_verification_subtitle))
-            }
-            Switch(checked = enabled, onCheckedChange = onToggle)
-        }
-    }
-}
-
-@Composable
-fun VoiceProfilesManagementCard(
-    voiceProfiles: Map<String, SpeakerVector>,
-    isEnrollmentActive: Boolean,
-    onLearnClick: () -> Unit,
-    onDeleteClick: (String) -> Unit
-) {
-    ConfigCard {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                ConfigIconBox(Icons.Outlined.Mic, "Stimmen-Management")
-                Spacer(Modifier.width(12.dp))
-                Column(Modifier.weight(1f)) {
-                    ConfigValue("Sprachprofile")
-                    ConfigSubtext(
-                        when {
-                            isEnrollmentActive -> "Enrollment aktiv..."
-                            voiceProfiles.isEmpty() -> "Keine Profile gespeichert"
-                            else -> "${voiceProfiles.size} Profile gespeichert"
-                        }
-                    )
-                }
-                Text(
-                    text = if (isEnrollmentActive) "Stopp" else "Lernen",
-                    color = MaterialTheme.colorScheme.primary,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.clickable(onClick = onLearnClick)
-                )
-            }
-            if (voiceProfiles.isNotEmpty()) {
-                VoiceProfileList(voiceProfiles.keys.toList(), onDeleteClick)
-            }
-        }
-    }
-}
-
-@Composable
-fun CoordinateManagementCard(coordinates: String, onEdit: () -> Unit) {
-    ConfigCard {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            ConfigIconBox(Icons.Outlined.LocationOn, stringResource(R.string.admin_panel_weather_coordinates))
-            Spacer(Modifier.width(12.dp))
-            Column(Modifier.weight(1f)) {
-                ConfigValue(stringResource(R.string.admin_panel_weather_coordinates))
-                ConfigSubtext(coordinates)
-            }
-            Text(
-                text = stringResource(R.string.admin_panel_webserver_coordiantes_change),
-                color = MaterialTheme.colorScheme.primary,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier.clickable(onClick = onEdit)
-            )
-        }
-    }
-}
 
 @Composable
 private fun AdminPanelDialogs(
@@ -289,6 +132,12 @@ private fun AdminPanelDialogs(
         val name = dialogState.selectedProfileToDelete
         DeleteProfileConfirmDialog(name, { onAction(AdminPanelAction.DeleteVoiceProfile(name)) }, onDismiss)
     }
+    if (dialogState.showRestart) {
+        RestartAppConfirmationDialog({
+            onAction(AdminPanelAction.RequestRestart)
+            onDismiss()
+        }, onDismiss)
+    }
 }
 
 @Composable
@@ -296,31 +145,84 @@ fun AdminPanelScreen(
     onBackClick: () -> Unit,
     viewModel: AdminPanelViewModel = koinViewModel()
 ) {
+    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isAuthorized by viewModel.isAuthorized.collectAsStateWithLifecycle()
+    val passwordError by viewModel.passwordError.collectAsStateWithLifecycle()
+    val filterState by viewModel.filterManager.filterState.collectAsStateWithLifecycle()
+    val showHidingSpotFilter by viewModel.filterManager.isOpen.collectAsStateWithLifecycle()
+
     var dialogs by remember { mutableStateOf(DialogState()) }
 
     LaunchedEffect(viewModel) {
         viewModel.events.collectLatest { event ->
-            dialogs = when (event) {
-                AdminPanelEvent.OpenMqttReports -> dialogs.copy(showMqttReports = true)
-                AdminPanelEvent.PasswordChanged -> dialogs.copy(showPassword = false)
+            when (event) {
+                AdminPanelEvent.OpenMqttReports -> dialogs = dialogs.copy(showMqttReports = true)
+                AdminPanelEvent.PasswordChanged -> dialogs = dialogs.copy(showPassword = false)
+                AdminPanelEvent.RestartAppTriggered -> {
+                    val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+                    val mainIntent = Intent.makeRestartActivityTask(intent?.component)
+                    context.startActivity(mainIntent)
+                    Runtime.getRuntime().exit(0)
+                }
             }
         }
     }
 
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.resetAuthorization()
+        }
+    }
+
+    if (!isAuthorized) {
+        AdminPasswordPrompt(
+            isError = passwordError,
+            onConfirm = { enteredPassword -> viewModel.checkPassword(enteredPassword) },
+            onBackClick = onBackClick,
+            onValueChange = { viewModel.clearPasswordError() }
+        )
+        return
+    }
+
     AdminPanelDialogs(uiState, viewModel::onAction, dialogs) { dialogs = DialogState() }
 
-    Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).padding(32.dp)) {
-        SettingsHeader(stringResource(R.string.admin_panel_header), onBackClick)
-        Spacer(Modifier.height(40.dp))
-        AdminPanelContent(uiState, viewModel::onAction) { dialogs = it }
+    if (showHidingSpotFilter) {
+        Dialog(onDismissRequest = viewModel.filterManager::dismiss) {
+            HidingSpotFilterContent(
+                state = filterState,
+                callbacks = HidingSpotFilterCallbacks(
+                    onToggle = viewModel.filterManager::toggle,
+                    onSelectAll = viewModel.filterManager::selectAll,
+                    onDeselectAll = viewModel.filterManager::deselectAll,
+                    onSave = viewModel.filterManager::save,
+                    onDismiss = viewModel.filterManager::dismiss
+                )
+            )
+        }
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(32.dp)
+        ) {
+            SettingsHeader(stringResource(R.string.admin_panel_header), onBackClick)
+            Spacer(Modifier.height(40.dp))
+            AdminPanelContent(uiState, viewModel) { dialogs = it }
+        }
     }
 }
 
 @Composable
 private fun AdminPanelContent(
     uiState: AdminPanelState,
-    onAction: (AdminPanelAction) -> Unit,
+    viewModel: AdminPanelViewModel,
     updateDialogs: (DialogState) -> Unit
 ) {
     Column(
@@ -328,11 +230,13 @@ private fun AdminPanelContent(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         WebserverUrlCard(uiState.webserverUrl) { updateDialogs(DialogState(showUrl = true)) }
-        MqttReportsCard { onAction(AdminPanelAction.OpenMqttReports) }
+        MqttReportsCard { viewModel.onAction(AdminPanelAction.OpenMqttReports) }
         WebserverPasswordCard { updateDialogs(DialogState(showPassword = true)) }
         CoordinateManagementCard(uiState.coordinates) { updateDialogs(DialogState(showCoordinate = true)) }
+        HidingSpotFilterCard { viewModel.filterManager.open() }
+        RestartAppCard { updateDialogs(DialogState(showRestart = true)) }
         SpeakerVerificationCard(uiState.isSpeakerVerificationEnabled) {
-            onAction(AdminPanelAction.ToggleSpeakerVerification(it))
+            viewModel.onAction(AdminPanelAction.ToggleSpeakerVerification(it))
         }
         SpeakerVerificationThresholdCard(uiState.speakerVerificationThreshold) {
             updateDialogs(DialogState(showThreshold = true))
@@ -342,9 +246,7 @@ private fun AdminPanelContent(
             uiState.isEnrollmentActive,
             {
                 if (uiState.isEnrollmentActive) {
-                    onAction(
-                        AdminPanelAction.ToggleEnrollment(false)
-                    )
+                    viewModel.onAction(AdminPanelAction.ToggleEnrollment(false))
                 } else {
                     updateDialogs(DialogState(showProfileName = true))
                 }
