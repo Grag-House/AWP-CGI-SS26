@@ -32,12 +32,12 @@ class SpeakerGate(
      */
     fun open(onTimeout: (() -> Unit)? = null) {
         _isOpen.value = true
-        Timber.v("Speaker gate opened. Timeout in %d ms.", timeoutMs)
+        Timber.v("Speaker gate opened (%d ms)", timeoutMs)
         timeoutJob?.cancel()
         timeoutJob = scope.launch {
             delay(timeoutMs.milliseconds)
             if (isOpen.value) {
-                Timber.d("Speaker Gate timeout reached. Closing.")
+                Timber.v("Speaker gate timed out")
                 close()
                 onTimeout?.invoke()
             }

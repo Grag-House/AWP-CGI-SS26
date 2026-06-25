@@ -47,7 +47,7 @@ class VoiceEnrollmentManager(
         _isActive.value = false
         saveJob?.cancel()
         saveJob = null
-        Timber.i("Enrollment stopped")
+        Timber.v("Enrollment stopped")
         onSyncRequired()
     }
 
@@ -62,11 +62,11 @@ class VoiceEnrollmentManager(
 
         if (frames < MIN_ENROLLMENT_FRAMES) {
             _status.value = EnrollmentStatus.TOO_SHORT
-            Timber.w("Enrollment too short: %d/%d frames", frames, MIN_ENROLLMENT_FRAMES)
+            Timber.d("Enrollment too short: %d/%d frames", frames, MIN_ENROLLMENT_FRAMES)
             return
         }
 
-        Timber.i("Enrollment success: %d frames. Saving...", frames)
+        Timber.i("Enrollment successful (%d frames). Saving...", frames)
         save(enrollmentName, vector)
     }
 

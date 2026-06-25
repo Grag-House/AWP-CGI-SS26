@@ -76,7 +76,7 @@ class SpeakerVerificationManager(
         isFinal: Boolean
     ) {
         if (vector == null) {
-            if (isFinal) Timber.w("Wake-word matched but no speaker vector")
+            if (isFinal) Timber.w("Wake-word match but missing speaker vector")
             return
         }
 
@@ -114,7 +114,7 @@ class SpeakerVerificationManager(
         if (authorized) {
             Timber.i("Verified: %s (score %.4f)", bestName, bestScore)
         } else {
-            Timber.w("Rejected: %s (score %.4f, threshold %.2f)", bestName, bestScore, threshold)
+            Timber.v("Rejected: %s (score %.4f, threshold %.2f)", bestName, bestScore, threshold)
         }
         authorized
     }
@@ -122,7 +122,8 @@ class SpeakerVerificationManager(
     private fun startCommandCapture() {
         if (isAwaitingCommand) return
 
-        Timber.i("Speaker verified. Awaiting command...")
+        Timber.i("Speaker verified. Capturing command...")
+        // User-facing TTS remains German as per app localization
         robot?.speak(TtsRequest.create("Ich höre jetzt zu!", false))
         isAwaitingCommand = true
 
@@ -130,7 +131,7 @@ class SpeakerVerificationManager(
         commandCaptureJob = scope.launch {
             delay(COMMAND_WINDOW_MS.milliseconds)
             if (isAwaitingCommand) {
-                Timber.w("Command timeout")
+                Timber.w("Command capture timed out")
                 isAwaitingCommand = false
                 isCurrentSpeakerVerified = false
             }
@@ -143,7 +144,7 @@ class SpeakerVerificationManager(
             isAwaitingCommand = false
             isCurrentSpeakerVerified = false
             commandCaptureJob?.cancel()
-            Timber.i("Command captured: %s", text)
+            Timber.d("Captured: %s", text)
             scope.launch { verifiedCommandFlow.emit(text) }
             return true
         }
