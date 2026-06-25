@@ -160,10 +160,10 @@ class AdminPanelViewModel(
     private fun handleVoiceAction(action: AdminPanelAction) {
         when (action) {
             is AdminPanelAction.ToggleSpeakerVerification -> viewModelScope.launch {
-                appConfigRepository.updateSpeakerVerificationEnabled(action.enabled)
+                appConfigRepository.updateSpeakerVerification(enabled = action.enabled)
             }
             is AdminPanelAction.EditSpeakerVerificationThreshold -> viewModelScope.launch {
-                appConfigRepository.updateSpeakerVerificationThreshold(action.threshold)
+                appConfigRepository.updateSpeakerVerification(threshold = action.threshold)
             }
             AdminPanelAction.ResetVoiceProfiles -> viewModelScope.launch {
                 voiceProfileRepository.clearAllProfiles()

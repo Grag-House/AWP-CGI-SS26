@@ -34,13 +34,13 @@ class PhotoboxSettingsViewModel(
 
     fun setDriveFolderLink(link: String) {
         viewModelScope.launch {
-            appConfigRepository.setDriveFolderLink(link)
+            appConfigRepository.setDriveSettings(folderLink = link)
         }
     }
 
     fun setDriveUploadUrl(url: String) {
         viewModelScope.launch {
-            appConfigRepository.setDriveUploadUrl(url)
+            appConfigRepository.setDriveSettings(uploadUrl = url)
         }
     }
 }

@@ -94,15 +94,10 @@ class AppConfigRepository(private val dataStore: DataStore<Preferences>) {
         preferences[speakerVerificationThresholdKey] ?: DEFAULT_SPEAKER_VERIFICATION_THRESHOLD
     }
 
-    suspend fun updateSpeakerVerificationEnabled(enabled: Boolean) {
+    suspend fun updateSpeakerVerification(enabled: Boolean? = null, threshold: Double? = null) {
         dataStore.edit { preferences ->
-            preferences[speakerVerificationEnabledKey] = enabled
-        }
-    }
-
-    suspend fun updateSpeakerVerificationThreshold(threshold: Double) {
-        dataStore.edit { preferences ->
-            preferences[speakerVerificationThresholdKey] = threshold.coerceIn(0.0, 1.0)
+            enabled?.let { preferences[speakerVerificationEnabledKey] = it }
+            threshold?.let { preferences[speakerVerificationThresholdKey] = it.coerceIn(0.0, 1.0) }
         }
     }
 
@@ -148,20 +143,15 @@ class AppConfigRepository(private val dataStore: DataStore<Preferences>) {
         preferences[driveFolderLinkKey] ?: DEFAULT_DRIVE_FOLDER_LINK
     }
 
-    suspend fun setDriveFolderLink(link: String) {
-        dataStore.edit { preferences ->
-            preferences[driveFolderLinkKey] = link
-        }
-    }
-
     // URL of the Apps Script web app that accepts the upload and writes it into the Drive folder.
     val driveUploadUrl: Flow<String> = dataStore.data.map { preferences ->
         preferences[driveUploadUrlKey] ?: DEFAULT_DRIVE_UPLOAD_URL
     }
 
-    suspend fun setDriveUploadUrl(url: String) {
+    suspend fun setDriveSettings(folderLink: String? = null, uploadUrl: String? = null) {
         dataStore.edit { preferences ->
-            preferences[driveUploadUrlKey] = url
+            folderLink?.let { preferences[driveFolderLinkKey] = it }
+            uploadUrl?.let { preferences[driveUploadUrlKey] = it }
         }
     }
 

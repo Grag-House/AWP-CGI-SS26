@@ -198,7 +198,6 @@ dependencies {
     // temi dependency
     implementation(libs.temi.sdk)
     implementation(libs.androidx.compose.ui.text)
-    implementation(libs.androidx.compose.material.icons.extended)
 
     // Vosk speech recognition dependencies
     implementation(libs.vosk.android)
