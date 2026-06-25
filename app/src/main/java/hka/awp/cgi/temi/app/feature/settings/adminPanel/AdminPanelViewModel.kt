@@ -35,13 +35,6 @@ class AdminPanelViewModel(
     private val patrolCameraStreamManager: PatrolCameraStreamManager
 ) : ViewModel() {
 
-    init {
-        // Starte die Migration asynchron beim Initialisieren des ViewModels
-        viewModelScope.launch {
-            appConfigRepository.performMigrationIfNeeded()
-        }
-    }
-
     private val _events = MutableSharedFlow<AdminPanelEvent>()
     val events = _events.asSharedFlow()
     private val _isAuthorized = MutableStateFlow(false)

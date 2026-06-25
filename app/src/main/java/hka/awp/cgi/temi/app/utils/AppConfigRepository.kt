@@ -1,7 +1,12 @@
 package hka.awp.cgi.temi.app.utils
 
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.*
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.doublePreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import hka.awp.cgi.temi.app.BuildConfig
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolSettingsDialog
 import kotlinx.coroutines.flow.Flow
@@ -10,14 +15,13 @@ import timber.log.Timber
 import java.security.MessageDigest
 
 class AppConfigRepository(private val dataStore: DataStore<Preferences>) {
-    
+
     // Keys
     private val webviewUrlKey = stringPreferencesKey("webview_url")
     private val latitudeKey = doublePreferencesKey("latitude")
     private val longitudeKey = doublePreferencesKey("longitude")
     private val adminPanelPasswordHashKey = stringPreferencesKey("admin_panel_password_hash")
     private val webserverPasswordHashKey = stringPreferencesKey("webserver_password_hash")
-    private val adminPasswordLegacyKey = stringPreferencesKey("admin_password")
     private val keyIsPatrolEnabled = booleanPreferencesKey("is_patrol_enabled")
     private val keyPatrolMode = stringPreferencesKey("patrol_mode")
     private val keyMinMinutes = intPreferencesKey("min_minutes")
@@ -79,7 +83,13 @@ class AppConfigRepository(private val dataStore: DataStore<Preferences>) {
 
     // --- Patrol Settings ---
 
-    suspend fun updatePatrolSettings(isEnabled: Boolean, mode: PatrolSettingsDialog, minMin: Int, maxMin: Int, hours: Set<Int>) {
+    suspend fun updatePatrolSettings(
+        isEnabled: Boolean,
+        mode: PatrolSettingsDialog,
+        minMin: Int,
+        maxMin: Int,
+        hours: Set<Int>
+    ) {
         dataStore.edit {
             it[keyIsPatrolEnabled] = isEnabled
             it[keyPatrolMode] = mode.name
@@ -89,20 +99,27 @@ class AppConfigRepository(private val dataStore: DataStore<Preferences>) {
         }
     }
 
-    val isPatrolEnabled: Flow<Boolean> = dataStore.data.map { it[keyIsPatrolEnabled] ?: DEFAULT_PATROL_ENABLED }
-    val patrolMode: Flow<PatrolSettingsDialog> = dataStore.data.map {
-        try { PatrolSettingsDialog.valueOf(it[keyPatrolMode] ?: PatrolSettingsDialog.RANDOM.name) }
-        catch (e: IllegalArgumentException) { PatrolSettingsDialog.RANDOM }
+    val isPatrolEnabled: Flow<Boolean> = dataStore.data.map {
+        it[keyIsPatrolEnabled] ?: DEFAULT_PATROL_ENABLED
+    }
+    val patrolMode: Flow<PatrolSettingsDialog> = dataStore.data.map { preferences ->
+        val name = preferences[keyPatrolMode] ?: PatrolSettingsDialog.RANDOM.name
+        try {
+            PatrolSettingsDialog.valueOf(name)
+        } catch (e: IllegalArgumentException) {
+            Timber.e(e, "Ungültiger Patrol-Modus: $name. Setze auf RANDOM.")
+            PatrolSettingsDialog.RANDOM
+        }
     }
     val minPatrolMinutes: Flow<Int> = dataStore.data.map { it[keyMinMinutes] ?: DEFAULT_MIN_MINUTES }
     val maxPatrolMinutes: Flow<Int> = dataStore.data.map { it[keyMaxMinutes] ?: DEFAULT_MAX_MINUTES }
-    
+
     val selectedPatrolHours: Flow<Set<Int>> = dataStore.data.map {
         it[keySelectedHours]?.split(COMMA_SEPARATOR)?.mapNotNull { s -> s.toIntOrNull() }?.toSet() ?: emptySet()
     }
-    
-    val patrolRoute: Flow<List<String>> = dataStore.data.map { 
-        it[keyPatrolRoute]?.split(ROUTE_SEPARATOR)?.filter { s -> s.isNotBlank() } ?: emptyList() 
+
+    val patrolRoute: Flow<List<String>> = dataStore.data.map {
+        it[keyPatrolRoute]?.split(ROUTE_SEPARATOR)?.filter { s -> s.isNotBlank() } ?: emptyList()
     }
 
     suspend fun updatePatrolRoute(route: List<String>) {

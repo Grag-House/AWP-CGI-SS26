@@ -16,7 +16,7 @@ class AppConfigRepositoryTest {
         val (repository, tmpDir) = createTestRepository(this)
 
         // 1. Legacy Passwort setzen
-        val legacyKey = stringPreferencesKey("admin_password")
+        // val legacyKey = stringPreferencesKey("admin_password")
         // Wir müssen hier direkt auf das DataStore zugreifen, da der Key private ist
         // Tipp: Überlege, den Key im Repository internal statt private zu machen
         // oder eine Methode für den Test zu ergänzen.

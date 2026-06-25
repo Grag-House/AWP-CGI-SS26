@@ -72,7 +72,7 @@ fun AdminPanelContent(
                 WebserverPasswordCard(
                     onUpdateWebserverPassword = onUpdateWebserverPassword
                 )
-                
+
                 AdminPasswordCard(
                     onChangePassword = onChangePassword
                 )
