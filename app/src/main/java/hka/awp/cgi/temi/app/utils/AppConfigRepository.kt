@@ -1,61 +1,38 @@
 package hka.awp.cgi.temi.app.utils
 
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.doublePreferencesKey
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.intPreferencesKey
-import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.*
 import hka.awp.cgi.temi.app.BuildConfig
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.DialogPatrolMode
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolSettingsDialog
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import timber.log.Timber
 import java.security.MessageDigest
 
 class AppConfigRepository(private val dataStore: DataStore<Preferences>) {
+    
+    // Keys
     private val webviewUrlKey = stringPreferencesKey("webview_url")
     private val latitudeKey = doublePreferencesKey("latitude")
     private val longitudeKey = doublePreferencesKey("longitude")
-
-    // Neue Keys
     private val adminPanelPasswordHashKey = stringPreferencesKey("admin_panel_password_hash")
     private val webserverPasswordHashKey = stringPreferencesKey("webserver_password_hash")
     private val adminPasswordLegacyKey = stringPreferencesKey("admin_password")
-
-    private val KEY_IS_PATROL_ENABLED = booleanPreferencesKey("is_patrol_enabled")
-    private val KEY_PATROL_MODE = stringPreferencesKey("patrol_mode")
-    private val KEY_MIN_MINUTES = intPreferencesKey("min_minutes")
-    private val KEY_MAX_MINUTES = intPreferencesKey("max_minutes")
-    private val KEY_SELECTED_HOURS = stringPreferencesKey("selected_hours")
-    private val PATROL_ROUTE = stringPreferencesKey("patrol_route")
+    private val keyIsPatrolEnabled = booleanPreferencesKey("is_patrol_enabled")
+    private val keyPatrolMode = stringPreferencesKey("patrol_mode")
+    private val keyMinMinutes = intPreferencesKey("min_minutes")
+    private val keyMaxMinutes = intPreferencesKey("max_minutes")
+    private val keySelectedHours = stringPreferencesKey("selected_hours")
+    private val keyPatrolRoute = stringPreferencesKey("patrol_route")
 
     private companion object {
         const val ROUTE_SEPARATOR = "|"
-    }
-
-    // --- Webview URL ---
-    val currentUrl: Flow<String> = dataStore.data.map { it[webviewUrlKey] ?: BuildConfig.WEBVIEW_URL }
-
-    suspend fun updateUrl(newUrl: String) {
-        dataStore.edit { it[webviewUrlKey] = newUrl }
-    }
-
-    // --- Migration & Passwort Management ---
-
-    suspend fun performMigrationIfNeeded() {
-        dataStore.edit { prefs ->
-            val legacy = prefs[adminPasswordLegacyKey]
-            if (legacy != null) {
-                val hash = hashPassword(legacy)
-                // Migriere Legacy zu BEIDEN neuen Keys
-                prefs[adminPanelPasswordHashKey] = hash
-                prefs[webserverPasswordHashKey] = hash
-                prefs.remove(adminPasswordLegacyKey)
-                Timber.d("Migration auf neue Passwort-Struktur abgeschlossen.")
-            }
-        }
+        const val COMMA_SEPARATOR = ","
+        const val DEFAULT_LATITUDE = 49.0138
+        const val DEFAULT_LONGITUDE = 8.3573
+        const val DEFAULT_PATROL_ENABLED = false
+        const val DEFAULT_MIN_MINUTES = 40
+        const val DEFAULT_MAX_MINUTES = 60
     }
 
     val adminPanelPasswordHash: Flow<String> = dataStore.data.map {
@@ -83,42 +60,52 @@ class AppConfigRepository(private val dataStore: DataStore<Preferences>) {
         return digest.digest(password.toByteArray()).joinToString("") { "%02x".format(it) }
     }
 
-    val latitude: Flow<Double> = dataStore.data.map { it[latitudeKey] ?: 49.0138 }
-    val longitude: Flow<Double> = dataStore.data.map { it[longitudeKey] ?: 8.3573 }
+    // --- Webview & Koordinaten ---
 
-    suspend fun updateCoordinates(latitude: Double, longitude: Double) {
+    val currentUrl: Flow<String> = dataStore.data.map { it[webviewUrlKey] ?: BuildConfig.WEBVIEW_URL }
+    val latitude: Flow<Double> = dataStore.data.map { it[latitudeKey] ?: DEFAULT_LATITUDE }
+    val longitude: Flow<Double> = dataStore.data.map { it[longitudeKey] ?: DEFAULT_LONGITUDE }
+
+    suspend fun updateUrl(newUrl: String) {
+        dataStore.edit { it[webviewUrlKey] = newUrl }
+    }
+
+    suspend fun updateCoordinates(lat: Double, lon: Double) {
         dataStore.edit {
-            it[latitudeKey] = latitude
-            it[longitudeKey] = longitude
+            it[latitudeKey] = lat
+            it[longitudeKey] = lon
         }
     }
 
-    suspend fun updatePatrolSettings(isEnabled: Boolean, mode: DialogPatrolMode, minMin: Int, maxMin: Int, hours: Set<Int>) {
+    // --- Patrol Settings ---
+
+    suspend fun updatePatrolSettings(isEnabled: Boolean, mode: PatrolSettingsDialog, minMin: Int, maxMin: Int, hours: Set<Int>) {
         dataStore.edit {
-            it[KEY_IS_PATROL_ENABLED] = isEnabled
-            it[KEY_PATROL_MODE] = mode.name
-            it[KEY_MIN_MINUTES] = minMin
-            it[KEY_MAX_MINUTES] = maxMin
-            it[KEY_SELECTED_HOURS] = hours.joinToString(",")
+            it[keyIsPatrolEnabled] = isEnabled
+            it[keyPatrolMode] = mode.name
+            it[keyMinMinutes] = minMin
+            it[keyMaxMinutes] = maxMin
+            it[keySelectedHours] = hours.joinToString(COMMA_SEPARATOR)
         }
     }
 
-    val isPatrolEnabled: Flow<Boolean> = dataStore.data.map { it[KEY_IS_PATROL_ENABLED] ?: false }
-    val patrolMode: Flow<DialogPatrolMode> = dataStore.data.map {
-        try {
-            DialogPatrolMode.valueOf(it[KEY_PATROL_MODE] ?: DialogPatrolMode.RANDOM.name)
-        } catch (e: Exception) { DialogPatrolMode.RANDOM }
+    val isPatrolEnabled: Flow<Boolean> = dataStore.data.map { it[keyIsPatrolEnabled] ?: DEFAULT_PATROL_ENABLED }
+    val patrolMode: Flow<PatrolSettingsDialog> = dataStore.data.map {
+        try { PatrolSettingsDialog.valueOf(it[keyPatrolMode] ?: PatrolSettingsDialog.RANDOM.name) }
+        catch (e: IllegalArgumentException) { PatrolSettingsDialog.RANDOM }
     }
-    val minPatrolMinutes: Flow<Int> = dataStore.data.map { it[KEY_MIN_MINUTES] ?: 40 }
-    val maxPatrolMinutes: Flow<Int> = dataStore.data.map { it[KEY_MAX_MINUTES] ?: 60 }
+    val minPatrolMinutes: Flow<Int> = dataStore.data.map { it[keyMinMinutes] ?: DEFAULT_MIN_MINUTES }
+    val maxPatrolMinutes: Flow<Int> = dataStore.data.map { it[keyMaxMinutes] ?: DEFAULT_MAX_MINUTES }
+    
     val selectedPatrolHours: Flow<Set<Int>> = dataStore.data.map {
-        it[KEY_SELECTED_HOURS]?.split(",")?.filter { s -> s.isNotEmpty() }?.map { s -> s.toInt() }?.toSet() ?: emptySet()
+        it[keySelectedHours]?.split(COMMA_SEPARATOR)?.mapNotNull { s -> s.toIntOrNull() }?.toSet() ?: emptySet()
     }
-    val patrolRoute: Flow<List<String>> = dataStore.data.map {
-        it[PATROL_ROUTE]?.split(ROUTE_SEPARATOR)?.filter { it.isNotBlank() } ?: emptyList()
+    
+    val patrolRoute: Flow<List<String>> = dataStore.data.map { 
+        it[keyPatrolRoute]?.split(ROUTE_SEPARATOR)?.filter { s -> s.isNotBlank() } ?: emptyList() 
     }
 
     suspend fun updatePatrolRoute(route: List<String>) {
-        dataStore.edit { it[PATROL_ROUTE] = route.joinToString(ROUTE_SEPARATOR) }
+        dataStore.edit { it[keyPatrolRoute] = route.joinToString(ROUTE_SEPARATOR) }
     }
 }

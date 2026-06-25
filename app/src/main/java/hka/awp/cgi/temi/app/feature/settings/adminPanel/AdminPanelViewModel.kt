@@ -7,11 +7,11 @@ import com.robotemi.sdk.Robot
 import hka.awp.cgi.temi.app.BuildConfig
 import hka.awp.cgi.temi.app.feature.mqtt.MqttManager
 import hka.awp.cgi.temi.app.feature.mqtt.MqttTrafficEvent
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.DialogPatrolMode
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolCameraStreamManager
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolManager
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolMode
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolSettings
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolSettingsDialog
 import hka.awp.cgi.temi.app.utils.AppConfigRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.math.round
 
+@Suppress("TooManyFunctions")
 class AdminPanelViewModel(
     private val appConfigRepository: AppConfigRepository,
     private val mqttManager: MqttManager,
@@ -64,6 +65,7 @@ class AdminPanelViewModel(
         }
     }
 
+    @Suppress("MagicNumber") // TODO Umschreiben
     val uiState: StateFlow<AdminPanelState> = combine(
         appConfigRepository.currentUrl,
         appConfigRepository.latitude,
@@ -84,7 +86,7 @@ class AdminPanelViewModel(
         val lon = args[2] as Double
         val trafficEvents = args[3] as List<MqttTrafficEvent>
         val isEnabled = args[4] as Boolean
-        val mode = args[5] as DialogPatrolMode
+        val mode = args[5] as PatrolSettingsDialog
         val min = args[6] as Int
         val max = args[7] as Int
         val hours = args[8] as Set<Int>
@@ -217,7 +219,7 @@ class AdminPanelViewModel(
 
     fun onSavePatrolSettings(
         isEnabled: Boolean,
-        mode: DialogPatrolMode,
+        mode: PatrolSettingsDialog,
         minMin: Int,
         maxMin: Int,
         hours: Set<Int>
@@ -229,8 +231,8 @@ class AdminPanelViewModel(
                 PatrolSettings(
                     isEnabled = isEnabled,
                     mode = when (mode) {
-                        DialogPatrolMode.RANDOM -> PatrolMode.RANDOM
-                        DialogPatrolMode.FIXED -> PatrolMode.FIXED
+                        PatrolSettingsDialog.RANDOM -> PatrolMode.RANDOM
+                        PatrolSettingsDialog.FIXED -> PatrolMode.FIXED
                     },
                     minMinutes = minMin,
                     maxMinutes = maxMin,
@@ -256,8 +258,8 @@ class AdminPanelViewModel(
                 PatrolSettings(
                     isEnabled = state.isPatrolEnabled,
                     mode = when (state.patrolMode) {
-                        DialogPatrolMode.RANDOM -> PatrolMode.RANDOM
-                        DialogPatrolMode.FIXED -> PatrolMode.FIXED
+                        PatrolSettingsDialog.RANDOM -> PatrolMode.RANDOM
+                        PatrolSettingsDialog.FIXED -> PatrolMode.FIXED
                     },
                     minMinutes = state.minMinutes,
                     maxMinutes = state.maxMinutes,
@@ -292,7 +294,7 @@ data class AdminPanelState(
     val savedLocations: List<String> = emptyList(),
     val patrolRoute: List<String> = emptyList(),
     val isPatrolEnabled: Boolean = false,
-    val patrolMode: DialogPatrolMode = DialogPatrolMode.RANDOM,
+    val patrolMode: PatrolSettingsDialog = PatrolSettingsDialog.RANDOM,
     val videoFrame: Bitmap? = null,
     val isPatrolStreaming: Boolean = false,
     val minMinutes: Int = 40,

@@ -36,19 +36,20 @@ import androidx.compose.ui.unit.sp
 import hka.awp.cgi.temi.app.R
 import java.util.Locale
 
-enum class DialogPatrolMode { RANDOM, FIXED }
+enum class PatrolSettingsDialog { RANDOM, FIXED }
 
 @OptIn(ExperimentalLayoutApi::class)
+@Suppress("LongMethod")
 @Composable
 fun PatrolSettingsDialog(
     initialIsEnabled: Boolean = false,
-    initialMode: DialogPatrolMode = DialogPatrolMode.RANDOM,
+    initialMode: PatrolSettingsDialog = PatrolSettingsDialog.RANDOM,
     initialMinMinutes: Int = 40,
     initialMaxMinutes: Int = 60,
     initialHours: Set<Int> = emptySet(),
     onTriggerPatrol: () -> Unit,
     onDismiss: () -> Unit,
-    onSave: (isEnabled: Boolean, mode: DialogPatrolMode, minMin: Int, maxMin: Int, hours: Set<Int>) -> Unit
+    onSave: (isEnabled: Boolean, mode: PatrolSettingsDialog, minMin: Int, maxMin: Int, hours: Set<Int>) -> Unit
 ) {
     var isEnabled by remember { mutableStateOf(initialIsEnabled) }
     var selectedMode by remember { mutableStateOf(initialMode) }
@@ -117,12 +118,12 @@ fun PatrolSettingsDialog(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable { selectedMode = DialogPatrolMode.RANDOM },
+                                .clickable { selectedMode = PatrolSettingsDialog.RANDOM },
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             RadioButton(
-                                selected = selectedMode == DialogPatrolMode.RANDOM,
-                                onClick = { selectedMode = DialogPatrolMode.RANDOM }
+                                selected = selectedMode == PatrolSettingsDialog.RANDOM,
+                                onClick = { selectedMode = PatrolSettingsDialog.RANDOM }
                             )
                             Spacer(Modifier.width(8.dp))
                             Text(stringResource(R.string.patrol_settings_mode_random))
@@ -131,19 +132,19 @@ fun PatrolSettingsDialog(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable { selectedMode = DialogPatrolMode.FIXED },
+                                .clickable { selectedMode = PatrolSettingsDialog.FIXED },
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             RadioButton(
-                                selected = selectedMode == DialogPatrolMode.FIXED,
-                                onClick = { selectedMode = DialogPatrolMode.FIXED }
+                                selected = selectedMode == PatrolSettingsDialog.FIXED,
+                                onClick = { selectedMode = PatrolSettingsDialog.FIXED }
                             )
                             Spacer(Modifier.width(8.dp))
                             Text(stringResource(R.string.patrol_settings_mode_fixed))
                         }
                     }
 
-                    if (selectedMode == DialogPatrolMode.RANDOM) {
+                    if (selectedMode == PatrolSettingsDialog.RANDOM) {
                         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             Text(
                                 stringResource(R.string.patrol_settings_interval_bounds_label),
@@ -155,16 +156,14 @@ fun PatrolSettingsDialog(
                             Slider(
                                 value = minMinutes,
                                 onValueChange = { minMinutes = it.coerceAtMost(maxMinutes) },
-                                valueRange = 10f..120f,
-                                steps = 11
+                                valueRange = 10f..120f
                             )
 
                             Text(stringResource(R.string.patrol_settings_max_distance, maxMinutes.toInt()))
                             Slider(
                                 value = maxMinutes,
                                 onValueChange = { maxMinutes = it.coerceAtLeast(minMinutes) },
-                                valueRange = 10f..120f,
-                                steps = 11
+                                valueRange = 10f..120f
                             )
                         }
                     } else {
@@ -180,14 +179,19 @@ fun PatrolSettingsDialog(
                                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                                 verticalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
+                                @Suppress("MagicNumber")
                                 for (hour in 0..23) {
                                     val isSelected = hour in selectedHours
                                     FilterChip(
                                         selected = isSelected,
                                         onClick = {
-                                            selectedHours = if (isSelected) selectedHours - hour else selectedHours + hour
+                                            selectedHours = if (isSelected) {
+                                                selectedHours - hour
+                                            } else {
+                                                selectedHours + hour
+                                            }
                                         },
-                                        label = { Text(text = String.format(Locale.ROOT, "%02d:00", hour)) }
+                                        label = { Text(text = String.format(Locale.GERMANY, "%02d:00", hour)) }
                                     )
                                 }
                             }

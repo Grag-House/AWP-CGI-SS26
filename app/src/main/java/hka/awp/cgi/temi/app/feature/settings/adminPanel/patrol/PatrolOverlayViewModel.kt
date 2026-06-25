@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 class PatrolOverlayViewModel(
     private val patrolManager: PatrolManager,
@@ -14,7 +15,8 @@ class PatrolOverlayViewModel(
     val videoFrame: StateFlow<Bitmap?> = patrolCameraStreamManager.videoFrame
 
     private val _isOverlayVisible = MutableStateFlow(true)
-    val isOverlayVisible: StateFlow<Boolean> = _isOverlayVisible
+    val isOverlayVisible: StateFlow<Boolean> = _isOverlayVisible.asStateFlow()
+    val countdownSeconds: StateFlow<Int?> = patrolManager.countdownSeconds
 
     fun stopPatrol() {
         patrolManager.stopPatrol()

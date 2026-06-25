@@ -72,9 +72,11 @@ fun AdminPanelContent(
                 WebserverPasswordCard(
                     onUpdateWebserverPassword = onUpdateWebserverPassword
                 )
+                
                 AdminPasswordCard(
                     onChangePassword = onChangePassword
                 )
+
                 CoordinateManagementCard(
                     coordinates = stringResource(
                         R.string.admin_panel_coordinates_format,

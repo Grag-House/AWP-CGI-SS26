@@ -2,9 +2,11 @@ package hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol
 
 import com.robotemi.sdk.Robot
 import com.robotemi.sdk.listeners.OnGoToLocationStatusChangedListener
+import hka.awp.cgi.temi.app.feature.mqtt.MqttManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,7 +15,8 @@ import timber.log.Timber
 
 class PatrolManager(
     private val robot: Robot?,
-    private val cameraStreamManager: PatrolCameraStreamManager
+    private val cameraStreamManager: PatrolCameraStreamManager,
+    private val mqttManager: MqttManager
 ) : OnGoToLocationStatusChangedListener {
 
     private val scope = CoroutineScope(Dispatchers.Main)
@@ -29,8 +32,24 @@ class PatrolManager(
     private val analysisHandler = PatrolAnalysisHandler(
         robot = robot,
         scope = scope,
-        cameraStreamManager = cameraStreamManager
+        cameraStreamManager = cameraStreamManager,
+        onEmergencyDetected = {
+            scanJob?.cancel()
+            robot?.stopMovement()
+        }
     )
+    private val _countdownSeconds = MutableStateFlow<Int?>(null)
+    val countdownSeconds: StateFlow<Int?> = _countdownSeconds.asStateFlow()
+    private companion object {
+        private const val PATROL_COUNTDOWN_SECONDS = 30
+        private const val ANNOUNCEMENT_TIMEOUT_MS = 12_000L
+        private const val CAMERA_TILT_SPEED = 0.4f
+        private const val STABILIZATION_DELAY_MS = 700L
+        private const val STABILIZATION_REPEATS = 3
+        private const val DEFAULT_CAMERA_ANGLE = 0
+
+        private const val AUTOMATIC_PATROL_DELAY = 1_000L
+    }
 
     init {
         robot?.addOnGoToLocationStatusChangedListener(this)
@@ -44,6 +63,11 @@ class PatrolManager(
         if (_isRunning.value) {
             Timber.w("Kontrollfahrt läuft bereits.")
             return false
+        }
+        _countdownSeconds.value = null
+
+        scope.launch {
+            announcePatrolStart()
         }
 
         robot?.toggleNavigationBillboard(disabled = true)
@@ -61,7 +85,23 @@ class PatrolManager(
         return true
     }
 
-    private fun startAutomaticPatrol(route: List<String>) {
+    private suspend fun announcePatrolStart() {
+        Timber.d("Sende Patrol Announcement Prompt über MQTT")
+        mqttManager.publishPatrolAnnouncementPrompt()
+
+        mqttManager.waitForTtsCompleted(timeoutMs = ANNOUNCEMENT_TIMEOUT_MS)
+
+        robot?.finishConversation()
+    }
+
+    private suspend fun startAutomaticPatrol(route: List<String>) {
+        for (seconds in PATROL_COUNTDOWN_SECONDS downTo 1) {
+            _countdownSeconds.value = seconds
+            delay(AUTOMATIC_PATROL_DELAY)
+        }
+
+        _countdownSeconds.value = null
+
         startImmediatePatrol(route, cameraTiltAngle = 0)
     }
 
@@ -71,13 +111,18 @@ class PatrolManager(
         robot?.goTo(location)
     }
 
-    override fun onGoToLocationStatusChanged(location: String, status: String, descriptionId: Int, description: String) {
+    override fun onGoToLocationStatusChanged(
+        location: String,
+        status: String,
+        descriptionId: Int,
+        description: String
+    ) {
         if (!_isRunning.value) return
 
         when (status.lowercase()) {
             "complete" -> {
                 Timber.d("Kontrollpunkt erreicht: $location")
-                scanAtCurrentPoint()
+                stabilizeCameraAndScan()
             }
             "abort", "cancel", "cancelled" -> {
                 Timber.w("Kontrollfahrt abgebrochen bei $location.")
@@ -86,12 +131,24 @@ class PatrolManager(
         }
     }
 
+    private fun stabilizeCameraAndScan() {
+        scanJob?.cancel()
+        scanJob = scope.launch {
+            repeat(STABILIZATION_REPEATS) {
+                robot?.tiltAngle(degrees = DEFAULT_CAMERA_ANGLE, speed = CAMERA_TILT_SPEED)
+                delay(STABILIZATION_DELAY_MS)
+            }
+
+            scanAtCurrentPoint()
+        }
+    }
+
     private fun scanAtCurrentPoint() {
         scanJob?.cancel()
         scanJob = scope.launch {
             val currentLoc = activeRoute[activeIndex]
 
-            scanner.executeScanSequence(activeCameraTiltAngle) {
+            scanner.executeScanSequence {
                 cameraStreamManager.sendPatrolPointReached(currentLoc)
             }
 
@@ -123,5 +180,6 @@ class PatrolManager(
         cameraStreamManager.stopStream()
         analysisHandler.stop()
         robot?.toggleNavigationBillboard(disabled = false)
+        _countdownSeconds.value = null
     }
 }

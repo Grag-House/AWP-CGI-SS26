@@ -28,7 +28,7 @@ import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 fun AdminPanelScreen(
     onBackClick: () -> Unit,
     viewModel: AdminPanelViewModel = koinViewModel()

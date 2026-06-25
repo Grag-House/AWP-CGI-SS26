@@ -42,7 +42,7 @@ class CameraStreamManager(
     private val _processedBitmap = MutableStateFlow<Bitmap?>(null)
     val processedBitmap: StateFlow<Bitmap?> = _processedBitmap.asStateFlow()
     private val _textMessages = MutableSharedFlow<String>(
-        extraBufferCapacity = 10
+        extraBufferCapacity = 20
     )
     val textMessages: SharedFlow<String> = _textMessages.asSharedFlow()
 
@@ -147,8 +147,8 @@ class CameraStreamManager(
                 val jpegBytes = imageProxy.toJpegBytes(JPEG_QUALITY)
                 currentWebSocket.send(jpegBytes.toByteString())
             }
-        } catch (e: Exception) {
-            Timber.e(e, "Frame konnte nicht gesendet werden")
+        } catch (e: IllegalStateException) {
+            Timber.e(e, "Fehler beim Verarbeiten des Frames: ${e.message}")
         } finally {
             imageProxy.close()
         }
@@ -173,8 +173,7 @@ class CameraStreamManager(
             cameraProviderFuture.get().unbindAll()
             imageAnalysis = null
 
-            // Socket schließen, wenn der Stream stoppt
-            webSocket?.close(1000, "Stream stopped")
+            webSocket?.close(WEBSOCKET_CODE, "Stream stopped")
             webSocket = null
         }, ContextCompat.getMainExecutor(context))
     }
@@ -187,6 +186,8 @@ class CameraStreamManager(
     private companion object {
         private const val JPEG_QUALITY = 60
         private const val FRAME_INTERVAL_MS = 200L
+
+        private const val WEBSOCKET_CODE = 1000
     }
 }
 
