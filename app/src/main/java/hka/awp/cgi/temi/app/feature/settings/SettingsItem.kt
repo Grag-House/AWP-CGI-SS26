@@ -7,6 +7,7 @@ import androidx.compose.material.icons.rounded.BatteryFull
 import androidx.compose.material.icons.rounded.Brightness6
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Notifications
+import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.ui.graphics.vector.ImageVector
 import hka.awp.cgi.temi.app.R
 
@@ -24,6 +25,7 @@ sealed class SettingsItem(
                 Notifications,
                 Display,
                 Battery,
+                Photobox,
                 About,
                 AdminPanel
             )
@@ -52,6 +54,12 @@ sealed class SettingsItem(
         titleRes = R.string.admin_panel,
         subtitleRes = R.string.admin_panel_description,
         icon = Icons.Rounded.AdminPanelSettings
+    )
+
+    data object Photobox : SettingsItem(
+        titleRes = R.string.settings_photobox_title,
+        subtitleRes = R.string.settings_photobox_subtitle,
+        icon = Icons.Rounded.PhotoCamera
     )
 
     data object About : SettingsItem(

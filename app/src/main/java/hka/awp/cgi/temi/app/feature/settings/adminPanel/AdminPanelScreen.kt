@@ -4,6 +4,17 @@ package hka.awp.cgi.temi.app.feature.settings.adminPanel
 
 import android.app.Activity
 import android.content.Intent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -12,6 +23,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.AdminPasswordPrompt
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.ChangeAdminPasswordDialog
@@ -24,15 +40,131 @@ import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.NoRouteSelect
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.RestartAppConfirmationDialog
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolRouteDialog
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolSettingsDialog
+import hka.awp.cgi.temi.app.R
+import hka.awp.cgi.temi.app.feature.hideandseek.HidingSpotFilterCallbacks
+import hka.awp.cgi.temi.app.feature.hideandseek.HidingSpotFilterContent
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.AdminPasswordPrompt
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.ChangePasswordDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.CoordinateManagementCard
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.DeleteProfileConfirmDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.EditCoordinatesDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.EditSpeakerVerificationThresholdDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.EditUrlDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.HidingSpotFilterCard
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.MqttReportsCard
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.MqttReportsDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.ProfileNameInputDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.ResetVoiceProfilesDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.RestartAppCard
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.RestartAppConfirmationDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.SpeakerVerificationCard
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.SpeakerVerificationThresholdCard
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.VoiceProfilesManagementCard
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.WebserverPasswordCard
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.WebserverUrlCard
+import hka.awp.cgi.temi.app.ui.components.SettingsHeader
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.viewmodel.koinViewModel
 
+// ─── Dialog State ────────────────────────────────────────────────────────────
+
+private data class DialogState(
+    val showUrl: Boolean = false,
+    val showCoordinate: Boolean = false,
+    val showThreshold: Boolean = false,
+    val showPassword: Boolean = false,
+    val showMqttReports: Boolean = false,
+    val showResetVoiceProfiles: Boolean = false,
+    val showProfileName: Boolean = false,
+    val showDeleteConfirm: Boolean = false,
+    val showRestart: Boolean = false,
+    val selectedProfileToDelete: String = ""
+)
+
 @Composable
-@Suppress("LongMethod", "CyclomaticComplexMethod")
+private fun AdminPanelDialogs(
+    uiState: AdminPanelState,
+    onAction: (AdminPanelAction) -> Unit,
+    dialogState: DialogState,
+    onDismiss: () -> Unit
+) {
+    if (dialogState.showUrl) {
+        EditUrlDialog(uiState.webserverUrl, {
+            onAction(AdminPanelAction.EditWebserverUrl(it))
+            onDismiss()
+        }, onDismiss)
+    }
+    if (dialogState.showCoordinate) {
+        EditCoordinatesDialog(
+            uiState.latitude,
+            uiState.longitude,
+            { lat, lon ->
+                onAction(AdminPanelAction.EditCoordinates(lat, lon))
+                onDismiss()
+            },
+            {
+                onAction(AdminPanelAction.ResetCoordinates)
+                onDismiss()
+            },
+            onDismiss
+        )
+    }
+    if (dialogState.showThreshold) {
+        EditSpeakerVerificationThresholdDialog(
+            uiState.speakerVerificationThreshold,
+            {
+                onAction(AdminPanelAction.EditSpeakerVerificationThreshold(it))
+                onDismiss()
+            },
+            onDismiss
+        )
+    }
+    if (dialogState.showPassword) {
+        ChangePasswordDialog({ onAction(AdminPanelAction.ChangePassword(it)) }, onDismiss)
+    }
+    if (dialogState.showMqttReports) {
+        MqttReportsDialog(
+            uiState.mqttReportTopics,
+            uiState.mqttTrafficEvents,
+            { onAction(AdminPanelAction.ClearMqttReports) },
+            onDismiss
+        )
+    }
+    if (dialogState.showResetVoiceProfiles) {
+        ResetVoiceProfilesDialog({ onAction(AdminPanelAction.ResetVoiceProfiles) }, onDismiss)
+    }
+    if (dialogState.showProfileName) {
+        ProfileNameInputDialog({
+            onAction(AdminPanelAction.ToggleEnrollment(true, it))
+            onDismiss()
+        }, onDismiss)
+    }
+    if (dialogState.showDeleteConfirm) {
+        val name = dialogState.selectedProfileToDelete
+        DeleteProfileConfirmDialog(name, { onAction(AdminPanelAction.DeleteVoiceProfile(name)) }, onDismiss)
+    }
+    if (dialogState.showRestart) {
+        RestartAppConfirmationDialog({
+            onAction(AdminPanelAction.RequestRestart)
+            onDismiss()
+        }, onDismiss)
+    }
+}
+
+@Composable
 fun AdminPanelScreen(
     onBackClick: () -> Unit,
     viewModel: AdminPanelViewModel = koinViewModel()
 ) {
+    val context = LocalContext.current
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isAuthorized by viewModel.isAuthorized.collectAsStateWithLifecycle()
+    val passwordError by viewModel.passwordError.collectAsStateWithLifecycle()
+    val filterState by viewModel.filterManager.filterState.collectAsStateWithLifecycle()
+    val showHidingSpotFilter by viewModel.filterManager.isOpen.collectAsStateWithLifecycle()
+
+    var dialogs by remember { mutableStateOf(DialogState()) }
+
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -53,9 +185,8 @@ fun AdminPanelScreen(
     LaunchedEffect(viewModel) {
         viewModel.events.collectLatest { event ->
             when (event) {
-                AdminPanelEvent.OpenMqttReports -> showMqttReportsDialog = true
-                AdminPanelEvent.PasswordChanged -> showAdminPasswordDialog = false
-                AdminPanelEvent.WebserverPasswordChanged -> showWebserverPasswordDialog = false
+                AdminPanelEvent.OpenMqttReports -> dialogs = dialogs.copy(showMqttReports = true)
+                AdminPanelEvent.PasswordChanged -> dialogs = dialogs.copy(showPassword = false)
                 AdminPanelEvent.RestartAppTriggered -> {
                     val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
                     val mainIntent = Intent.makeRestartActivityTask(intent?.component)
@@ -71,7 +202,7 @@ fun AdminPanelScreen(
 
     DisposableEffect(Unit) {
         onDispose {
-            viewModel.resetAuthorization()
+            viewModel.onAction(AdminPanelAction.ResetAuthorization)
         }
     }
 
@@ -85,125 +216,88 @@ fun AdminPanelScreen(
         return
     }
 
-    if (showUrlDialog) {
-        EditUrlDialog(initialUrl = uiState.webserverUrl, onConfirm = { url ->
-            viewModel.onEditWebserverUrl(url)
-            showUrlDialog = false
-        }, onDismiss = { showUrlDialog = false })
-    }
-    if (showCoordinateDialog) {
-        EditCoordinatesDialog(
-            initialLatitude = uiState.latitude,
-            initialLongitude = uiState.longitude,
-            onConfirm = { lat, lon ->
-                viewModel.onEditCoordinates(lat, lon)
-                showCoordinateDialog = false
+    if (!isAuthorized) {
+        AdminPasswordPrompt(
+            isError = passwordError,
+            onConfirm = { enteredPassword ->
+                viewModel.onAction(AdminPanelAction.CheckPassword(enteredPassword))
             },
-            onReset = {
-                viewModel.onResetCoordinates()
-                showCoordinateDialog = false
-            },
-            onDismiss = { showCoordinateDialog = false }
+            onBackClick = onBackClick,
+            onValueChange = { viewModel.onAction(AdminPanelAction.ClearPasswordError) }
         )
-    }
-    if (showWebserverPasswordDialog) {
-        ChangeWebserverPasswordDialog(
-            onConfirm = { viewModel.onUpdateWebserverPassword(it) },
-            onDismiss = { showWebserverPasswordDialog = false }
-        )
-    }
-    if (showAdminPasswordDialog) {
-        ChangeAdminPasswordDialog(
-            onConfirm = { viewModel.onChangePassword(it) },
-            onDismiss = { showAdminPasswordDialog = false }
-        )
-    }
-    if (showMqttReportsDialog) {
-        MqttReportsDialog(
-            monitoredTopics = uiState.mqttReportTopics,
-            events = uiState.mqttTrafficEvents,
-            onClear = viewModel::onClearMqttReports,
-            onDismiss = { showMqttReportsDialog = false }
-        )
-    }
-    if (showRestartDialog) {
-        RestartAppConfirmationDialog(
-            onConfirm = {
-                viewModel.onRestartAppRequested()
-                showRestartDialog = false
-            },
-            onDismiss = { showRestartDialog = false }
-        )
+        return
     }
 
-    if (showNoRouteDialog) {
-        NoRouteSelectedDialog(onDismiss = { showNoRouteDialog = false })
+    AdminPanelDialogs(uiState, viewModel::onAction, dialogs) { dialogs = DialogState() }
+
+    if (showHidingSpotFilter) {
+        Dialog(onDismissRequest = viewModel.filterManager::dismiss) {
+            HidingSpotFilterContent(
+                state = filterState,
+                callbacks = HidingSpotFilterCallbacks(
+                    onToggle = viewModel.filterManager::toggle,
+                    onSelectAll = viewModel.filterManager::selectAll,
+                    onDeselectAll = viewModel.filterManager::deselectAll,
+                    onSave = viewModel.filterManager::save,
+                    onDismiss = viewModel.filterManager::dismiss
+                )
+            )
+        }
     }
 
-    if (showPatrolSettingsDialog) {
-        PatrolSettingsDialog(
-            initialIsEnabled = uiState.isPatrolEnabled,
-            initialMode = uiState.patrolMode,
-            initialMinMinutes = uiState.minMinutes,
-            initialMaxMinutes = uiState.maxMinutes,
-            initialHours = uiState.selectedHours,
-            onTriggerPatrol = {
-                val success = viewModel.onTriggerImmediatePatrol()
-                if (!success) {
-                    showPatrolSettingsDialog = false
-                    showNoRouteDialog = true
+    Row(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(32.dp)
+        ) {
+            SettingsHeader(stringResource(R.string.admin_panel_header), onBackClick)
+            Spacer(Modifier.height(40.dp))
+            AdminPanelContent(uiState, viewModel) { dialogs = it }
+        }
+    }
+}
+
+@Composable
+private fun AdminPanelContent(
+    uiState: AdminPanelState,
+    viewModel: AdminPanelViewModel,
+    updateDialogs: (DialogState) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        WebserverUrlCard(uiState.webserverUrl) { updateDialogs(DialogState(showUrl = true)) }
+        MqttReportsCard { viewModel.onAction(AdminPanelAction.OpenMqttReports) }
+        WebserverPasswordCard { updateDialogs(DialogState(showPassword = true)) }
+        CoordinateManagementCard(uiState.coordinates) { updateDialogs(DialogState(showCoordinate = true)) }
+        HidingSpotFilterCard { viewModel.filterManager.open() }
+        RestartAppCard { updateDialogs(DialogState(showRestart = true)) }
+        SpeakerVerificationCard(uiState.isSpeakerVerificationEnabled) {
+            viewModel.onAction(AdminPanelAction.ToggleSpeakerVerification(it))
+        }
+        SpeakerVerificationThresholdCard(uiState.speakerVerificationThreshold) {
+            updateDialogs(DialogState(showThreshold = true))
+        }
+        VoiceProfilesManagementCard(
+            uiState.voiceProfiles,
+            uiState.isEnrollmentActive,
+            {
+                if (uiState.isEnrollmentActive) {
+                    viewModel.onAction(AdminPanelAction.ToggleEnrollment(false))
+                } else {
+                    updateDialogs(DialogState(showProfileName = true))
                 }
             },
-            onSave = { isEnabled, mode, minMin, maxMin, hours ->
-                viewModel.onSavePatrolSettings(
-                    isEnabled = isEnabled,
-                    mode = mode,
-                    minMin = minMin,
-                    maxMin = maxMin,
-                    hours = hours
-                )
-            },
-            onDismiss = { showPatrolSettingsDialog = false }
+            { updateDialogs(DialogState(showDeleteConfirm = true, selectedProfileToDelete = it)) }
         )
     }
-    if (showPatrolRouteDialog) {
-        PatrolRouteDialog(
-            savedLocations = uiState.savedLocations,
-            initialRoute = uiState.patrolRoute,
-            onDismiss = {
-                showPatrolRouteDialog = false
-            },
-            onSave = { route ->
-                viewModel.onSavePatrolRoute(route)
-                showPatrolRouteDialog = false
-            }
-        )
-    }
-
-    if (showCloseDialog) {
-        CloseAppConfirmationDialog(
-            onConfirm = {
-                showCloseDialog = false
-                viewModel.requestCloseApp()
-            },
-            onDismiss = { showCloseDialog = false }
-        )
-    }
-
-    AdminPanelContent(
-        uiState = uiState,
-        onBackClick = onBackClick,
-        onEditUrl = { showUrlDialog = true },
-        onOpenMqtt = viewModel::onOpenMqttReports,
-        onUpdateWebserverPassword = { showWebserverPasswordDialog = true },
-        onChangePassword = { showAdminPasswordDialog = true },
-        onEditCoordinates = { showCoordinateDialog = true },
-        onRestartRequest = { showRestartDialog = true },
-        onNavigateToPatrolSettings = { showPatrolSettingsDialog = true },
-        onNavigateToPatrolRoute = {
-            viewModel.loadPatrolLocations()
-            showPatrolRouteDialog = true
-        },
-        onCloseRequest = { showCloseDialog = true },
-    )
 }

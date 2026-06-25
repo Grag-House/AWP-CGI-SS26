@@ -8,6 +8,11 @@ import hka.awp.cgi.temi.app.feature.controller.ControllerViewModel
 import hka.awp.cgi.temi.app.feature.hideandseek.HideAndSeekViewModel
 import hka.awp.cgi.temi.app.feature.hideandseek.HidingSpotRepository
 import hka.awp.cgi.temi.app.feature.navigation.NavigationViewModel
+import hka.awp.cgi.temi.app.feature.photobox.PhotoboxViewModel
+import hka.awp.cgi.temi.app.feature.photobox.capture.PhotoboxCameraManager
+import hka.awp.cgi.temi.app.feature.photobox.upload.PhotoboxPendingUploadStore
+import hka.awp.cgi.temi.app.feature.photobox.upload.PhotoboxUploadQueue
+import hka.awp.cgi.temi.app.feature.photobox.upload.PhotoboxUploadRepository
 import hka.awp.cgi.temi.app.feature.settings.SettingsViewModel
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.AdminPanelViewModel
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolCameraStreamManager
@@ -16,6 +21,7 @@ import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolOverlayView
 import hka.awp.cgi.temi.app.feature.settings.battery.BatteryViewModel
 import hka.awp.cgi.temi.app.feature.settings.display.DisplayViewModel
 import hka.awp.cgi.temi.app.feature.settings.language.LanguageViewModel
+import hka.awp.cgi.temi.app.feature.settings.photobox.PhotoboxSettingsViewModel
 import hka.awp.cgi.temi.app.feature.webserver.WebserverViewModel
 import hka.awp.cgi.temi.app.ui.shell.AppViewModel
 import hka.awp.cgi.temi.app.utils.NetworkManager
@@ -58,7 +64,12 @@ val appModule = module {
         }
     }
 
-    single<TemiBatteryMonitor> { TemiBatteryMonitor(robot = get()) }
+    single<TemiBatteryMonitor> {
+        TemiBatteryMonitor(
+            robot = get(),
+            mqttManager = get()
+        )
+    }
 
     single {
         CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -70,7 +81,6 @@ val appModule = module {
             scope = get(),
         )
     }
-
     viewModel {
         AppViewModel(
             networkManager = get(),
@@ -93,24 +103,50 @@ val appModule = module {
     }
 
     viewModel {
-        NavigationViewModel(get(), get(), get())
+        NavigationViewModel(get(), get(), get(), get())
     }
 
     viewModel {
         AdminPanelViewModel(
             appConfigRepository = get(),
             mqttManager = get(),
-            patrolManager = get(),
+            voiceProfileRepository = get(),
+            voiceRecognitionViewModel = get(),
             robot = get(),
-            patrolCameraStreamManager = get()
-        )
+            hidingSpotRepository = get(),
+            patrolCameraStreamManager = get(),
+            patrolManager = get()
+            )
     }
-
-    single { PatrolManager(robot = get(), cameraStreamManager = get(), mqttManager = get()) }
 
     single { HidingSpotRepository(androidContext()) }
 
     viewModel { HideAndSeekViewModel(robot = get(), hidingSpotRepository = get()) }
+
+    single { PhotoboxCameraManager(androidContext()) }
+
+    single {
+        PhotoboxUploadRepository(
+            context = androidContext(),
+            client = get(),
+            appConfigRepository = get()
+        )
+    }
+
+    single { PhotoboxPendingUploadStore(androidContext()) }
+
+    single { PhotoboxUploadQueue(context = androidContext(), pendingUploadStore = get()) }
+
+    viewModel {
+        PhotoboxViewModel(
+            cameraManager = get(),
+            appConfigRepository = get(),
+            uploadRepository = get(),
+            uploadQueue = get()
+        )
+    }
+
+    viewModel { PhotoboxSettingsViewModel(appConfigRepository = get()) }
 
     viewModel<WebserverViewModel> { WebserverViewModel(get()) }
 

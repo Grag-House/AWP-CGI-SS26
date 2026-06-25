@@ -19,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.core.content.ContextCompat
 import hka.awp.cgi.temi.app.feature.controller.ControllerViewModel
 import hka.awp.cgi.temi.app.feature.settings.display.DisplayViewModel
+import hka.awp.cgi.temi.app.feature.voiceRecognition.TemiVoiceRecognitionViewModel
 import hka.awp.cgi.temi.app.ui.shell.MainShell
 import hka.awp.cgi.temi.app.ui.theme.CgiTheme
 import hka.awp.cgi.temi.app.utils.LanguageHelper
@@ -46,33 +47,34 @@ class MainActivity : ComponentActivity() {
     }
 
     private lateinit var soundPool: SoundPool
-    private var hornSoundId: Int = 0
+    private var hornSoundId: Int = -1
+
+    private val temiVoiceRecognitionViewModel: TemiVoiceRecognitionViewModel by viewModel()
+
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            initTemiVoiceRecognition()
+        } else {
+            Timber.w("Microphone permission denied. Voice recognition will not work.")
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestCameraPermissionIfNeeded()
 
-        // this will hide the android topBar and only show if in case the user swipes down
         hideTopBar(window)
-
         enableEdgeToEdge()
 
-        val audioAttributes = AudioAttributes.Builder()
-            .setUsage(AudioAttributes.USAGE_MEDIA)
-            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-            .build()
+        initSoundPool()
 
-        soundPool = SoundPool.Builder()
-            .setMaxStreams(1)
-            .setAudioAttributes(audioAttributes)
-            .build()
-
-        hornSoundId = soundPool.load(this, R.raw.horn, 1)
+        checkMicrophonePermission()
 
         setContent {
             val displayViewModel: DisplayViewModel = koinViewModel()
             val isDarkMode by displayViewModel.isDarkMode.collectAsState()
-
             CgiTheme(darkTheme = isDarkMode) {
                 MainShell()
             }
@@ -90,59 +92,60 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    override fun attachBaseContext(newBase: Context) {
-        val langCode = LanguageHelper.getLocale(newBase)
-        val locale = Locale.forLanguageTag(langCode)
-        val config = Configuration(newBase.resources.configuration)
-        config.setLocale(locale)
+    private fun initTemiVoiceRecognition() {
+        temiVoiceRecognitionViewModel.initializeVoiceAi()
+    }
 
+    private fun checkMicrophonePermission() {
+        when {
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.RECORD_AUDIO
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                initTemiVoiceRecognition()
+            }
+
+            else -> {
+                requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+            }
+        }
+    }
+
+    private fun initSoundPool() {
+        soundPool = SoundPool.Builder()
+            .setMaxStreams(1)
+            .setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build()
+            )
+            .build()
+        hornSoundId = soundPool.load(this, R.raw.horn, 1)
+    }
+
+    override fun attachBaseContext(newBase: Context) {
+        val config = Configuration(newBase.resources.configuration)
+        config.setLocale(Locale.forLanguageTag(LanguageHelper.getLocale(newBase)))
         super.attachBaseContext(newBase.createConfigurationContext(config))
     }
 
     override fun dispatchGenericMotionEvent(event: MotionEvent): Boolean {
-        if (event.isGameControllerEvent()) {
-            val leftY = event.getCenteredAxis(MotionEvent.AXIS_Y)
-            val rightX = event.getCenteredAxis(MotionEvent.AXIS_Z)
-            Timber.d("Stick Werte - RX: $leftY, Z: $rightX")
+        if (!event.isFromGameController()) return super.dispatchGenericMotionEvent(event)
 
-            controllerViewModel.onControllerInput(
-                x = -rightX,
-                y = leftY,
-            )
-
-            return true
-        }
-        Timber.d("test $event")
-        return super.dispatchGenericMotionEvent(event)
+        controllerViewModel.onControllerInput(
+            x = -event.getCenteredAxis(MotionEvent.AXIS_Z),
+            y = event.getCenteredAxis(MotionEvent.AXIS_Y),
+        )
+        return true
     }
 
-    override fun onDestroy() {
-        soundPool.release()
-        super.onDestroy()
-    }
-
-    override fun onKeyDown(
-        keyCode: Int,
-        event: KeyEvent?,
-    ): Boolean {
-        if (event?.isGameControllerEvent() != true) {
-            Timber.d("test $event")
-            return super.onKeyDown(keyCode, event)
-        }
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (event?.isFromGameController() != true) return super.onKeyDown(keyCode, event)
 
         when (keyCode) {
-            CONTROLLER_KEYCODE_ENABLE -> {
-                if (!controllerViewModel.controllerEnabled.value) {
-                    controllerViewModel.setControllerEnabled(true)
-                }
-            }
-
-            CONTROLLER_KEYCODE_DISABLE -> {
-                if (controllerViewModel.controllerEnabled.value) {
-                    controllerViewModel.setControllerEnabled(false)
-                }
-            }
-
+            CONTROLLER_KEYCODE_ENABLE -> controllerViewModel.setControllerEnabled(true)
+            CONTROLLER_KEYCODE_DISABLE -> controllerViewModel.setControllerEnabled(false)
             CONTROLLER_KEYCODE_TRIANGLE -> {
                 if (controllerViewModel.controllerEnabled.value) {
                     soundPool.play(hornSoundId, 1f, 1f, 1, 0, 1f)
@@ -151,39 +154,31 @@ class MainActivity : ComponentActivity() {
 
             else -> {
                 Timber.d("Ignored controller keyCode=$keyCode")
+                return true
             }
         }
-
         return true
     }
 
-    override fun onKeyUp(
-        keyCode: Int,
-        event: KeyEvent?,
-    ): Boolean {
-        if (event?.isGameControllerEvent() != true) {
-            return super.onKeyUp(keyCode, event)
-        }
+    override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
+        return if (event?.isFromGameController() == true) true else super.onKeyUp(keyCode, event)
+    }
 
-        return true
+    override fun onDestroy() {
+        soundPool.release()
+        super.onDestroy()
     }
 }
 
-private fun MotionEvent.isGameControllerEvent(): Boolean {
-    return source and InputDevice.SOURCE_JOYSTICK == InputDevice.SOURCE_JOYSTICK ||
-        source and InputDevice.SOURCE_GAMEPAD == InputDevice.SOURCE_GAMEPAD
-}
+private fun MotionEvent.isFromGameController(): Boolean =
+    source and (InputDevice.SOURCE_JOYSTICK or InputDevice.SOURCE_GAMEPAD) != 0
 
-private fun KeyEvent.isGameControllerEvent(): Boolean {
-    return source and InputDevice.SOURCE_GAMEPAD == InputDevice.SOURCE_GAMEPAD ||
-        source and InputDevice.SOURCE_JOYSTICK == InputDevice.SOURCE_JOYSTICK
-}
+private fun KeyEvent.isFromGameController(): Boolean =
+    source and (InputDevice.SOURCE_GAMEPAD or InputDevice.SOURCE_JOYSTICK) != 0
 
 private fun MotionEvent.getCenteredAxis(axis: Int): Float {
-    val range = device?.getMotionRange(axis, source)
-    val flat = range?.flat ?: DEFAULT_CONTROLLER_DEAD_ZONE
+    val flat = device?.getMotionRange(axis, source)?.flat ?: DEFAULT_CONTROLLER_DEAD_ZONE
     val value = getAxisValue(axis)
-
     return if (abs(value) > flat) value else 0f
 }
 

@@ -37,6 +37,8 @@
     <string name="settings_location_subtitle">Services de localisation</string>
     <string name="settings_about_title">À propos</string>
     <string name="settings_about_subtitle">Informations système</string>
+    <string name="settings_photobox_title">Photobox</string>
+    <string name="settings_photobox_subtitle">Thème &amp; superposition</string>
     <string name="display_brightness">Luminosité</string>
     <string name="display_screensaver">Écran de veille</string>
     <string name="display_screensaver_after">Démarre après %1$s</string>
@@ -99,6 +101,7 @@
     <string name="admin_panel_weather_coordinates">Coordonnées météo</string>
     <string name="admin_panel_webserver_coordiantes_change">Changer coordonnées</string>
     <string name="admin_panel_webserver_url_change">Changer URL</string>
+    <string name="admin_panel_speaker_verification_threshold_change">Modifier le seuil</string>
     <string name="admin_panel_header">Admin Panel</string>
     <string name="admin_panel_latitude">"Latitude : "</string>
     <string name="admin_panel_longitude">Longitude :</string>
@@ -153,6 +156,8 @@
     <string name="patrol_stream_back_button">Retour</string>
     <string name="patrol_countdown_message">La ronde démarre dans %1$d secondes</string>
     <string name="patrol_stream_stop_button">Arrêter la ronde</string>
+    <string name="admin_panel_speaker_verification">Vérification du locuteur</string>
+    <string name="admin_panel_speaker_verification_subtitle">Seules les voix autorisées peuvent réveiller le robot</string>
 
     <string name="navigation_status_label">STATUS</string>
     <string name="current_location_prefix">Position actuelle :</string>
@@ -242,7 +247,7 @@
     <string name="hide_and_seek_start_button">C\'est parti !</string>
     <string name="hide_and_seek_hiding_title">Temi joue à cache-cache</string>
     <string name="hide_and_seek_hiding_subtitle">Ne me suis pas – je vais me cacher !</string>
-    <string name="hide_and_seek_hiding_bystander_note">Ne pas donner d\'indice.</string>
+    <string name="hide_and_seek_hiding_bystander_note">Les autres peuvent regarder, mais merci de ne pas donner d\'indices.</string>
     <string name="hide_and_seek_hiding_countdown_label">DÉBUT DANS</string>
     <string name="hide_and_seek_hiding_seconds">%1$d s</string>
     <string name="hide_and_seek_waiting_title">Trouve-moi !</string>
@@ -255,9 +260,6 @@
     <string name="hide_and_seek_lost_location_label">J\'ÉTAIS CACHÉ ICI</string>
     <string name="hide_and_seek_lost_location_unknown">révélé plus tard</string>
     <string name="hide_and_seek_play_again">Rejouer</string>
-    <string name="hide_and_seek_to_dashboard">Vers dashboard</string>
-    <string name="hide_and_seek_navigation_error_title">Échec de la navigation</string>
-    <string name="hide_and_seek_navigation_error_message">Échec de la navigation vers la cachette.</string>
     <string name="hiding_spot_filter_button">Modifier cachettes</string>
     <string name="hiding_spot_filter_button_active">Filtre actif</string>
     <string name="hiding_spot_filter_title">Sélectionner cachettes</string>
@@ -266,8 +268,11 @@
     <string name="hiding_spot_filter_deselect_all">Tout désélectionner</string>
     <string name="hiding_spot_filter_no_locations">Aucun lieu.</string>
     <string name="hiding_spot_filter_count">%1$d de %2$d activés</string>
+
     <string name="hiding_spot_filter_cancel">Annuler</string>
     <string name="hiding_spot_filter_save">Enregistrer</string>
+    <string name="admin_panel_hiding_spots">Configuration des cachettes</string>
+    <string name="admin_panel_hiding_spots_subtitle">Gérer les cachettes autorisées</string>
     <string name="admin_panel_restart_app">Redémarrer l\'application</string>
     <string name="admin_panel_restart_app_subtitle">Redémarrer en cas de problème</string>
     <string name="admin_panel_restart_confirm_title">Redémarrer l\'application ?</string>
@@ -276,4 +281,65 @@
     <string name="admin_panel_password_input">Zone d\'administration protégée, veuillez saisir le mot de passe.</string>
     <string name="admin_panel_enter_password">Saisir le mot de passe</string>
     <string name="password_wrong">Mot de passe incorrect</string>
+
+    <!-- Photobox -->
+    <string name="photobox">Photomaton</string>
+    <string name="photobox_sub">Utiliser Temi comme photomaton</string>
+    <string name="photobox_description">Icône caméra photomaton</string>
+    <string name="photobox_intro_text">Mettez-vous devant Temi et souriez à la caméra. Le compte à rebours démarre automatiquement.</string>
+    <string name="photobox_countdown_label">DURÉE DU COMPTE À REBOURS</string>
+    <string name="photobox_start_button">C\'est parti !</string>
+    <string name="photobox_smile_label">Souris !</string>
+    <string name="photobox_cancel">Annuler</string>
+    <string name="photobox_click_text">Clic !</string>
+    <string name="photobox_preview_title">Superbe !</string>
+    <string name="photobox_preview_message">Remets-toi devant Temi lorsque tu es prêt pour la prochaine photo.</string>
+    <string name="photobox_camera_permission_required">Je ne peux pas te voir sans accès à la caméra.</string>
+    <string name="photobox_camera_unavailable">Ma caméra n\'est pas disponible pour le moment.</string>
+    <string name="photobox_overlay_title">Superposition Temi</string>
+    <string name="photobox_overlay_description">Place une image de Temi sur la photo prise, pour donner l\'impression que Temi se trouve à vos côtés.</string>
+    <string name="photobox_banner_title">Bannière</string>
+    <string name="photobox_banner_description">Affiche une bannière en bas de la photo.</string>
+    <string name="photobox_banner_50_years_cgi">50 ans de CGI</string>
+    <string name="photobox_banner_cgi_lab">CGI Lab</string>
+    <string name="photobox_upload_section_title">Téléchargement des photos</string>
+    <string name="photobox_drive_folder_label">Lien du dossier Google Drive</string>
+    <string name="photobox_drive_upload_url_label">URL du webhook d\'envoi</string>
+    <string name="photobox_upload_save_button">Enregistrer</string>
+    <string name="photobox_upload_description">Les photos sont automatiquement envoyées dans ce dossier Drive après la prise de vue.</string>
+    <string name="photobox_show_qr_button">Afficher le code QR</string>
+    <string name="photobox_upload_in_progress">Envoi de ta photo…</string>
+    <string name="photobox_upload_failed">Envoi échoué</string>
+    <string name="photobox_upload_queued">Pas de connexion – ta photo sera envoyée automatiquement dès que tu seras de nouveau en ligne.</string>
+    <string name="photobox_generate_qr_button">Partager la photo</string>
+    <string name="photobox_filter_none">Original</string>
+    <string name="photobox_filter_grayscale">Noir et blanc</string>
+    <string name="photobox_filter_sepia">Sépia</string>
+    <string name="photobox_filter_vintage">Vintage</string>
+    <string name="photobox_qr_dialog_title">Ta photo</string>
+    <string name="photobox_qr_dialog_subtitle">Scanne le code QR pour voir et télécharger la photo.</string>
+    <string name="photobox_qr_dialog_expiry">Ce lien n\'est valable que pendant 30 minutes.</string>
+    <string name="photobox_mode_select_title">Bienvenue dans le photomaton !</string>
+    <string name="photobox_mode_select_subtitle">Choisis comment tu veux prendre ta photo.</string>
+    <string name="photobox_mode_standard_title">Standard</string>
+    <string name="photobox_mode_standard_description">Une seule photo</string>
+    <string name="photobox_mode_strip_title">Bande de 3 photos</string>
+    <string name="photobox_mode_strip_description">3 photos sur une bande</string>
+    <string name="photobox_mode_strip4_title">Bande de 4 photos</string>
+    <string name="photobox_mode_strip4_description">4 photos sur une bande</string>
+    <string name="photobox_mode_grid_title">Grille 2x2</string>
+    <string name="photobox_mode_grid_description">4 photos en grille</string>
+    <string name="photobox_overlay_position_label">POSITION DE TEMI</string>
+    <string name="photobox_overlay_position_left">Gauche</string>
+    <string name="photobox_overlay_position_center">Centre</string>
+    <string name="photobox_overlay_position_right">Droite</string>
+    <string name="photobox_change_mode_button">Changer de mode</string>
+    <string name="photobox_strip_delay_label">PAUSE ENTRE LES PHOTOS</string>
+    <string name="photobox_change_pose_label">Change de pose !</string>
+    <string name="photobox_shot_progress">Photo %1$d sur %2$d</string>
+    <string name="photobox_new_photo_button">Nouvelle photo</string>
+    <string name="photobox_to_dashboard">Vers le dashboard</string>
+    <string name="photobox_photo_count">%1$d photos prises</string>
+    <string name="photobox_photo_number">Photo #%1$d</string>
+    <string name="photobox_duration_seconds">%1$d s</string>
 </resources>

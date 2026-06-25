@@ -21,6 +21,8 @@ import hka.awp.cgi.temi.app.feature.hideandseek.HideAndSeekScreen
 import hka.awp.cgi.temi.app.feature.hideandseek.HideAndSeekViewModel
 import hka.awp.cgi.temi.app.feature.navigation.NavigationContent
 import hka.awp.cgi.temi.app.feature.navigation.NavigationViewModel
+import hka.awp.cgi.temi.app.feature.photobox.PhotoboxScreen
+import hka.awp.cgi.temi.app.feature.photobox.PhotoboxViewModel
 import hka.awp.cgi.temi.app.feature.settings.SettingsNavigationEvent
 import hka.awp.cgi.temi.app.feature.settings.SettingsViewModel
 import hka.awp.cgi.temi.app.feature.settings.about.SettingsScreen
@@ -31,6 +33,7 @@ import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolStreamOverl
 import hka.awp.cgi.temi.app.feature.settings.battery.BatteryScreen
 import hka.awp.cgi.temi.app.feature.settings.display.DisplayScreen
 import hka.awp.cgi.temi.app.feature.settings.language.LanguageScreen
+import hka.awp.cgi.temi.app.feature.settings.photobox.PhotoboxSettingsScreen
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherContent
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherState
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherViewModel
@@ -38,7 +41,6 @@ import hka.awp.cgi.temi.app.feature.webserver.ServerState
 import hka.awp.cgi.temi.app.feature.webserver.WebViewScreen
 import hka.awp.cgi.temi.app.feature.webserver.WebserverViewModel
 import org.koin.compose.viewmodel.koinViewModel
-import timber.log.Timber
 
 /**
  * The primary UI shell of the application.
@@ -63,6 +65,8 @@ fun MainShell(
     navigationViewModel: NavigationViewModel = koinViewModel(),
     webserverViewModel: WebserverViewModel = koinViewModel(),
     weatherViewModel: WeatherViewModel = koinViewModel(),
+    hideAndSeekViewModel: HideAndSeekViewModel = koinViewModel(),
+    photoboxViewModel: PhotoboxViewModel = koinViewModel()
     hideAndSeekViewModel: HideAndSeekViewModel = koinViewModel(),
     patrolOverlayViewModel: PatrolOverlayViewModel = koinViewModel()
 ) {
@@ -105,6 +109,26 @@ fun MainShell(
                     onSidebarToggle = { appViewModel.onSideBarToggle() },
                     modifier = Modifier.width(260.dp)
                 )
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            Sidebar(
+                isExpanded = appViewModel.isSidebarExpanded,
+                selectedRoute = appViewModel.selectedRoute,
+                onRouteSelected = { screen ->
+                    // Clicking Photobox while already on it (e.g. mid-countdown/capture) doesn't
+                    // trigger a route change, so the screen wouldn't otherwise get disposed/reset
+                    // — reset explicitly so it always lands back on mode selection.
+                    if (screen == Screen.Photobox) {
+                        photoboxViewModel.reset()
+                    }
+                    appViewModel.onRouteSelect(screen)
+                },
+                onSidebarToggle = { appViewModel.onSideBarToggle() },
+                modifier = Modifier.width(260.dp)
+            )
 
                 Row(
                     modifier = Modifier
@@ -122,8 +146,9 @@ fun MainShell(
                             hideAndSeekViewModel = hideAndSeekViewModel,
                             serverState = serverState,
                             currentTemperatureState = currentTemperatureState,
-                            webserverUrlState = webserverUrlState
-                        ),
+                            webserverUrlState = webserverUrlState,
+                            photoboxViewModel = photoboxViewModel
+                            ),
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -158,8 +183,6 @@ private fun RenderSelectedRoute(
     routeDeps: MainShellRouteDeps,
     modifier: Modifier
 ) {
-    Timber.d("Selected route: %s", selectedRoute)
-
     when (selectedRoute) {
         Screen.Dashboard.route -> DashboardRouteContent(
             modifier = modifier,
@@ -187,20 +210,13 @@ private fun RenderSelectedRoute(
             SettingsScreen(modifier = modifier, viewModel = routeDeps.settingsViewModel)
         }
 
-        Screen.DisplaySettings.route -> DisplayScreen(
-            onBackClick = { routeDeps.appViewModel.onRouteSelect(Screen.Settings) }
-        )
-
-        Screen.BatterySettings.route -> BatteryScreen(
-            onBackClick = { routeDeps.appViewModel.onRouteSelect(Screen.Settings) }
-        )
-
-        Screen.AdminPanel.route -> AdminPanelScreen(
-            onBackClick = { routeDeps.appViewModel.onRouteSelect(Screen.Settings) }
-        )
-
-        Screen.LanguageSettings.route -> LanguageScreen(
-            onBackClick = { routeDeps.appViewModel.onRouteSelect(Screen.Settings) }
+        Screen.DisplaySettings.route,
+        Screen.BatterySettings.route,
+        Screen.AdminPanel.route,
+        Screen.LanguageSettings.route,
+        Screen.PhotoboxSettings.route -> RenderSettingsSubRoute(
+            selectedRoute = selectedRoute,
+            onNavigateBack = { routeDeps.appViewModel.onRouteSelect(Screen.Settings) }
         )
 
         Screen.Weather.route -> WeatherContent(viewModel = routeDeps.weatherViewModel)
@@ -208,6 +224,12 @@ private fun RenderSelectedRoute(
         Screen.HideAndSeek.route -> HideAndSeekScreen(
             modifier = modifier,
             viewModel = routeDeps.hideAndSeekViewModel,
+            onNavigateToDashboard = { routeDeps.appViewModel.onRouteSelect(Screen.Dashboard) }
+        )
+
+        Screen.Photobox.route -> PhotoboxScreen(
+            modifier = modifier,
+            viewModel = routeDeps.photoboxViewModel,
             onNavigateToDashboard = { routeDeps.appViewModel.onRouteSelect(Screen.Dashboard) }
         )
 
@@ -223,12 +245,24 @@ private fun RenderSelectedRoute(
     }
 }
 
+@Composable
+private fun RenderSettingsSubRoute(selectedRoute: String, onNavigateBack: () -> Unit) {
+    when (selectedRoute) {
+        Screen.DisplaySettings.route -> DisplayScreen(onBackClick = onNavigateBack)
+        Screen.BatterySettings.route -> BatteryScreen(onBackClick = onNavigateBack)
+        Screen.AdminPanel.route -> AdminPanelScreen(onBackClick = onNavigateBack)
+        Screen.PhotoboxSettings.route -> PhotoboxSettingsScreen(onBackClick = onNavigateBack)
+        else -> LanguageScreen(onBackClick = onNavigateBack)
+    }
+}
+
 private data class MainShellRouteDeps(
     val appViewModel: AppViewModel,
     val settingsViewModel: SettingsViewModel,
     val navigationViewModel: NavigationViewModel,
     val weatherViewModel: WeatherViewModel,
     val hideAndSeekViewModel: HideAndSeekViewModel,
+    val photoboxViewModel: PhotoboxViewModel,
     val serverState: ServerState,
     val currentTemperatureState: WeatherState,
     val webserverUrlState: String
@@ -246,6 +280,7 @@ private fun HandleSettingsNavigationEvents(
                 is SettingsNavigationEvent.NavigateToBattery -> onNavigate(Screen.BatterySettings)
                 is SettingsNavigationEvent.NavigateToAdminPanel -> onNavigate(Screen.AdminPanel)
                 is SettingsNavigationEvent.NavigateToLanguage -> onNavigate(Screen.LanguageSettings)
+                is SettingsNavigationEvent.NavigateToPhotobox -> onNavigate(Screen.PhotoboxSettings)
             }
         }
     }

@@ -43,6 +43,7 @@ class MqttManager(private val robot: Robot?, private val client: Mqtt5BlockingCl
         private const val TILT_ANGLE_TOPIC = "$BASE_TOPIC/temi_tilt_angle/set"
         private const val SPEAK_TOPIC = "$BASE_TOPIC/temi_speak/set"
         private const val TTS_LISTENER_TOPIC = "$BASE_TOPIC/ttsListener"
+        const val BATTERY_TOPIC = "$BASE_TOPIC/temi_battery_level"
         private val json = Json { ignoreUnknownKeys = true }
         private const val MAX_TRAFFIC_EVENTS = 200
         private val _latestTtsStatus = MutableStateFlow<String?>(null)
@@ -71,7 +72,7 @@ class MqttManager(private val robot: Robot?, private val client: Mqtt5BlockingCl
 
     /**
      * Connects to the MQTT broker and starts a blocking message loop.
-     * This function will suspend until the message loop is finished or cancelled.
+     * This function will suspend until the message loop is finished or canceled.
      */
     suspend fun connect() = withContext(Dispatchers.IO) {
         Timber.d("Connecting to MQTT broker at %s", client.config.serverHost)
@@ -163,7 +164,10 @@ class MqttManager(private val robot: Robot?, private val client: Mqtt5BlockingCl
 
     private fun handleSpeak(payload: String) {
         try {
-            val cmd = json.decodeFromString<MqttCommand>(payload)
+            // Sanitize payload: Escape raw backslashes that aren't followed by valid JSON escape chars
+            // This prevents "Invalid escaped char" errors from malformed input like LaTeX \( \)
+            val sanitized = sanitizeJsonString(payload)
+            val cmd = json.decodeFromString<MqttCommand>(sanitized)
             cmd.payloadObject?.let { text ->
                 robot?.speak(TtsRequest.create(speech = text, isShowOnConversationLayer = false))
             }
@@ -180,6 +184,32 @@ class MqttManager(private val robot: Robot?, private val client: Mqtt5BlockingCl
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             Timber.e(e, "Failed to publish locations")
         }
+    }
+
+    /**
+     * Escapes single backslashes in JSON string that aren't valid escape sequences.
+     */
+    private fun sanitizeJsonString(input: String): String {
+        val validEscapes = setOf('"', '\\', '/', 'b', 'f', 'n', 'r', 't', 'u')
+        val sb = StringBuilder()
+        var i = 0
+        while (i < input.length) {
+            val c = input[i]
+            if (c == '\\' && i + 1 < input.length) {
+                val next = input[i + 1]
+                if (next !in validEscapes) {
+                    sb.append("\\\\") // Escape the backslash
+                } else {
+                    sb.append('\\') // Keep valid escape
+                }
+            } else if (c == '\\' && i + 1 == input.length) {
+                sb.append("\\\\") // Escape trailing backslash
+            } else {
+                sb.append(c)
+            }
+            i++
+        }
+        return sb.toString()
     }
 
     private fun handleGetReadyState() {

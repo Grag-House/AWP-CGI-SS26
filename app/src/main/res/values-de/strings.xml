@@ -39,6 +39,8 @@
     <string name="settings_location_subtitle">Ortungsdienste und Navigation</string>
     <string name="settings_about_title">Über</string>
     <string name="settings_about_subtitle">Informationen über das System</string>
+    <string name="settings_photobox_title">Fotobox</string>
+    <string name="settings_photobox_subtitle">Design &amp; Overlay</string>
 
     <string name="display_brightness">Bildschirmhelligkeit</string>
 
@@ -111,6 +113,7 @@
     <string name="admin_panel_weather_coordinates">Wetterkoordinaten</string>
     <string name="admin_panel_webserver_coordiantes_change">Koordinaten ändern</string>
     <string name="admin_panel_webserver_url_change">URL ändern</string>
+    <string name="admin_panel_speaker_verification_threshold_change">Schwellwert ändern</string>
     <string name="admin_panel_header">Admin Panel</string>
     <string name="admin_panel_latitude">"Breite: "</string>
     <string name="admin_panel_longitude">Länge:</string>
@@ -165,6 +168,8 @@
     <string name="patrol_stream_back_button">Zurück</string>
     <string name="patrol_countdown_message">Kontrollfahrt startet in %1$d Sekunden</string>
     <string name="patrol_stream_stop_button">Patrouille abbrechen</string>
+    <string name="admin_panel_speaker_verification">Speaker Verification</string>
+    <string name="admin_panel_speaker_verification_subtitle">Nur autorisierte Stimmen können den Roboter wecken</string>
 
     <!-- Navigation Page -->
     <string name="navigation_status_label">STATUS</string>
@@ -273,8 +278,8 @@
     <string name="hide_and_seek_lost_location_unknown">wird später enthüllt</string>
     <string name="hide_and_seek_play_again">Nochmal spielen</string>
     <string name="hide_and_seek_to_dashboard">Zum Dashboard</string>
-    <string name="hide_and_seek_navigation_error_title">Navigation fehlgeschlagen</string>
-    <string name="hide_and_seek_navigation_error_message">Navigation zum Versteck fehlgeschlagen.</string>
+    <string name="hide_and_seek_navigation_error_title">Da ist etwas schiefgelaufen</string>
+    <string name="hide_and_seek_navigation_error_message">Ich konnte mein Versteck nicht erreichen. Lass es uns noch einmal versuchen!</string>
     <!-- Hide and Seek Place Filter -->
     <string name="hiding_spot_filter_button">Verstecke bearbeiten</string>
     <string name="hiding_spot_filter_button_active">Filter aktiv</string>
@@ -286,6 +291,8 @@
     <string name="hiding_spot_filter_count">%1$d von %2$d Orten aktiviert</string>
     <string name="hiding_spot_filter_cancel">Abbrechen</string>
     <string name="hiding_spot_filter_save">Speichern</string>
+    <string name="admin_panel_hiding_spots">Versteck-Konfiguration</string>
+    <string name="admin_panel_hiding_spots_subtitle">Erlaubte Versteckpositionen verwalten</string>
     <string name="admin_panel_restart_app">App neustarten</string>
     <string name="admin_panel_restart_app_subtitle">Bei Problemen, einmal neustarten</string>
     <string name="admin_panel_restart_confirm_title">App neustarten?</string>
@@ -294,4 +301,65 @@
     <string name="admin_panel_password_input">Admin-Bereich geschützt, bitte Passwort eingeben.</string>
     <string name="admin_panel_enter_password">Password eingeben</string>
     <string name="password_wrong">Falsches Passwort</string>
+
+    <!-- Photobox -->
+    <string name="photobox">Fotobox</string>
+    <string name="photobox_sub">Temi als Fotobox nutzen</string>
+    <string name="photobox_description">Fotobox-Kamera-Symbol</string>
+    <string name="photobox_intro_text">Stell dich vor Temi auf und lächle in die Kamera. Der Countdown startet automatisch.</string>
+    <string name="photobox_countdown_label">COUNTDOWN-DAUER</string>
+    <string name="photobox_start_button">Los geht\'s!</string>
+    <string name="photobox_smile_label">Lächeln bitte!</string>
+    <string name="photobox_cancel">Abbrechen</string>
+    <string name="photobox_click_text">Klick!</string>
+    <string name="photobox_preview_title">Sieht super aus!</string>
+    <string name="photobox_preview_message">Stell dich erneut vor Temi auf, wenn du bereit für das nächste Foto bist.</string>
+    <string name="photobox_camera_permission_required">Ohne Kamerazugriff kann ich dich leider nicht sehen.</string>
+    <string name="photobox_camera_unavailable">Meine Kamera ist gerade nicht verfügbar.</string>
+    <string name="photobox_overlay_title">Temi-Overlay</string>
+    <string name="photobox_overlay_description">Legt ein Bild von Temi über das aufgenommene Foto, sodass es aussieht, als würde Temi neben dir stehen.</string>
+    <string name="photobox_banner_title">Banner</string>
+    <string name="photobox_banner_description">Blendet einen Banner unten auf dem Foto ein.</string>
+    <string name="photobox_banner_50_years_cgi">50 Jahre CGI</string>
+    <string name="photobox_banner_cgi_lab">CGI Lab</string>
+    <string name="photobox_upload_section_title">Foto-Upload</string>
+    <string name="photobox_drive_folder_label">Google-Drive-Ordner-Link</string>
+    <string name="photobox_drive_upload_url_label">Upload-Webhook-URL</string>
+    <string name="photobox_upload_save_button">Speichern</string>
+    <string name="photobox_upload_description">Fotos werden nach der Aufnahme automatisch in diesen Drive-Ordner hochgeladen.</string>
+    <string name="photobox_show_qr_button">QR-Code anzeigen</string>
+    <string name="photobox_upload_in_progress">Dein Foto wird hochgeladen …</string>
+    <string name="photobox_upload_failed">Hochladen fehlgeschlagen</string>
+    <string name="photobox_upload_queued">Kein Internet – dein Foto wird automatisch hochgeladen, sobald wieder eine Verbindung besteht.</string>
+    <string name="photobox_generate_qr_button">Foto teilen</string>
+    <string name="photobox_filter_none">Original</string>
+    <string name="photobox_filter_grayscale">Schwarz-Weiß</string>
+    <string name="photobox_filter_sepia">Sepia</string>
+    <string name="photobox_filter_vintage">Vintage</string>
+    <string name="photobox_qr_dialog_title">Dein Foto</string>
+    <string name="photobox_qr_dialog_subtitle">QR-Code scannen, um das Foto anzusehen und herunterzuladen.</string>
+    <string name="photobox_qr_dialog_expiry">Dieser Link ist nur 30 Minuten lang gültig.</string>
+    <string name="photobox_mode_select_title">Willkommen bei der Fotobox!</string>
+    <string name="photobox_mode_select_subtitle">Wähle aus, wie du dein Erinnerungsfoto machen möchtest.</string>
+    <string name="photobox_mode_standard_title">Standard</string>
+    <string name="photobox_mode_standard_description">Ein einzelnes Foto</string>
+    <string name="photobox_mode_strip_title">3er-Streifen</string>
+    <string name="photobox_mode_strip_description">3 Fotos auf einem Streifen</string>
+    <string name="photobox_mode_strip4_title">4er-Streifen</string>
+    <string name="photobox_mode_strip4_description">4 Fotos auf einem Streifen</string>
+    <string name="photobox_mode_grid_title">2x2-Raster</string>
+    <string name="photobox_mode_grid_description">4 Fotos im Raster</string>
+    <string name="photobox_overlay_position_label">TEMI-POSITION</string>
+    <string name="photobox_overlay_position_left">Links</string>
+    <string name="photobox_overlay_position_center">Mitte</string>
+    <string name="photobox_overlay_position_right">Rechts</string>
+    <string name="photobox_change_mode_button">Modus ändern</string>
+    <string name="photobox_strip_delay_label">PAUSE ZWISCHEN FOTOS</string>
+    <string name="photobox_change_pose_label">Pose ändern!</string>
+    <string name="photobox_shot_progress">Foto %1$d von %2$d</string>
+    <string name="photobox_new_photo_button">Neues Foto</string>
+    <string name="photobox_to_dashboard">Zum Dashboard</string>
+    <string name="photobox_photo_count">%1$d Fotos aufgenommen</string>
+    <string name="photobox_photo_number">Foto #%1$d</string>
+    <string name="photobox_duration_seconds">%1$d s</string>
 </resources>

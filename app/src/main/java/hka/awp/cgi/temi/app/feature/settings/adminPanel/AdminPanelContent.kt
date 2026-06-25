@@ -1,5 +1,6 @@
 package hka.awp.cgi.temi.app.feature.settings.adminPanel
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -17,6 +19,7 @@ import hka.awp.cgi.temi.app.R
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.AdminPasswordCard
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.CloseAppCard
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.CoordinateManagementCard
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.HidingSpotFilterCard
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.MqttReportsCard
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.PatrolRouteCard
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.PatrolSettingsCard
@@ -38,10 +41,13 @@ fun AdminPanelContent(
     onRestartRequest: () -> Unit,
     onNavigateToPatrolSettings: () -> Unit,
     onNavigateToPatrolRoute: () -> Unit,
-    onCloseRequest: () -> Unit
+    onCloseRequest: () -> Unit,
+    onOpenHidingSpotFilter: () -> Unit
 ) {
     Row(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
     ) {
         Column(
             modifier = Modifier
@@ -67,25 +73,12 @@ fun AdminPanelContent(
                     onEdit = onEditUrl
                 )
 
+                WebserverUrlCard(url = uiState.webserverUrl, onEdit = onEditUrl)
                 MqttReportsCard(onNavigate = onOpenMqtt)
-
-                WebserverPasswordCard(
-                    onUpdateWebserverPassword = onUpdateWebserverPassword
-                )
-
-                AdminPasswordCard(
-                    onChangePassword = onChangePassword
-                )
-
-                CoordinateManagementCard(
-                    coordinates = stringResource(
-                        R.string.admin_panel_coordinates_format,
-                        uiState.longitude,
-                        uiState.latitude
-                    ),
-                    onEdit = onEditCoordinates
-                )
-
+                WebserverPasswordCard(onUpdateWebserverPassword = onUpdateWebserverPassword)
+                CoordinateManagementCard(coordinates = uiState.coordinates, onEdit = onEditCoordinates)
+                HidingSpotFilterCard(onEdit = onOpenHidingSpotFilter)
+                RestartAppCard(onRestartClick = onRestartRequest)
                 PatrolSettingsCard(
                     currentModeText = if (!uiState.isPatrolEnabled) {
                         stringResource(R.string.admin_panel_patrol_disabled)
@@ -93,7 +86,7 @@ fun AdminPanelContent(
                         uiState.patrolRoute.joinToString(" → ")
                     },
                     onNavigate = onNavigateToPatrolSettings
-                )
+                                  )
 
                 PatrolRouteCard(
                     currentRouteText = if (uiState.patrolRoute.isEmpty()) {
@@ -102,15 +95,10 @@ fun AdminPanelContent(
                         uiState.patrolRoute.joinToString(" → ")
                     },
                     onNavigate = onNavigateToPatrolRoute
-                )
-
-                RestartAppCard(
-                    onRestartClick = onRestartRequest
-                )
-
+                               )
                 CloseAppCard(
                     onCloseClick = onCloseRequest
-                )
+                            )
             }
         }
     }

@@ -3,7 +3,7 @@ name: Android CI with Gradle
 # Trigger for pushes und merge requests on main and dev
 on:
   push:
-    branches: [ "main", "dev" ]
+    branches: [ "dev" ]
   pull_request:
     branches: [ "main", "dev" ]
 
@@ -40,6 +40,8 @@ jobs:
           echo "MQTT_USERNAME"=${{ secrets.MQTT_USERNAME }} >> .env
           echo "MQTT_PASSWORD"=${{ secrets.MQTT_PASSWORD }} >> .env
           echo "DEFAULT_ADMIN_PASSWORD"=${{ secrets.ADMIN_PASSWORD }} >> .env
+          echo "DEFAULT_DRIVE_FOLDER_LINK"=${{ secrets.DEFAULT_DRIVE_FOLDER_LINK }} >> .env
+          echo "DEFAULT_DRIVE_UPLOAD_URL"=${{ secrets.DEFAULT_DRIVE_UPLOAD_URL }} >> .env
       
       
 

@@ -50,6 +50,12 @@ class SettingsViewModel(private val repository: RobotRepository, private val rob
                     _navigationEvent.emit(SettingsNavigationEvent.NavigateToAdminPanel)
                 }
             }
+
+            SettingsItem.Photobox -> {
+                viewModelScope.launch {
+                    _navigationEvent.emit(SettingsNavigationEvent.NavigateToPhotobox)
+                }
+            }
         }
     }
 
@@ -63,4 +69,5 @@ sealed class SettingsNavigationEvent {
     data object NavigateToLanguage : SettingsNavigationEvent()
     data object NavigateToBattery : SettingsNavigationEvent()
     data object NavigateToAdminPanel : SettingsNavigationEvent()
+    data object NavigateToPhotobox : SettingsNavigationEvent()
 }
