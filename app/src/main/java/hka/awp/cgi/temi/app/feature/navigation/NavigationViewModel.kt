@@ -15,18 +15,21 @@ import com.robotemi.sdk.navigation.listener.OnDistanceToLocationChangedListener
 import com.robotemi.sdk.navigation.model.Position
 import hka.awp.cgi.temi.app.R
 import hka.awp.cgi.temi.app.feature.mqtt.MqttManager
+import hka.awp.cgi.temi.app.feature.voiceRecognition.TemiVoiceListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import kotlin.coroutines.resume
+import kotlin.time.Duration.Companion.milliseconds
 
 /** Represents a location on the map with name and X/Y coordinates from Temi map data. */
 data class LocationMarker(val name: String, val x: Float, val y: Float)
@@ -61,7 +64,8 @@ data class NavigationUiState(
 class NavigationViewModel(
     private val robot: Robot?,
     private val mqttManager: MqttManager,
-    private val defaultMapName: String
+    private val defaultMapName: String,
+    private val temiVoiceListener: TemiVoiceListener
 ) : ViewModel(),
     OnRobotReadyListener,
     OnDistanceToLocationChangedListener,
@@ -78,7 +82,7 @@ class NavigationViewModel(
     private var pendingTerminalPublishJob: Job? = null
 
     companion object {
-        private const val ABORT_DEBOUNCE_MS = 1500L
+        private val ABORT_DEBOUNCE_MS = 1500L.milliseconds
     }
 
     init {
@@ -90,6 +94,16 @@ class NavigationViewModel(
         robot?.addTtsListener(this)
         viewModelScope.launch {
             mqttManager.connect()
+        }
+        viewModelScope.launch {
+            temiVoiceListener.verifiedCommandFlow.collectLatest { command ->
+                if (command.isBlank()) {
+                    Timber.w("Verified Vosk command blank, ignoring.")
+                    return@collectLatest
+                }
+                Timber.i("🎙️ Verified Vosk command → MQTT: '%s'", command)
+                mqttManager.publishAsr(command)
+            }
         }
     }
 
@@ -107,11 +121,32 @@ class NavigationViewModel(
     }
 
     override fun onAsrResult(asrResult: String, sttLanguage: SttLanguage) {
-        robot?.finishConversation()
+        // Log EVERYTHING from Temi SDK for debugging
+        Timber.i(
+            "🤖 Raw Temi SDK ASR received: '%s' (Lang: %s, len=%d)",
+            asrResult,
+            sttLanguage,
+            asrResult.length
+        )
+
+        if (asrResult.isBlank()) {
+            Timber.w("Temi SDK ASR callback returned blank text.")
+            return
+        }
+
+        if (!temiVoiceListener.allowTemiAsrResult()) {
+            Timber.w("Ignoriere Temi-ASR Ergebnis ohne offenes Speaker-Gate.")
+            robot?.finishConversation()
+            return
+        }
+
+        Timber.i("Temi-ASR Ergebnis durch Speaker-Gate akzeptiert.")
         Timber.d("ASR Result: %s (%s)", asrResult, sttLanguage)
 
         viewModelScope.launch {
+            Timber.i("Sende ASR an MQTT Broker: '%s'", asrResult)
             mqttManager.publishAsr(asrResult)
+            Timber.i("ASR an MQTT Broker gesendet.")
         }
 
         // Simple local NLP example: "Go to [Location]"
@@ -119,10 +154,14 @@ class NavigationViewModel(
         if (textLower.contains("gehe zu") || textLower.contains("go to")) {
             val location = textLower.split("gehe zu", "go to").last().trim()
             if (location.isNotEmpty()) {
+                robot?.finishConversation()
                 robot?.speak(TtsRequest.create(speech = "Ich fahre zu $location", isShowOnConversationLayer = false))
                 goToLocation(location)
             }
         }
+
+        // Return to wake-word listening after Temi ASR command handling.
+        temiVoiceListener.resumeWakeWordListening()
     }
 
     override fun onTtsStatusChanged(ttsRequest: TtsRequest) {

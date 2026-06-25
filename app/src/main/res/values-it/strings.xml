@@ -100,6 +100,7 @@
     <string name="admin_panel_weather_coordinates">Coordinate meteo</string>
     <string name="admin_panel_webserver_coordiantes_change">Cambia coordinate</string>
     <string name="admin_panel_webserver_url_change">Cambia URL</string>
+    <string name="admin_panel_speaker_verification_threshold_change">Modificare la soglia</string>
     <string name="admin_panel_header">Admin Panel</string>
     <string name="admin_panel_latitude">"Latitudine: "</string>
     <string name="admin_panel_longitude">Longitudine:</string>
@@ -120,6 +121,8 @@
     <string name="admin_panel_mqtt_reports_direction_out">OUT</string>
     <string name="admin_panel_mqtt_reports_clear">Svuota</string>
     <string name="admin_panel_close">Chiudi</string>
+    <string name="admin_panel_speaker_verification">Verifica del parlante</string>
+    <string name="admin_panel_speaker_verification_subtitle">Solo le voci autorizzate possono svegliare il robot</string>
 
     <string name="navigation_status_label">STATUS</string>
     <string name="current_location_prefix">Posizione attuale:</string>
@@ -233,6 +236,8 @@
     <string name="hiding_spot_filter_count">%1$d di %2$d attivati</string>
     <string name="hiding_spot_filter_cancel">Annulla</string>
     <string name="hiding_spot_filter_save">Salva</string>
+    <string name="admin_panel_hiding_spots">Configurazione nascondigli</string>
+    <string name="admin_panel_hiding_spots_subtitle">Gestisci i nascondigli consentiti</string>
     <string name="admin_panel_restart_app">Riavvia app</string>
     <string name="admin_panel_restart_app_subtitle">Riavviare in caso di problemi</string>
     <string name="admin_panel_restart_confirm_title">Riavviare l\'app?</string>

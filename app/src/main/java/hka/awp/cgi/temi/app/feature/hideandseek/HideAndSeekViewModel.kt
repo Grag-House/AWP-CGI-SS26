@@ -39,15 +39,13 @@ data class HideAndSeekUiState(
 @Suppress("TooManyFunctions")
 class HideAndSeekViewModel(
     private val robot: Robot?,
-    hidingSpotRepository: HidingSpotRepository
+    private val hidingSpotRepository: HidingSpotRepository
 ) : ViewModel(),
     OnGoToLocationStatusChangedListener,
     OnDistanceToLocationChangedListener {
 
     private val _uiState = MutableStateFlow(HideAndSeekUiState())
     val uiState: StateFlow<HideAndSeekUiState> = _uiState.asStateFlow()
-
-    val filterManager = HidingSpotFilterManager(robot, hidingSpotRepository)
 
     private val navigator = HideAndSeekNavigator(robot, viewModelScope)
     private var timerJob: Job? = null
@@ -112,7 +110,7 @@ class HideAndSeekViewModel(
 
     fun startGame() {
         clearError()
-        val hidingSpot = selectHidingSpot(robot, distancesToLocations, filterManager.savedEnabledSpots)
+        val hidingSpot = selectHidingSpot(robot, distancesToLocations, hidingSpotRepository.loadEnabledSpots())
         _uiState.update {
             it.copy(
                 gameState = GameState.HIDING,

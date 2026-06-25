@@ -23,7 +23,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.material.icons.rounded.SportsEsports
-import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -46,7 +45,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import hka.awp.cgi.temi.app.R
 
@@ -60,9 +58,6 @@ fun HideAndSeekScreen(
     onNavigateToDashboard: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val filterState by viewModel.filterManager.filterState.collectAsStateWithLifecycle()
-    val showFilter by viewModel.filterManager.isOpen.collectAsStateWithLifecycle()
-    val hasActiveFilter by viewModel.filterManager.hasActiveFilter.collectAsStateWithLifecycle()
 
     if (uiState.navigationError) {
         AlertDialog(
@@ -77,31 +72,14 @@ fun HideAndSeekScreen(
         )
     }
 
-    if (showFilter) {
-        Dialog(onDismissRequest = viewModel.filterManager::dismiss) {
-            HidingSpotFilterContent(
-                state = filterState,
-                callbacks = HidingSpotFilterCallbacks(
-                    onToggle = viewModel.filterManager::toggle,
-                    onSelectAll = viewModel.filterManager::selectAll,
-                    onDeselectAll = viewModel.filterManager::deselectAll,
-                    onSave = viewModel.filterManager::save,
-                    onDismiss = viewModel.filterManager::dismiss
-                )
-            )
-        }
-    }
-
     when (uiState.gameState) {
         GameState.SETUP -> SetupContent(
             modifier = modifier.fillMaxSize().padding(24.dp),
             uiState = uiState,
-            hasActiveFilter = hasActiveFilter,
             callbacks = SetupCallbacks(
                 onIncrease = { viewModel.adjustSearchTime(1) },
                 onDecrease = { viewModel.adjustSearchTime(-1) },
-                onStart = viewModel::startGame,
-                onOpenFilter = viewModel.filterManager::open
+                onStart = viewModel::startGame
             )
         )
         GameState.HIDING -> HidingContent(
@@ -132,15 +110,13 @@ fun HideAndSeekScreen(
 private data class SetupCallbacks(
     val onIncrease: () -> Unit,
     val onDecrease: () -> Unit,
-    val onStart: () -> Unit,
-    val onOpenFilter: () -> Unit
+    val onStart: () -> Unit
 )
 
 @Composable
 private fun SetupContent(
     modifier: Modifier = Modifier,
     uiState: HideAndSeekUiState,
-    hasActiveFilter: Boolean,
     callbacks: SetupCallbacks
 ) {
     Row(
@@ -152,7 +128,6 @@ private fun SetupContent(
         SetupRightColumn(
             modifier = Modifier.weight(1f).fillMaxHeight(),
             uiState = uiState,
-            hasActiveFilter = hasActiveFilter,
             callbacks = callbacks
         )
     }
@@ -192,7 +167,6 @@ private fun SetupLeftColumn(modifier: Modifier = Modifier) {
 private fun SetupRightColumn(
     modifier: Modifier = Modifier,
     uiState: HideAndSeekUiState,
-    hasActiveFilter: Boolean,
     callbacks: SetupCallbacks
 ) {
     Column(
@@ -215,26 +189,6 @@ private fun SetupRightColumn(
                 modifier = Modifier.padding(20.dp),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 lineHeight = 26.sp
-            )
-        }
-        OutlinedButton(
-            onClick = callbacks.onOpenFilter,
-            modifier = Modifier.fillMaxWidth().height(52.dp),
-            shape = RoundedCornerShape(16.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Rounded.Tune,
-                contentDescription = null,
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(Modifier.width(8.dp))
-            Text(
-                text = if (hasActiveFilter) {
-                    stringResource(R.string.hiding_spot_filter_button_active)
-                } else {
-                    stringResource(R.string.hiding_spot_filter_button)
-                },
-                style = MaterialTheme.typography.titleMedium
             )
         }
         Button(

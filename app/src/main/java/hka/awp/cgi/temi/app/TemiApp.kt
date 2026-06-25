@@ -5,6 +5,7 @@ import android.util.Log
 import hka.awp.cgi.temi.app.feature.photobox.upload.PhotoboxUploadQueue
 import hka.awp.cgi.temi.app.koin.appModule
 import hka.awp.cgi.temi.app.koin.navigationModule
+import hka.awp.cgi.temi.app.koin.temiVoiceRecognitionModule
 import hka.awp.cgi.temi.app.koin.weatherModule
 import hka.awp.cgi.temi.app.koin.webserverModule
 import org.koin.android.ext.koin.androidContext
@@ -23,7 +24,7 @@ class TemiApp : Application() {
         super.onCreate()
         GlobalContext.startKoin {
             androidContext(this@TemiApp)
-            modules(appModule, weatherModule, navigationModule, webserverModule)
+            modules(appModule, weatherModule, navigationModule, webserverModule, temiVoiceRecognitionModule)
         }
 
         // Resumes any Photobox uploads that were still cached on disk when the process last
