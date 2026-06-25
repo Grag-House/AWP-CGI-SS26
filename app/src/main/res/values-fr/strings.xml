@@ -98,6 +98,7 @@
     <string name="admin_panel_weather_coordinates">Coordonnées météo</string>
     <string name="admin_panel_webserver_coordiantes_change">Changer coordonnées</string>
     <string name="admin_panel_webserver_url_change">Changer URL</string>
+    <string name="admin_panel_speaker_verification_threshold_change">Modifier le seuil</string>
     <string name="admin_panel_header">Admin Panel</string>
     <string name="admin_panel_latitude">"Latitude : "</string>
     <string name="admin_panel_longitude">Longitude :</string>
@@ -118,6 +119,8 @@
     <string name="admin_panel_mqtt_reports_direction_out">OUT</string>
     <string name="admin_panel_mqtt_reports_clear">Vider</string>
     <string name="admin_panel_close">Fermer</string>
+    <string name="admin_panel_speaker_verification">Vérification du locuteur</string>
+    <string name="admin_panel_speaker_verification_subtitle">Seules les voix autorisées peuvent réveiller le robot</string>
 
     <string name="navigation_status_label">STATUS</string>
     <string name="current_location_prefix">Position actuelle :</string>
