@@ -4,10 +4,13 @@ import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -36,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -44,6 +48,8 @@ import androidx.compose.ui.window.Dialog
 import hka.awp.cgi.temi.app.R
 import hka.awp.cgi.temi.app.feature.photobox.BottomBar
 import hka.awp.cgi.temi.app.feature.photobox.PHOTOBOX_BANNER_ASPECT_RATIO
+import hka.awp.cgi.temi.app.feature.photobox.PHOTOBOX_GRID_BANNER_WIDTH_FRACTION
+import hka.awp.cgi.temi.app.feature.photobox.PhotoboxBanner
 import hka.awp.cgi.temi.app.feature.photobox.PhotoboxMode
 import hka.awp.cgi.temi.app.feature.photobox.PhotoboxUploadState
 import hka.awp.cgi.temi.app.feature.photobox.TemiOverlayImage
@@ -61,7 +67,7 @@ internal data class PreviewPhotoState(
     val mode: PhotoboxMode,
     val overlayEnabled: Boolean,
     val overlayPosition: TemiOverlayPosition,
-    val bannerEnabled: Boolean,
+    val banner: PhotoboxBanner?,
     val uploadState: PhotoboxUploadState,
     val selectedFilter: PhotoboxPhotoFilter
 )
@@ -81,33 +87,39 @@ internal fun PreviewOverlay(
     callbacks: PreviewOverlayCallbacks
 ) {
     BoxWithConstraints(modifier = Modifier.fillMaxSize().background(Color.Black)) {
-        if (photoState.capturedBitmap != null) {
-            Image(
-                bitmap = photoState.capturedBitmap.asImageBitmap(),
-                contentDescription = null,
-                // A single photo roughly matches the screen's aspect ratio, so Crop fills the
-                // screen without visible black bars. A strip/grid composite has a different
-                // aspect ratio — cropping it the same way would zoom in until only part of it is
-                // visible, so it needs Fit instead to keep the whole composite on screen.
-                contentScale = if (photoState.mode == PhotoboxMode.STANDARD) ContentScale.Crop else ContentScale.Fit,
-                // Filter is only baked into the actual file on upload (see PhotoboxViewModel) —
-                // here it's just a cheap GPU-composited preview so switching filters is instant.
-                colorFilter = photoState.selectedFilter.toComposeColorFilter(),
-                modifier = Modifier.fillMaxSize()
-            )
+        val bitmap = photoState.capturedBitmap
+        if (bitmap != null) {
+            // A single photo roughly matches the screen's aspect ratio, so Crop fills the screen
+            // without visible black bars and the banner (drawn separately below) can simply be
+            // aligned to this Box's bottom edge — Crop always covers it edge-to-edge. A strip/grid
+            // composite has a different aspect ratio — cropping it the same way would zoom in
+            // until only part of it is visible, so it's wrapped in its own aspect-ratio-matched
+            // Box instead, letterboxed (Fit) rather than filled, so the banner can be aligned to
+            // *its* bottom edge — the composite's real bottom edge, not the screen's.
+            if (photoState.mode == PhotoboxMode.STANDARD) {
+                PreviewPhoto(bitmap, photoState.selectedFilter, ContentScale.Crop, Modifier.fillMaxSize())
+                if (photoState.banner != null) BannerOverlayImage(photoState.banner, photoState.mode)
+            } else {
+                val photoAspectRatio = bitmap.width.toFloat() / bitmap.height
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Box(modifier = Modifier.fillMaxSize().aspectRatio(photoAspectRatio)) {
+                        PreviewPhoto(bitmap, photoState.selectedFilter, ContentScale.Fit, Modifier.fillMaxSize())
+                        if (photoState.banner != null) BannerOverlayImage(photoState.banner, photoState.mode)
+                    }
+                }
+            }
         }
 
         // For a strip/grid, Temi is already baked into each individual frame (see
         // PhotoboxSessionFinalizer) — showing it again here would add one oversized Temi
         // floating next to the whole composite.
         if (photoState.overlayEnabled && photoState.mode == PhotoboxMode.STANDARD) {
-            // A banner is baked flush against the bottom edge (see PhotoboxUploadRepository) —
-            // shift Temi up by its approximate on-screen height so the live overlay doesn't end
-            // up rendered on top of it (the actual uploaded file is shifted exactly, using the
-            // real bitmap dimensions; this is just an approximation for the live preview here).
-            val bottomInset = if (photoState.bannerEnabled) {
-                val bitmap = photoState.capturedBitmap
-                val photoAspectRatio = if (bitmap != null) bitmap.width.toFloat() / bitmap.height else 1f
+            // The banner is drawn flush against the bottom edge (see BannerOverlayImage) — shift
+            // Temi up by its approximate on-screen height so the live overlay doesn't end up
+            // rendered on top of it (the actual uploaded file is shifted exactly, using the real
+            // bitmap dimensions; this is just an approximation for the live preview here).
+            val bottomInset = if (photoState.banner != null) {
+                val photoAspectRatio = bitmap?.let { it.width.toFloat() / it.height } ?: 1f
                 maxHeight * (photoAspectRatio / PHOTOBOX_BANNER_ASPECT_RATIO)
             } else {
                 0.dp
@@ -170,6 +182,43 @@ internal fun PreviewOverlay(
             )
         }
     }
+}
+
+@Composable
+private fun PreviewPhoto(
+    bitmap: Bitmap,
+    filter: PhotoboxPhotoFilter,
+    contentScale: ContentScale,
+    modifier: Modifier
+) {
+    Image(
+        bitmap = bitmap.asImageBitmap(),
+        contentDescription = null,
+        contentScale = contentScale,
+        // The filter is only baked into the actual file on upload (see PhotoboxSessionFinalizer)
+        // — here it's just a cheap GPU-composited preview so switching filters is instant. The
+        // banner is drawn as a separate, unfiltered layer on top (see BannerOverlayImage) so it's
+        // never affected by this.
+        colorFilter = filter.toComposeColorFilter(),
+        modifier = modifier
+    )
+}
+
+/** Draws [banner] unfiltered, flush against the bottom edge of whatever Box it's placed in — see
+ * the two call sites in [PreviewOverlay], one per content-scale strategy, for how that Box is
+ * made to match the photo's actual on-screen bounds. Deliberately drawn as its own layer, on top
+ * of (not baked into) the filtered photo, so the color filter never tints the banner — mirrors
+ * the real bake order in [hka.awp.cgi.temi.app.feature.photobox.upload.PhotoboxSessionFinalizer.upload]. */
+@Composable
+private fun BoxScope.BannerOverlayImage(banner: PhotoboxBanner, mode: PhotoboxMode) {
+    val widthFraction = if (mode == PhotoboxMode.GRID_2X2) PHOTOBOX_GRID_BANNER_WIDTH_FRACTION else 1f
+    Image(
+        painter = painterResource(banner.drawableRes(mode)),
+        contentDescription = null,
+        modifier = Modifier
+            .align(Alignment.BottomCenter)
+            .fillMaxWidth(widthFraction)
+    )
 }
 
 @Composable
