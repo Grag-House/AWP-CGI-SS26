@@ -2,7 +2,6 @@ package hka.awp.cgi.temi.app.feature.controller
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import hka.awp.cgi.temi.app.feature.controller.stream.ControllerCameraStreamManager
 import hka.awp.cgi.temi.app.utils.TemiMovementController
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,8 +13,7 @@ import kotlin.math.abs
 @Suppress("TooManyFunctions")
 class ControllerViewModel(
     private val movementController: TemiMovementController,
-    private val bluetoothControllerManager: BluetoothControllerManager,
-    private val cameraStreamManager: ControllerCameraStreamManager
+    private val bluetoothControllerManager: BluetoothControllerManager
 ) : ViewModel() {
 
     companion object {
@@ -41,11 +39,8 @@ class ControllerViewModel(
     fun setControllerEnabled(enabled: Boolean) {
         _controllerEnabled.value = enabled
 
-        if (enabled) {
-            cameraStreamManager.startLiveView()
-        } else {
+        if (!enabled) {
             movementController.stop()
-            cameraStreamManager.stopLiveView()
         }
     }
 
@@ -113,7 +108,6 @@ class ControllerViewModel(
     override fun onCleared() {
         movementController.stop()
         bluetoothControllerManager.release()
-        cameraStreamManager.stopLiveView()
         super.onCleared()
     }
 }

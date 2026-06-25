@@ -26,6 +26,11 @@ class BluetoothControllerManager(
     private val _isScanning = MutableStateFlow(false)
     val isScanning: StateFlow<Boolean> = _isScanning.asStateFlow()
 
+    companion object {
+        private const val BLUETOOTH_PROFILE_HID_DEVICE = 4
+        private const val UNKNOWN_BLUETOOTH_DEVICE_NAME = "Unbekanntes Gerät"
+    }
+
     private fun Intent.getBluetoothDeviceExtra(): BluetoothDevice? {
         return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             getParcelableExtra(
@@ -370,6 +375,3 @@ class BluetoothControllerManager(
         }
     }
 }
-
-private const val BLUETOOTH_PROFILE_HID_DEVICE = 4
-private const val UNKNOWN_BLUETOOTH_DEVICE_NAME = "Unbekanntes Gerät"

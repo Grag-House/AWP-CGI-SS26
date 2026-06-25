@@ -5,7 +5,6 @@ import hka.awp.cgi.temi.app.BuildConfig
 import hka.awp.cgi.temi.app.data.repository.RobotRepository
 import hka.awp.cgi.temi.app.feature.controller.BluetoothControllerManager
 import hka.awp.cgi.temi.app.feature.controller.ControllerViewModel
-import hka.awp.cgi.temi.app.feature.controller.stream.ControllerCameraStreamManager
 import hka.awp.cgi.temi.app.feature.hideandseek.HideAndSeekViewModel
 import hka.awp.cgi.temi.app.feature.hideandseek.HidingSpotRepository
 import hka.awp.cgi.temi.app.feature.navigation.NavigationViewModel
@@ -125,20 +124,10 @@ val appModule = module {
         )
     }
 
-    single {
-        val ip = BuildConfig.SERVER_IP
-        val port = BuildConfig.SERVER_PORT
-        ControllerCameraStreamManager(
-            context = androidContext(),
-            serverUrl = "ws://$ip:$port"
-        )
-    }
-
     viewModel {
         ControllerViewModel(
             movementController = get(),
-            bluetoothControllerManager = get(),
-            get()
+            bluetoothControllerManager = get()
         )
     }
 
