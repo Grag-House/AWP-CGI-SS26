@@ -14,7 +14,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.AdminPasswordPrompt
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.ChangePasswordDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.ChangeAdminPasswordDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.ChangeWebserverPasswordDialog
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.CloseAppConfirmationDialog
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.EditCoordinatesDialog
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.EditUrlDialog
@@ -39,7 +40,8 @@ fun AdminPanelScreen(
     val passwordError by viewModel.passwordError.collectAsStateWithLifecycle()
 
     var showCoordinateDialog by remember { mutableStateOf(false) }
-    var showPasswordDialog by remember { mutableStateOf(false) }
+    var showWebserverPasswordDialog by remember { mutableStateOf(false) }
+    var showAdminPasswordDialog by remember { mutableStateOf(false) }
     var showUrlDialog by remember { mutableStateOf(false) }
     var showMqttReportsDialog by remember { mutableStateOf(false) }
     var showRestartDialog by remember { mutableStateOf(false) }
@@ -52,7 +54,8 @@ fun AdminPanelScreen(
         viewModel.events.collectLatest { event ->
             when (event) {
                 AdminPanelEvent.OpenMqttReports -> showMqttReportsDialog = true
-                AdminPanelEvent.PasswordChanged -> showPasswordDialog = false
+                AdminPanelEvent.PasswordChanged -> showAdminPasswordDialog = false
+                AdminPanelEvent.WebserverPasswordChanged -> showWebserverPasswordDialog = false
                 AdminPanelEvent.RestartAppTriggered -> {
                     val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
                     val mainIntent = Intent.makeRestartActivityTask(intent?.component)
@@ -72,10 +75,10 @@ fun AdminPanelScreen(
         }
     }
 
-    if (isAuthorized) {
+    if (!isAuthorized) {
         AdminPasswordPrompt(
             isError = passwordError,
-            onConfirm = { enteredPassword -> viewModel.checkPassword(enteredPassword) },
+            onConfirm = { enteredPassword -> viewModel.checkAdminPassword(enteredPassword) },
             onBackClick = onBackClick,
             onValueChange = { viewModel.clearPasswordError() }
         )
@@ -103,8 +106,17 @@ fun AdminPanelScreen(
             onDismiss = { showCoordinateDialog = false }
         )
     }
-    if (showPasswordDialog) {
-        ChangePasswordDialog(onConfirm = { viewModel.onChangePassword(it) }, onDismiss = { showPasswordDialog = false })
+    if (showWebserverPasswordDialog) {
+        ChangeWebserverPasswordDialog(
+            onConfirm = { viewModel.onUpdateWebserverPassword(it) },
+            onDismiss = { showWebserverPasswordDialog = false }
+        )
+    }
+    if (showAdminPasswordDialog) {
+        ChangeAdminPasswordDialog(
+            onConfirm = { viewModel.onChangePassword(it) },
+            onDismiss = { showAdminPasswordDialog = false }
+        )
     }
     if (showMqttReportsDialog) {
         MqttReportsDialog(
@@ -183,7 +195,8 @@ fun AdminPanelScreen(
         onBackClick = onBackClick,
         onEditUrl = { showUrlDialog = true },
         onOpenMqtt = viewModel::onOpenMqttReports,
-        onChangePassword = { showPasswordDialog = true },
+        onUpdateWebserverPassword = { showWebserverPasswordDialog = true },
+        onChangePassword = { showAdminPasswordDialog = true },
         onEditCoordinates = { showCoordinateDialog = true },
         onRestartRequest = { showRestartDialog = true },
         onNavigateToPatrolSettings = { showPatrolSettingsDialog = true },

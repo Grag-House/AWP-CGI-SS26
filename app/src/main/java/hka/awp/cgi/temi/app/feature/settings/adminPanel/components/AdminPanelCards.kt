@@ -61,12 +61,12 @@ fun CloseAppCard(onCloseClick: () -> Unit) {
         ) {
             ConfigIconBox(
                 icon = Icons.Default.BlindsClosed,
-                contentDescription = "App schließen"
+                contentDescription = stringResource(R.string.admin_panel_close_app)
             )
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
-                ConfigValue("App schließen")
-                ConfigSubtext("App wird runtergefahren")
+                ConfigValue(stringResource(R.string.admin_panel_close_app))
+                ConfigSubtext(stringResource(R.string.admin_panel_close_app_subtitle))
             }
             Icon(
                 imageVector = Icons.Default.ChevronRight,
@@ -131,7 +131,7 @@ fun MqttReportsCard(onNavigate: () -> Unit) {
 
 @Composable
 fun WebserverPasswordCard(
-    onChangePassword: () -> Unit
+    onUpdateWebserverPassword: () -> Unit
 ) {
     ConfigCard {
         Row(
@@ -149,6 +149,35 @@ fun WebserverPasswordCard(
             }
             Text(
                 text = stringResource(R.string.admin_panel_webserver_password_change),
+                color = MaterialTheme.colorScheme.primary,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.clickable(onClick = onUpdateWebserverPassword)
+            )
+        }
+    }
+}
+
+@Composable
+fun AdminPasswordCard(
+    onChangePassword: () -> Unit
+) {
+    ConfigCard {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            ConfigIconBox(
+                icon = Icons.Outlined.Lock,
+                contentDescription = stringResource(R.string.admin_panel_admin_password)
+            )
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                ConfigValue(stringResource(R.string.admin_panel_admin_password))
+                PasswordDots()
+            }
+            Text(
+                text = stringResource(R.string.admin_panel_admin_password_change),
                 color = MaterialTheme.colorScheme.primary,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
@@ -200,12 +229,12 @@ fun PatrolSettingsCard(
         ) {
             ConfigIconBox(
                 icon = Icons.Outlined.ShieldMoon,
-                contentDescription = "Automatische Kontrollfahrten"
+                contentDescription = stringResource(R.string.admin_panel_patrol_settings)
             )
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
-                ConfigValue("Automatische Kontrollfahrten")
-                ConfigSubtext("Aktiv: $currentModeText")
+                ConfigValue(stringResource(R.string.admin_panel_patrol_settings))
+                ConfigSubtext(stringResource(R.string.admin_panel_active_prefix, currentModeText))
             }
             Icon(
                 imageVector = Icons.Default.ChevronRight,
@@ -228,12 +257,12 @@ fun PatrolRouteCard(
         ) {
             ConfigIconBox(
                 icon = Icons.Outlined.ShieldMoon,
-                contentDescription = "Kontrollfahrten Routenkonfiguration"
+                contentDescription = stringResource(R.string.admin_panel_patrol_route)
             )
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
-                ConfigValue("Kontrollfahrten Routenkonfiguration")
-                ConfigSubtext("Aktiv: $currentRouteText")
+                ConfigValue(stringResource(R.string.admin_panel_patrol_route))
+                ConfigSubtext(stringResource(R.string.admin_panel_active_prefix, currentRouteText))
             }
             Icon(
                 imageVector = Icons.Default.ChevronRight,

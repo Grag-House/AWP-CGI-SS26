@@ -64,7 +64,7 @@ fun HideAndSeekScreen(
     val showFilter by viewModel.filterManager.isOpen.collectAsStateWithLifecycle()
     val hasActiveFilter by viewModel.filterManager.hasActiveFilter.collectAsStateWithLifecycle()
 
-    if (uiState.errorMessage != null) {
+    if (uiState.navigationError) {
         AlertDialog(
             onDismissRequest = viewModel::clearError,
             confirmButton = {
@@ -72,8 +72,8 @@ fun HideAndSeekScreen(
                     Text(stringResource(R.string.close))
                 }
             },
-            title = { Text("Navigation fehlgeschlagen") },
-            text = { Text(uiState.errorMessage!!) }
+            title = { Text(stringResource(R.string.hide_and_seek_navigation_error_title)) },
+            text = { Text(stringResource(R.string.hide_and_seek_navigation_error_message)) }
         )
     }
 

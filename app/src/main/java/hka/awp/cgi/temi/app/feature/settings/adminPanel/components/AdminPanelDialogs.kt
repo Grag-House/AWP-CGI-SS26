@@ -53,11 +53,11 @@ fun CloseAppConfirmationDialog(
             )
         },
         title = {
-            Text(text = "App schließen")
+            Text(text = stringResource(R.string.admin_panel_close_app))
         },
         text = {
             Text(
-                text = "Möchtest du die Anwendung wirklich schließen?",
+                text = stringResource(R.string.admin_panel_close_app_confirm_text),
                 style = MaterialTheme.typography.bodyMedium
             )
         },
@@ -68,7 +68,7 @@ fun CloseAppConfirmationDialog(
                     containerColor = MaterialTheme.colorScheme.error
                 )
             ) {
-                Text("App beenden")
+                Text(stringResource(R.string.admin_panel_confirm_close_app))
             }
         },
         dismissButton = {
@@ -122,7 +122,53 @@ fun RestartAppConfirmationDialog(
 
 @Suppress("LongMethod")
 @Composable
-fun ChangePasswordDialog(
+fun ChangeAdminPasswordDialog(
+    onConfirm: (newPassword: String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var newPassword by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = {
+            Icon(
+                imageVector = Icons.Outlined.Lock,
+                contentDescription = null
+            )
+        },
+        title = {
+            Text(text = stringResource(R.string.admin_panel_admin_password_change))
+        },
+        text = {
+            OutlinedTextField(
+                value = newPassword,
+                onValueChange = { newPassword = it },
+                label = { Text(stringResource(R.string.admin_panel_new_admin_password)) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                visualTransformation = PasswordVisualTransformation(),
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
+        confirmButton = {
+            Button(
+                onClick = { onConfirm(newPassword) },
+                enabled = newPassword.isNotBlank()
+            ) {
+                Text(stringResource(R.string.admin_panel_confirm))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.admin_panel_cancel))
+            }
+        }
+    )
+}
+
+@Suppress("LongMethod")
+@Composable
+fun ChangeWebserverPasswordDialog(
     onConfirm: (newPassword: String) -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -298,11 +344,11 @@ fun NoRouteSelectedDialog(
             )
         },
         title = {
-            Text(text = "Keine Route ausgewählt")
+            Text(text = stringResource(R.string.admin_panel_no_route_selected_title))
         },
         text = {
             Text(
-                text = "Bitte wähle zuerst eine Route aus, bevor du fortfährst.",
+                text = stringResource(R.string.admin_panel_no_route_selected_text),
                 style = MaterialTheme.typography.bodyMedium
             )
         },
