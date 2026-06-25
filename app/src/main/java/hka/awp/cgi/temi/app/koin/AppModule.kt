@@ -7,11 +7,17 @@ import hka.awp.cgi.temi.app.feature.controller.ControllerViewModel
 import hka.awp.cgi.temi.app.feature.hideandseek.HideAndSeekViewModel
 import hka.awp.cgi.temi.app.feature.hideandseek.HidingSpotRepository
 import hka.awp.cgi.temi.app.feature.navigation.NavigationViewModel
+import hka.awp.cgi.temi.app.feature.photobox.PhotoboxViewModel
+import hka.awp.cgi.temi.app.feature.photobox.capture.PhotoboxCameraManager
+import hka.awp.cgi.temi.app.feature.photobox.upload.PhotoboxPendingUploadStore
+import hka.awp.cgi.temi.app.feature.photobox.upload.PhotoboxUploadQueue
+import hka.awp.cgi.temi.app.feature.photobox.upload.PhotoboxUploadRepository
 import hka.awp.cgi.temi.app.feature.settings.SettingsViewModel
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.AdminPanelViewModel
 import hka.awp.cgi.temi.app.feature.settings.battery.BatteryViewModel
 import hka.awp.cgi.temi.app.feature.settings.display.DisplayViewModel
 import hka.awp.cgi.temi.app.feature.settings.language.LanguageViewModel
+import hka.awp.cgi.temi.app.feature.settings.photobox.PhotoboxSettingsViewModel
 import hka.awp.cgi.temi.app.feature.webserver.WebserverViewModel
 import hka.awp.cgi.temi.app.ui.shell.AppViewModel
 import hka.awp.cgi.temi.app.utils.NetworkManager
@@ -110,6 +116,31 @@ val appModule = module {
     single { HidingSpotRepository(androidContext()) }
 
     viewModel { HideAndSeekViewModel(robot = get(), hidingSpotRepository = get()) }
+
+    single { PhotoboxCameraManager(androidContext()) }
+
+    single {
+        PhotoboxUploadRepository(
+            context = androidContext(),
+            client = get(),
+            appConfigRepository = get()
+        )
+    }
+
+    single { PhotoboxPendingUploadStore(androidContext()) }
+
+    single { PhotoboxUploadQueue(context = androidContext(), pendingUploadStore = get()) }
+
+    viewModel {
+        PhotoboxViewModel(
+            cameraManager = get(),
+            appConfigRepository = get(),
+            uploadRepository = get(),
+            uploadQueue = get()
+        )
+    }
+
+    viewModel { PhotoboxSettingsViewModel(appConfigRepository = get()) }
 
     viewModel<WebserverViewModel> { WebserverViewModel(get()) }
 

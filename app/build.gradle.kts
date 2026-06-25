@@ -81,6 +81,14 @@ android {
             val adminPassword = props.getProperty("DEFAULT_ADMIN_PASSWORD")
                 ?: throw GradleException("Missing property 'DEFAULT_ADMIN_PASSWORD' in .env")
             buildConfigField("String", "DEFAULT_ADMIN_PASSWORD", "\"$adminPassword\"")
+
+            val driveFolderLink = props.getProperty("DEFAULT_DRIVE_FOLDER_LINK")
+                ?: throw GradleException("Missing property 'DEFAULT_DRIVE_FOLDER_LINK' in .env")
+            buildConfigField("String", "DEFAULT_DRIVE_FOLDER_LINK", "\"$driveFolderLink\"")
+
+            val driveUploadUrl = props.getProperty("DEFAULT_DRIVE_UPLOAD_URL")
+                ?: throw GradleException("Missing property 'DEFAULT_DRIVE_UPLOAD_URL' in .env")
+            buildConfigField("String", "DEFAULT_DRIVE_UPLOAD_URL", "\"$driveUploadUrl\"")
         } else {
             throw GradleException(
                 "Missing .env file! please create it and include the 'WEBVIEW_URL"
@@ -190,7 +198,6 @@ dependencies {
     // temi dependency
     implementation(libs.temi.sdk)
     implementation(libs.androidx.compose.ui.text)
-    implementation(libs.androidx.compose.material.icons.extended)
 
     // Vosk speech recognition dependencies
     implementation(libs.vosk.android)
@@ -210,6 +217,18 @@ dependencies {
     // debug dependencies
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    // CameraX
+    implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
+
+    // QR code generation for Photobox photo links
+    implementation(libs.zxing.core)
+
+    // Offline upload retry queue for Photobox (survives app restarts and waits for network)
+    implementation(libs.androidx.work.runtime.ktx)
 
     // api desugaring
     coreLibraryDesugaring(libs.android.desugarJdkLibs)
