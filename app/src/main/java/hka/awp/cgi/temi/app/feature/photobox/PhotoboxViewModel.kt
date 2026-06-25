@@ -46,6 +46,10 @@ data class PhotoboxUiState(
     val isBetweenShots: Boolean = false,
     val shotsTaken: Int = 0,
     val capturedBitmap: Bitmap? = null,
+    // The banner the photo was actually captured with, frozen at capture time (see startSession)
+    // — not baked into capturedBitmap, so the live preview can render it as a layer that's
+    // unaffected by selectedFilter (the real bake order is the same, see PhotoboxSessionFinalizer).
+    val capturedBanner: PhotoboxBanner? = null,
     val uploadState: PhotoboxUploadState = PhotoboxUploadState.NONE,
     val uploadedPhotoUrl: String? = null,
     val uploadedPhotoExpiresAt: Long? = null,
@@ -124,7 +128,8 @@ class PhotoboxViewModel(
                 },
                 onShotsReady = { shots ->
                     val bannerAtCapture = bannerSettings.banner.value.takeIf { bannerSettings.enabled.value }
-                    val overlayOptionsAtCapture = PhotoboxOverlayOptions(overlayPosition.value, bannerAtCapture)
+                    val overlayOptionsAtCapture =
+                        PhotoboxOverlayOptions(overlayPosition.value, bannerAtCapture, mode = state.mode)
                     sessionFinalizer.finalize(
                         mode = state.mode,
                         shots = shots,
@@ -142,6 +147,7 @@ class PhotoboxViewModel(
                                 it.copy(
                                     phase = PhotoboxPhase.PREVIEW,
                                     capturedBitmap = finalImage,
+                                    capturedBanner = bannerAtCapture,
                                     uploadState = PhotoboxUploadState.NONE,
                                     uploadedPhotoUrl = null,
                                     uploadedPhotoExpiresAt = null,

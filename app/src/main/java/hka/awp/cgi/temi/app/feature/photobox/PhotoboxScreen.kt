@@ -71,7 +71,6 @@ fun PhotoboxScreen(
     val cameraState by viewModel.cameraState.collectAsStateWithLifecycle()
     val overlayEnabled by viewModel.overlayEnabled.collectAsStateWithLifecycle()
     val overlayPosition by viewModel.overlayPosition.collectAsStateWithLifecycle()
-    val bannerEnabled by viewModel.bannerSettings.enabled.collectAsStateWithLifecycle()
 
     DisposableEffect(viewModel) {
         onDispose { viewModel.onScreenStopped() }
@@ -116,7 +115,7 @@ fun PhotoboxScreen(
                     mode = uiState.mode,
                     overlayEnabled = overlayEnabled,
                     overlayPosition = overlayPosition,
-                    bannerEnabled = bannerEnabled,
+                    banner = uiState.capturedBanner,
                     uploadState = uiState.uploadState,
                     selectedFilter = uiState.selectedFilter
                 ),
