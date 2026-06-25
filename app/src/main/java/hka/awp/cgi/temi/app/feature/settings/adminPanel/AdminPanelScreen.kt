@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -22,7 +21,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -43,9 +41,9 @@ import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.HidingSpotFil
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.MqttReportsCard
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.MqttReportsDialog
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.ProfileNameInputDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.ResetVoiceProfilesDialog
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.RestartAppCard
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.RestartAppConfirmationDialog
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.ResetVoiceProfilesDialog
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.SpeakerVerificationCard
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.SpeakerVerificationThresholdCard
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.VoiceProfilesManagementCard
@@ -171,16 +169,18 @@ fun AdminPanelScreen(
 
     DisposableEffect(Unit) {
         onDispose {
-            viewModel.resetAuthorization()
+            viewModel.onAction(AdminPanelAction.ResetAuthorization)
         }
     }
 
     if (!isAuthorized) {
         AdminPasswordPrompt(
             isError = passwordError,
-            onConfirm = { enteredPassword -> viewModel.checkPassword(enteredPassword) },
+            onConfirm = { enteredPassword ->
+                viewModel.onAction(AdminPanelAction.CheckPassword(enteredPassword))
+            },
             onBackClick = onBackClick,
-            onValueChange = { viewModel.clearPasswordError() }
+            onValueChange = { viewModel.onAction(AdminPanelAction.ClearPasswordError) }
         )
         return
     }
@@ -226,7 +226,10 @@ private fun AdminPanelContent(
     updateDialogs: (DialogState) -> Unit
 ) {
     Column(
-        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         WebserverUrlCard(uiState.webserverUrl) { updateDialogs(DialogState(showUrl = true)) }

@@ -93,14 +93,6 @@ class AppConfigRepository(private val dataStore: DataStore<Preferences>) {
         }
     }
 
-    suspend fun resetWebserverDefaults() {
-        dataStore.edit { preferences ->
-            preferences[webviewUrlKey] = BuildConfig.WEBVIEW_URL
-            preferences[adminPasswordHashKey] = hashPassword(BuildConfig.DEFAULT_ADMIN_PASSWORD)
-            preferences.remove(adminPasswordLegacyKey)
-        }
-    }
-
     fun isValidAdminPassword(plainPassword: String, currentHash: String): Boolean {
         return hashPassword(plainPassword) == currentHash
     }
@@ -111,8 +103,13 @@ class AppConfigRepository(private val dataStore: DataStore<Preferences>) {
             "%02x".format(byte)
         }
     }
+
     // --- General ---
 
+    @Suppress("unused")
+    /**
+     * Should only be used to clear the ENTIRE dataStore only use this if you know what you are doing :)
+     */
     suspend fun clear() {
         dataStore.edit { it.clear() }
     }
