@@ -217,15 +217,6 @@ private fun CameraPreviewView(
         factory = { ctx ->
             PreviewView(ctx).apply {
                 scaleType = PreviewView.ScaleType.FILL_CENTER
-                // SurfaceView (the PERFORMANCE default) ignores scaleX since it's composited as
-                // its own layer outside the normal View pipeline — switch to TextureView so the
-                // mirroring below actually has an effect.
-                implementationMode = PreviewView.ImplementationMode.COMPATIBLE
-                // Temi's camera faces the user like a selfie cam regardless of how Android
-                // classifies the lens, so the live feed is always mirrored — otherwise moving
-                // your head left makes the preview look like you moved right, the opposite of
-                // how a mirror (or a selfie cam) works.
-                scaleX = -1f
                 // Deferred to post() so the view is laid out and viewPort reflects its real size.
                 post { onBindCamera(lifecycleOwner, surfaceProvider, viewPort) }
             }

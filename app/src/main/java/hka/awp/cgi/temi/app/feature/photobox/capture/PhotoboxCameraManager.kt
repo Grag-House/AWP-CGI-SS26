@@ -144,10 +144,7 @@ class PhotoboxCameraManager(private val context: Context) {
                     }
                     val rotation = image.imageInfo.rotationDegrees
                     image.close()
-                    // Temi's camera faces the user like a selfie cam regardless of how Android
-                    // classifies the lens, so the saved photo is always mirrored to match what
-                    // was shown live (see scaleX in PhotoboxScreen's CameraPreviewView).
-                    var result = mirroredBitmap(rotatedBitmap(bitmap, rotation))
+                    var result = rotatedBitmap(bitmap, rotation)
                     result = downscaledIfNeeded(result)
                     onResult(Result.success(result))
                 }
@@ -169,11 +166,6 @@ class PhotoboxCameraManager(private val context: Context) {
     private fun rotatedBitmap(bitmap: Bitmap, degrees: Int): Bitmap {
         if (degrees == 0) return bitmap
         val matrix = Matrix().apply { postRotate(degrees.toFloat()) }
-        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
-    }
-
-    private fun mirroredBitmap(bitmap: Bitmap): Bitmap {
-        val matrix = Matrix().apply { postScale(-1f, 1f) }
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
     }
 
