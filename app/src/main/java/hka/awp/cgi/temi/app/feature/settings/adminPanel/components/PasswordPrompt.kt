@@ -25,6 +25,19 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import hka.awp.cgi.temi.app.R
 
+/**
+ * Renders a full-screen gateway password barrier to intercept unauthenticated
+ * users attempting to open the admin console.
+ *
+ * It manages an internal state variable for masking user input via [PasswordVisualTransformation]. If an
+ * external auth sequence flags an invalid attempt via [isError], it surfaces an error layout state
+ * and resets its state tracking upon character mutational changes via [onValueChange].
+ *
+ * @param isError Flag indicating whether the last submitted credential match failed.
+ * @param onConfirm Callback supplying the unmasked password string token for verification backend layers.
+ * @param onBackClick Intercepts the rejection or back-navigation button step to exit the barrier.
+ * @param onValueChange Callback fired immediately when user keystrokes occur to clear external error flags.
+ */
 @Composable
 fun AdminPasswordPrompt(
     isError: Boolean,

@@ -23,6 +23,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import hka.awp.cgi.temi.app.R
 
+/**
+ * Displays an alert dialog for configuring and assembling custom patrol routes.
+ *
+ * This modal maps out a vertically scrollable list of pre-saved location waypoints. It initializes
+ * an internal mutable state track utilizing `mutableStateListOf` to dynamically add or eliminate
+ * specific targets during checkpoint selection before committing changes back to persistent storage layers.
+ *
+ * @param savedLocations The master collection list containing all discoverable or recorded device location tags.
+ * @param initialRoute The snapshot list configuration indicating which
+ * location steps are active upon launching the view.
+ * @param onDismiss Callback triggered when terminating the dialog overlay container layout.
+ * @param onSave Event hook fired upon submission, supplying the newly compiled collection sequence of waypoint tags.
+ */
 @Composable
 fun AdminPanelRouteDialog(
     savedLocations: List<String>,

@@ -27,6 +27,19 @@ import java.time.format.DateTimeFormatter
 
 private val reportTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss")
 
+/**
+ * Displays a diagnostic modal dialog detailing MQTT broker communication logs and tracked topics.
+ *
+ * This dialog renders a scrollable view combining a list of monitored subscription topics with
+ * a chronological feed of inbound and outbound [MqttTrafficEvent] telemetry occurrences. It provides
+ * actions to clear the active log cache or dismiss the display window.
+ *
+ * @param monitoredTopics A distinct set of unique MQTT channel paths currently being analyzed by the app.
+ * @param events A history collection of logged messaging actions
+ * containing direction, source channel, and raw contents.
+ * @param onClear Callback triggered when the user requests flushing the active traffic events trace buffer.
+ * @param onDismiss Callback triggered when closing the overlay interface or clicking out of its layout boundaries.
+ */
 @Composable
 fun MqttReportsDialog(
     monitoredTopics: Set<String>,

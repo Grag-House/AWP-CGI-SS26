@@ -31,6 +31,35 @@ import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.cards.Webserv
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.dialogs.MqttReportsCard
 import hka.awp.cgi.temi.app.ui.components.SettingsHeader
 
+/**
+ * Renders the primary container layout scroll-surface assembling the robot's executive administrator cockpit panel.
+ *
+ * This master template aggregates all specific configuration subgroups (including local and remote security protocols,
+ * MQTT broker reports, telemetry coordinate presets, voice matching databases, and autonomous patrol configurations)
+ * inside a unified scrollable view. It translates values fed from a declarative [AdminPanelState] snapshot
+ * and binds stateless interactions directly back to higher-level orchestrating view models or controllers.
+ *
+ * @param uiState The active immutable view state state-holder holding required operational telemetry information.
+ * @param onBackClick Intercepts upper navigation buttons to move out of the console screen.
+ * @param onEditUrl Triggers the input dialog workflow for modifying the remote backend web server path.
+ * @param onOpenMqtt Displays the log tracking overlay for active MQTT broker telemetry traffic.
+ * @param onUpdateWebserverPassword Displays the security prompt layout for changing remote synchronization access keys.
+ * @param onChangeAdminPassword Displays the security prompt layout for modifying the local master access passphrase.
+ * @param onEditCoordinates Triggers the decimal validation input modal for latitude/longitude geofence anchoring.
+ * @param onRestartRequest Displays a safety confirmation dialog to trigger an application software lifecycle reboot.
+ * @param onNavigateToPatrolSettings Dispatches view mutations or navigates to adjust scheduler strategies
+ * (Random/Fixed).
+ * @param onNavigateToPatrolRoute Dispatches views to adjust target sequence lists mapping custom checkpoint layouts.
+ * @param onCloseRequest Displays a safety verification prompt to terminate and close out the active runtime process.
+ * @param onOpenHidingSpotFilter Opens the filter settings overlay tracking applicable hiding-spot
+ * location restrictions.
+ * @param onToggleSpeakerVerification Toggles the global biometric validation block barrier for processing
+ * voice commands.
+ * @param onEditSpeakerThreshold Displays the precision adjustment input text dialog for matching validation bounds.
+ * @param onToggleEnrollment Initiates or prematurely aborts a recording pipeline capture phase to map fresh
+ * speaker profiles.
+ * @param onDeleteVoiceProfile Erases a single biometric profile entry row matching the forwarded identifier string.
+ */
 @Composable
 @Suppress("LongParameterList", "LongMethod")
 fun AdminPanelContent(

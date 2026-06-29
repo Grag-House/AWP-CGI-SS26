@@ -44,6 +44,16 @@ import java.util.Locale
 private const val THRESHOLD_MIN = 0.0
 private const val THRESHOLD_MAX = 1.0
 
+/**
+ * Displays an input dialog for adjusting the biometric speaker verification confidence threshold.
+ *
+ * Automatically intercepts comma inputs and sanitizes them into dot format. It validates the parsed double
+ * value against [THRESHOLD_MIN] and [THRESHOLD_MAX], disabling submission unless the constraint is satisfied.
+ *
+ * @param initialThreshold The current threshold parameter to pre-populate within the text field.
+ * @param onConfirm Callback fired once a valid decimal boundary score has been confirmed.
+ * @param onDismiss Callback triggered when closing or canceling the dialog instance.
+ */
 @Composable
 fun EditSpeakerVerificationThresholdDialog(
     initialThreshold: Double,
@@ -82,6 +92,14 @@ fun EditSpeakerVerificationThresholdDialog(
     )
 }
 
+/**
+ * Displays an overlay input dialog for specifying a identifier name before training a new voice print profile.
+ *
+ * Keeps the submission pipeline blocked until a non-empty, trimmed text value is supplied.
+ *
+ * @param onConfirm Callback supplying the sanitized, trimmed registration name string to initiate enrollment.
+ * @param onDismiss Callback triggered when canceling the process profile declaration.
+ */
 @Composable
 fun ProfileNameInputDialog(onConfirm: (String) -> Unit, onDismiss: () -> Unit) {
     var nameInput by remember { mutableStateOf("") }
@@ -110,6 +128,15 @@ fun ProfileNameInputDialog(onConfirm: (String) -> Unit, onDismiss: () -> Unit) {
     )
 }
 
+/**
+ * Displays a critical validation alert dialog confirming the individual removal of a voice print profile.
+ *
+ * Uses error-themed action markers to emphasize the destructive nature of removing biometric templates.
+ *
+ * @param profileName The designated unique textual label key pointing to the target voice print element.
+ * @param onConfirm Callback fired when explicitly consenting to clear the target entry.
+ * @param onDismiss Callback triggered when canceling the target removal step.
+ */
 @Composable
 fun DeleteProfileConfirmDialog(profileName: String, onConfirm: () -> Unit, onDismiss: () -> Unit) {
     AlertDialog(
@@ -131,6 +158,14 @@ fun DeleteProfileConfirmDialog(profileName: String, onConfirm: () -> Unit, onDis
     )
 }
 
+/**
+ * Displays a critical validation alert dialog confirming the master reset and wipe of all registered biometric data.
+ *
+ * Uses error-themed styling to highlight the destructive nature of flushing all profile signatures.
+ *
+ * @param onConfirm Callback fired when explicitly consenting to clear all existing voice print structures.
+ * @param onDismiss Callback triggered when rejecting the data wipe operation.
+ */
 @Composable
 fun ResetVoiceProfilesDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
     AlertDialog(
@@ -154,6 +189,12 @@ fun ResetVoiceProfilesDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
     )
 }
 
+/**
+ * Renders an embedded sub-list displaying active speaker profiles inline alongside individual deletion triggers.
+ *
+ * @param profiles A list tracking the active names of registered voice profile records.
+ * @param onDeleteClick Intercepts deletion clicks on a specific entry, forwarding the target profile identifier name.
+ */
 @Composable
 fun VoiceProfileList(profiles: List<String>, onDeleteClick: (String) -> Unit) {
     Spacer(Modifier.height(8.dp))
@@ -184,6 +225,11 @@ fun VoiceProfileList(profiles: List<String>, onDeleteClick: (String) -> Unit) {
     }
 }
 
+/**
+ * Renders an navigation entry row card targeting full systemic MQTT telemetry report logs.
+ *
+ * @param onNavigate Executed when the user interacts with the card container layout to view messaging history.
+ */
 @Composable
 fun MqttReportsCard(onNavigate: () -> Unit) {
     ConfigCard(onClick = onNavigate) {
