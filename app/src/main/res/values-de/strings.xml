@@ -100,6 +100,7 @@
     <string name="notifications_description">Benachrichtigungen</string>
     <string name="cgi">CGI</string>
     <string name="toggle_sidebar_description">Schaltfläche zum Ein- oder Ausklappen der Seitenleiste</string>
+    <string name="back_description">Zurück</string>
 
     <string name="admin_panel">Admin Panel</string>
     <string name="admin_panel_description">Erweiterte Einstellungen für Wetterseite, Webserver, MQTT</string>
@@ -116,6 +117,7 @@
     <string name="admin_panel_header">Admin Panel</string>
     <string name="admin_panel_latitude">"Breite: "</string>
     <string name="admin_panel_longitude">Länge:</string>
+    <string name="admin_panel_coordinates_format">Länge: %1$s Breite: %2$s</string>
     <string name="admin_panel_confirm">Bestätigen</string>
     <string name="admin_panel_reset_defaults">Standard</string>
     <string name="admin_panel_latitude_error">Gültigkeitsbereich: -90 bis 90</string>
@@ -133,6 +135,39 @@
     <string name="admin_panel_mqtt_reports_direction_out">OUT</string>
     <string name="admin_panel_mqtt_reports_clear">Leeren</string>
     <string name="admin_panel_close">Schließen</string>
+    <string name="admin_panel_close_app">App schließen</string>
+    <string name="admin_panel_close_app_subtitle">App wird runtergefahren</string>
+    <string name="admin_panel_close_app_confirm_text">Möchtest du die Anwendung wirklich schließen?</string>
+    <string name="admin_panel_confirm_close_app">App beenden</string>
+    <string name="admin_panel_admin_password">Admin-Passwort</string>
+    <string name="admin_panel_admin_password_change">Admin-Passwort ändern</string>
+    <string name="admin_panel_new_admin_password">Neues Admin-Passwort:</string>
+    <string name="admin_panel_patrol_settings">Automatische Kontrollfahrten</string>
+    <string name="admin_panel_patrol_route">Routenkonfiguration für Kontrollfahrten</string>
+    <string name="admin_panel_active_prefix">Aktiv: %1$s</string>
+    <string name="admin_panel_patrol_disabled">Deaktiviert</string>
+    <string name="admin_panel_no_route_selected_title">Keine Route ausgewählt</string>
+    <string name="admin_panel_no_route_selected_text">Bitte wähle eine Route aus, damit die Kontrollfahrt starten kann.</string>
+
+    <!-- Patrol Route/Settings Dialogs -->
+    <string name="save">Speichern</string>
+    <string name="patrol_route_dialog_title">Kontrollroute einstellen</string>
+    <string name="patrol_route_dialog_subtitle">Wähle die Orte aus, die Temi bei einer Kontrollfahrt anfahren soll.</string>
+    <string name="patrol_settings_dialog_title">Kontrollfahrten konfigurieren</string>
+    <string name="patrol_settings_dialog_subtitle">Wähle aus, wie die automatischen Rundgänge zur Überprüfung des Wohlbefindens geplant werden sollen.</string>
+    <string name="patrol_settings_enable_label">Automatische Fahrten aktivieren</string>
+    <string name="patrol_settings_trigger_now_button">Jetzt eine Kontrollfahrt starten</string>
+    <string name="patrol_settings_mode_label">Planungs-Modus</string>
+    <string name="patrol_settings_mode_random">Zufalls-Intervall (z.B. alle 40–60 Min)</string>
+    <string name="patrol_settings_mode_fixed">Feste Stunden (jede gewählte Stunde)</string>
+    <string name="patrol_settings_interval_bounds_label">Intervall-Grenzen (Minuten)</string>
+    <string name="patrol_settings_min_distance">Minimaler Abstand: %1$d Min.</string>
+    <string name="patrol_settings_max_distance">Maximaler Abstand: %1$d Min.</string>
+    <string name="patrol_settings_select_hours_label">Uhrzeiten auswählen (Ganze Stunden)</string>
+    <string name="patrol_stream_content_description">Kontrollfahrt-Videostream</string>
+    <string name="patrol_stream_back_button">Zurück</string>
+    <string name="patrol_countdown_message">Kontrollfahrt startet in %1$d Sekunden</string>
+    <string name="patrol_stream_stop_button">Patrouille abbrechen</string>
     <string name="admin_panel_speaker_verification">Speaker Verification</string>
     <string name="admin_panel_speaker_verification_subtitle">Nur autorisierte Stimmen können den Roboter wecken</string>
 
@@ -215,6 +250,8 @@
     <string name="controller_connect">Verbinden</string>
     <string name="controller_delete">Entfernen</string>
     <string name="controller_isNotBonded">Nicht gekoppelt</string>
+    <string name="controller_status_label">Status: %1$s</string>
+    <string name="controller_bottom_text">Bluetooth Controller</string>
 
     <!-- Hide and Seek Page -->
     <string name="hide_and_seek">Verstecken</string>

@@ -1,5 +1,6 @@
 package hka.awp.cgi.temi.app.ui.shell
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -20,6 +21,9 @@ import hka.awp.cgi.temi.app.feature.hideandseek.HideAndSeekScreen
 import hka.awp.cgi.temi.app.feature.hideandseek.HideAndSeekViewModel
 import hka.awp.cgi.temi.app.feature.navigation.NavigationContent
 import hka.awp.cgi.temi.app.feature.navigation.NavigationViewModel
+import hka.awp.cgi.temi.app.feature.patrol.overlay.PatrolCountdownOverlay
+import hka.awp.cgi.temi.app.feature.patrol.overlay.PatrolOverlayViewModel
+import hka.awp.cgi.temi.app.feature.patrol.overlay.PatrolStreamOverlay
 import hka.awp.cgi.temi.app.feature.photobox.PhotoboxScreen
 import hka.awp.cgi.temi.app.feature.photobox.PhotoboxViewModel
 import hka.awp.cgi.temi.app.feature.settings.SettingsNavigationEvent
@@ -62,7 +66,8 @@ fun MainShell(
     webserverViewModel: WebserverViewModel = koinViewModel(),
     weatherViewModel: WeatherViewModel = koinViewModel(),
     hideAndSeekViewModel: HideAndSeekViewModel = koinViewModel(),
-    photoboxViewModel: PhotoboxViewModel = koinViewModel()
+    photoboxViewModel: PhotoboxViewModel = koinViewModel(),
+    patrolOverlayViewModel: PatrolOverlayViewModel = koinViewModel()
 ) {
     val wifiLevel by appViewModel.wifiLevel.collectAsStateWithLifecycle()
     val currentTime by appViewModel.currentTime.collectAsStateWithLifecycle()
@@ -71,6 +76,17 @@ fun MainShell(
     val serverState by webserverViewModel.serverState.collectAsStateWithLifecycle()
     val currentTemperatureState by weatherViewModel.uiState.collectAsStateWithLifecycle()
     val webserverUrlState by webserverViewModel.urlState.collectAsStateWithLifecycle()
+
+    val videoFrame by patrolOverlayViewModel.videoFrame.collectAsStateWithLifecycle()
+    val isPatrolRunning by patrolOverlayViewModel.isRunning.collectAsStateWithLifecycle()
+    val isOverlayVisible by patrolOverlayViewModel.isOverlayVisible.collectAsStateWithLifecycle()
+    val countdownSeconds by patrolOverlayViewModel.countdownSeconds.collectAsStateWithLifecycle()
+
+    LaunchedEffect(isPatrolRunning) {
+        if (isPatrolRunning) {
+            patrolOverlayViewModel.showOverlay()
+        }
+    }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -84,47 +100,60 @@ fun MainShell(
             )
         }
     ) { paddingValues ->
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
+        Box(
+            modifier = Modifier.fillMaxSize()
         ) {
-            Sidebar(
-                isExpanded = appViewModel.isSidebarExpanded,
-                selectedRoute = appViewModel.selectedRoute,
-                onRouteSelected = { screen ->
-                    // Clicking Photobox while already on it (e.g. mid-countdown/capture) doesn't
-                    // trigger a route change, so the screen wouldn't otherwise get disposed/reset
-                    // — reset explicitly so it always lands back on mode selection.
-                    if (screen == Screen.Photobox) {
-                        photoboxViewModel.reset()
-                    }
-                    appViewModel.onRouteSelect(screen)
-                },
-                onSidebarToggle = { appViewModel.onSideBarToggle() },
-                modifier = Modifier.width(260.dp)
-            )
-
             Row(
                 modifier = Modifier
-                    .weight(1f)
-                    .padding(top = 12.dp, bottom = 12.dp, end = 12.dp)
-                    .clip(RoundedCornerShape(24.dp))
+                    .fillMaxSize()
+                    .padding(paddingValues)
             ) {
-                RenderSelectedRoute(
+                Sidebar(
+                    isExpanded = appViewModel.isSidebarExpanded,
                     selectedRoute = appViewModel.selectedRoute,
-                    routeDeps = MainShellRouteDeps(
-                        appViewModel = appViewModel,
-                        settingsViewModel = settingsViewModel,
-                        navigationViewModel = navigationViewModel,
-                        weatherViewModel = weatherViewModel,
-                        hideAndSeekViewModel = hideAndSeekViewModel,
-                        photoboxViewModel = photoboxViewModel,
-                        serverState = serverState,
-                        currentTemperatureState = currentTemperatureState,
-                        webserverUrlState = webserverUrlState
-                    ),
-                    modifier = Modifier.weight(1f)
+                    onRouteSelected = { screen ->
+                        if (screen == Screen.Photobox) {
+                            photoboxViewModel.reset()
+                        }
+                        appViewModel.onRouteSelect(screen)
+                    },
+                    onSidebarToggle = { appViewModel.onSideBarToggle() },
+                    modifier = Modifier.width(260.dp)
+                )
+
+                Row(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(top = 12.dp, bottom = 12.dp, end = 12.dp)
+                        .clip(RoundedCornerShape(24.dp))
+                ) {
+                    RenderSelectedRoute(
+                        selectedRoute = appViewModel.selectedRoute,
+                        routeDeps = MainShellRouteDeps(
+                            appViewModel = appViewModel,
+                            settingsViewModel = settingsViewModel,
+                            navigationViewModel = navigationViewModel,
+                            weatherViewModel = weatherViewModel,
+                            hideAndSeekViewModel = hideAndSeekViewModel,
+                            photoboxViewModel = photoboxViewModel,
+                            serverState = serverState,
+                            currentTemperatureState = currentTemperatureState,
+                            webserverUrlState = webserverUrlState
+                        ),
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+
+            countdownSeconds?.let { seconds ->
+                PatrolCountdownOverlay(seconds = seconds)
+            }
+
+            if (isPatrolRunning && isOverlayVisible) {
+                PatrolStreamOverlay(
+                    videoFrame = videoFrame,
+                    onBackClick = patrolOverlayViewModel::hideOverlay,
+                    onStopPatrol = patrolOverlayViewModel::stopPatrol
                 )
             }
         }

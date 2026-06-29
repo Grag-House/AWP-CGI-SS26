@@ -1,4 +1,4 @@
-package hka.awp.cgi.temi.app.feature.settings.adminPanel.components
+package hka.awp.cgi.temi.app.feature.settings.adminPanel.components.cards
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

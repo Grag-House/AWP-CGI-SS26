@@ -8,13 +8,20 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 
 @Suppress("TooManyFunctions")
 class ControllerViewModel(
     private val movementController: TemiMovementController,
-    private val bluetoothControllerManager: BluetoothControllerManager,
+    private val bluetoothControllerManager: BluetoothControllerManager
 ) : ViewModel() {
 
+    companion object {
+        private const val CONTROLLER_UPDATE_INTERVAL_MS = 20L
+        private const val BASE_SPEED_FACTOR = 1.0f
+        private const val TURN_EFFORT_PENALTY_WEIGHT = 0.3f
+        private const val TURN_MULTIPLIER = 2.0f
+    }
     val devices: StateFlow<List<ControllerDevice>> = bluetoothControllerManager.devices
     val isScanning: StateFlow<Boolean> = bluetoothControllerManager.isScanning
 
@@ -79,8 +86,15 @@ class ControllerViewModel(
     }
 
     fun onControllerInput(x: Float, y: Float) {
-        lastX = x
-        lastY = y
+        val steering = if (x > 0) x * x else -(x * x)
+
+        val turnEffort = abs(steering)
+
+        val linearSpeed = y * (BASE_SPEED_FACTOR - (turnEffort * TURN_EFFORT_PENALTY_WEIGHT))
+        val turn = steering * TURN_MULTIPLIER
+
+        lastX = turn
+        lastY = linearSpeed
     }
 
     fun loadPairedDevices() {
@@ -97,5 +111,3 @@ class ControllerViewModel(
         super.onCleared()
     }
 }
-
-private const val CONTROLLER_UPDATE_INTERVAL_MS = 50L

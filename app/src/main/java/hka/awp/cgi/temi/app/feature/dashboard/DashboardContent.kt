@@ -159,8 +159,8 @@ private fun ContentGrid(serverState: ServerState, onClick: (Screen) -> Unit, cur
         }
         item {
             DashboardCard(
-                title = "Controller",
-                subtitle = "Gamepad verbinden und Steuerung aktivieren",
+                title = stringResource(R.string.controller),
+                subtitle = stringResource(R.string.controller_subtitle),
                 customIcon = {
                     Icon(
                         painter = painterResource(id = R.drawable.joystick_24dp_000000_fill0_wght400_grad0_opsz24),
@@ -168,7 +168,7 @@ private fun ContentGrid(serverState: ServerState, onClick: (Screen) -> Unit, cur
                         contentDescription = stringResource(R.string.controller_description)
                     )
                 },
-                bottomText = "Bluetooth Controller",
+                bottomText = stringResource(R.string.controller_bottom_text),
                 onClick = {
                     onClick(Screen.Controller)
                 }

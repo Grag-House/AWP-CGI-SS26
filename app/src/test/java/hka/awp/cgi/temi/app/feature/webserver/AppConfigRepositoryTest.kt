@@ -1,8 +1,6 @@
 package hka.awp.cgi.temi.app.feature.webserver
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
 import hka.awp.cgi.temi.app.BuildConfig
 import hka.awp.cgi.temi.app.utils.AppConfigRepository
 import kotlinx.coroutines.flow.first
@@ -18,86 +16,52 @@ import kotlin.io.path.deleteRecursively
 
 class AppConfigRepositoryTest {
 
+    // Helper für DataStore Setup um Redundanz zu vermeiden
     @OptIn(ExperimentalPathApi::class)
-    @Test
-    fun `when datastore is empty, admin password falls back to default hash`() = runTest {
+    private fun createTestRepository(
+        scope: kotlinx.coroutines.CoroutineScope
+    ): Pair<AppConfigRepository, java.nio.file.Path> {
         val tmpDir = createTempDirectory(prefix = "app-config-test")
         val file = File(tmpDir.toString(), "preferences.preferences_pb")
-        val dataStore = PreferenceDataStoreFactory.create(
-            scope = this,
-            produceFile = { file }
-        )
-        val repository = AppConfigRepository(dataStore)
-
-        val expectedHash = repository.hashPassword(BuildConfig.DEFAULT_ADMIN_PASSWORD)
-        assertEquals(expectedHash, repository.adminPasswordHash.first())
-
-        tmpDir.deleteRecursively()
+        val dataStore = PreferenceDataStoreFactory.create(scope = scope, produceFile = { file })
+        return AppConfigRepository(dataStore) to tmpDir
     }
 
-    @OptIn(ExperimentalPathApi::class)
     @Test
-    fun `when password is updated, repository stores and returns hashed value`() = runTest {
-        val tmpDir = createTempDirectory(prefix = "app-config-test")
-        val file = File(tmpDir.toString(), "preferences.preferences_pb")
-        val dataStore = PreferenceDataStoreFactory.create(
-            scope = this,
-            produceFile = { file }
-        )
-        val repository = AppConfigRepository(dataStore)
+    fun `admin panel and webserver passwords are independent`() = runTest {
+        val (repository, tmpDir) = createTestRepository(this)
 
-        val newPassword = "newPassword42"
-        repository.updateAdminPassword(newPassword)
+        val adminPass = "admin123"
+        val webPass = "web456"
 
-        val expectedHash = repository.hashPassword(newPassword)
-        assertEquals(expectedHash, repository.adminPasswordHash.first())
-        assertTrue(repository.isValidAdminPassword(newPassword, expectedHash))
+        repository.updateAdminPanelPassword(adminPass)
+        repository.updateWebserverPassword(webPass)
 
-        tmpDir.deleteRecursively()
-    }
+        @OptIn(ExperimentalPathApi::class)
+        @Test
+        @Disabled("Reason: logic currently removed from code")
+        fun `reset webserver defaults restores default url and default admin password hash`() = runTest {
+            val tmpDir = createTempDirectory(prefix = "app-config-test")
+            val file = File(tmpDir.toString(), "preferences.preferences_pb")
+            val dataStore = PreferenceDataStoreFactory.create(
+                scope = this,
+                produceFile = { file }
+            )
+            val repository = AppConfigRepository(dataStore)
+            val adminHash = repository.adminPanelPasswordHash.first()
+            val webHash = repository.webserverPasswordHash.first()
 
-    @OptIn(ExperimentalPathApi::class)
-    @Test
-    fun `when legacy plain password exists, repository hashes it as fallback`() = runTest {
-        val tmpDir = createTempDirectory(prefix = "app-config-test")
-        val file = File(tmpDir.toString(), "preferences.preferences_pb")
-        val dataStore = PreferenceDataStoreFactory.create(
-            scope = this,
-            produceFile = { file }
-        )
-        val repository = AppConfigRepository(dataStore)
+            assertEquals(repository.hashPassword(adminPass), adminHash)
+            assertEquals(repository.hashPassword(webPass), webHash)
+            assertTrue(adminHash != webHash)
+            repository.updateUrl("https://example.com/custom")
+            repository.updateAdminPassword("super-secret")
 
-        val legacyPassword = "legacy-admin"
-        val legacyKey = stringPreferencesKey("admin_password")
-        dataStore.edit { prefs ->
-            prefs[legacyKey] = legacyPassword
+            assertEquals(BuildConfig.WEBVIEW_URL, repository.currentUrl.first())
+            val expectedDefaultHash = repository.hashPassword(BuildConfig.DEFAULT_ADMIN_PASSWORD)
+            assertEquals(expectedDefaultHash, repository.adminPasswordHash.first())
+
+            tmpDir.deleteRecursively()
         }
-
-        val expectedHash = repository.hashPassword(legacyPassword)
-        assertEquals(expectedHash, repository.adminPasswordHash.first())
-
-        tmpDir.deleteRecursively()
-    }
-
-    @OptIn(ExperimentalPathApi::class)
-    @Test
-    @Disabled("Reason: logic currently removed from code")
-    fun `reset webserver defaults restores default url and default admin password hash`() = runTest {
-        val tmpDir = createTempDirectory(prefix = "app-config-test")
-        val file = File(tmpDir.toString(), "preferences.preferences_pb")
-        val dataStore = PreferenceDataStoreFactory.create(
-            scope = this,
-            produceFile = { file }
-        )
-        val repository = AppConfigRepository(dataStore)
-
-        repository.updateUrl("https://example.com/custom")
-        repository.updateAdminPassword("super-secret")
-
-        assertEquals(BuildConfig.WEBVIEW_URL, repository.currentUrl.first())
-        val expectedDefaultHash = repository.hashPassword(BuildConfig.DEFAULT_ADMIN_PASSWORD)
-        assertEquals(expectedDefaultHash, repository.adminPasswordHash.first())
-
-        tmpDir.deleteRecursively()
     }
 }

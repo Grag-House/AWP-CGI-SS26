@@ -8,8 +8,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
 import timber.log.Timber
 import java.time.Instant
@@ -44,6 +46,8 @@ class MqttManager(private val robot: Robot?, private val client: Mqtt5BlockingCl
         const val BATTERY_TOPIC = "$BASE_TOPIC/temi_battery_level"
         private val json = Json { ignoreUnknownKeys = true }
         private const val MAX_TRAFFIC_EVENTS = 200
+        private val _latestTtsStatus = MutableStateFlow<String?>(null)
+        val latestTtsStatus: StateFlow<String?> = _latestTtsStatus.asStateFlow()
 
         val reportTopics: Set<String> = setOf(
             GOTO_TOPIC,
@@ -87,6 +91,7 @@ class MqttManager(private val robot: Robot?, private val client: Mqtt5BlockingCl
             client.subscribeWith().topicFilter(GET_READY_STATE_TOPIC).send()
             client.subscribeWith().topicFilter(PLAY_SEQUENCE_TOPIC).send()
             client.subscribeWith().topicFilter(TILT_ANGLE_TOPIC).send()
+            client.subscribeWith().topicFilter(TTS_LISTENER_TOPIC).send()
             Timber.d("MQTT subscriptions active")
 
             // Message loop using the 'publishes' stream
@@ -108,6 +113,7 @@ class MqttManager(private val robot: Robot?, private val client: Mqtt5BlockingCl
                     GET_READY_STATE_TOPIC -> handleGetReadyState()
                     PLAY_SEQUENCE_TOPIC -> handlePlaySequence(payload)
                     TILT_ANGLE_TOPIC -> handleTiltAngle(payload)
+                    TTS_LISTENER_TOPIC -> handleTtsListener(payload)
                 }
             }
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
@@ -115,6 +121,24 @@ class MqttManager(private val robot: Robot?, private val client: Mqtt5BlockingCl
         } finally {
             disconnect()
         }
+    }
+
+    private fun handleTtsListener(payload: String) {
+        runCatching {
+            val status = json.decodeFromString<MqttStatus>(payload).status
+            _latestTtsStatus.value = status
+        }.onFailure {
+            Timber.e(it, "Error parsing ttsListener payload: %s", payload)
+        }
+    }
+
+    suspend fun waitForTtsCompleted(timeoutMs: Long = 10_000L): Boolean {
+        return withTimeoutOrNull(timeoutMs) {
+            latestTtsStatus.first { status ->
+                status.equals("completed", ignoreCase = true)
+            }
+            true
+        } ?: false
     }
 
     private fun handleGoto(payload: String) {
@@ -237,6 +261,19 @@ class MqttManager(private val robot: Robot?, private val client: Mqtt5BlockingCl
             publishMessage(TTS_LISTENER_TOPIC, payload)
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             Timber.e(e, "Failed to publish TTS status")
+        }
+    }
+
+    suspend fun publishPatrolAnnouncementPrompt() = withContext(Dispatchers.IO) {
+        try {
+            val prompt =
+                "Kündige auf kreative, freundliche, lustige und kurze Art eine automatische Kontrollfahrt an." +
+                    " Sage, dass Temi jetzt eine Kontrollfahrt startet. Maximal zwei kurze Sätze.".trimIndent()
+
+            val payload = json.encodeToString(MqttAsr(prompt))
+            publishMessage("$BASE_TOPIC/asrListener", payload)
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+            Timber.e(e, "Failed to publish patrol announcement prompt")
         }
     }
 

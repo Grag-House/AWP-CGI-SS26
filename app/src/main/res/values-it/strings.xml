@@ -88,6 +88,7 @@
     <string name="notifications_description">Notifiche</string>
     <string name="cgi">CGI</string>
     <string name="toggle_sidebar_description">Toggle barra laterale</string>
+    <string name="back_description">Indietro</string>
 
     <string name="admin_panel">Admin Panel</string>
     <string name="admin_panel_description">Impostazioni avanzate</string>
@@ -104,6 +105,7 @@
     <string name="admin_panel_header">Admin Panel</string>
     <string name="admin_panel_latitude">"Latitudine: "</string>
     <string name="admin_panel_longitude">Longitudine:</string>
+    <string name="admin_panel_coordinates_format">Longitudine: %1$s Latitudine: %2$s</string>
     <string name="admin_panel_confirm">Conferma</string>
     <string name="admin_panel_reset_defaults">Predefinito</string>
     <string name="admin_panel_latitude_error">Range: -90 a 90</string>
@@ -121,6 +123,39 @@
     <string name="admin_panel_mqtt_reports_direction_out">OUT</string>
     <string name="admin_panel_mqtt_reports_clear">Svuota</string>
     <string name="admin_panel_close">Chiudi</string>
+    <string name="admin_panel_close_app">Chiudi app</string>
+    <string name="admin_panel_close_app_subtitle">L\'app verrà chiusa</string>
+    <string name="admin_panel_close_app_confirm_text">Vuoi davvero chiudere l\'app?</string>
+    <string name="admin_panel_confirm_close_app">Chiudi app</string>
+    <string name="admin_panel_admin_password">Password amministratore</string>
+    <string name="admin_panel_admin_password_change">Cambia password amministratore</string>
+    <string name="admin_panel_new_admin_password">Nuova password amministratore:</string>
+    <string name="admin_panel_patrol_settings">Ronde automatiche</string>
+    <string name="admin_panel_patrol_route">Configurazione del percorso di ronda</string>
+    <string name="admin_panel_active_prefix">Attivo: %1$s</string>
+    <string name="admin_panel_patrol_disabled">Disattivato</string>
+    <string name="admin_panel_no_route_selected_title">Nessun percorso selezionato</string>
+    <string name="admin_panel_no_route_selected_text">Seleziona un percorso per poter avviare la ronda.</string>
+
+    <!-- Patrol Route/Settings Dialogs -->
+    <string name="save">Salva</string>
+    <string name="patrol_route_dialog_title">Imposta percorso di ronda</string>
+    <string name="patrol_route_dialog_subtitle">Scegli i luoghi che Temi deve visitare durante una ronda.</string>
+    <string name="patrol_settings_dialog_title">Configura le ronde</string>
+    <string name="patrol_settings_dialog_subtitle">Scegli come pianificare i giri automatici di controllo del benessere.</string>
+    <string name="patrol_settings_enable_label">Attiva le ronde automatiche</string>
+    <string name="patrol_settings_trigger_now_button">Avvia subito una ronda</string>
+    <string name="patrol_settings_mode_label">Modalità di pianificazione</string>
+    <string name="patrol_settings_mode_random">Intervallo casuale (es. ogni 40–60 min)</string>
+    <string name="patrol_settings_mode_fixed">Ore fisse (ogni ora selezionata)</string>
+    <string name="patrol_settings_interval_bounds_label">Limiti dell\'intervallo (minuti)</string>
+    <string name="patrol_settings_min_distance">Intervallo minimo: %1$d min.</string>
+    <string name="patrol_settings_max_distance">Intervallo massimo: %1$d min.</string>
+    <string name="patrol_settings_select_hours_label">Seleziona gli orari (ore intere)</string>
+    <string name="patrol_stream_content_description">Flusso video della ronda</string>
+    <string name="patrol_stream_back_button">Indietro</string>
+    <string name="patrol_countdown_message">La ronda inizia in %1$d secondi</string>
+    <string name="patrol_stream_stop_button">Interrompi la ronda</string>
     <string name="admin_panel_speaker_verification">Verifica del parlante</string>
     <string name="admin_panel_speaker_verification_subtitle">Solo le voci autorizzate possono svegliare il robot</string>
 
@@ -199,6 +234,8 @@
     <string name="controller_connect">Connetti</string>
     <string name="controller_delete">Rimuovi</string>
     <string name="controller_isNotBonded">Non accoppiato</string>
+    <string name="controller_status_label">Stato: %1$s</string>
+    <string name="controller_bottom_text">Controller Bluetooth</string>
 
     <string name="hide_and_seek">Nascondino</string>
     <string name="hide_and_seek_sub">Trova Temi!</string>
@@ -238,14 +275,6 @@
     <string name="hiding_spot_filter_save">Salva</string>
     <string name="admin_panel_hiding_spots">Configurazione nascondigli</string>
     <string name="admin_panel_hiding_spots_subtitle">Gestisci i nascondigli consentiti</string>
-    <string name="admin_panel_restart_app">Riavvia app</string>
-    <string name="admin_panel_restart_app_subtitle">Riavviare in caso di problemi</string>
-    <string name="admin_panel_restart_confirm_title">Riavviare l\'app?</string>
-    <string name="admin_panel_restart_confirm_text">L\'applicazione verrà chiusa e riavviata immediatamente. I processi in background in esecuzione verranno interrotti.</string>
-    <string name="admin_panel_confirm_restart">Riavvia</string>
-    <string name="admin_panel_enter_password">Inserisci la password</string>
-    <string name="admin_panel_password_input">Area admin protetta, inserisci la password.</string>
-    <string name="password_wrong">Password errata</string>
 
     <!-- Photobox -->
     <string name="photobox">Fotobox</string>
@@ -307,4 +336,12 @@
     <string name="photobox_photo_count">%1$d foto scattate</string>
     <string name="photobox_photo_number">Foto #%1$d</string>
     <string name="photobox_duration_seconds">%1$d s</string>
+    <string name="admin_panel_restart_app">Riavvia app</string>
+    <string name="admin_panel_restart_app_subtitle">Riavviare in caso di problemi</string>
+    <string name="admin_panel_restart_confirm_title">Riavviare l\'app?</string>
+    <string name="admin_panel_restart_confirm_text">L\'applicazione verrà chiusa e riavviata immediatamente. I processi in background in esecuzione verranno interrotti.</string>
+    <string name="admin_panel_confirm_restart">Riavvia</string>
+    <string name="admin_panel_enter_password">Inserisci la password</string>
+    <string name="admin_panel_password_input">Area admin protetta, inserisci la password.</string>
+    <string name="password_wrong">Password errata</string>
 </resources>
