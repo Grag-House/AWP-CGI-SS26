@@ -135,7 +135,7 @@ private fun ControllerDeviceRow(
         ) {
             Text(device.name)
             Text(device.address)
-            Text("Status: ${device.bondStateLabel()}")
+            Text(stringResource(R.string.controller_status_label, device.bondStateLabel()))
         }
 
         Button(

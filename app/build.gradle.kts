@@ -82,6 +82,14 @@ android {
                 ?: throw GradleException("Missing property 'DEFAULT_ADMIN_PASSWORD' in .env")
             buildConfigField("String", "DEFAULT_ADMIN_PASSWORD", "\"$adminPassword\"")
 
+            val serverIp = props.getProperty("SERVER_IP")
+                ?: throw GradleException("Missing property 'SERVER_IP' in .env")
+            buildConfigField("String", "SERVER_IP", "\"$serverIp\"")
+
+            val serverPort = props.getProperty("SERVER_PORT")
+                ?: throw GradleException("Missing property 'SERVER_PORT' in .env")
+            buildConfigField("String", "SERVER_PORT", "\"$serverPort\"")
+
             val driveFolderLink = props.getProperty("DEFAULT_DRIVE_FOLDER_LINK")
                 ?: throw GradleException("Missing property 'DEFAULT_DRIVE_FOLDER_LINK' in .env")
             buildConfigField("String", "DEFAULT_DRIVE_FOLDER_LINK", "\"$driveFolderLink\"")
@@ -167,6 +175,11 @@ kotlin {
 }
 
 dependencies {
+    implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.lifecycle.process)
     implementation(libs.androidx.ui)
     implementation(libs.firebase.annotations)
     implementation(libs.koin.android)

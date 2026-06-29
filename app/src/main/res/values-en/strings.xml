@@ -89,6 +89,7 @@
     <string name="notifications_description">Notifications</string>
     <string name="cgi">CGI</string>
     <string name="toggle_sidebar_description">Toggle sidebar</string>
+    <string name="back_description">Back</string>
 
     <string name="admin_panel">Admin Panel</string>
     <string name="admin_panel_description">Advanced settings for weather, webserver, MQTT</string>
@@ -105,6 +106,7 @@
     <string name="admin_panel_header">Admin Panel</string>
     <string name="admin_panel_latitude">"Latitude: "</string>
     <string name="admin_panel_longitude">Longitude:</string>
+    <string name="admin_panel_coordinates_format">Longitude: %1$s Latitude: %2$s</string>
     <string name="admin_panel_confirm">Confirm</string>
     <string name="admin_panel_reset_defaults">Default</string>
     <string name="admin_panel_latitude_error">Range: -90 to 90</string>
@@ -122,6 +124,39 @@
     <string name="admin_panel_mqtt_reports_direction_out">OUT</string>
     <string name="admin_panel_mqtt_reports_clear">Clear</string>
     <string name="admin_panel_close">Close</string>
+    <string name="admin_panel_close_app">Close app</string>
+    <string name="admin_panel_close_app_subtitle">The app will shut down</string>
+    <string name="admin_panel_close_app_confirm_text">Do you really want to close the app?</string>
+    <string name="admin_panel_confirm_close_app">Close app</string>
+    <string name="admin_panel_admin_password">Admin password</string>
+    <string name="admin_panel_admin_password_change">Change admin password</string>
+    <string name="admin_panel_new_admin_password">New admin password:</string>
+    <string name="admin_panel_patrol_settings">Automatic patrols</string>
+    <string name="admin_panel_patrol_route">Patrol route configuration</string>
+    <string name="admin_panel_active_prefix">Active: %1$s</string>
+    <string name="admin_panel_patrol_disabled">Disabled</string>
+    <string name="admin_panel_no_route_selected_title">No route selected</string>
+    <string name="admin_panel_no_route_selected_text">Please select a route so the patrol can start.</string>
+
+    <!-- Patrol Route/Settings Dialogs -->
+    <string name="save">Save</string>
+    <string name="patrol_route_dialog_title">Set patrol route</string>
+    <string name="patrol_route_dialog_subtitle">Choose the places Temi should visit during a patrol.</string>
+    <string name="patrol_settings_dialog_title">Configure patrols</string>
+    <string name="patrol_settings_dialog_subtitle">Choose how the automatic well-being check rounds should be scheduled.</string>
+    <string name="patrol_settings_enable_label">Enable automatic patrols</string>
+    <string name="patrol_settings_trigger_now_button">Start a patrol now</string>
+    <string name="patrol_settings_mode_label">Scheduling mode</string>
+    <string name="patrol_settings_mode_random">Random interval (e.g. every 40–60 min)</string>
+    <string name="patrol_settings_mode_fixed">Fixed hours (every selected hour)</string>
+    <string name="patrol_settings_interval_bounds_label">Interval bounds (minutes)</string>
+    <string name="patrol_settings_min_distance">Minimum interval: %1$d min.</string>
+    <string name="patrol_settings_max_distance">Maximum interval: %1$d min.</string>
+    <string name="patrol_settings_select_hours_label">Select times (whole hours)</string>
+    <string name="patrol_stream_content_description">Patrol video stream</string>
+    <string name="patrol_stream_back_button">Back</string>
+    <string name="patrol_countdown_message">Patrol starts in %1$d seconds</string>
+    <string name="patrol_stream_stop_button">Stop patrol</string>
     <string name="admin_panel_speaker_verification">Speaker Verification</string>
     <string name="admin_panel_speaker_verification_subtitle">Only authorized voices can wake up the robot</string>
 
@@ -200,6 +235,8 @@
     <string name="controller_connect">Connect</string>
     <string name="controller_delete">Remove</string>
     <string name="controller_isNotBonded">Not paired</string>
+    <string name="controller_status_label">Status: %1$s</string>
+    <string name="controller_bottom_text">Bluetooth Controller</string>
 
     <string name="hide_and_seek">Hide and Seek</string>
     <string name="hide_and_seek_sub">Find Temi!</string>
@@ -237,8 +274,6 @@
     <string name="hiding_spot_filter_count">%1$d of %2$d places activated</string>
     <string name="hiding_spot_filter_cancel">Cancel</string>
     <string name="hiding_spot_filter_save">Save</string>
-    <string name="admin_panel_hiding_spots">Hiding Spot Configuration</string>
-    <string name="admin_panel_hiding_spots_subtitle">Manage allowed hiding spots</string>
     <string name="admin_panel_restart_app">Restart App</string>
     <string name="admin_panel_restart_app_subtitle">Restart once if experiencing issues</string>
     <string name="admin_panel_restart_confirm_title">Restart app?</string>
@@ -247,6 +282,8 @@
     <string name="admin_panel_password_input">Admin area protected, please enter password.</string>
     <string name="admin_panel_enter_password">Enter password</string>
     <string name="password_wrong">Incorrect password</string>
+    <string name="admin_panel_hiding_spots">Hiding Spot Configuration</string>
+    <string name="admin_panel_hiding_spots_subtitle">Manage allowed hiding spots</string>
 
     <!-- Photobox -->
     <string name="photobox">Photo Booth</string>

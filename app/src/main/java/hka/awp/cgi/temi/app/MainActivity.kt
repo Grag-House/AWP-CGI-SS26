@@ -40,6 +40,12 @@ import kotlin.math.abs
 class MainActivity : ComponentActivity() {
 
     private val controllerViewModel: ControllerViewModel by viewModel()
+    private val cameraPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { isGranted ->
+        Timber.d("Camera permission granted: $isGranted")
+    }
+
     private lateinit var soundPool: SoundPool
     private var hornSoundId: Int = -1
 
@@ -57,6 +63,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        requestCameraPermissionIfNeeded()
 
         hideTopBar(window)
         enableEdgeToEdge()
@@ -71,6 +78,17 @@ class MainActivity : ComponentActivity() {
             CgiTheme(darkTheme = isDarkMode) {
                 MainShell()
             }
+        }
+    }
+
+    private fun requestCameraPermissionIfNeeded() {
+        val isGranted = ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.CAMERA,
+        ) == PackageManager.PERMISSION_GRANTED
+
+        if (!isGranted) {
+            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
         }
     }
 

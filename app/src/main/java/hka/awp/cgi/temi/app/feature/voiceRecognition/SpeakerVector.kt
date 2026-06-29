@@ -1,4 +1,4 @@
-package hka.awp.cgi.temi.app.feature.settings.adminPanel
+package hka.awp.cgi.temi.app.feature.voiceRecognition
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable

@@ -1,12 +1,16 @@
 package hka.awp.cgi.temi.app.koin
 
 import com.robotemi.sdk.Robot
+import hka.awp.cgi.temi.app.BuildConfig
 import hka.awp.cgi.temi.app.data.repository.RobotRepository
 import hka.awp.cgi.temi.app.feature.controller.BluetoothControllerManager
 import hka.awp.cgi.temi.app.feature.controller.ControllerViewModel
 import hka.awp.cgi.temi.app.feature.hideandseek.HideAndSeekViewModel
 import hka.awp.cgi.temi.app.feature.hideandseek.HidingSpotRepository
 import hka.awp.cgi.temi.app.feature.navigation.NavigationViewModel
+import hka.awp.cgi.temi.app.feature.patrol.PatrolCameraStreamManager
+import hka.awp.cgi.temi.app.feature.patrol.PatrolManager
+import hka.awp.cgi.temi.app.feature.patrol.overlay.PatrolOverlayViewModel
 import hka.awp.cgi.temi.app.feature.photobox.PhotoboxViewModel
 import hka.awp.cgi.temi.app.feature.photobox.capture.PhotoboxCameraManager
 import hka.awp.cgi.temi.app.feature.photobox.upload.PhotoboxPendingUploadStore
@@ -109,7 +113,9 @@ val appModule = module {
             voiceProfileRepository = get(),
             voiceRecognitionViewModel = get(),
             robot = get(),
-            hidingSpotRepository = get()
+            hidingSpotRepository = get(),
+            patrolCameraStreamManager = get(),
+            patrolManager = get()
         )
     }
 
@@ -157,7 +163,31 @@ val appModule = module {
     viewModel {
         ControllerViewModel(
             movementController = get(),
-            bluetoothControllerManager = get(),
+            bluetoothControllerManager = get()
+        )
+    }
+
+    single {
+        val ip = BuildConfig.SERVER_IP
+        val port = BuildConfig.SERVER_PORT
+        PatrolCameraStreamManager(
+            context = androidContext(),
+            serverUrl = "ws://$ip:$port"
+        )
+    }
+
+    single {
+        PatrolManager(
+            robot = get(),
+            cameraStreamManager = get(),
+            mqttManager = get()
+        )
+    }
+
+    viewModel {
+        PatrolOverlayViewModel(
+            patrolManager = get(),
+            patrolCameraStreamManager = get()
         )
     }
 }
