@@ -28,6 +28,13 @@ import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.ConfigSubtext
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.ConfigValue
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.PasswordDots
 
+/**
+ * Renders a system utility configuration card for restarting the application layer.
+ *
+ * Clicking this row triggers an immediate, full software lifecycle restart routine.
+ *
+ * @param onRestartClick Executed when the user interacts with the card to reboot the app.
+ */
 @Composable
 fun RestartAppCard(onRestartClick: () -> Unit) {
     ConfigCard(onClick = onRestartClick) {
@@ -53,6 +60,13 @@ fun RestartAppCard(onRestartClick: () -> Unit) {
     }
 }
 
+/**
+ * Renders a system utility configuration card for terminating and closing the application.
+ *
+ * Clicking this row triggers a termination routine that exits the application layer entirely.
+ *
+ * @param onCloseClick Executed when the user interacts with the card to exit the application instance.
+ */
 @Composable
 fun CloseAppCard(onCloseClick: () -> Unit) {
     ConfigCard(onClick = onCloseClick) {
@@ -78,6 +92,14 @@ fun CloseAppCard(onCloseClick: () -> Unit) {
     }
 }
 
+/**
+ * Renders an administration management card for inspecting and modifying the remote web server URL.
+ *
+ * Displays the current web endpoint target string and offers an inline text action to update the address path.
+ *
+ * @param url The currently configured remote web server endpoint network path.
+ * @param onEdit Executed when the user interacts with the modification text button to update the link.
+ */
 @Composable
 fun WebserverUrlCard(url: String, onEdit: () -> Unit) {
     ConfigCard {
@@ -105,6 +127,14 @@ fun WebserverUrlCard(url: String, onEdit: () -> Unit) {
     }
 }
 
+/**
+ * Renders a restricted security card for changing the API authentication password used for web server interactions.
+ *
+ * Hides actual security details using masked dot layout elements and attaches a button action
+ * to initiate an overlay modification.
+ *
+ * @param onUpdateWebserverPassword Executed when the text link is clicked to modify web server access keys.
+ */
 @Composable
 fun WebserverPasswordCard(
     onUpdateWebserverPassword: () -> Unit
@@ -134,6 +164,13 @@ fun WebserverPasswordCard(
     }
 }
 
+/**
+ * Renders a restricted security card for changing the application's local administrator console master access key.
+ *
+ * Shields the current state using a masked password pattern and triggers an updates workflow onClick.
+ *
+ * @param onChangePassword Executed when the user requests a modification to the master panel security credentials.
+ */
 @Composable
 fun AdminPasswordCard(
     onChangePassword: () -> Unit

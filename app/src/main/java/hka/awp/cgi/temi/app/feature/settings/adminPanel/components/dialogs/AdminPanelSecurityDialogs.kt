@@ -33,6 +33,19 @@ private const val LAT_MAX = 90.0
 private const val LON_MIN = -180.0
 private const val LON_MAX = 180.0
 
+/**
+ * Displays an overlay input dialog for updating weather or localization coordinates.
+ *
+ * It validates inputs reactively against standard geographical limits ([-90.0, 90.0] for latitude
+ * and [-180.0, 180.0] for longitude), highlighting erroneous fields with supporting text
+ * and disabling confirmation actions until inputs resolve to valid coordinate sets.
+ *
+ * @param initialLatitude The current active latitude configuration to pre-fill.
+ * @param initialLongitude The current active longitude configuration to pre-fill.
+ * @param onConfirm Callback supplying the updated coordinates once verified successfully.
+ * @param onReset Callback triggered when requesting a rollback to default deployment coordinates.
+ * @param onDismiss Callback triggered when closing or canceling the dialog instance.
+ */
 @Composable
 fun EditCoordinatesDialog(
     initialLatitude: Double,
@@ -111,6 +124,13 @@ fun EditCoordinatesDialog(
     })
 }
 
+/**
+ * Displays an administration alert dialog for changing the target remote web server endpoint URL.
+ *
+ * @param initialUrl The active web network path string to pre-populate within the text field.
+ * @param onConfirm Callback fired upon validation acceptance, containing the updated target link text.
+ * @param onDismiss Callback triggered when closing or canceling the modification window.
+ */
 @Composable
 fun EditUrlDialog(
     initialUrl: String,
@@ -151,6 +171,15 @@ fun EditUrlDialog(
     })
 }
 
+/**
+ * Displays an explicit security prompt layout for altering the application's master administrator access credentials.
+ *
+ * Enforces masked inputs via [PasswordVisualTransformation] to shield secrets from shoulder-surfing,
+ * keeping confirmation actions blocked until a non-blank token string is supplied.
+ *
+ * @param onConfirm Callback fired when submitting the finalized password string.
+ * @param onDismiss Callback triggered when rejecting changes or closing the modal interface.
+ */
 @Suppress("LongMethod")
 @Composable
 fun ChangeAdminPasswordDialog(
@@ -197,6 +226,16 @@ fun ChangeAdminPasswordDialog(
     )
 }
 
+/**
+ * Displays a security prompt layout for modifying backend API integration
+ * keys used during remote web server synchronization.
+ *
+ * Enforces masked inputs via [PasswordVisualTransformation] to shield secrets from shoulder-surfing,
+ * keeping confirmation actions blocked until a non-blank token string is supplied.
+ *
+ * @param onConfirm Callback fired when submitting the finalized access token.
+ * @param onDismiss Callback triggered when rejecting changes or closing the modal interface.
+ */
 @Suppress("LongMethod")
 @Composable
 fun ChangeWebserverPasswordDialog(

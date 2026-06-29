@@ -39,8 +39,33 @@ import androidx.compose.ui.unit.sp
 import hka.awp.cgi.temi.app.R
 import java.util.Locale
 
-enum class AdminPanelPatrolSettingsDialog { RANDOM, FIXED }
+/**
+ * Supported execution strategy modes for automated robot patrol patterns.
+ */
+enum class AdminPanelPatrolSettingsDialog {
+    /** Patrol routines are dispatched dynamically within a variable time interval. */
+    RANDOM,
 
+    /** Patrol routines are dispatched precisely at fixed hourly intervals. */
+    FIXED
+}
+
+/**
+ * Displays a modal dialog for scheduling and configuring the robot's automated patrol profiles.
+ *
+ * This complex configuration dialog manages mutational UI state tracking for runtime variables such as
+ * master switch triggers, randomized time-window bounds via sliders, and targeted hour-of-day filter chips.
+ *
+ * @param initialIsEnabled Flag indicating whether automated patrolling is globally enabled on launch.
+ * @param initialMode The startup strategy profile (Randomized vs Fixed schedules) to initialize.
+ * @param initialMinMinutes The fallback minimum time offset boundary value for localized random iterations.
+ * @param initialMaxMinutes The fallback maximum time offset boundary value for localized random iterations.
+ * @param initialHours A distinct set of assigned operating hours predefined for fixed schedules.
+ * @param onTriggerPatrol Callback triggered when bypassing schedules to initiate an instantaneous patrol cycle.
+ * @param onDismiss Callback triggered when closing the overlay layout window interface.
+ * @param onSave Event hook fired when finalizing changes, pushing altered
+ * telemetry data back to persistence boundaries.
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Suppress("LongMethod")
 @Composable
@@ -223,6 +248,14 @@ fun AdminPanelPatrolSettingsDialog(
     )
 }
 
+/**
+ * Displays a warning alert dialog indicating that no valid navigation pathway route is currently selected.
+ *
+ * This popup is typically triggered as a safety validation checkpoint preventing automated operation starts
+ * when missing crucial orientation track definitions.
+ *
+ * @param onDismiss Callback triggered when the notification modal is acknowledged or dismissed.
+ */
 @Composable
 fun NoRouteSelectedDialog(
     onDismiss: () -> Unit

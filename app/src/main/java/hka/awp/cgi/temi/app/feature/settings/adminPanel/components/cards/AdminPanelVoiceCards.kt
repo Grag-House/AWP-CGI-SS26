@@ -26,6 +26,15 @@ import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.dialogs.Voice
 import hka.awp.cgi.temi.app.feature.voiceRecognition.SpeakerVector
 import java.util.Locale
 
+/**
+ * Renders a configuration card for monitoring and modifying the speaker verification confidence threshold.
+ *
+ * Displays the current sensitivity value as a formatted decimal and triggers a modification dialog
+ * or inline editor upon interaction.
+ *
+ * @param threshold The mathematical verification boundary score required to confirm a biometric voice match.
+ * @param onEdit Executed when the user requests a change to the verification threshold value.
+ */
 @Composable
 fun SpeakerVerificationThresholdCard(
     threshold: Double,
@@ -56,6 +65,15 @@ fun SpeakerVerificationThresholdCard(
     }
 }
 
+/**
+ * Renders an administration toggle card to enable or disable biometric speaker verification functionality.
+ *
+ * When deactivated, the application processes voice triggers globally without restricting actions
+ * to recognized administrator speech profiles.
+ *
+ * @param enabled Specifies whether voice-print matching barriers are currently enforced.
+ * @param onToggle Callback triggered when the master hardware/subsystem state switch is flipped.
+ */
 @Composable
 fun SpeakerVerificationCard(enabled: Boolean, onToggle: (Boolean) -> Unit) {
     ConfigCard {
@@ -77,6 +95,21 @@ fun SpeakerVerificationCard(enabled: Boolean, onToggle: (Boolean) -> Unit) {
     }
 }
 
+/**
+ * Renders a comprehensive profile management layout handling biometric voice token registrations.
+ *
+ * This component visually reflects dynamic enrollment states (e.g., actively learning a new voice signature),
+ * prints summary statistics of current entries, and renders a localized sub-list for single-entry profile deletions.
+ *
+ * @param voiceProfiles A mapped directory collection of registered
+ * user names paired with their underlying [SpeakerVector] biometric signatures.
+ * @param isEnrollmentActive Flag indicating whether the system recording
+ * pipeline is capturing audio for a registration process.
+ * @param onLearnClick Intercepts clicks to either spin up or explicitly
+ * halt an active enrollment audio sequence.
+ * @param onDeleteClick Triggered when removing an existing profile
+ * signature identifier from active database configurations.
+ */
 @Composable
 fun VoiceProfilesManagementCard(
     voiceProfiles: Map<String, SpeakerVector>,
