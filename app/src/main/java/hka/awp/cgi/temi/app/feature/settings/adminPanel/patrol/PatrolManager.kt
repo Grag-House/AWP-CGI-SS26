@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
+@Suppress("TooManyFunctions")
 class PatrolManager(
     private val robot: Robot?,
     private val cameraStreamManager: PatrolCameraStreamManager,
@@ -34,11 +35,14 @@ class PatrolManager(
         scope = scope,
         cameraStreamManager = cameraStreamManager,
         onEmergencyDetected = {
-            scanJob?.cancel()
-            robot?.stopMovement()
+            pausePatrolForEmergency()
+        },
+        onObservationFinished = {
+            resumePatrolAfterEmergency()
         }
     )
     private val _countdownSeconds = MutableStateFlow<Int?>(null)
+    private var ignoreAbortUntilMs = 0L
     val countdownSeconds: StateFlow<Int?> = _countdownSeconds.asStateFlow()
     private companion object {
         private const val PATROL_COUNTDOWN_SECONDS = 30
@@ -121,10 +125,21 @@ class PatrolManager(
 
         when (status.lowercase()) {
             "complete" -> {
+                if (analysisHandler.isObserving) {
+                    Timber.d("Complete während Lying-Beobachtung ignoriert.")
+                    return
+                }
+
                 Timber.d("Kontrollpunkt erreicht: $location")
                 stabilizeCameraAndScan()
             }
+
             "abort", "cancel", "cancelled" -> {
+                if (analysisHandler.isObserving || System.currentTimeMillis() < ignoreAbortUntilMs) {
+                    Timber.w("GoTo-Abbruch wegen Lying/Emergency ignoriert.")
+                    return
+                }
+
                 Timber.w("Kontrollfahrt abgebrochen bei $location.")
                 stopPatrol()
             }
@@ -154,6 +169,30 @@ class PatrolManager(
 
             goToNextLocation()
         }
+    }
+
+    @Suppress("MagicNumber")
+    private fun pausePatrolForEmergency() {
+        Timber.w("Kontrollfahrt pausiert wegen Lying-Erkennung.")
+
+        scanJob?.cancel()
+        scanJob = null
+
+        ignoreAbortUntilMs = System.currentTimeMillis() + 3_000L
+        robot?.stopMovement()
+        scope.launch {
+            repeat(STABILIZATION_REPEATS) {
+                robot?.tiltAngle(degrees = DEFAULT_CAMERA_ANGLE, speed = CAMERA_TILT_SPEED)
+                delay(STABILIZATION_DELAY_MS)
+            }
+        }
+    }
+
+    private fun resumePatrolAfterEmergency() {
+        Timber.i("Lying-Beobachtung beendet. Setze Kontrollfahrt fort.")
+
+        if (!_isRunning.value) return
+        moveToCurrentLocation()
     }
 
     private fun goToNextLocation() {
