@@ -66,10 +66,9 @@ fun MainShell(
     webserverViewModel: WebserverViewModel = koinViewModel(),
     weatherViewModel: WeatherViewModel = koinViewModel(),
     hideAndSeekViewModel: HideAndSeekViewModel = koinViewModel(),
-    photoboxViewModel: PhotoboxViewModel = koinViewModel()
-    hideAndSeekViewModel: HideAndSeekViewModel = koinViewModel(),
+    photoboxViewModel: PhotoboxViewModel = koinViewModel(),
     patrolOverlayViewModel: PatrolOverlayViewModel = koinViewModel()
-) {
+             ) {
     val wifiLevel by appViewModel.wifiLevel.collectAsStateWithLifecycle()
     val currentTime by appViewModel.currentTime.collectAsStateWithLifecycle()
     val batteryLevel by appViewModel.batteryLevel.collectAsStateWithLifecycle()
@@ -77,10 +76,17 @@ fun MainShell(
     val serverState by webserverViewModel.serverState.collectAsStateWithLifecycle()
     val currentTemperatureState by weatherViewModel.uiState.collectAsStateWithLifecycle()
     val webserverUrlState by webserverViewModel.urlState.collectAsStateWithLifecycle()
+
     val videoFrame by patrolOverlayViewModel.videoFrame.collectAsStateWithLifecycle()
     val isPatrolRunning by patrolOverlayViewModel.isRunning.collectAsStateWithLifecycle()
     val isOverlayVisible by patrolOverlayViewModel.isOverlayVisible.collectAsStateWithLifecycle()
     val countdownSeconds by patrolOverlayViewModel.countdownSeconds.collectAsStateWithLifecycle()
+
+    LaunchedEffect(isPatrolRunning) {
+        if (isPatrolRunning) {
+            patrolOverlayViewModel.showOverlay()
+        }
+    }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -91,51 +97,36 @@ fun MainShell(
                 currentTime = currentTime,
                 batteryLevel = batteryLevel,
                 isCharging = isCharging
-            )
+                        )
         }
-    ) { paddingValues ->
+            ) { paddingValues ->
         Box(
             modifier = Modifier.fillMaxSize()
-        ) {
+           ) {
             Row(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-            ) {
+               ) {
                 Sidebar(
                     isExpanded = appViewModel.isSidebarExpanded,
                     selectedRoute = appViewModel.selectedRoute,
-                    onRouteSelected = { screen -> appViewModel.onRouteSelect(screen) },
+                    onRouteSelected = { screen ->
+                        if (screen == Screen.Photobox) {
+                            photoboxViewModel.reset()
+                        }
+                        appViewModel.onRouteSelect(screen)
+                    },
                     onSidebarToggle = { appViewModel.onSideBarToggle() },
                     modifier = Modifier.width(260.dp)
-                )
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            Sidebar(
-                isExpanded = appViewModel.isSidebarExpanded,
-                selectedRoute = appViewModel.selectedRoute,
-                onRouteSelected = { screen ->
-                    // Clicking Photobox while already on it (e.g. mid-countdown/capture) doesn't
-                    // trigger a route change, so the screen wouldn't otherwise get disposed/reset
-                    // — reset explicitly so it always lands back on mode selection.
-                    if (screen == Screen.Photobox) {
-                        photoboxViewModel.reset()
-                    }
-                    appViewModel.onRouteSelect(screen)
-                },
-                onSidebarToggle = { appViewModel.onSideBarToggle() },
-                modifier = Modifier.width(260.dp)
-            )
+                       )
 
                 Row(
                     modifier = Modifier
                         .weight(1f)
                         .padding(top = 12.dp, bottom = 12.dp, end = 12.dp)
                         .clip(RoundedCornerShape(24.dp))
-                ) {
+                   ) {
                     RenderSelectedRoute(
                         selectedRoute = appViewModel.selectedRoute,
                         routeDeps = MainShellRouteDeps(
@@ -144,26 +135,18 @@ fun MainShell(
                             navigationViewModel = navigationViewModel,
                             weatherViewModel = weatherViewModel,
                             hideAndSeekViewModel = hideAndSeekViewModel,
+                            photoboxViewModel = photoboxViewModel,
                             serverState = serverState,
                             currentTemperatureState = currentTemperatureState,
-                            webserverUrlState = webserverUrlState,
-                            photoboxViewModel = photoboxViewModel
-                            ),
+                            webserverUrlState = webserverUrlState
+                                                      ),
                         modifier = Modifier.weight(1f)
-                    )
+                                       )
                 }
             }
 
-            if (countdownSeconds != null) {
-                PatrolCountdownOverlay(
-                    seconds = countdownSeconds!!
-                )
-            }
-
-            LaunchedEffect(isPatrolRunning) {
-                if (isPatrolRunning) {
-                    patrolOverlayViewModel.showOverlay()
-                }
+            countdownSeconds?.let { seconds ->
+                PatrolCountdownOverlay(seconds = seconds)
             }
 
             if (isPatrolRunning && isOverlayVisible) {
@@ -171,7 +154,7 @@ fun MainShell(
                     videoFrame = videoFrame,
                     onBackClick = patrolOverlayViewModel::hideOverlay,
                     onStopPatrol = patrolOverlayViewModel::stopPatrol
-                )
+                                   )
             }
         }
     }

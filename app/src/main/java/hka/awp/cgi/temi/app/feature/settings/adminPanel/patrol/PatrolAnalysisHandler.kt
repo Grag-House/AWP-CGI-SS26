@@ -26,9 +26,12 @@ class PatrolAnalysisHandler(
     fun start() {
         if (collectJob?.isActive == true) return
 
+        Timber.d("PatrolAnalysisHandler gestartet")
+
         collectJob = scope.launch {
             cameraStreamManager.textMessages.collectLatest { message ->
                 val state = message.trim().lowercase()
+                Timber.d("PatrolAnalysisHandler Nachricht erhalten: $state")
                 latestState = state
                 if (state == LYING_STATE) {
                     handleLyingDetected()
@@ -122,7 +125,7 @@ class PatrolAnalysisHandler(
     }
 
     private companion object {
-        private const val LYING_STATE = "Lying"
+        private const val LYING_STATE = "lying"
         private const val OBSERVATION_TIME_MS = 10_000L
         private const val REQUIRED_LYING_CONFIRMATIONS = 5
         private const val FINAL_ALARM_REPEAT_COUNT = 3

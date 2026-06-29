@@ -263,8 +263,6 @@
     <string name="hide_and_seek_to_dashboard">Al cruscotto</string>
     <string name="hide_and_seek_navigation_error_title">Qualcosa è andato storto</string>
     <string name="hide_and_seek_navigation_error_message">Non sono riuscito a raggiungere il mio nascondiglio. Riproviamo!</string>
-    <string name="hide_and_seek_navigation_error_title">Navigazione non riuscita</string>
-    <string name="hide_and_seek_navigation_error_message">Navigazione verso il nascondiglio non riuscita.</string>
     <string name="hiding_spot_filter_button">Modifica nascondigli</string>
     <string name="hiding_spot_filter_button_active">Filtro attivo</string>
     <string name="hiding_spot_filter_title">Seleziona nascondigli</string>
@@ -277,14 +275,6 @@
     <string name="hiding_spot_filter_save">Salva</string>
     <string name="admin_panel_hiding_spots">Configurazione nascondigli</string>
     <string name="admin_panel_hiding_spots_subtitle">Gestisci i nascondigli consentiti</string>
-    <string name="admin_panel_restart_app">Riavvia app</string>
-    <string name="admin_panel_restart_app_subtitle">Riavviare in caso di problemi</string>
-    <string name="admin_panel_restart_confirm_title">Riavviare l\'app?</string>
-    <string name="admin_panel_restart_confirm_text">L\'applicazione verrà chiusa e riavviata immediatamente. I processi in background in esecuzione verranno interrotti.</string>
-    <string name="admin_panel_confirm_restart">Riavvia</string>
-    <string name="admin_panel_enter_password">Inserisci la password</string>
-    <string name="admin_panel_password_input">Area admin protetta, inserisci la password.</string>
-    <string name="password_wrong">Password errata</string>
 
     <!-- Photobox -->
     <string name="photobox">Fotobox</string>

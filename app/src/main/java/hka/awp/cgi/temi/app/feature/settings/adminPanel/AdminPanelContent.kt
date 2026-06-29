@@ -24,6 +24,9 @@ import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.MqttReportsCa
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.PatrolRouteCard
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.PatrolSettingsCard
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.RestartAppCard
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.SpeakerVerificationCard
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.SpeakerVerificationThresholdCard
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.VoiceProfilesManagementCard
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.WebserverPasswordCard
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.WebserverUrlCard
 import hka.awp.cgi.temi.app.ui.components.SettingsHeader
@@ -36,28 +39,32 @@ fun AdminPanelContent(
     onEditUrl: () -> Unit,
     onOpenMqtt: () -> Unit,
     onUpdateWebserverPassword: () -> Unit,
-    onChangePassword: () -> Unit,
+    onChangeAdminPassword: () -> Unit,
     onEditCoordinates: () -> Unit,
     onRestartRequest: () -> Unit,
     onNavigateToPatrolSettings: () -> Unit,
     onNavigateToPatrolRoute: () -> Unit,
     onCloseRequest: () -> Unit,
-    onOpenHidingSpotFilter: () -> Unit
-) {
+    onOpenHidingSpotFilter: () -> Unit,
+    onToggleSpeakerVerification: (Boolean) -> Unit,
+    onEditSpeakerThreshold: () -> Unit,
+    onToggleEnrollment: () -> Unit,
+    onDeleteVoiceProfile: (String) -> Unit
+                     ) {
     Row(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-    ) {
+       ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(32.dp)
-        ) {
+              ) {
             SettingsHeader(
                 title = stringResource(R.string.admin_panel_header),
                 onBackClick = onBackClick
-            )
+                          )
 
             Spacer(modifier = Modifier.height(40.dp))
 
@@ -67,23 +74,42 @@ fun AdminPanelContent(
                     .verticalScroll(rememberScrollState())
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
+                  ) {
                 WebserverUrlCard(
                     url = uiState.webserverUrl,
                     onEdit = onEditUrl
-                )
+                                )
 
-                WebserverUrlCard(url = uiState.webserverUrl, onEdit = onEditUrl)
-                MqttReportsCard(onNavigate = onOpenMqtt)
-                WebserverPasswordCard(onUpdateWebserverPassword = onUpdateWebserverPassword)
-                CoordinateManagementCard(coordinates = uiState.coordinates, onEdit = onEditCoordinates)
-                HidingSpotFilterCard(onEdit = onOpenHidingSpotFilter)
-                RestartAppCard(onRestartClick = onRestartRequest)
+                MqttReportsCard(
+                    onNavigate = onOpenMqtt
+                               )
+
+                WebserverPasswordCard(
+                    onUpdateWebserverPassword = onUpdateWebserverPassword
+                                     )
+
+                AdminPasswordCard(
+                    onChangePassword = onChangeAdminPassword
+                                 )
+
+                CoordinateManagementCard(
+                    coordinates = uiState.coordinates,
+                    onEdit = onEditCoordinates
+                                        )
+
+                HidingSpotFilterCard(
+                    onEdit = onOpenHidingSpotFilter
+                                    )
+
+                RestartAppCard(
+                    onRestartClick = onRestartRequest
+                              )
+
                 PatrolSettingsCard(
                     currentModeText = if (!uiState.isPatrolEnabled) {
                         stringResource(R.string.admin_panel_patrol_disabled)
                     } else {
-                        uiState.patrolRoute.joinToString(" → ")
+                        "${uiState.patrolMode.name}: ${uiState.minMinutes}-${uiState.maxMinutes} min"
                     },
                     onNavigate = onNavigateToPatrolSettings
                                   )
@@ -96,6 +122,24 @@ fun AdminPanelContent(
                     },
                     onNavigate = onNavigateToPatrolRoute
                                )
+
+                SpeakerVerificationCard(
+                    enabled = uiState.isSpeakerVerificationEnabled,
+                    onToggle = onToggleSpeakerVerification
+                                       )
+
+                SpeakerVerificationThresholdCard(
+                    threshold = uiState.speakerVerificationThreshold,
+                    onEdit = onEditSpeakerThreshold
+                                                )
+
+                VoiceProfilesManagementCard(
+                    uiState.voiceProfiles,
+                    uiState.isEnrollmentActive,
+                    onToggleEnrollment,
+                    onDeleteVoiceProfile
+                                            )
+
                 CloseAppCard(
                     onCloseClick = onCloseRequest
                             )

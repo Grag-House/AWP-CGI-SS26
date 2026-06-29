@@ -176,6 +176,14 @@ val appModule = module {
         )
     }
 
+    single {
+        PatrolManager(
+            robot = get(),
+            cameraStreamManager = get(),
+            mqttManager = get()
+                     )
+    }
+
     viewModel {
         PatrolOverlayViewModel(
             patrolManager = get(),
