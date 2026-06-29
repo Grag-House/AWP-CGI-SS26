@@ -260,6 +260,7 @@
     <string name="hide_and_seek_lost_location_label">J\'ÉTAIS CACHÉ ICI</string>
     <string name="hide_and_seek_lost_location_unknown">révélé plus tard</string>
     <string name="hide_and_seek_play_again">Rejouer</string>
+    <string name="hide_and_seek_to_dashboard">Accéder au tableau de bord</string>
     <string name="hiding_spot_filter_button">Modifier cachettes</string>
     <string name="hiding_spot_filter_button_active">Filtre actif</string>
     <string name="hiding_spot_filter_title">Sélectionner cachettes</string>
@@ -268,6 +269,8 @@
     <string name="hiding_spot_filter_deselect_all">Tout désélectionner</string>
     <string name="hiding_spot_filter_no_locations">Aucun lieu.</string>
     <string name="hiding_spot_filter_count">%1$d de %2$d activés</string>
+    <string name="hide_and_seek_navigation_error_title">Échec de la navigation</string>
+    <string name="hide_and_seek_navigation_error_message">Échec de la navigation vers la cachette.</string>
 
     <string name="hiding_spot_filter_cancel">Annuler</string>
     <string name="hiding_spot_filter_save">Enregistrer</string>
