@@ -8,7 +8,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import hka.awp.cgi.temi.app.BuildConfig
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolSettingsDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.dialogs.AdminPanelPatrolSettingsDialog
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import timber.log.Timber
@@ -123,14 +123,14 @@ class AppConfigRepository(
         it[keyIsPatrolEnabled] ?: DEFAULT_PATROL_ENABLED
     }
 
-    val patrolMode: Flow<PatrolSettingsDialog> = dataStore.data.map { preferences ->
-        val name = preferences[keyPatrolMode] ?: PatrolSettingsDialog.RANDOM.name
+    val patrolMode: Flow<AdminPanelPatrolSettingsDialog> = dataStore.data.map { preferences ->
+        val name = preferences[keyPatrolMode] ?: AdminPanelPatrolSettingsDialog.RANDOM.name
 
         try {
-            PatrolSettingsDialog.valueOf(name)
+            AdminPanelPatrolSettingsDialog.valueOf(name)
         } catch (e: IllegalArgumentException) {
             Timber.e(e, "Ungültiger Patrol-Modus: $name. Setze auf RANDOM.")
-            PatrolSettingsDialog.RANDOM
+            AdminPanelPatrolSettingsDialog.RANDOM
         }
     }
 
@@ -159,7 +159,7 @@ class AppConfigRepository(
 
     suspend fun updatePatrolSettings(
         isEnabled: Boolean,
-        mode: PatrolSettingsDialog,
+        mode: AdminPanelPatrolSettingsDialog,
         minMin: Int,
         maxMin: Int,
         hours: Set<Int>

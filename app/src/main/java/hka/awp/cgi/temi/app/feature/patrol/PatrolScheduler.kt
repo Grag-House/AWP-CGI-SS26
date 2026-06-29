@@ -1,4 +1,4 @@
-package hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol
+package hka.awp.cgi.temi.app.feature.patrol
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job

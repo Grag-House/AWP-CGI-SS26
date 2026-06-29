@@ -1,4 +1,4 @@
-package hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol
+package hka.awp.cgi.temi.app.feature.settings.adminPanel.components.dialogs
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -39,20 +39,21 @@ import androidx.compose.ui.unit.sp
 import hka.awp.cgi.temi.app.R
 import java.util.Locale
 
-enum class PatrolSettingsDialog { RANDOM, FIXED }
+enum class AdminPanelPatrolSettingsDialog { RANDOM, FIXED }
 
 @OptIn(ExperimentalLayoutApi::class)
 @Suppress("LongMethod")
 @Composable
-fun PatrolSettingsDialog(
+fun AdminPanelPatrolSettingsDialog(
     initialIsEnabled: Boolean = false,
-    initialMode: PatrolSettingsDialog = PatrolSettingsDialog.RANDOM,
+    initialMode: AdminPanelPatrolSettingsDialog = AdminPanelPatrolSettingsDialog.RANDOM,
     initialMinMinutes: Int = 40,
     initialMaxMinutes: Int = 60,
     initialHours: Set<Int> = emptySet(),
     onTriggerPatrol: () -> Unit,
     onDismiss: () -> Unit,
-    onSave: (isEnabled: Boolean, mode: PatrolSettingsDialog, minMin: Int, maxMin: Int, hours: Set<Int>) -> Unit
+    onSave:
+    (isEnabled: Boolean, mode: AdminPanelPatrolSettingsDialog, minMin: Int, maxMin: Int, hours: Set<Int>) -> Unit
 ) {
     var isEnabled by remember { mutableStateOf(initialIsEnabled) }
     var selectedMode by remember { mutableStateOf(initialMode) }
@@ -121,12 +122,12 @@ fun PatrolSettingsDialog(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable { selectedMode = PatrolSettingsDialog.RANDOM },
+                                .clickable { selectedMode = AdminPanelPatrolSettingsDialog.RANDOM },
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             RadioButton(
-                                selected = selectedMode == PatrolSettingsDialog.RANDOM,
-                                onClick = { selectedMode = PatrolSettingsDialog.RANDOM }
+                                selected = selectedMode == AdminPanelPatrolSettingsDialog.RANDOM,
+                                onClick = { selectedMode = AdminPanelPatrolSettingsDialog.RANDOM }
                             )
                             Spacer(Modifier.width(8.dp))
                             Text(stringResource(R.string.patrol_settings_mode_random))
@@ -135,19 +136,19 @@ fun PatrolSettingsDialog(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable { selectedMode = PatrolSettingsDialog.FIXED },
+                                .clickable { selectedMode = AdminPanelPatrolSettingsDialog.FIXED },
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             RadioButton(
-                                selected = selectedMode == PatrolSettingsDialog.FIXED,
-                                onClick = { selectedMode = PatrolSettingsDialog.FIXED }
+                                selected = selectedMode == AdminPanelPatrolSettingsDialog.FIXED,
+                                onClick = { selectedMode = AdminPanelPatrolSettingsDialog.FIXED }
                             )
                             Spacer(Modifier.width(8.dp))
                             Text(stringResource(R.string.patrol_settings_mode_fixed))
                         }
                     }
 
-                    if (selectedMode == PatrolSettingsDialog.RANDOM) {
+                    if (selectedMode == AdminPanelPatrolSettingsDialog.RANDOM) {
                         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             Text(
                                 stringResource(R.string.patrol_settings_interval_bounds_label),

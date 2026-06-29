@@ -1,4 +1,4 @@
-package hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol
+package hka.awp.cgi.temi.app.feature.patrol.overlay
 
 import android.graphics.Bitmap
 import androidx.compose.foundation.Image

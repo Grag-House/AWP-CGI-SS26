@@ -1,4 +1,4 @@
-package hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol
+package hka.awp.cgi.temi.app.feature.patrol.overlay
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize

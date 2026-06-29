@@ -20,6 +20,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import hka.awp.cgi.temi.app.feature.hideandseek.HidingSpotFilterCallbacks
 import hka.awp.cgi.temi.app.feature.hideandseek.HidingSpotFilterContent
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.AdminPasswordPrompt
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.dialogs.AdminPanelPatrolSettingsDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.dialogs.AdminPanelRouteDialog
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.dialogs.ChangeAdminPasswordDialog
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.dialogs.ChangeWebserverPasswordDialog
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.dialogs.CloseAppConfirmationDialog
@@ -28,12 +30,10 @@ import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.dialogs.EditC
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.dialogs.EditSpeakerVerificationThresholdDialog
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.dialogs.EditUrlDialog
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.dialogs.MqttReportsDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.dialogs.NoRouteSelectedDialog
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.dialogs.ProfileNameInputDialog
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.dialogs.ResetVoiceProfilesDialog
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.dialogs.RestartAppConfirmationDialog
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.NoRouteSelectedDialog
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolRouteDialog
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolSettingsDialog
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -188,7 +188,7 @@ private fun AdminPanelDialogs(
         )
     }
     if (dialogState.showPatrolSettings) {
-        PatrolSettingsDialog(
+        AdminPanelPatrolSettingsDialog(
             initialIsEnabled = uiState.isPatrolEnabled,
             initialMode = uiState.patrolMode,
             initialMinMinutes = uiState.minMinutes,
@@ -217,7 +217,7 @@ private fun AdminPanelDialogs(
     }
 
     if (dialogState.showPatrolRoute) {
-        PatrolRouteDialog(
+        AdminPanelRouteDialog(
             savedLocations = uiState.savedLocations,
             initialRoute = uiState.patrolRoute,
             onDismiss = onDismiss,

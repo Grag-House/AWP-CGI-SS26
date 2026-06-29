@@ -1,4 +1,4 @@
-package hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol
+package hka.awp.cgi.temi.app.feature.patrol
 
 import com.robotemi.sdk.Robot
 import com.robotemi.sdk.TtsRequest

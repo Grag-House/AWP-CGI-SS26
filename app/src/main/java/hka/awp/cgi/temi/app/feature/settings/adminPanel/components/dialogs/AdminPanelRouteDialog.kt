@@ -1,4 +1,4 @@
-package hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol
+package hka.awp.cgi.temi.app.feature.settings.adminPanel.components.dialogs
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
 import hka.awp.cgi.temi.app.R
 
 @Composable
-fun PatrolRouteDialog(
+fun AdminPanelRouteDialog(
     savedLocations: List<String>,
     initialRoute: List<String>,
     onDismiss: () -> Unit,

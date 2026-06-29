@@ -1,7 +1,9 @@
-package hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol
+package hka.awp.cgi.temi.app.feature.patrol.overlay
 
 import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
+import hka.awp.cgi.temi.app.feature.patrol.PatrolCameraStreamManager
+import hka.awp.cgi.temi.app.feature.patrol.PatrolManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

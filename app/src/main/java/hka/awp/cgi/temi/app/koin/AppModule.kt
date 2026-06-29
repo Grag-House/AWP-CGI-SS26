@@ -8,6 +8,9 @@ import hka.awp.cgi.temi.app.feature.controller.ControllerViewModel
 import hka.awp.cgi.temi.app.feature.hideandseek.HideAndSeekViewModel
 import hka.awp.cgi.temi.app.feature.hideandseek.HidingSpotRepository
 import hka.awp.cgi.temi.app.feature.navigation.NavigationViewModel
+import hka.awp.cgi.temi.app.feature.patrol.PatrolCameraStreamManager
+import hka.awp.cgi.temi.app.feature.patrol.PatrolManager
+import hka.awp.cgi.temi.app.feature.patrol.overlay.PatrolOverlayViewModel
 import hka.awp.cgi.temi.app.feature.photobox.PhotoboxViewModel
 import hka.awp.cgi.temi.app.feature.photobox.capture.PhotoboxCameraManager
 import hka.awp.cgi.temi.app.feature.photobox.upload.PhotoboxPendingUploadStore
@@ -15,9 +18,6 @@ import hka.awp.cgi.temi.app.feature.photobox.upload.PhotoboxUploadQueue
 import hka.awp.cgi.temi.app.feature.photobox.upload.PhotoboxUploadRepository
 import hka.awp.cgi.temi.app.feature.settings.SettingsViewModel
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.AdminPanelViewModel
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolCameraStreamManager
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolManager
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolOverlayViewModel
 import hka.awp.cgi.temi.app.feature.settings.battery.BatteryViewModel
 import hka.awp.cgi.temi.app.feature.settings.display.DisplayViewModel
 import hka.awp.cgi.temi.app.feature.settings.language.LanguageViewModel
