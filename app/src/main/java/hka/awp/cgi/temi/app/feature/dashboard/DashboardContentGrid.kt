@@ -25,7 +25,7 @@ fun ContentGrid(serverState: ServerState, onClick: (Screen) -> Unit, currentTemp
         columns = GridCells.Fixed(GRIDCELL_COUNT),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
+    ) {
         item {
             DashboardCard(
                 title = stringResource(R.string.webserver),
@@ -35,7 +35,7 @@ fun ContentGrid(serverState: ServerState, onClick: (Screen) -> Unit, currentTemp
                     "${stringResource(R.string.status_online)} (${
                         serverState.ipAddress ?: stringResource(
                             R.string.unknown_host_address
-                                                               )
+                        )
                     })"
                 } else {
                     stringResource(R.string.status_offline)
@@ -43,7 +43,7 @@ fun ContentGrid(serverState: ServerState, onClick: (Screen) -> Unit, currentTemp
                 onClick = {
                     onClick(Screen.Webserver)
                 }
-                         )
+            )
         }
         @Suppress("MagicNumber")
         item {
@@ -55,12 +55,12 @@ fun ContentGrid(serverState: ServerState, onClick: (Screen) -> Unit, currentTemp
                         painter = painterResource(id = R.drawable.partly_cloudy_day),
                         tint = MaterialTheme.colorScheme.primary,
                         contentDescription = stringResource(R.string.weather_icon_description)
-                        )
+                    )
                 },
                 bottomText = stringResource(R.string.temp_unit, currentTemperatureState),
                 isTemp = true,
                 onClick = { onClick(Screen.Weather) }
-                         )
+            )
         }
         item {
             DashboardCard(
@@ -69,7 +69,7 @@ fun ContentGrid(serverState: ServerState, onClick: (Screen) -> Unit, currentTemp
                 Icons.Rounded.Navigation,
                 stringResource(R.string.fastestroute),
                 onClick = { onClick(Screen.Navigation) }
-                         )
+            )
         }
         item {
             DashboardCard(
@@ -77,7 +77,7 @@ fun ContentGrid(serverState: ServerState, onClick: (Screen) -> Unit, currentTemp
                 subtitle = stringResource(R.string.hide_and_seek_sub),
                 icon = Icons.Rounded.SportsEsports,
                 onClick = { onClick(Screen.HideAndSeek) }
-                         )
+            )
         }
         item {
             DashboardCard(
@@ -87,7 +87,7 @@ fun ContentGrid(serverState: ServerState, onClick: (Screen) -> Unit, currentTemp
                 onClick = {
                     onClick(Screen.Settings)
                 }
-                         )
+            )
         }
         item {
             DashboardCard(
@@ -98,13 +98,13 @@ fun ContentGrid(serverState: ServerState, onClick: (Screen) -> Unit, currentTemp
                         painter = painterResource(id = R.drawable.joystick_24dp_000000_fill0_wght400_grad0_opsz24),
                         tint = MaterialTheme.colorScheme.primary,
                         contentDescription = stringResource(R.string.controller_description)
-                        )
+                    )
                 },
                 bottomText = stringResource(R.string.controller_bottom_text),
                 onClick = {
                     onClick(Screen.Controller)
                 }
-                         )
+            )
         }
     }
 }
