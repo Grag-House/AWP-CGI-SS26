@@ -1,4 +1,4 @@
-package hka.awp.cgi.temi.app.feature.stream // Jetzt im Core-Paket!
+package hka.awp.cgi.temi.app.feature.stream
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -28,6 +28,17 @@ import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.Executors
 
+/**
+ * A core manager responsible for capturing real-time camera frames and streaming them via WebSockets.
+ *
+ * This class binds into the Jetpack CameraX lifecycle to capture frames from the default front camera,
+ * processes them into optimized JPEG payloads, and sends them to a targeted WebSocket server.
+ * It also handles bi-directional messaging, exposing incoming processed video frames as [Bitmap]s
+ * and incoming server string data as reactive [SharedFlow] messages.
+ *
+ * All operations regarding connection throttling, backpressure handling, and hardware unbinding
+ * are managed internally.
+ */
 class CameraStreamManager(
     private val context: Context,
     private val serverUrl: String,
@@ -40,17 +51,25 @@ class CameraStreamManager(
     private val mainExecutor = ContextCompat.getMainExecutor(context)
     private var lastFrameSentAt = 0L
     private val _processedBitmap = MutableStateFlow<Bitmap?>(null)
+
+    /**
+     * Emits the latest processed frame returned by the server as a display-ready [Bitmap].
+     * Emits `null` if the stream is stopped or uninitialized.
+     */
     val processedBitmap: StateFlow<Bitmap?> = _processedBitmap.asStateFlow()
+
     private val _textMessages = MutableSharedFlow<String>(
         extraBufferCapacity = 20
     )
+
+    /**
+     * Hot stream emitting textual messages or event responses received from the server.
+     */
     val textMessages: SharedFlow<String> = _textMessages.asSharedFlow()
 
-    // Verhindert mehrfache Verbindungsaufbaue während der Stream läuft
     @Volatile
     private var isWebSocketConnectingOrConnected = false
 
-    // HINWEIS: Wird jetzt intern aufgerufen, wenn der erste Frame bereit ist!
     private fun connect() {
         if (webSocket != null || isWebSocketConnectingOrConnected) return
 
@@ -62,11 +81,11 @@ class CameraStreamManager(
             request,
             object : WebSocketListener() {
                 override fun onOpen(webSocket: WebSocket, response: Response) {
-                    Timber.d("WebSocket verbunden: $serverUrl")
+                    Timber.d("WebSocket connected: $serverUrl")
                 }
 
                 override fun onMessage(webSocket: WebSocket, text: String) {
-                    Timber.d("Analyse: $text")
+                    Timber.d("Analysis: $text")
                     _textMessages.tryEmit(text)
                 }
 
@@ -79,19 +98,19 @@ class CameraStreamManager(
                             _processedBitmap.value = bitmap
                         }
                     } else {
-                        Timber.w("Empfangenes Binary konnte nicht als Bitmap decodiert werden.")
+                        Timber.w("Failed to decode received binary data into a Bitmap.")
                     }
                 }
 
                 override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-                    Timber.e(t, "WebSocket Fehler - Setze Verbindungsstatus zurück")
-                    // Bei Fehler zurücksetzen, damit beim nächsten Frame ein Reconnect versucht werden kann
+                    Timber.e(t, "WebSocket error - resetting connection status")
+
                     isWebSocketConnectingOrConnected = false
                     this@CameraStreamManager.webSocket = null
                 }
 
                 override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-                    Timber.d("WebSocket geschlossen: $code $reason")
+                    Timber.d("WebSocket closed: $code $reason")
                     isWebSocketConnectingOrConnected = false
                     this@CameraStreamManager.webSocket = null
                 }
@@ -99,10 +118,15 @@ class CameraStreamManager(
         )
     }
 
+    /**
+     * Initializes and binds CameraX to the application's process lifecycle and begins capturing frames.
+     * The underlying WebSocket connection will automatically trigger upon receiving the initial camera frames.
+     * If streaming is already active, this call is safely ignored.
+     */
     fun startStream() {
         if (isStreaming) return
         isStreaming = true
-        isWebSocketConnectingOrConnected = false // Status zurücksetzen
+        isWebSocketConnectingOrConnected = false
 
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
         cameraProviderFuture.addListener({
@@ -138,7 +162,7 @@ class CameraStreamManager(
             lastFrameSentAt = now
 
             if (!isWebSocketConnectingOrConnected) {
-                Timber.i("Erster Kamera-Frame empfangen! Starte WebSocket-Verbindung...")
+                Timber.i("First camera frame received! Initiating WebSocket connection...")
                 connect()
             }
 
@@ -148,20 +172,25 @@ class CameraStreamManager(
                 currentWebSocket.send(jpegBytes.toByteString())
             }
         } catch (e: IllegalStateException) {
-            Timber.e(e, "Fehler beim Verarbeiten des Frames: ${e.message}")
+            Timber.e(e, "Error processing frame: ${e.message}")
         } finally {
             imageProxy.close()
         }
     }
 
+    /**
+     * Sends an arbitrary string message or JSON payload over the active WebSocket channel.
+     *
+     * @param text The data payload to transmit.
+     */
     fun sendText(text: String) {
         webSocket?.send(text)
     }
 
-    fun sendBytes(bytes: ByteArray) {
-        webSocket?.send(bytes.toByteString())
-    }
-
+    /**
+     * Stops the active stream, unbinds all CameraX pipeline components, and gracefully closes
+     * the current WebSocket session.
+     */
     fun stopStream() {
         if (!isStreaming) return
         isStreaming = false
@@ -178,6 +207,10 @@ class CameraStreamManager(
         }, ContextCompat.getMainExecutor(context))
     }
 
+    /**
+     * Completely shuts down the streaming manager infrastructure, terminates background execution threads,
+     * and releases camera and socket holds.
+     */
     fun disconnect() {
         stopStream()
         cameraExecutor.shutdown()
@@ -191,7 +224,6 @@ class CameraStreamManager(
     }
 }
 
-// Die Extension-Funktionen bleiben hier als private Hilfsfunktionen für die Konvertierung
 private fun ImageProxy.toJpegBytes(quality: Int): ByteArray {
     val nv21 = yuv420ToNv21(this)
     val yuvImage = YuvImage(nv21, ImageFormat.NV21, width, height, null)
