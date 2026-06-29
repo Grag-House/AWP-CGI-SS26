@@ -20,7 +20,7 @@ class AppConfigRepositoryTest {
     @OptIn(ExperimentalPathApi::class)
     private fun createTestRepository(
         scope: kotlinx.coroutines.CoroutineScope
-                                    ): Pair<AppConfigRepository, java.nio.file.Path> {
+    ): Pair<AppConfigRepository, java.nio.file.Path> {
         val tmpDir = createTempDirectory(prefix = "app-config-test")
         val file = File(tmpDir.toString(), "preferences.preferences_pb")
         val dataStore = PreferenceDataStoreFactory.create(scope = scope, produceFile = { file })
@@ -46,7 +46,7 @@ class AppConfigRepositoryTest {
             val dataStore = PreferenceDataStoreFactory.create(
                 scope = this,
                 produceFile = { file }
-                                                             )
+            )
             val repository = AppConfigRepository(dataStore)
             val adminHash = repository.adminPanelPasswordHash.first()
             val webHash = repository.webserverPasswordHash.first()

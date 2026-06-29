@@ -2,7 +2,6 @@ package hka.awp.cgi.temi.app.feature.voiceRecognition
 
 import com.robotemi.sdk.Robot
 import com.robotemi.sdk.voice.WakeupOrigin
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.SpeakerVector
 import hka.awp.cgi.temi.app.utils.AppConfigRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

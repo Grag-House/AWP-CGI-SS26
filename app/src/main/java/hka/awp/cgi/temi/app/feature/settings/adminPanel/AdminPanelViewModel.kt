@@ -14,6 +14,7 @@ import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolManager
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolMode
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolSettings
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolSettingsDialog
+import hka.awp.cgi.temi.app.feature.voiceRecognition.SpeakerVector
 import hka.awp.cgi.temi.app.feature.voiceRecognition.TemiVoiceRecognitionViewModel
 import hka.awp.cgi.temi.app.feature.voiceRecognition.VoiceProfileRepository
 import hka.awp.cgi.temi.app.utils.AppConfigRepository
@@ -30,7 +31,11 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.math.round
 
-@Suppress("TooManyFunctions")
+/**
+ * ViewModel for the Admin Panel, managing security, configuration, voice profiles,
+ * and robot patrol settings.
+ */
+@Suppress("LongParameterList", "TooManyFunctions")
 class AdminPanelViewModel(
     private val appConfigRepository: AppConfigRepository,
     private val mqttManager: MqttManager,
@@ -40,7 +45,7 @@ class AdminPanelViewModel(
     hidingSpotRepository: HidingSpotRepository,
     private val patrolManager: PatrolManager,
     private val patrolCameraStreamManager: PatrolCameraStreamManager
-                         ) : ViewModel() {
+) : ViewModel() {
 
     val filterManager = HidingSpotFilterManager(robot, hidingSpotRepository)
 
@@ -60,7 +65,7 @@ class AdminPanelViewModel(
 
     private data class PatrolRouteSettingsState(
         val savedLocations: List<String> = emptyList()
-                                               )
+    )
 
     private data class AdminPanelFlows(
         val url: String,
@@ -68,7 +73,7 @@ class AdminPanelViewModel(
         val longitude: Double,
         val speakerEnabled: Boolean,
         val speakerThreshold: Double,
-                                      )
+    )
 
     fun loadPatrolLocations() {
         patrolRouteSettings.update {
@@ -77,7 +82,7 @@ class AdminPanelViewModel(
                     ?.locations
                     ?.filter { location -> location.startsWith(patrolLocationPrefix) }
                     ?: emptyList()
-                   )
+            )
         }
     }
 
@@ -86,24 +91,24 @@ class AdminPanelViewModel(
         appConfigRepository.latitude,
         appConfigRepository.longitude,
         appConfigRepository.isSpeakerVerificationEnabled,
-                                        ) { url, lat, lon, speakerEnabled ->
+    ) { url, lat, lon, speakerEnabled ->
         AdminPanelFlows(
             url = url,
             latitude = lat,
             longitude = lon,
             speakerEnabled = speakerEnabled,
             speakerThreshold = AppConfigRepository.DEFAULT_SPEAKER_VERIFICATION_THRESHOLD,
-                       )
+        )
     }
 
     private val configWithThresholdFlow = combine(
         baseConfigFlow,
         appConfigRepository.speakerVerificationThreshold,
-                                                 ) { config, threshold ->
+    ) { config, threshold ->
         config.copy(speakerThreshold = threshold)
     }
 
-    @Suppress("MagicNumber", "UNCHECKED_CAST")
+    @Suppress("UNCHECKED_CAST", "MagicNumber")
     val uiState: StateFlow<AdminPanelState> = combine(
         configWithThresholdFlow,
         mqttManager.trafficEvents,
@@ -118,7 +123,7 @@ class AdminPanelViewModel(
         appConfigRepository.patrolRoute,
         videoFrame,
         patrolManager.isRunning,
-                                                     ) { args ->
+    ) { args ->
         val config = args[0] as AdminPanelFlows
         val trafficEvents = args[1] as List<MqttTrafficEvent>
         val voiceProfiles = args[2] as Map<String, SpeakerVector>
@@ -154,12 +159,12 @@ class AdminPanelViewModel(
             patrolRoute = patrolRoute,
             videoFrame = currentFrame,
             isPatrolStreaming = isPatrolStreaming,
-                       )
+        )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(STATE_TIMEOUT),
         initialValue = AdminPanelState()
-             )
+    )
 
     fun onAction(action: AdminPanelAction) {
         when (action) {
@@ -177,7 +182,6 @@ class AdminPanelViewModel(
             AdminPanelAction.ClearMqttReports,
             AdminPanelAction.RequestRestart,
             is AdminPanelAction.RequestCloseApp -> handleConfigAction(action)
-
 
             is AdminPanelAction.ToggleSpeakerVerification,
             is AdminPanelAction.EditSpeakerVerificationThreshold,
@@ -244,7 +248,7 @@ class AdminPanelViewModel(
                 appConfigRepository.updateUrl(action.url)
             }
             AdminPanelAction.ResetCoordinates -> viewModelScope.launch {
-                appConfigRepository.updateCoordinates(49.0138, 8.3573)
+                appConfigRepository.updateCoordinates(DEFAULT_LATITUDE, DEFAULT_LONGITUDE)
             }
             AdminPanelAction.OpenMqttReports -> viewModelScope.launch {
                 _events.emit(AdminPanelEvent.OpenMqttReports)
@@ -289,7 +293,7 @@ class AdminPanelViewModel(
                 minMin = action.minMinutes,
                 maxMin = action.maxMinutes,
                 hours = action.hours,
-                                                                          )
+            )
             is AdminPanelAction.SavePatrolRoute -> onSavePatrolRoute(action.route)
             AdminPanelAction.TriggerImmediatePatrol -> onTriggerImmediatePatrol()
             AdminPanelAction.ExitPatrol -> onExitPatrol()
@@ -298,8 +302,8 @@ class AdminPanelViewModel(
     }
 
     private fun updateCoordinates(latitude: Double, longitude: Double) {
-        val roundedLat = round(latitude * 10000.0) / 10000.0
-        val roundedLon = round(longitude * 10000.0) / 10000.0
+        val roundedLat = round(latitude * COORDINATE_PRECISION) / COORDINATE_PRECISION
+        val roundedLon = round(longitude * COORDINATE_PRECISION) / COORDINATE_PRECISION
 
         viewModelScope.launch {
             appConfigRepository.updateCoordinates(roundedLat, roundedLon)
@@ -312,7 +316,7 @@ class AdminPanelViewModel(
         minMin: Int,
         maxMin: Int,
         hours: Set<Int>
-                            ) {
+    ) {
         viewModelScope.launch {
             appConfigRepository.updatePatrolSettings(isEnabled, mode, minMin, maxMin, hours)
 
@@ -327,14 +331,16 @@ class AdminPanelViewModel(
                     maxMinutes = maxMin,
                     hours = hours,
                     route = uiState.value.patrolRoute,
-                              )
-                                        )
+                )
+            )
         }
     }
 
-
-    fun onTriggerImmediatePatrol(): Boolean {
-        return patrolManager.startImmediatePatrol(uiState.value.patrolRoute)
+    fun onTriggerImmediatePatrol() {
+        val success = patrolManager.startImmediatePatrol(uiState.value.patrolRoute)
+        if (!success) {
+            viewModelScope.launch { _events.emit(AdminPanelEvent.NoRouteSelected) }
+        }
     }
 
     fun onSavePatrolRoute(route: List<String>) {
@@ -354,8 +360,8 @@ class AdminPanelViewModel(
                     maxMinutes = state.maxMinutes,
                     hours = state.selectedHours,
                     route = route,
-                              )
-                                        )
+                )
+            )
         }
     }
 
@@ -365,9 +371,15 @@ class AdminPanelViewModel(
 
     companion object {
         private const val STATE_TIMEOUT = 5000L
+        private const val DEFAULT_LATITUDE = 49.0138
+        private const val DEFAULT_LONGITUDE = 8.3573
+        private const val COORDINATE_PRECISION = 10000.0
     }
 }
 
+/**
+ * Interface representing actions that can be performed in the Admin Panel.
+ */
 sealed interface AdminPanelAction {
     data object ClearPasswordError : AdminPanelAction
     data object ResetAuthorization : AdminPanelAction
@@ -397,21 +409,28 @@ sealed interface AdminPanelAction {
         val minMinutes: Int,
         val maxMinutes: Int,
         val hours: Set<Int>,
-                                 ) : AdminPanelAction
+    ) : AdminPanelAction
 
     data class SavePatrolRoute(val route: List<String>) : AdminPanelAction
     data object TriggerImmediatePatrol : AdminPanelAction
     data object ExitPatrol : AdminPanelAction
 }
 
+/**
+ * Events emitted by the Admin Panel to the UI.
+ */
 sealed interface AdminPanelEvent {
     data object OpenMqttReports : AdminPanelEvent
     data object WebserverPasswordChanged : AdminPanelEvent
     data object PasswordChanged : AdminPanelEvent
     data object RestartAppTriggered : AdminPanelEvent
     data object CloseAppTriggered : AdminPanelEvent
+    data object NoRouteSelected : AdminPanelEvent
 }
 
+/**
+ * State representing the UI of the Admin Panel.
+ */
 data class AdminPanelState(
     val webserverUrl: String = BuildConfig.WEBVIEW_URL,
     val appVersion: String = BuildConfig.VERSION_NAME,
@@ -434,9 +453,6 @@ data class AdminPanelState(
     val maxMinutes: Int = 60,
     val selectedHours: Set<Int> = emptySet(),
 
-    @Suppress("MagicNumber")
     val longitude: Double = 8.3573,
-
-    @Suppress("MagicNumber")
     val latitude: Double = 49.0138,
-                          )
+)

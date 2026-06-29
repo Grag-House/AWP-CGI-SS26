@@ -68,7 +68,7 @@ fun MainShell(
     hideAndSeekViewModel: HideAndSeekViewModel = koinViewModel(),
     photoboxViewModel: PhotoboxViewModel = koinViewModel(),
     patrolOverlayViewModel: PatrolOverlayViewModel = koinViewModel()
-             ) {
+) {
     val wifiLevel by appViewModel.wifiLevel.collectAsStateWithLifecycle()
     val currentTime by appViewModel.currentTime.collectAsStateWithLifecycle()
     val batteryLevel by appViewModel.batteryLevel.collectAsStateWithLifecycle()
@@ -97,17 +97,17 @@ fun MainShell(
                 currentTime = currentTime,
                 batteryLevel = batteryLevel,
                 isCharging = isCharging
-                        )
+            )
         }
-            ) { paddingValues ->
+    ) { paddingValues ->
         Box(
             modifier = Modifier.fillMaxSize()
-           ) {
+        ) {
             Row(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-               ) {
+            ) {
                 Sidebar(
                     isExpanded = appViewModel.isSidebarExpanded,
                     selectedRoute = appViewModel.selectedRoute,
@@ -119,14 +119,14 @@ fun MainShell(
                     },
                     onSidebarToggle = { appViewModel.onSideBarToggle() },
                     modifier = Modifier.width(260.dp)
-                       )
+                )
 
                 Row(
                     modifier = Modifier
                         .weight(1f)
                         .padding(top = 12.dp, bottom = 12.dp, end = 12.dp)
                         .clip(RoundedCornerShape(24.dp))
-                   ) {
+                ) {
                     RenderSelectedRoute(
                         selectedRoute = appViewModel.selectedRoute,
                         routeDeps = MainShellRouteDeps(
@@ -139,9 +139,9 @@ fun MainShell(
                             serverState = serverState,
                             currentTemperatureState = currentTemperatureState,
                             webserverUrlState = webserverUrlState
-                                                      ),
+                        ),
                         modifier = Modifier.weight(1f)
-                                       )
+                    )
                 }
             }
 
@@ -154,7 +154,7 @@ fun MainShell(
                     videoFrame = videoFrame,
                     onBackClick = patrolOverlayViewModel::hideOverlay,
                     onStopPatrol = patrolOverlayViewModel::stopPatrol
-                                   )
+                )
             }
         }
     }

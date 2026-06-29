@@ -20,22 +20,24 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import hka.awp.cgi.temi.app.feature.hideandseek.HidingSpotFilterCallbacks
 import hka.awp.cgi.temi.app.feature.hideandseek.HidingSpotFilterContent
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.AdminPasswordPrompt
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.ChangeAdminPasswordDialog
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.ChangeWebserverPasswordDialog
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.CloseAppConfirmationDialog
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.DeleteProfileConfirmDialog
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.EditCoordinatesDialog
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.EditSpeakerVerificationThresholdDialog
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.EditUrlDialog
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.MqttReportsDialog
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.ProfileNameInputDialog
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.ResetVoiceProfilesDialog
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.RestartAppConfirmationDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.dialogs.ChangeAdminPasswordDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.dialogs.ChangeWebserverPasswordDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.dialogs.CloseAppConfirmationDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.dialogs.DeleteProfileConfirmDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.dialogs.EditCoordinatesDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.dialogs.EditSpeakerVerificationThresholdDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.dialogs.EditUrlDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.dialogs.MqttReportsDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.dialogs.ProfileNameInputDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.dialogs.ResetVoiceProfilesDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.dialogs.RestartAppConfirmationDialog
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.NoRouteSelectedDialog
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolRouteDialog
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.patrol.PatrolSettingsDialog
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.viewmodel.koinViewModel
 
+@Suppress("LongMethod")
 private data class DialogState(
     val showUrl: Boolean = false,
     val showCoordinate: Boolean = false,
@@ -51,15 +53,18 @@ private data class DialogState(
     val selectedProfileToDelete: String = "",
     val showPatrolSettings: Boolean = false,
     val showPatrolRoute: Boolean = false,
-                              )
+    val showNoRouteDialog: Boolean = false,
+)
 
 @Composable
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 private fun AdminPanelDialogs(
     uiState: AdminPanelState,
     onAction: (AdminPanelAction) -> Unit,
     dialogState: DialogState,
+    onPatrolError: () -> Unit,
     onDismiss: () -> Unit
-                             ) {
+) {
     if (dialogState.showUrl) {
         EditUrlDialog(
             uiState.webserverUrl,
@@ -68,7 +73,7 @@ private fun AdminPanelDialogs(
                 onDismiss()
             },
             onDismiss
-                     )
+        )
     }
 
     if (dialogState.showCoordinate) {
@@ -84,7 +89,7 @@ private fun AdminPanelDialogs(
                 onDismiss()
             },
             onDismiss
-                             )
+        )
     }
 
     if (dialogState.showThreshold) {
@@ -95,7 +100,7 @@ private fun AdminPanelDialogs(
                 onDismiss()
             },
             onDismiss
-                                              )
+        )
     }
 
     if (dialogState.showAdminPassword) {
@@ -105,7 +110,7 @@ private fun AdminPanelDialogs(
                 onDismiss()
             },
             onDismiss
-                                 )
+        )
     }
 
     if (dialogState.showWebserverPassword) {
@@ -115,7 +120,7 @@ private fun AdminPanelDialogs(
                 onDismiss()
             },
             onDismiss
-                                     )
+        )
     }
 
     if (dialogState.showMqttReports) {
@@ -124,7 +129,11 @@ private fun AdminPanelDialogs(
             uiState.mqttTrafficEvents,
             { onAction(AdminPanelAction.ClearMqttReports) },
             onDismiss
-                         )
+        )
+    }
+
+    if (dialogState.showNoRouteDialog) {
+        NoRouteSelectedDialog(onDismiss)
     }
 
     if (dialogState.showResetVoiceProfiles) {
@@ -134,7 +143,7 @@ private fun AdminPanelDialogs(
                 onDismiss()
             },
             onDismiss
-                                )
+        )
     }
 
     if (dialogState.showProfileName) {
@@ -144,7 +153,7 @@ private fun AdminPanelDialogs(
                 onDismiss()
             },
             onDismiss
-                              )
+        )
     }
 
     if (dialogState.showDeleteConfirm) {
@@ -156,7 +165,7 @@ private fun AdminPanelDialogs(
                 onDismiss()
             },
             onDismiss
-                                  )
+        )
     }
 
     if (dialogState.showRestart) {
@@ -166,7 +175,7 @@ private fun AdminPanelDialogs(
                 onDismiss()
             },
             onDismiss
-                                    )
+        )
     }
 
     if (dialogState.showClose) {
@@ -176,7 +185,7 @@ private fun AdminPanelDialogs(
                 onDismiss()
             },
             onDismiss
-                                  )
+        )
     }
     if (dialogState.showPatrolSettings) {
         PatrolSettingsDialog(
@@ -187,7 +196,9 @@ private fun AdminPanelDialogs(
             initialHours = uiState.selectedHours,
             onTriggerPatrol = {
                 onAction(AdminPanelAction.TriggerImmediatePatrol)
-                onDismiss()
+                if (uiState.patrolRoute.isEmpty()) {
+                    onPatrolError()
+                }
             },
             onDismiss = onDismiss,
             onSave = { enabled, mode, min, max, hours ->
@@ -198,31 +209,32 @@ private fun AdminPanelDialogs(
                         minMinutes = min,
                         maxMinutes = max,
                         hours = hours
-                                                       )
-                        )
+                    )
+                )
                 onDismiss()
             }
-                            )
+        )
     }
 
     if (dialogState.showPatrolRoute) {
         PatrolRouteDialog(
-                savedLocations = uiState.savedLocations,
-                initialRoute = uiState.patrolRoute,
-                onDismiss = onDismiss,
-                onSave = {
-                    onAction(AdminPanelAction.SavePatrolRoute(it))
-                    onDismiss()
-                }
+            savedLocations = uiState.savedLocations,
+            initialRoute = uiState.patrolRoute,
+            onDismiss = onDismiss,
+            onSave = {
+                onAction(AdminPanelAction.SavePatrolRoute(it))
+                onDismiss()
+            }
         )
     }
 }
 
 @Composable
+@Suppress("LongMethod")
 fun AdminPanelScreen(
     onBackClick: () -> Unit,
     viewModel: AdminPanelViewModel = koinViewModel()
-                    ) {
+) {
     val context = LocalContext.current
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -245,7 +257,7 @@ fun AdminPanelScreen(
                     dialogs = dialogs.copy(
                         showAdminPassword = false,
                         showWebserverPassword = false
-                                          )
+                    )
                 }
 
                 AdminPanelEvent.RestartAppTriggered -> {
@@ -257,6 +269,10 @@ fun AdminPanelScreen(
 
                 AdminPanelEvent.CloseAppTriggered -> {
                     (context as? Activity)?.finishAffinity()
+                }
+
+                AdminPanelEvent.NoRouteSelected -> {
+                    dialogs = dialogs.copy(showPatrolSettings = false, showNoRouteDialog = true)
                 }
             }
         }
@@ -278,7 +294,7 @@ fun AdminPanelScreen(
             onValueChange = {
                 viewModel.onAction(AdminPanelAction.ClearPasswordError)
             }
-                           )
+        )
         return
     }
 
@@ -286,8 +302,14 @@ fun AdminPanelScreen(
         uiState = uiState,
         onAction = viewModel::onAction,
         dialogState = dialogs,
-        onDismiss = { dialogs = DialogState() }
-                     )
+        onDismiss = { dialogs = DialogState() },
+        onPatrolError = {
+            dialogs = dialogs.copy(
+                showPatrolSettings = false,
+                showNoRouteDialog = true
+            )
+        }
+    )
 
     if (showHidingSpotFilter) {
         Dialog(onDismissRequest = viewModel.filterManager::dismiss) {
@@ -299,70 +321,69 @@ fun AdminPanelScreen(
                     onDeselectAll = viewModel.filterManager::deselectAll,
                     onSave = viewModel.filterManager::save,
                     onDismiss = viewModel.filterManager::dismiss
-                                                     )
-                                   )
-        }
-    }
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(32.dp)
-              ) {
-            AdminPanelContent(
-                uiState = uiState,
-                onBackClick = onBackClick,
-                onEditUrl = {
-                    dialogs = DialogState(showUrl = true)
-                },
-                onOpenMqtt = {
-                    viewModel.onAction(AdminPanelAction.OpenMqttReports)
-                },
-                onUpdateWebserverPassword = {
-                    dialogs = DialogState(showWebserverPassword = true)
-                },
-                onChangeAdminPassword = {
-                    dialogs = DialogState(showAdminPassword = true)
-                },
-                onEditCoordinates = {
-                    dialogs = DialogState(showCoordinate = true)
-                },
-                onRestartRequest = {
-                    dialogs = DialogState(showRestart = true)
-                },
-                onNavigateToPatrolSettings = {
-                    viewModel.loadPatrolLocations()
-                    dialogs = DialogState(showPatrolSettings = true)
-                },
-                onNavigateToPatrolRoute = {
-                    viewModel.loadPatrolLocations()
-                    dialogs = DialogState(showPatrolRoute = true)
-                },
-                onCloseRequest = {
-                    dialogs = DialogState(showClose = true)
-                },
-                onOpenHidingSpotFilter = {
-                    viewModel.filterManager.open()
-                },
-                onToggleSpeakerVerification = {
-                    viewModel.onAction(AdminPanelAction.ToggleSpeakerVerification(it))
-                },
-                onEditSpeakerThreshold = {
-                    dialogs = DialogState(showThreshold = true)
-                },
-                onToggleEnrollment = {
-                    if (uiState.isEnrollmentActive) {
-                        viewModel.onAction(AdminPanelAction.ToggleEnrollment(false))
-                    } else {
-                        dialogs = DialogState(showProfileName = true)
-                    }
-                },
-                onDeleteVoiceProfile = {
-                    dialogs = DialogState(
-                        showDeleteConfirm = true,
-                        selectedProfileToDelete = it
-                                         )
-                }
+                )
             )
         }
     }
-
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(32.dp)
+    ) {
+        AdminPanelContent(
+            uiState = uiState,
+            onBackClick = onBackClick,
+            onEditUrl = {
+                dialogs = DialogState(showUrl = true)
+            },
+            onOpenMqtt = {
+                viewModel.onAction(AdminPanelAction.OpenMqttReports)
+            },
+            onUpdateWebserverPassword = {
+                dialogs = DialogState(showWebserverPassword = true)
+            },
+            onChangeAdminPassword = {
+                dialogs = DialogState(showAdminPassword = true)
+            },
+            onEditCoordinates = {
+                dialogs = DialogState(showCoordinate = true)
+            },
+            onRestartRequest = {
+                dialogs = DialogState(showRestart = true)
+            },
+            onNavigateToPatrolSettings = {
+                viewModel.loadPatrolLocations()
+                dialogs = DialogState(showPatrolSettings = true)
+            },
+            onNavigateToPatrolRoute = {
+                viewModel.loadPatrolLocations()
+                dialogs = DialogState(showPatrolRoute = true)
+            },
+            onCloseRequest = {
+                dialogs = DialogState(showClose = true)
+            },
+            onOpenHidingSpotFilter = {
+                viewModel.filterManager.open()
+            },
+            onToggleSpeakerVerification = {
+                viewModel.onAction(AdminPanelAction.ToggleSpeakerVerification(it))
+            },
+            onEditSpeakerThreshold = {
+                dialogs = DialogState(showThreshold = true)
+            },
+            onToggleEnrollment = {
+                if (uiState.isEnrollmentActive) {
+                    viewModel.onAction(AdminPanelAction.ToggleEnrollment(false))
+                } else {
+                    dialogs = DialogState(showProfileName = true)
+                }
+            },
+            onDeleteVoiceProfile = {
+                dialogs = DialogState(
+                    showDeleteConfirm = true,
+                    selectedProfileToDelete = it
+                )
+            }
+        )
+    }
+}

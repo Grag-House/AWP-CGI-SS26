@@ -16,19 +16,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import hka.awp.cgi.temi.app.R
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.AdminPasswordCard
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.CloseAppCard
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.CoordinateManagementCard
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.HidingSpotFilterCard
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.MqttReportsCard
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.PatrolRouteCard
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.PatrolSettingsCard
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.RestartAppCard
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.SpeakerVerificationCard
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.SpeakerVerificationThresholdCard
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.VoiceProfilesManagementCard
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.WebserverPasswordCard
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.WebserverUrlCard
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.cards.AdminPasswordCard
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.cards.CloseAppCard
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.cards.CoordinateManagementCard
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.cards.HidingSpotFilterCard
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.cards.PatrolRouteCard
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.cards.PatrolSettingsCard
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.cards.RestartAppCard
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.cards.SpeakerVerificationCard
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.cards.SpeakerVerificationThresholdCard
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.cards.VoiceProfilesManagementCard
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.cards.WebserverPasswordCard
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.cards.WebserverUrlCard
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.dialogs.MqttReportsCard
 import hka.awp.cgi.temi.app.ui.components.SettingsHeader
 
 @Composable
@@ -50,21 +50,21 @@ fun AdminPanelContent(
     onEditSpeakerThreshold: () -> Unit,
     onToggleEnrollment: () -> Unit,
     onDeleteVoiceProfile: (String) -> Unit
-                     ) {
+) {
     Row(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-       ) {
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(32.dp)
-              ) {
+        ) {
             SettingsHeader(
                 title = stringResource(R.string.admin_panel_header),
                 onBackClick = onBackClick
-                          )
+            )
 
             Spacer(modifier = Modifier.height(40.dp))
 
@@ -74,36 +74,32 @@ fun AdminPanelContent(
                     .verticalScroll(rememberScrollState())
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
-                  ) {
+            ) {
+                MqttReportsCard(
+                    onNavigate = onOpenMqtt
+                )
+
                 WebserverUrlCard(
                     url = uiState.webserverUrl,
                     onEdit = onEditUrl
-                                )
-
-                MqttReportsCard(
-                    onNavigate = onOpenMqtt
-                               )
+                )
 
                 WebserverPasswordCard(
                     onUpdateWebserverPassword = onUpdateWebserverPassword
-                                     )
+                )
 
                 AdminPasswordCard(
                     onChangePassword = onChangeAdminPassword
-                                 )
+                )
 
                 CoordinateManagementCard(
                     coordinates = uiState.coordinates,
                     onEdit = onEditCoordinates
-                                        )
+                )
 
                 HidingSpotFilterCard(
                     onEdit = onOpenHidingSpotFilter
-                                    )
-
-                RestartAppCard(
-                    onRestartClick = onRestartRequest
-                              )
+                )
 
                 PatrolSettingsCard(
                     currentModeText = if (!uiState.isPatrolEnabled) {
@@ -112,7 +108,7 @@ fun AdminPanelContent(
                         "${uiState.patrolMode.name}: ${uiState.minMinutes}-${uiState.maxMinutes} min"
                     },
                     onNavigate = onNavigateToPatrolSettings
-                                  )
+                )
 
                 PatrolRouteCard(
                     currentRouteText = if (uiState.patrolRoute.isEmpty()) {
@@ -121,28 +117,32 @@ fun AdminPanelContent(
                         uiState.patrolRoute.joinToString(" → ")
                     },
                     onNavigate = onNavigateToPatrolRoute
-                               )
+                )
 
                 SpeakerVerificationCard(
                     enabled = uiState.isSpeakerVerificationEnabled,
                     onToggle = onToggleSpeakerVerification
-                                       )
+                )
 
                 SpeakerVerificationThresholdCard(
                     threshold = uiState.speakerVerificationThreshold,
                     onEdit = onEditSpeakerThreshold
-                                                )
+                )
 
                 VoiceProfilesManagementCard(
                     uiState.voiceProfiles,
                     uiState.isEnrollmentActive,
                     onToggleEnrollment,
                     onDeleteVoiceProfile
-                                            )
+                )
 
                 CloseAppCard(
                     onCloseClick = onCloseRequest
-                            )
+                )
+
+                RestartAppCard(
+                    onRestartClick = onRestartRequest
+                )
             }
         }
     }

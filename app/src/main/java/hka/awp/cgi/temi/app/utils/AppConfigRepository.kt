@@ -17,9 +17,10 @@ import java.security.MessageDigest
 private const val DEFAULT_DRIVE_FOLDER_LINK = BuildConfig.DEFAULT_DRIVE_FOLDER_LINK
 private const val DEFAULT_DRIVE_UPLOAD_URL = BuildConfig.DEFAULT_DRIVE_UPLOAD_URL
 
+@Suppress("TooManyFunctions")
 class AppConfigRepository(
     private val dataStore: DataStore<Preferences>
-                         ) {
+) {
     private val webviewUrlKey = stringPreferencesKey("webview_url")
     private val latitudeKey = doublePreferencesKey("latitude")
     private val longitudeKey = doublePreferencesKey("longitude")
@@ -162,7 +163,7 @@ class AppConfigRepository(
         minMin: Int,
         maxMin: Int,
         hours: Set<Int>
-                                    ) {
+    ) {
         dataStore.edit {
             it[keyIsPatrolEnabled] = isEnabled
             it[keyPatrolMode] = mode.name
@@ -189,7 +190,7 @@ class AppConfigRepository(
     suspend fun updateSpeakerVerification(
         enabled: Boolean? = null,
         threshold: Double? = null
-                                         ) {
+    ) {
         dataStore.edit {
             enabled?.let { value -> it[speakerVerificationEnabledKey] = value }
             threshold?.let { value ->

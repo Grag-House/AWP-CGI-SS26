@@ -2,7 +2,6 @@ package hka.awp.cgi.temi.app.feature.voiceRecognition
 
 import com.robotemi.sdk.Robot
 import com.robotemi.sdk.TtsRequest
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.SpeakerVector
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
