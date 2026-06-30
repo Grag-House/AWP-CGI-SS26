@@ -72,7 +72,7 @@ class AppConfigRepository(
         masterKey,
         EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-                                                          )
+    )
 
     private val _webserverUser = MutableStateFlow(encryptedPrefs.getString("user", "") ?: "")
     val webserverUser: Flow<String> = _webserverUser.asStateFlow()
@@ -143,7 +143,7 @@ class AppConfigRepository(
     }
     suspend fun updateWebserverVerification(
         enabled: Boolean? = null
-                                           ) {
+    ) {
         dataStore.edit {
             enabled?.let { value -> it[webserverVerificationEnabledKey] = value }
         }

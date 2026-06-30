@@ -93,7 +93,7 @@ class AdminPanelViewModel(
         appConfigRepository.longitude,
         appConfigRepository.isSpeakerVerificationEnabled,
         appConfigRepository.isWebserverVerificationEnabled
-                                        ) { url, lat, lon, speakerEnabled, basicAuthEnabled ->
+    ) { url, lat, lon, speakerEnabled, basicAuthEnabled ->
         AdminPanelFlows(
             url = url,
             latitude = lat,

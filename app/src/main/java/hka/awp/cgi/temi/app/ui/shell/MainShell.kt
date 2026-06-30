@@ -300,5 +300,5 @@ fun WebserverHostScreen(viewModel: WebserverViewModel) {
         isVerificationEnabled = isVerificationEnabled,
         webserverUser = webserverUser,
         webserverPassword = webserverPassword
-                 )
+    )
 }

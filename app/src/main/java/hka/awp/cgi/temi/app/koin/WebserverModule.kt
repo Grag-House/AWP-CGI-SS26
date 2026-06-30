@@ -17,7 +17,7 @@ val webserverModule = module {
         AppConfigRepository(
             context = androidContext(),
             dataStore = get()
-                           )
+        )
     }
 
     viewModel<WebserverViewModel> { WebserverViewModel(appConfigRepository = get()) }

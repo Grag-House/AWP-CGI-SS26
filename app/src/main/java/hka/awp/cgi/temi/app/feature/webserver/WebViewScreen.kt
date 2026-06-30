@@ -29,7 +29,7 @@ fun WebViewScreen(
     isVerificationEnabled: Boolean = false,
     webserverUser: String = "",
     webserverPassword: String = ""
-                 ) {
+) {
     val context = LocalContext.current
     val view =
         remember {
@@ -38,7 +38,7 @@ fun WebViewScreen(
                     ViewGroup.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.MATCH_PARENT
-                                          )
+                    )
 
                 webViewClient = TemiWebViewClient()
                 // this is needed for the webserver backend to work
@@ -60,11 +60,11 @@ fun WebViewScreen(
                 val encodedCredentials = Base64.encodeToString(
                     credentials.toByteArray(Charsets.UTF_8),
                     Base64.NO_WRAP
-                                                              )
+                )
                 view.loadUrl(
                     sanitizedUrl,
                     mapOf(BASIC_AUTH_HEADER to "Basic $encodedCredentials")
-                            )
+                )
             } else {
                 view.loadUrl(sanitizedUrl)
             }
@@ -75,7 +75,7 @@ fun WebViewScreen(
                 "text/html",
                 "UTF-8",
                 null
-                                    )
+            )
         }
     }
 

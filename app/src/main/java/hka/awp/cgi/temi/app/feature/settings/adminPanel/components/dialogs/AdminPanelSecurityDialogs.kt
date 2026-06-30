@@ -260,14 +260,14 @@ fun ChangeWebserverPasswordDialog(
         text = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
-                  ) {
+            ) {
                 OutlinedTextField(
                     value = newUser,
                     onValueChange = { newUser = it },
                     label = { Text(stringResource(R.string.admin_panel_new_user)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
-                                 )
+                )
 
                 OutlinedTextField(
                     value = newPassword,
@@ -275,11 +275,11 @@ fun ChangeWebserverPasswordDialog(
                     label = { Text(stringResource(R.string.admin_panel_new_password)) },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Password
-                                                     ),
+                    ),
                     visualTransformation = PasswordVisualTransformation(),
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
-                                 )
+                )
             }
         },
         confirmButton = {

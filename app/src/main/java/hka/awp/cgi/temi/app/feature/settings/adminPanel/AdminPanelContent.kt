@@ -118,7 +118,7 @@ fun AdminPanelContent(
                 WebserverVerificationCard(
                     enabled = uiState.isWebserverVerificationEnabled,
                     onToggle = onToggleWebserverAuthentication
-                                         )
+                )
 
                 WebserverPasswordCard(
                     onUpdateWebserverPassword = onUpdateWebserverPassword

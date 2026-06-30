@@ -171,11 +171,11 @@ fun WebserverVerificationCard(enabled: Boolean, onToggle: (Boolean) -> Unit) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
-           ) {
+        ) {
             ConfigIconBox(
                 icon = Icons.Outlined.Lock,
                 contentDescription = stringResource(R.string.admin_panel_webserver_verification)
-                         )
+            )
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
                 ConfigValue(stringResource(R.string.admin_panel_webserver_verification))
