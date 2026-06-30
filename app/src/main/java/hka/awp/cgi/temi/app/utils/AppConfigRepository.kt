@@ -116,10 +116,6 @@ class AppConfigRepository(
         return hashPassword(plainPassword) == currentHash
     }
 
-    fun isValidAdminPassword(plainPassword: String, currentHash: String): Boolean {
-        return isValidPassword(plainPassword, currentHash)
-    }
-
     fun hashPassword(password: String): String {
         val digest = MessageDigest.getInstance("SHA-256")
         return digest.digest(password.toByteArray()).joinToString(separator = "") { byte ->
