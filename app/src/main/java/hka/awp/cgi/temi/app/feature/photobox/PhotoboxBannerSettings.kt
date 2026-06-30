@@ -38,10 +38,7 @@ enum class PhotoboxBanner(
 
 private val DEFAULT_BANNER = PhotoboxBanner.CGI_LAB
 
-// The grid composite is roughly twice as wide as a single photo, so a full-width banner there
-// looks oversized — both the live preview and the actual bake scale it down to this fraction of
-// the grid's width instead.
-internal const val PHOTOBOX_GRID_BANNER_WIDTH_FRACTION = 0.6f
+internal const val PHOTOBOX_GRID_BANNER_WIDTH_FRACTION = 1.0f
 
 // Both banner PNGs share this width:height ratio (4400x327) — used to approximate, in the
 // preview screen's live Compose layer, how tall the already-baked banner renders so Temi's live
