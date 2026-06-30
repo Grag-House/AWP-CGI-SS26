@@ -144,6 +144,9 @@ fun AdminPanelScreen(
             onOpenMqtt = {
                 viewModel.onAction(AdminPanelAction.OpenMqttReports)
             },
+            onToggleWebserverAuthentication = {
+                viewModel.onAction(AdminPanelAction.ToggleWebserverVerification(it))
+            },
             onUpdateWebserverPassword = {
                 dialogs = DialogState(showWebserverPassword = true)
             },

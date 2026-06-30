@@ -73,6 +73,7 @@ class AdminPanelViewModel(
         val longitude: Double,
         val speakerEnabled: Boolean,
         val speakerThreshold: Double,
+        val basicAuthEnabled: Boolean,
     )
 
     fun loadPatrolLocations() {
@@ -91,13 +92,15 @@ class AdminPanelViewModel(
         appConfigRepository.latitude,
         appConfigRepository.longitude,
         appConfigRepository.isSpeakerVerificationEnabled,
-    ) { url, lat, lon, speakerEnabled ->
+        appConfigRepository.isWebserverVerificationEnabled
+                                        ) { url, lat, lon, speakerEnabled, basicAuthEnabled ->
         AdminPanelFlows(
             url = url,
             latitude = lat,
             longitude = lon,
             speakerEnabled = speakerEnabled,
             speakerThreshold = AppConfigRepository.DEFAULT_SPEAKER_VERIFICATION_THRESHOLD,
+            basicAuthEnabled = basicAuthEnabled,
         )
     }
 
@@ -173,7 +176,8 @@ class AdminPanelViewModel(
             AdminPanelAction.ClearPasswordError,
             AdminPanelAction.ResetAuthorization,
             is AdminPanelAction.ChangeAdminPassword,
-            is AdminPanelAction.ChangeWebserverPassword -> handleSecurityAction(action)
+            is AdminPanelAction.ChangeWebserverPassword,
+            is AdminPanelAction.ToggleWebserverVerification -> handleSecurityAction(action)
 
             is AdminPanelAction.EditCoordinates,
             is AdminPanelAction.EditWebserverUrl,
@@ -213,6 +217,9 @@ class AdminPanelViewModel(
                 appConfigRepository.updateWebserverPassword(action.password)
                 appConfigRepository.updateWebserverUser(action.user)
                 _events.emit(AdminPanelEvent.WebserverPasswordChanged)
+            }
+            is AdminPanelAction.ToggleWebserverVerification -> viewModelScope.launch {
+                appConfigRepository.updateWebserverVerification(enabled = action.enabled)
             }
             else -> Unit
         }
@@ -395,6 +402,7 @@ sealed interface AdminPanelAction {
     data class CheckWebserverPassword(val password: String) : AdminPanelAction
     data class CheckAdminPassword(val password: String) : AdminPanelAction
     data class ChangeAdminPassword(val password: String) : AdminPanelAction
+    data class ToggleWebserverVerification(val enabled: Boolean) : AdminPanelAction
     data class ChangeWebserverPassword(val password: String, val user: String) : AdminPanelAction
 
     data class ToggleSpeakerVerification(val enabled: Boolean) : AdminPanelAction

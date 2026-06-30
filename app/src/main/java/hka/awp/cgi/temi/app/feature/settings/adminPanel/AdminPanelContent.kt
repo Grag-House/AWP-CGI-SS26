@@ -28,6 +28,7 @@ import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.cards.Speaker
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.cards.VoiceProfilesManagementCard
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.cards.WebserverPasswordCard
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.cards.WebserverUrlCard
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.cards.WebserverVerificationCard
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.dialogs.MqttReportsCard
 import hka.awp.cgi.temi.app.ui.components.SettingsHeader
 
@@ -67,6 +68,7 @@ fun AdminPanelContent(
     onBackClick: () -> Unit,
     onEditUrl: () -> Unit,
     onOpenMqtt: () -> Unit,
+    onToggleWebserverAuthentication: (Boolean) -> Unit,
     onUpdateWebserverPassword: () -> Unit,
     onChangeAdminPassword: () -> Unit,
     onEditCoordinates: () -> Unit,
@@ -112,6 +114,11 @@ fun AdminPanelContent(
                     url = uiState.webserverUrl,
                     onEdit = onEditUrl
                 )
+
+                WebserverVerificationCard(
+                    enabled = uiState.isSpeakerVerificationEnabled,
+                    onToggle = onToggleWebserverAuthentication
+                                         )
 
                 WebserverPasswordCard(
                     onUpdateWebserverPassword = onUpdateWebserverPassword

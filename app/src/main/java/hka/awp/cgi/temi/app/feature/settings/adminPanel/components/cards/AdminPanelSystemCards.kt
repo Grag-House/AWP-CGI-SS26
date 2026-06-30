@@ -14,6 +14,7 @@ import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -160,6 +161,27 @@ fun WebserverPasswordCard(
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.clickable(onClick = onUpdateWebserverPassword)
             )
+        }
+    }
+}
+
+@Composable
+fun WebserverVerificationCard(enabled: Boolean, onToggle: (Boolean) -> Unit) {
+    ConfigCard {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+           ) {
+            ConfigIconBox(
+                icon = Icons.Outlined.Lock,
+                contentDescription = stringResource(R.string.admin_panel_webserver_verification)
+                         )
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                ConfigValue(stringResource(R.string.admin_panel_webserver_verification))
+                ConfigSubtext(stringResource(R.string.admin_panel_webserver_verification_subtitle))
+            }
+            Switch(checked = enabled, onCheckedChange = onToggle)
         }
     }
 }

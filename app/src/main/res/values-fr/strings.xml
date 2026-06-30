@@ -346,4 +346,6 @@
     <string name="photobox_photo_count">%1$d photos prises</string>
     <string name="photobox_photo_number">Photo #%1$d</string>
     <string name="photobox_duration_seconds">%1$d s</string>
+    <string name="admin_panel_webserver_verification">Authentification du serveur web</string>
+    <string name="admin_panel_webserver_verification_subtitle">Utilise l\'authentification Basic Auth pour s\'authentifier auprès du serveur web</string>
 </resources>

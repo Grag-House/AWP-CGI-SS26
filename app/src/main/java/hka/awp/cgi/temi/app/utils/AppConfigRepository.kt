@@ -26,6 +26,8 @@ class AppConfigRepository(
     private val longitudeKey = doublePreferencesKey("longitude")
 
     private val adminPanelPasswordHashKey = stringPreferencesKey("admin_panel_password_hash")
+
+    private val webserverVerificationEnabledKey = booleanPreferencesKey("webserver_verification_enabled")
     private val webserverPasswordHashKey = stringPreferencesKey("webserver_password_hash")
 
     private val webserverUserHashKey = stringPreferencesKey("webserver_user_hash")
@@ -104,6 +106,17 @@ class AppConfigRepository(
         dataStore.edit {
             it[webserverPasswordHashKey] = hashPassword(password)
         }
+    }
+    suspend fun updateWebserverVerification(
+        enabled: Boolean? = null
+                                           ) {
+        dataStore.edit {
+            enabled?.let { value -> it[webserverVerificationEnabledKey] = value }
+        }
+    }
+
+    val isWebserverVerificationEnabled: Flow<Boolean> = dataStore.data.map {
+        it[webserverVerificationEnabledKey] ?: false
     }
 
     suspend fun updateWebserverUser(user: String) {

@@ -345,4 +345,6 @@
     <string name="admin_panel_enter_password">Inserisci la password</string>
     <string name="admin_panel_password_input">Area admin protetta, inserisci la password.</string>
     <string name="password_wrong">Password errata</string>
+    <string name="admin_panel_webserver_verification">Autenticazione del server web</string>
+    <string name="admin_panel_webserver_verification_subtitle">Utilizza la Basic Auth per autenticarsi sul server web</string>
 </resources>
