@@ -181,6 +181,7 @@ dependencies {
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.lifecycle.process)
     implementation(libs.androidx.ui)
+    implementation(libs.core.ktx)
     implementation(libs.firebase.annotations)
     implementation(libs.koin.android)
     implementation(platform(libs.koin.bom))

@@ -1,6 +1,8 @@
 package hka.awp.cgi.temi.app.feature.webserver
 
+import android.content.Context
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.test.core.app.ApplicationProvider
 import hka.awp.cgi.temi.app.BuildConfig
 import hka.awp.cgi.temi.app.utils.AppConfigRepository
 import kotlinx.coroutines.flow.first
@@ -24,7 +26,8 @@ class AppConfigRepositoryTest {
         val tmpDir = createTempDirectory(prefix = "app-config-test")
         val file = File(tmpDir.toString(), "preferences.preferences_pb")
         val dataStore = PreferenceDataStoreFactory.create(scope = scope, produceFile = { file })
-        return AppConfigRepository(dataStore) to tmpDir
+        val context: Context = ApplicationProvider.getApplicationContext()
+        return AppConfigRepository(context, dataStore) to tmpDir
     }
 
     @Test
@@ -47,7 +50,8 @@ class AppConfigRepositoryTest {
                 scope = this,
                 produceFile = { file }
             )
-            val repository = AppConfigRepository(dataStore)
+            val context: Context = ApplicationProvider.getApplicationContext()
+            val repository = AppConfigRepository(context, dataStore)
             val adminHash = repository.adminPanelPasswordHash.first()
             val webHash = repository.webserverPasswordHash.first()
 
