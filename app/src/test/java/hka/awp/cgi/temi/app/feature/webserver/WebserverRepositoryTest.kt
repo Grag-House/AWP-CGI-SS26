@@ -55,9 +55,10 @@ class WebserverRepositoryTest {
         val key = stringPreferencesKey("webview_url")
         val value = "https://example.com"
 
+        val context: Context = ApplicationProvider.getApplicationContext()
         datastore = mockk<DataStore<Preferences>>(relaxed = true)
         every { datastore.data } returns flowOf(preferencesOf(key to value))
-        repository = AppConfigRepository(dataStore = datastore)
+        repository = AppConfigRepository(context, dataStore = datastore)
 
         assertEquals(value, repository.currentUrl.first())
     }
