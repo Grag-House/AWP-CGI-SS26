@@ -211,6 +211,7 @@ class AdminPanelViewModel(
             }
             is AdminPanelAction.ChangeWebserverPassword -> viewModelScope.launch {
                 appConfigRepository.updateWebserverPassword(action.password)
+                appConfigRepository.updateWebserverUser(action.user)
                 _events.emit(AdminPanelEvent.WebserverPasswordChanged)
             }
             else -> Unit
@@ -394,7 +395,7 @@ sealed interface AdminPanelAction {
     data class CheckWebserverPassword(val password: String) : AdminPanelAction
     data class CheckAdminPassword(val password: String) : AdminPanelAction
     data class ChangeAdminPassword(val password: String) : AdminPanelAction
-    data class ChangeWebserverPassword(val password: String) : AdminPanelAction
+    data class ChangeWebserverPassword(val password: String, val user: String) : AdminPanelAction
 
     data class ToggleSpeakerVerification(val enabled: Boolean) : AdminPanelAction
     data class EditSpeakerVerificationThreshold(val threshold: Double) : AdminPanelAction

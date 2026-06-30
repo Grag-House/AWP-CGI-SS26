@@ -28,6 +28,8 @@ class AppConfigRepository(
     private val adminPanelPasswordHashKey = stringPreferencesKey("admin_panel_password_hash")
     private val webserverPasswordHashKey = stringPreferencesKey("webserver_password_hash")
 
+    private val webserverUserHashKey = stringPreferencesKey("webserver_user_hash")
+
     private val keyIsPatrolEnabled = booleanPreferencesKey("is_patrol_enabled")
     private val keyPatrolMode = stringPreferencesKey("patrol_mode")
     private val keyMinMinutes = intPreferencesKey("min_minutes")
@@ -101,6 +103,12 @@ class AppConfigRepository(
     suspend fun updateWebserverPassword(password: String) {
         dataStore.edit {
             it[webserverPasswordHashKey] = hashPassword(password)
+        }
+    }
+
+    suspend fun updateWebserverUser(user: String) {
+        dataStore.edit {
+            it[webserverUserHashKey] = hashPassword(user)
         }
     }
 

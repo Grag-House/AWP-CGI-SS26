@@ -239,10 +239,12 @@ fun ChangeAdminPasswordDialog(
 @Suppress("LongMethod")
 @Composable
 fun ChangeWebserverPasswordDialog(
-    onConfirm: (newPassword: String) -> Unit,
+    onConfirm: (newPassword: String, newUser: String) -> Unit,
     onDismiss: () -> Unit
 ) {
     var newPassword by remember { mutableStateOf("") }
+
+    var newUser by remember { mutableStateOf("") }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -256,20 +258,34 @@ fun ChangeWebserverPasswordDialog(
             Text(text = stringResource(R.string.admin_panel_change_password_title))
         },
         text = {
-            OutlinedTextField(
-                value = newPassword,
-                onValueChange = { newPassword = it },
-                label = { Text(stringResource(R.string.admin_panel_new_password)) },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                visualTransformation = PasswordVisualTransformation(),
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
-            )
+            Column(
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+                  ) {
+                OutlinedTextField(
+                    value = newUser,
+                    onValueChange = { newUser = it },
+                    label = { Text(stringResource(R.string.admin_panel_new_user)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                                 )
+
+                OutlinedTextField(
+                    value = newPassword,
+                    onValueChange = { newPassword = it },
+                    label = { Text(stringResource(R.string.admin_panel_new_password)) },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password
+                                                     ),
+                    visualTransformation = PasswordVisualTransformation(),
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                                 )
+            }
         },
         confirmButton = {
             Button(
-                onClick = { onConfirm(newPassword) },
-                enabled = newPassword.isNotBlank()
+                onClick = { onConfirm(newPassword, newUser) },
+                enabled = newPassword.isNotBlank() && newUser.isNotBlank(),
             ) {
                 Text(stringResource(R.string.admin_panel_confirm))
             }

@@ -87,8 +87,8 @@ fun AdminPanelDialogs(
 
     if (dialogState.showWebserverPassword) {
         ChangeWebserverPasswordDialog(
-            {
-                onAction(AdminPanelAction.ChangeWebserverPassword(it))
+            { password, user ->
+                onAction(AdminPanelAction.ChangeWebserverPassword(password, user))
                 onDismiss()
             },
             onDismiss

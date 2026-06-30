@@ -96,8 +96,8 @@
     <string name="admin_panel_appversion">Version App</string>
     <string name="admin_panel_mqtt_reports">Rapports MQTT</string>
     <string name="admin_panel_mqtt_reports_subtitle">Rapports actuels</string>
-    <string name="admin_panel_webserver_password">Mot de passe</string>
-    <string name="admin_panel_webserver_password_change">Changer mot de passe</string>
+    <string name="admin_panel_webserver_password">Identifiants d\'accès au serveur web</string>
+    <string name="admin_panel_webserver_password_change">Modifier les identifiants de connexion</string>
     <string name="admin_panel_weather_coordinates">Coordonnées météo</string>
     <string name="admin_panel_webserver_coordiantes_change">Changer coordonnées</string>
     <string name="admin_panel_webserver_url_change">Changer URL</string>
@@ -113,6 +113,7 @@
     <string name="admin_panel_cancel">Annuler</string>
     <string name="admin_panel_change_password_title">Changer mot de passe</string>
     <string name="admin_panel_new_password">Nouveau mot de passe :</string>
+    <string name="admin_panel_new_user">Nouvel utilisateur du serveur web:</string>
     <string name="admin_panel_webserver_defaults_reset">Réinitialiser défauts</string>
     <string name="admin_panel_webserver_defaults_reset_done">Réinitialisé.</string>
     <string name="admin_panel_mqtt_reports_topics_title">Sujets observés</string>
