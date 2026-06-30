@@ -116,7 +116,7 @@ fun AdminPanelContent(
                 )
 
                 WebserverVerificationCard(
-                    enabled = uiState.isSpeakerVerificationEnabled,
+                    enabled = uiState.isWebserverVerificationEnabled,
                     onToggle = onToggleWebserverAuthentication
                                          )
 

@@ -143,6 +143,7 @@ class AdminPanelViewModel(
 
         AdminPanelState(
             webserverUrl = config.url,
+            isWebserverVerificationEnabled = config.basicAuthEnabled,
             latitude = config.latitude,
             longitude = config.longitude,
             coordinates = "Länge: ${config.longitude} Breite: ${config.latitude}",
@@ -442,6 +443,7 @@ sealed interface AdminPanelEvent {
  */
 data class AdminPanelState(
     val webserverUrl: String = BuildConfig.WEBVIEW_URL,
+    val isWebserverVerificationEnabled: Boolean = false,
     val appVersion: String = BuildConfig.VERSION_NAME,
     val mqttReportTopics: Set<String> = emptySet(),
     val mqttTrafficEvents: List<MqttTrafficEvent> = emptyList(),
