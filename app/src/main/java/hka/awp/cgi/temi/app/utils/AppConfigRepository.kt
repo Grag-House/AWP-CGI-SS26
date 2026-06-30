@@ -1,5 +1,6 @@
 package hka.awp.cgi.temi.app.utils
 
+import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -7,9 +8,13 @@ import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
 import hka.awp.cgi.temi.app.BuildConfig
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.dialogs.AdminPanelPatrolSettingsDialog
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import timber.log.Timber
 import java.security.MessageDigest
@@ -19,6 +24,7 @@ private const val DEFAULT_DRIVE_UPLOAD_URL = BuildConfig.DEFAULT_DRIVE_UPLOAD_UR
 
 @Suppress("TooManyFunctions")
 class AppConfigRepository(
+    private val context: Context,
     private val dataStore: DataStore<Preferences>
 ) {
     private val webviewUrlKey = stringPreferencesKey("webview_url")
@@ -55,6 +61,24 @@ class AppConfigRepository(
     val currentUrl: Flow<String> = dataStore.data.map {
         it[webviewUrlKey] ?: BuildConfig.WEBVIEW_URL
     }
+
+    val masterKey = MasterKey.Builder(context)
+        .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+        .build()
+
+    val encryptedPrefs = EncryptedSharedPreferences.create(
+        context,
+        "webserver_credentials",
+        masterKey,
+        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                                                          )
+
+    private val _webserverUser = MutableStateFlow(encryptedPrefs.getString("user", "") ?: "")
+    val webserverUser: Flow<String> = _webserverUser.asStateFlow()
+
+    private val _webserverPassword = MutableStateFlow(encryptedPrefs.getString("password", "") ?: "")
+    val webserverPassword: Flow<String> = _webserverPassword.asStateFlow()
 
     suspend fun updateUrl(newUrl: String) {
         dataStore.edit {
@@ -106,6 +130,16 @@ class AppConfigRepository(
         dataStore.edit {
             it[webserverPasswordHashKey] = hashPassword(password)
         }
+        encryptedPrefs.edit().putString("password", password).apply()
+        _webserverPassword.value = password
+    }
+
+    suspend fun updateWebserverUser(user: String) {
+        dataStore.edit {
+            it[webserverUserHashKey] = hashPassword(user)
+        }
+        encryptedPrefs.edit().putString("user", user).apply()
+        _webserverUser.value = user
     }
     suspend fun updateWebserverVerification(
         enabled: Boolean? = null
@@ -113,16 +147,12 @@ class AppConfigRepository(
         dataStore.edit {
             enabled?.let { value -> it[webserverVerificationEnabledKey] = value }
         }
+        println("password:" + webserverPassword)
+        println("user" + webserverUser)
     }
 
     val isWebserverVerificationEnabled: Flow<Boolean> = dataStore.data.map {
         it[webserverVerificationEnabledKey] ?: false
-    }
-
-    suspend fun updateWebserverUser(user: String) {
-        dataStore.edit {
-            it[webserverUserHashKey] = hashPassword(user)
-        }
     }
 
     fun isValidPassword(plainPassword: String, currentHash: String): Boolean {

@@ -10,6 +10,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -285,4 +286,19 @@ private fun DashboardRouteContent(
         // TODO add utility method or catch the exception
         Integer.parseInt(currentTemperatureState.hourlyForecast[0].temp)
     )
+}
+
+@Composable
+fun WebserverHostScreen(viewModel: WebserverViewModel) {
+    val url by viewModel.urlState.collectAsState()
+    val isVerificationEnabled by viewModel.isVerificationEnabled.collectAsState()
+    val webserverUser by viewModel.webserverUser.collectAsState()
+    val webserverPassword by viewModel.webserverPassword.collectAsState()
+
+    WebViewScreen(
+        url = url,
+        isVerificationEnabled = isVerificationEnabled,
+        webserverUser = webserverUser,
+        webserverPassword = webserverPassword
+                 )
 }

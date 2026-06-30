@@ -13,7 +13,12 @@ import org.koin.dsl.module
 val webserverModule = module {
     single<DataStore<Preferences>> { androidContext().dataStore }
 
-    single<AppConfigRepository> { AppConfigRepository(dataStore = get()) }
+    single<AppConfigRepository> {
+        AppConfigRepository(
+            context = androidContext(),
+            dataStore = get()
+                           )
+    }
 
     viewModel<WebserverViewModel> { WebserverViewModel(appConfigRepository = get()) }
 }

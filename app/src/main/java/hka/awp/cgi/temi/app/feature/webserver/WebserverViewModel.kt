@@ -24,7 +24,25 @@ class WebserverViewModel(appConfigRepository: AppConfigRepository) : ViewModel()
         viewModelScope,
         SharingStarted.WhileSubscribed(SUBSCRIPTION_TIMEOUT),
         BuildConfig.WEBVIEW_URL
-    )
+                                                                            )
+
+    val isVerificationEnabled: StateFlow<Boolean> = appConfigRepository.isWebserverVerificationEnabled.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(SUBSCRIPTION_TIMEOUT),
+        false
+                                                                                                              )
+
+    val webserverUser: StateFlow<String> = appConfigRepository.webserverUser.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(SUBSCRIPTION_TIMEOUT),
+        ""
+                                                                                    )
+
+    val webserverPassword: StateFlow<String> = appConfigRepository.webserverPassword.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(SUBSCRIPTION_TIMEOUT),
+        ""
+                                                                                            )
 
     companion object {
         // The interval at which the server status is checked (in milliseconds)
