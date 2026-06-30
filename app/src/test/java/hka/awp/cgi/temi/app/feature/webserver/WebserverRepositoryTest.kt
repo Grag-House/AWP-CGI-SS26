@@ -1,11 +1,13 @@
 package hka.awp.cgi.temi.app.feature.webserver
 
+import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.preferencesOf
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.test.core.app.ApplicationProvider
 import hka.awp.cgi.temi.app.BuildConfig
 import hka.awp.cgi.temi.app.utils.AppConfigRepository
 import io.mockk.every
@@ -29,9 +31,10 @@ class WebserverRepositoryTest {
 
     @BeforeEach
     fun setup() {
+        val context: Context = ApplicationProvider.getApplicationContext()
         datastore = mockk<DataStore<Preferences>>(relaxed = true)
         every { datastore.data } returns flowOf(emptyPreferences())
-        repository = AppConfigRepository(dataStore = datastore)
+        repository = AppConfigRepository(context, dataStore = datastore)
     }
 
     @AfterEach
@@ -72,8 +75,8 @@ class WebserverRepositoryTest {
             scope = this,
             produceFile = { file }
         )
-
-        val repository = AppConfigRepository(dataStore)
+        val context: Context = ApplicationProvider.getApplicationContext()
+        val repository = AppConfigRepository(context, dataStore)
 
         // initial: should read fallback from BuildConfig
         val expectedFallback = BuildConfig.WEBVIEW_URL
