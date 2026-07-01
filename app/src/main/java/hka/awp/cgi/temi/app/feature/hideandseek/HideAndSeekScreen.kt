@@ -50,7 +50,13 @@ import hka.awp.cgi.temi.app.R
 
 private const val SECONDS_PER_MINUTE = 60
 private const val URGENT_SECONDS_THRESHOLD = 30
+private const val TEMI_IMAGE_WEIGHT = 0.4f
+private const val CONTENT_WEIGHT = 0.6f
 
+/**
+ * Root composable for the Hide & Seek feature. Renders the appropriate content for the current
+ * [GameState] — setup, hiding countdown, waiting/search timer, won, or lost.
+ */
 @Composable
 fun HideAndSeekScreen(
     modifier: Modifier = Modifier,
@@ -271,7 +277,6 @@ private fun TimePickerCard(
     }
 }
 
-@Suppress("MagicNumber")
 @Composable
 private fun HidingContent(
     modifier: Modifier = Modifier,
@@ -282,20 +287,18 @@ private fun HidingContent(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-        // Left: Temi image
         Image(
             painter = painterResource(R.drawable.temi_hiding),
             contentDescription = null,
             contentScale = ContentScale.Fit,
             modifier = Modifier
-                .weight(0.4f)
+                .weight(TEMI_IMAGE_WEIGHT)
                 .fillMaxHeight()
         )
 
-        // Right: status + countdown + cancel
         Column(
             modifier = Modifier
-                .weight(0.6f)
+                .weight(CONTENT_WEIGHT)
                 .fillMaxHeight(),
             verticalArrangement = Arrangement.Center
         ) {
@@ -419,7 +422,7 @@ private fun WaitingContent(
             contentAlignment = Alignment.Center
         ) {
             Box(contentAlignment = Alignment.Center) {
-                // Robot behind the circle, shifted left so circle overlaps its right side
+                // Temi image sits behind the timer circle; offset pushes it left so the circle overlaps its right side
                 Image(
                     painter = painterResource(R.drawable.temi_waiting),
                     contentDescription = null,
@@ -428,29 +431,25 @@ private fun WaitingContent(
                         .size(200.dp)
                         .offset(x = (-170).dp)
                 )
-                // Circle centered and rendered on top
                 Box(contentAlignment = Alignment.Center) {
-                    // Filled background matching screen background
+                    // Filled circle matching the screen background punches a visual hole through the Temi image behind
                     Box(
                         modifier = Modifier
                             .size(280.dp)
                             .background(MaterialTheme.colorScheme.background, CircleShape)
                     )
-                    // Background ring
                     CircularProgressIndicator(
                         progress = { 1f },
                         modifier = Modifier.size(280.dp),
                         strokeWidth = 16.dp,
                         color = trackColor
                     )
-                    // Timer ring
                     CircularProgressIndicator(
                         progress = { progress },
                         modifier = Modifier.size(280.dp),
                         strokeWidth = 16.dp,
                         color = timerColor
                     )
-                    // Time text in center
                     Text(
                         text = formatTime(uiState.searchSecondsRemaining),
                         style = MaterialTheme.typography.displayLarge,
@@ -533,7 +532,6 @@ private fun WonContent(
     }
 }
 
-@Suppress("MagicNumber")
 @Composable
 private fun LostContent(
     modifier: Modifier = Modifier,
@@ -550,12 +548,12 @@ private fun LostContent(
             contentDescription = null,
             contentScale = ContentScale.Fit,
             modifier = Modifier
-                .weight(0.4f)
+                .weight(TEMI_IMAGE_WEIGHT)
                 .fillMaxHeight()
         )
         Column(
             modifier = Modifier
-                .weight(0.6f)
+                .weight(CONTENT_WEIGHT)
                 .fillMaxHeight(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center

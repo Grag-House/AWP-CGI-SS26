@@ -13,6 +13,11 @@ import timber.log.Timber
 
 private const val REQUEST_CODE_MAP = 1001
 
+/**
+ * Handles Temi's navigation to a hiding spot. Prefers [Robot.goToPosition] (no on-screen
+ * navigation overlay) using coordinates loaded from the map; falls back to [Robot.goTo] if
+ * the position isn't cached yet. Requests MAP permission on init if not already granted.
+ */
 class HideAndSeekNavigator(
     private val robot: Robot?,
     private val scope: CoroutineScope
