@@ -61,6 +61,11 @@ import hka.awp.cgi.temi.app.feature.photobox.upload.PHOTOBOX_OVERLAY_HEIGHT_FRAC
 
 private val OVERLAY_HIDDEN_PHASES = setOf(PhotoboxPhase.MODE_SELECT, PhotoboxPhase.PREVIEW)
 
+/**
+ * Root composable for the Photobox feature. Renders the live camera feed and layers the
+ * appropriate UI for the current [PhotoboxPhase] — mode selection, idle, countdown, capture
+ * flash, or the post-capture preview with upload controls.
+ */
 @Composable
 fun PhotoboxScreen(
     modifier: Modifier = Modifier,
@@ -251,6 +256,7 @@ internal fun BoxScope.TemiOverlayImage(position: TemiOverlayPosition, bottomInse
     )
 }
 
+/** Frosted-glass bottom sheet used across Photobox overlays for controls and status. */
 @Composable
 internal fun BottomBar(
     modifier: Modifier = Modifier,

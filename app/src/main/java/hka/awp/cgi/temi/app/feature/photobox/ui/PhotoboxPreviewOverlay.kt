@@ -85,6 +85,10 @@ internal data class PreviewOverlayCallbacks(
     val onToDashboard: () -> Unit
 )
 
+/**
+ * Post-capture preview: shows the final photo (with live filter and banner overlay), upload
+ * controls, and — after a successful upload — a QR code button.
+ */
 @Composable
 internal fun PreviewOverlay(
     photoState: PreviewPhotoState,
@@ -195,11 +199,6 @@ private fun PreviewPhoto(
     )
 }
 
-/** Draws [banner] unfiltered, flush against the bottom edge of whatever Box it's placed in — see
- * the two call sites in [PreviewOverlay], one per content-scale strategy, for how that Box is
- * made to match the photo's actual on-screen bounds. Deliberately drawn as its own layer, on top
- * of (not baked into) the filtered photo, so the color filter never tints the banner — mirrors
- * the real bake order in [hka.awp.cgi.temi.app.feature.photobox.upload.PhotoboxSessionFinalizer.upload]. */
 @Composable
 private fun BoxScope.BannerOverlayImage(banner: PhotoboxBanner, mode: PhotoboxMode) {
     val widthFraction = if (mode == PhotoboxMode.GRID_2X2) PHOTOBOX_GRID_BANNER_WIDTH_FRACTION else 1f
@@ -325,6 +324,7 @@ private val PhotoboxPhotoFilter.labelRes: Int
         PhotoboxPhotoFilter.VINTAGE -> R.string.photobox_filter_vintage
     }
 
+/** Dialog showing a QR code that links to the uploaded photo, with an optional expiry notice. */
 @Composable
 internal fun QrCodeDialog(photoUrl: String, expiresAtMillis: Long?, onDismiss: () -> Unit) {
     val qrBitmap = remember(photoUrl) { generateQrCodeBitmap(photoUrl) }

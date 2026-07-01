@@ -9,6 +9,11 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+/**
+ * Branding banner variant burned into the bottom of Photobox photos. Each variant carries
+ * separate assets for standalone, strip, and grid layouts because the branding area's aspect
+ * ratio differs across modes.
+ */
 enum class PhotoboxBanner(
     private val standardDrawableRes: Int,
     private val stripDrawableRes: Int,
