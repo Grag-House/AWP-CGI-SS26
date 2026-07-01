@@ -22,11 +22,93 @@ import java.security.MessageDigest
 private const val DEFAULT_DRIVE_FOLDER_LINK = BuildConfig.DEFAULT_DRIVE_FOLDER_LINK
 private const val DEFAULT_DRIVE_UPLOAD_URL = BuildConfig.DEFAULT_DRIVE_UPLOAD_URL
 
+/**
+ * Contract for storing and retrieving plaintext webserver credentials.
+ * Abstracted so [AppConfigRepository] can be unit-tested without Android instrumentation —
+ * tests inject [FakeWebserverCredentialStore]; production wires [EncryptedWebserverCredentialStore].
+ */
+interface WebserverCredentialStore {
+    fun getUser(): String
+    fun getPassword(): String
+    fun saveUser(user: String)
+    fun savePassword(password: String)
+}
+
+/**
+ * Production implementation backed by [EncryptedSharedPreferences].
+ * Keys and values are encrypted at rest using AES256.
+ */
+class EncryptedWebserverCredentialStore(context: Context) : WebserverCredentialStore {
+    private val prefs = EncryptedSharedPreferences.create(
+        context,
+        "webserver_credentials",
+        MasterKey.Builder(context)
+            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+            .build(),
+        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                                                         )
+
+    override fun getUser(): String = prefs.getString(KEY_USER, "") ?: ""
+    override fun getPassword(): String = prefs.getString(KEY_PASSWORD, "") ?: ""
+    override fun saveUser(user: String) {
+        prefs.edit().putString(KEY_USER, user).apply()
+    }
+
+    override fun savePassword(password: String) {
+        prefs.edit().putString(KEY_PASSWORD, password).apply()
+    }
+
+    companion object {
+        private const val KEY_USER = "user"
+        private const val KEY_PASSWORD = "password"
+    }
+}
+
+/**
+ * In-memory fake for unit tests — no Android runtime or encryption needed.
+ */
+class FakeWebserverCredentialStore : WebserverCredentialStore {
+    private var user: String = ""
+    private var password: String = ""
+
+    override fun getUser(): String = user
+    override fun getPassword(): String = password
+    override fun saveUser(user: String) {
+        this.user = user
+    }
+
+    override fun savePassword(password: String) {
+        this.password = password
+    }
+}
+
 @Suppress("TooManyFunctions")
-class AppConfigRepository(
-    private val context: Context,
-    private val dataStore: DataStore<Preferences>
-) {
+class AppConfigRepository private constructor(
+    private val dataStore: DataStore<Preferences>,
+    private val credentialStore: WebserverCredentialStore
+                                             ) {
+    companion object {
+        const val ROUTE_SEPARATOR = "|"
+        const val COMMA_SEPARATOR = ","
+
+        const val DEFAULT_LATITUDE = 49.0138
+        const val DEFAULT_LONGITUDE = 8.3573
+
+        const val DEFAULT_PATROL_ENABLED = false
+        const val DEFAULT_MIN_MINUTES = 40
+        const val DEFAULT_MAX_MINUTES = 60
+
+        const val DEFAULT_SPEAKER_VERIFICATION_THRESHOLD = 0.82
+
+        /** Production: wires [EncryptedWebserverCredentialStore] automatically. */
+        operator fun invoke(context: Context, dataStore: DataStore<Preferences>) =
+            AppConfigRepository(dataStore, EncryptedWebserverCredentialStore(context))
+
+        /** Testing: accepts any [WebserverCredentialStore] implementation, no Context needed. */
+        operator fun invoke(dataStore: DataStore<Preferences>, credentialStore: WebserverCredentialStore) =
+            AppConfigRepository(dataStore, credentialStore)
+    }
     private val webviewUrlKey = stringPreferencesKey("webview_url")
     private val latitudeKey = doublePreferencesKey("latitude")
     private val longitudeKey = doublePreferencesKey("longitude")
@@ -62,22 +144,10 @@ class AppConfigRepository(
         it[webviewUrlKey] ?: BuildConfig.WEBVIEW_URL
     }
 
-    private val masterKey = MasterKey.Builder(context)
-        .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-        .build()
-
-    private val encryptedPrefs = EncryptedSharedPreferences.create(
-        context,
-        "webserver_credentials",
-        masterKey,
-        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-    )
-
-    private val _webserverUser = MutableStateFlow(encryptedPrefs.getString("user", "") ?: "")
+    private val _webserverUser = MutableStateFlow(credentialStore.getUser())
     val webserverUser: Flow<String> = _webserverUser.asStateFlow()
 
-    private val _webserverPassword = MutableStateFlow(encryptedPrefs.getString("password", "") ?: "")
+    private val _webserverPassword = MutableStateFlow(credentialStore.getPassword())
     val webserverPassword: Flow<String> = _webserverPassword.asStateFlow()
 
     suspend fun updateUrl(newUrl: String) {
@@ -112,6 +182,10 @@ class AppConfigRepository(
         it[webserverPasswordHashKey] ?: hashPassword(BuildConfig.DEFAULT_ADMIN_PASSWORD)
     }
 
+    val webserverUserHash: Flow<String> = dataStore.data.map {
+        it[webserverUserHashKey] ?: ""
+    }
+
     val adminPasswordHash: Flow<String> = adminPanelPasswordHash
 
     suspend fun updateAdminPanelPassword(password: String) {
@@ -130,7 +204,7 @@ class AppConfigRepository(
         dataStore.edit {
             it[webserverPasswordHashKey] = hashPassword(password)
         }
-        encryptedPrefs.edit().putString("password", password).apply()
+        credentialStore.savePassword(password)
         _webserverPassword.value = password
     }
 
@@ -138,12 +212,12 @@ class AppConfigRepository(
         dataStore.edit {
             it[webserverUserHashKey] = hashPassword(user)
         }
-        encryptedPrefs.edit().putString("user", user).apply()
+        credentialStore.saveUser(user)
         _webserverUser.value = user
     }
     suspend fun updateWebserverVerification(
         enabled: Boolean? = null
-    ) {
+                                           ) {
         dataStore.edit {
             enabled?.let { value -> it[webserverVerificationEnabledKey] = value }
         }
@@ -208,7 +282,7 @@ class AppConfigRepository(
         minMin: Int,
         maxMin: Int,
         hours: Set<Int>
-    ) {
+                                    ) {
         dataStore.edit {
             it[keyIsPatrolEnabled] = isEnabled
             it[keyPatrolMode] = mode.name
@@ -235,7 +309,7 @@ class AppConfigRepository(
     suspend fun updateSpeakerVerification(
         enabled: Boolean? = null,
         threshold: Double? = null
-    ) {
+                                         ) {
         dataStore.edit {
             enabled?.let { value -> it[speakerVerificationEnabledKey] = value }
             threshold?.let { value ->
@@ -292,19 +366,5 @@ class AppConfigRepository(
     @Suppress("unused")
     suspend fun clear() {
         dataStore.edit { it.clear() }
-    }
-
-    companion object {
-        const val ROUTE_SEPARATOR = "|"
-        const val COMMA_SEPARATOR = ","
-
-        const val DEFAULT_LATITUDE = 49.0138
-        const val DEFAULT_LONGITUDE = 8.3573
-
-        const val DEFAULT_PATROL_ENABLED = false
-        const val DEFAULT_MIN_MINUTES = 40
-        const val DEFAULT_MAX_MINUTES = 60
-
-        const val DEFAULT_SPEAKER_VERIFICATION_THRESHOLD = 0.82
     }
 }

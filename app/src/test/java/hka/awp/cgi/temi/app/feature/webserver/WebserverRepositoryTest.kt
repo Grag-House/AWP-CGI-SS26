@@ -1,15 +1,12 @@
-package hka.awp.cgi.temi.app.feature.webserver
+package hka.awp.cgi.temi.app.utils
 
-import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.preferencesOf
 import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.test.core.app.ApplicationProvider
 import hka.awp.cgi.temi.app.BuildConfig
-import hka.awp.cgi.temi.app.utils.AppConfigRepository
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.unmockkAll
@@ -31,67 +28,51 @@ class WebserverRepositoryTest {
 
     @BeforeEach
     fun setup() {
-        val context: Context = ApplicationProvider.getApplicationContext()
         datastore = mockk<DataStore<Preferences>>(relaxed = true)
         every { datastore.data } returns flowOf(emptyPreferences())
-        repository = AppConfigRepository(context, dataStore = datastore)
+        repository = AppConfigRepository(dataStore = datastore, credentialStore = FakeWebserverCredentialStore())
     }
 
     @AfterEach
     fun tearDown() {
-        // clear all mocks after each test to avoid interference between tests
         unmockkAll()
     }
 
     @Test
     fun `when DataStore is empty, it returns the BuildConfig fallback URL`() = runTest {
-        val expected = BuildConfig.WEBVIEW_URL
-        val result = repository.currentUrl.first()
-        assertEquals(expected, result)
+        assertEquals(BuildConfig.WEBVIEW_URL, repository.currentUrl.first())
     }
 
     @Test
-    fun `when DataStore has a valid URL, it returns the host of that URL`() = runTest {
+    fun `when DataStore has a stored URL, it returns that URL`() = runTest {
         val key = stringPreferencesKey("webview_url")
         val value = "https://example.com"
-
-        val context: Context = ApplicationProvider.getApplicationContext()
-        datastore = mockk<DataStore<Preferences>>(relaxed = true)
         every { datastore.data } returns flowOf(preferencesOf(key to value))
-        repository = AppConfigRepository(context, dataStore = datastore)
+        repository = AppConfigRepository(dataStore = datastore, credentialStore = FakeWebserverCredentialStore())
 
         assertEquals(value, repository.currentUrl.first())
     }
 
-    // we use a real  DataStore here, since it is too annoying to mock the edit function
+    // Real DataStore used here — mocking DataStore.edit() is too fragile
     @OptIn(ExperimentalPathApi::class)
     @Test
-    fun `when the URL in DataStore is  updated, it returns the new host`() = runTest {
-        // temp file + dir
+    fun `when the URL in DataStore is updated, the flow emits the new value`() = runTest {
         val tmpDir = createTempDirectory(prefix = "datastore-test")
         val file = File(tmpDir.toString(), "preferences.preferences_pb")
+        val dataStore = PreferenceDataStoreFactory.create(scope = this, produceFile = { file })
+        val repository = AppConfigRepository(dataStore = dataStore, credentialStore = FakeWebserverCredentialStore())
 
-        // create a real Preferences DataStore that the test controls via the test scope
-        val dataStore = PreferenceDataStoreFactory.create(
-            scope = this,
-            produceFile = { file }
-        )
-        val context: Context = ApplicationProvider.getApplicationContext()
-        val repository = AppConfigRepository(context, dataStore)
+        assertEquals(BuildConfig.WEBVIEW_URL, repository.currentUrl.first())
 
-        // initial: should read fallback from BuildConfig
-        val expectedFallback = BuildConfig.WEBVIEW_URL
-        assertEquals(expectedFallback, repository.currentUrl.first())
+        repository.updateUrl("https://example.com/path")
 
-        val newValue = "https://example.com/path"
+        assertEquals("https://example.com/path", repository.currentUrl.first())
 
-        // update the value
-        repository.updateUrl(newValue)
-
-        // DataStore will persist and emit the new value
-        assertEquals(newValue, repository.currentUrl.first())
-
-        // cleanup
         tmpDir.deleteRecursively()
+    }
+
+    @Test
+    fun `webserverVerificationEnabled defaults to false when DataStore is empty`() = runTest {
+        assertEquals(false, repository.isWebserverVerificationEnabled.first())
     }
 }

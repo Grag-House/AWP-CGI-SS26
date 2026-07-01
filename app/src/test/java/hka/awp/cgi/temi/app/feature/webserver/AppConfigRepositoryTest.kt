@@ -1,14 +1,11 @@
-package hka.awp.cgi.temi.app.feature.webserver
+package hka.awp.cgi.temi.app.utils
 
-import android.content.Context
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
-import androidx.test.core.app.ApplicationProvider
 import hka.awp.cgi.temi.app.BuildConfig
-import hka.awp.cgi.temi.app.utils.AppConfigRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.io.File
@@ -18,54 +15,103 @@ import kotlin.io.path.deleteRecursively
 
 class AppConfigRepositoryTest {
 
-    // Helper für DataStore Setup um Redundanz zu vermeiden
     @OptIn(ExperimentalPathApi::class)
     private fun createTestRepository(
         scope: kotlinx.coroutines.CoroutineScope
-    ): Pair<AppConfigRepository, java.nio.file.Path> {
+                                    ): Pair<AppConfigRepository, java.nio.file.Path> {
         val tmpDir = createTempDirectory(prefix = "app-config-test")
         val file = File(tmpDir.toString(), "preferences.preferences_pb")
         val dataStore = PreferenceDataStoreFactory.create(scope = scope, produceFile = { file })
-        val context: Context = ApplicationProvider.getApplicationContext()
-        return AppConfigRepository(context, dataStore) to tmpDir
+        // FakeWebserverCredentialStore avoids EncryptedSharedPreferences — no Context needed
+        return AppConfigRepository(dataStore = dataStore, credentialStore = FakeWebserverCredentialStore()) to tmpDir
     }
 
+    @OptIn(ExperimentalPathApi::class)
     @Test
     fun `admin panel and webserver passwords are independent`() = runTest {
         val (repository, tmpDir) = createTestRepository(this)
 
-        val adminPass = "admin123"
-        val webPass = "web456"
+        repository.updateAdminPanelPassword("admin123")
+        repository.updateWebserverPassword("web456")
 
-        repository.updateAdminPanelPassword(adminPass)
-        repository.updateWebserverPassword(webPass)
+        val adminHash = repository.adminPanelPasswordHash.first()
+        val webHash = repository.webserverPasswordHash.first()
 
-        @OptIn(ExperimentalPathApi::class)
-        @Test
-        @Disabled("Reason: logic currently removed from code")
-        fun `reset webserver defaults restores default url and default admin password hash`() = runTest {
-            val tmpDir = createTempDirectory(prefix = "app-config-test")
+        assertEquals(repository.hashPassword("admin123"), adminHash)
+        assertEquals(repository.hashPassword("web456"), webHash)
+        assertNotEquals(adminHash, webHash)
+
+        tmpDir.deleteRecursively()
+    }
+
+    @OptIn(ExperimentalPathApi::class)
+    @Test
+    fun `updateWebserverUser and updateWebserverPassword persist to credential store and flow`() = runTest {
+        val fake = FakeWebserverCredentialStore()
+        val tmpDir = createTempDirectory(prefix = "app-config-creds-test")
+        val file = File(tmpDir.toString(), "preferences.preferences_pb")
+        val dataStore = PreferenceDataStoreFactory.create(scope = this, produceFile = { file })
+        val repository = AppConfigRepository(dataStore = dataStore, credentialStore = fake)
+
+        repository.updateWebserverUser("alice")
+        repository.updateWebserverPassword("s3cr3t")
+
+        // Credential store holds plaintext for Basic Auth
+        assertEquals("alice", fake.getUser())
+        assertEquals("s3cr3t", fake.getPassword())
+
+        // Flows emit the new values
+        assertEquals("alice", repository.webserverUser.first())
+        assertEquals("s3cr3t", repository.webserverPassword.first())
+
+        // DataStore holds only hashes — never plaintext
+        val userHash = repository.webserverUserHash.first()
+        val passwordHash = repository.webserverPasswordHash.first()
+        assertEquals(repository.hashPassword("alice"), userHash)
+        assertEquals(repository.hashPassword("s3cr3t"), passwordHash)
+        assertNotEquals("alice", userHash)
+        assertNotEquals("s3cr3t", passwordHash)
+
+        tmpDir.deleteRecursively()
+    }
+
+    @OptIn(ExperimentalPathApi::class)
+    @Test
+    fun `webserverUser and webserverPassword flows are initialised from the credential store on construction`() =
+        runTest {
+            val fake = FakeWebserverCredentialStore()
+            fake.saveUser("bob")
+            fake.savePassword("hunter2")
+
+            val tmpDir = createTempDirectory(prefix = "app-config-init-test")
             val file = File(tmpDir.toString(), "preferences.preferences_pb")
-            val dataStore = PreferenceDataStoreFactory.create(
-                scope = this,
-                produceFile = { file }
-            )
-            val context: Context = ApplicationProvider.getApplicationContext()
-            val repository = AppConfigRepository(context, dataStore)
-            val adminHash = repository.adminPanelPasswordHash.first()
-            val webHash = repository.webserverPasswordHash.first()
+            val dataStore = PreferenceDataStoreFactory.create(scope = this, produceFile = { file })
+            val repository = AppConfigRepository(dataStore = dataStore, credentialStore = fake)
 
-            assertEquals(repository.hashPassword(adminPass), adminHash)
-            assertEquals(repository.hashPassword(webPass), webHash)
-            assertTrue(adminHash != webHash)
-            repository.updateUrl("https://example.com/custom")
-            repository.updateAdminPassword("super-secret")
-
-            assertEquals(BuildConfig.WEBVIEW_URL, repository.currentUrl.first())
-            val expectedDefaultHash = repository.hashPassword(BuildConfig.DEFAULT_ADMIN_PASSWORD)
-            assertEquals(expectedDefaultHash, repository.adminPasswordHash.first())
+            assertEquals("bob", repository.webserverUser.first())
+            assertEquals("hunter2", repository.webserverPassword.first())
 
             tmpDir.deleteRecursively()
         }
+
+    @OptIn(ExperimentalPathApi::class)
+    @Test
+    @Disabled("Reason: reset-to-defaults logic currently removed from code")
+    fun `reset webserver defaults restores default URL and default admin password hash`() = runTest {
+        val tmpDir = createTempDirectory(prefix = "app-config-test")
+        val file = File(tmpDir.toString(), "preferences.preferences_pb")
+        val dataStore = PreferenceDataStoreFactory.create(scope = this, produceFile = { file })
+        val repository = AppConfigRepository(dataStore = dataStore, credentialStore = FakeWebserverCredentialStore())
+
+        repository.updateUrl("https://example.com/custom")
+        repository.updateAdminPassword("super-secret")
+
+        assertEquals(BuildConfig.WEBVIEW_URL, repository.currentUrl.first())
+        assertEquals(
+            repository.hashPassword(BuildConfig.DEFAULT_ADMIN_PASSWORD),
+            repository.adminPasswordHash.first()
+                    )
+
+        tmpDir.deleteRecursively()
     }
 }
