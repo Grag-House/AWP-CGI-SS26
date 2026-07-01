@@ -1,11 +1,13 @@
 package hka.awp.cgi.temi.app.feature.photobox.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -26,6 +28,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -35,6 +39,7 @@ import hka.awp.cgi.temi.app.feature.photobox.PhotoboxMode
 import hka.awp.cgi.temi.app.feature.photobox.TemiOverlayPosition
 
 private const val MODE_CARD_WIDTH_DP = 220
+private const val TEMI_IMAGE_HEIGHT_FRACTION = 0.8f
 
 @Composable
 internal fun ModeSelectOverlay(
@@ -48,61 +53,72 @@ internal fun ModeSelectOverlay(
         modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = stringResource(R.string.photobox_mode_select_title),
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(40.dp)
+        ) {
+            Image(
+                painter = painterResource(R.drawable.temi_picture),
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.fillMaxHeight(TEMI_IMAGE_HEIGHT_FRACTION)
             )
-            Spacer(Modifier.height(8.dp))
-            Text(
-                text = stringResource(R.string.photobox_mode_select_subtitle),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(Modifier.height(32.dp))
-            Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-                Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
-                    ModeOptionCard(
-                        title = stringResource(R.string.photobox_mode_standard_title),
-                        description = stringResource(R.string.photobox_mode_standard_description),
-                        icon = Icons.Rounded.PhotoCamera,
-                        selected = selectedMode == PhotoboxMode.STANDARD,
-                        onClick = { onModeSelect(PhotoboxMode.STANDARD) }
-                    )
-                    ModeOptionCard(
-                        title = stringResource(R.string.photobox_mode_strip_title),
-                        description = stringResource(R.string.photobox_mode_strip_description),
-                        icon = Icons.Rounded.Filter3,
-                        selected = selectedMode == PhotoboxMode.STRIP,
-                        onClick = { onModeSelect(PhotoboxMode.STRIP) }
-                    )
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
-                    ModeOptionCard(
-                        title = stringResource(R.string.photobox_mode_strip4_title),
-                        description = stringResource(R.string.photobox_mode_strip4_description),
-                        icon = Icons.Rounded.Filter4,
-                        selected = selectedMode == PhotoboxMode.STRIP_1X4,
-                        onClick = { onModeSelect(PhotoboxMode.STRIP_1X4) }
-                    )
-                    ModeOptionCard(
-                        title = stringResource(R.string.photobox_mode_grid_title),
-                        description = stringResource(R.string.photobox_mode_grid_description),
-                        icon = Icons.Rounded.GridView,
-                        selected = selectedMode == PhotoboxMode.GRID_2X2,
-                        onClick = { onModeSelect(PhotoboxMode.GRID_2X2) }
-                    )
-                }
-            }
-            if (overlayEnabled) {
-                Spacer(Modifier.height(32.dp))
-                OverlayPositionSelector(
-                    selected = overlayPosition,
-                    onSelect = onOverlayPositionSelect
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = stringResource(R.string.photobox_mode_select_title),
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold
                 )
-            }
-        }
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = stringResource(R.string.photobox_mode_select_subtitle),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.height(32.dp))
+                Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
+                        ModeOptionCard(
+                            title = stringResource(R.string.photobox_mode_standard_title),
+                            description = stringResource(R.string.photobox_mode_standard_description),
+                            icon = Icons.Rounded.PhotoCamera,
+                            selected = selectedMode == PhotoboxMode.STANDARD,
+                            onClick = { onModeSelect(PhotoboxMode.STANDARD) }
+                        )
+                        ModeOptionCard(
+                            title = stringResource(R.string.photobox_mode_strip_title),
+                            description = stringResource(R.string.photobox_mode_strip_description),
+                            icon = Icons.Rounded.Filter3,
+                            selected = selectedMode == PhotoboxMode.STRIP,
+                            onClick = { onModeSelect(PhotoboxMode.STRIP) }
+                        )
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
+                        ModeOptionCard(
+                            title = stringResource(R.string.photobox_mode_strip4_title),
+                            description = stringResource(R.string.photobox_mode_strip4_description),
+                            icon = Icons.Rounded.Filter4,
+                            selected = selectedMode == PhotoboxMode.STRIP_1X4,
+                            onClick = { onModeSelect(PhotoboxMode.STRIP_1X4) }
+                        )
+                        ModeOptionCard(
+                            title = stringResource(R.string.photobox_mode_grid_title),
+                            description = stringResource(R.string.photobox_mode_grid_description),
+                            icon = Icons.Rounded.GridView,
+                            selected = selectedMode == PhotoboxMode.GRID_2X2,
+                            onClick = { onModeSelect(PhotoboxMode.GRID_2X2) }
+                        )
+                    }
+                }
+                if (overlayEnabled) {
+                    Spacer(Modifier.height(32.dp))
+                    OverlayPositionSelector(
+                        selected = overlayPosition,
+                        onSelect = onOverlayPositionSelect
+                    )
+                }
+            } // Column
+        } // Row
     }
 }
 

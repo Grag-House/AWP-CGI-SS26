@@ -25,6 +25,13 @@ private const val GRID_TOP_MARGIN_RATIO = 40f / 390f
 private const val GRID_VERTICAL_GAP_RATIO = 40f / 390f
 private const val GRID_BOTTOM_MARGIN_RATIO = 260f / 390f
 
+// Fraction of the total composite height that is the blank branding area at the bottom.
+// Derived by inverting the layout ratios above: bottomMargin / totalCompositeHeight.
+// Used by PhotoboxUploadRepository and PhotoboxPreviewOverlay to size the banner dynamically.
+internal const val STRIP_BANNER_HEIGHT_FRACTION = 392f / 1800f
+internal const val STRIP_1X4_BANNER_HEIGHT_FRACTION = 392f / 2256f
+internal const val GRID_2X2_BANNER_HEIGHT_FRACTION = 260f / 1120f
+
 /**
  * Stacks the given shots vertically into a classic photo booth strip: a side margin around
  * each photo, a top margin, gaps between photos, and a larger blank area below the last shot

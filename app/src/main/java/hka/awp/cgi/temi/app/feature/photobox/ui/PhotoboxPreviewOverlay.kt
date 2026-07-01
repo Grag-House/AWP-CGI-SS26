@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -56,6 +57,9 @@ import hka.awp.cgi.temi.app.feature.photobox.TemiOverlayImage
 import hka.awp.cgi.temi.app.feature.photobox.TemiOverlayPosition
 import hka.awp.cgi.temi.app.feature.photobox.filter.PhotoboxPhotoFilter
 import hka.awp.cgi.temi.app.feature.photobox.filter.toComposeColorFilter
+import hka.awp.cgi.temi.app.feature.photobox.upload.GRID_2X2_BANNER_HEIGHT_FRACTION
+import hka.awp.cgi.temi.app.feature.photobox.upload.STRIP_1X4_BANNER_HEIGHT_FRACTION
+import hka.awp.cgi.temi.app.feature.photobox.upload.STRIP_BANNER_HEIGHT_FRACTION
 
 private const val COLOR_SUCCESS = 0xFF4CAF50L
 private val ColorSuccess = Color(COLOR_SUCCESS)
@@ -86,48 +90,35 @@ internal fun PreviewOverlay(
     photoState: PreviewPhotoState,
     callbacks: PreviewOverlayCallbacks
 ) {
-    BoxWithConstraints(modifier = Modifier.fillMaxSize().background(Color.Black)) {
+    Column(modifier = Modifier.fillMaxSize().background(Color.Black)) {
         val bitmap = photoState.capturedBitmap
-        if (bitmap != null) {
-            // A single photo roughly matches the screen's aspect ratio, so Crop fills the screen
-            // without visible black bars and the banner (drawn separately below) can simply be
-            // aligned to this Box's bottom edge — Crop always covers it edge-to-edge. A strip/grid
-            // composite has a different aspect ratio — cropping it the same way would zoom in
-            // until only part of it is visible, so it's wrapped in its own aspect-ratio-matched
-            // Box instead, letterboxed (Fit) rather than filled, so the banner can be aligned to
-            // *its* bottom edge — the composite's real bottom edge, not the screen's.
-            if (photoState.mode == PhotoboxMode.STANDARD) {
-                PreviewPhoto(bitmap, photoState.selectedFilter, ContentScale.Crop, Modifier.fillMaxSize())
-                if (photoState.banner != null) BannerOverlayImage(photoState.banner, photoState.mode)
-            } else {
+        // Image area: takes all space above the BottomBar so strip/grid composites are fully
+        // visible without the BottomBar covering their bottom edge.
+        BoxWithConstraints(modifier = Modifier.weight(1f).fillMaxWidth()) {
+            val imageAreaHeight = maxHeight
+            if (bitmap != null) {
                 val photoAspectRatio = bitmap.width.toFloat() / bitmap.height
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Box(modifier = Modifier.fillMaxSize().aspectRatio(photoAspectRatio)) {
+                    Box(modifier = Modifier.aspectRatio(photoAspectRatio)) {
                         PreviewPhoto(bitmap, photoState.selectedFilter, ContentScale.Fit, Modifier.fillMaxSize())
                         if (photoState.banner != null) BannerOverlayImage(photoState.banner, photoState.mode)
+                        // For a strip/grid, Temi is already baked into each individual frame (see
+                        // PhotoboxSessionFinalizer) — showing it again here would add one oversized
+                        // Temi floating next to the whole composite.
+                        if (photoState.overlayEnabled && photoState.mode == PhotoboxMode.STANDARD) {
+                            val bottomInset = if (photoState.banner != null) {
+                                imageAreaHeight * (photoAspectRatio / PHOTOBOX_BANNER_ASPECT_RATIO)
+                            } else {
+                                0.dp
+                            }
+                            TemiOverlayImage(photoState.overlayPosition, bottomInset)
+                        }
                     }
                 }
             }
         }
 
-        // For a strip/grid, Temi is already baked into each individual frame (see
-        // PhotoboxSessionFinalizer) — showing it again here would add one oversized Temi
-        // floating next to the whole composite.
-        if (photoState.overlayEnabled && photoState.mode == PhotoboxMode.STANDARD) {
-            // The banner is drawn flush against the bottom edge (see BannerOverlayImage) — shift
-            // Temi up by its approximate on-screen height so the live overlay doesn't end up
-            // rendered on top of it (the actual uploaded file is shifted exactly, using the real
-            // bitmap dimensions; this is just an approximation for the live preview here).
-            val bottomInset = if (photoState.banner != null) {
-                val photoAspectRatio = bitmap?.let { it.width.toFloat() / it.height } ?: 1f
-                maxHeight * (photoAspectRatio / PHOTOBOX_BANNER_ASPECT_RATIO)
-            } else {
-                0.dp
-            }
-            TemiOverlayImage(photoState.overlayPosition, bottomInset)
-        }
-
-        BottomBar(modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()) {
+        BottomBar(modifier = Modifier.fillMaxWidth()) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -212,12 +203,28 @@ private fun PreviewPhoto(
 @Composable
 private fun BoxScope.BannerOverlayImage(banner: PhotoboxBanner, mode: PhotoboxMode) {
     val widthFraction = if (mode == PhotoboxMode.GRID_2X2) PHOTOBOX_GRID_BANNER_WIDTH_FRACTION else 1f
+    // For strip/grid the banner must fill the white area exactly — same ratios as the strip/grid
+    // layout functions, so the preview matches the baked file. STANDARD has no fixed white area.
+    val heightFraction = when (mode) {
+        PhotoboxMode.STRIP -> STRIP_BANNER_HEIGHT_FRACTION
+        PhotoboxMode.STRIP_1X4 -> STRIP_1X4_BANNER_HEIGHT_FRACTION
+        PhotoboxMode.GRID_2X2 -> GRID_2X2_BANNER_HEIGHT_FRACTION
+        PhotoboxMode.STANDARD -> 0f
+    }
     Image(
         painter = painterResource(banner.drawableRes(mode)),
         contentDescription = null,
-        modifier = Modifier
-            .align(Alignment.BottomCenter)
-            .fillMaxWidth(widthFraction)
+        contentScale = if (mode == PhotoboxMode.STANDARD) ContentScale.Fit else ContentScale.FillBounds,
+        modifier = if (mode == PhotoboxMode.STANDARD) {
+            Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth(widthFraction)
+        } else {
+            Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth(widthFraction)
+                .fillMaxHeight(heightFraction)
+        }
     )
 }
 

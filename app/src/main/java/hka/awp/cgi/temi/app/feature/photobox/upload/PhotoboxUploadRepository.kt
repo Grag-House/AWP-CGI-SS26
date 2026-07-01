@@ -175,13 +175,11 @@ class PhotoboxUploadRepository(
         bannerBitmaps.getOrPut(drawableRes) { BitmapFactory.decodeResource(context.resources, drawableRes) }
 
     /**
-     * Draws [banner] centered against the bottom edge, scaled (keeping its aspect ratio) to a
-     * fraction of the photo's width — the full width for a standalone photo; a smaller fraction
-     * for a 2x2 grid composite since it's wide enough that a full-width banner looks oversized.
-     * For a strip/grid this lands in the blank branding area [combinePhotoStrip]/[combinePhotoGrid]
-     * already leave at the bottom; for a standalone photo it overlays the bottom edge of the photo
-     * itself. Always baked in last (after any color filter), so the banner itself is never
-     * affected by the filter.
+     * Draws [banner] centered against the bottom edge. For strip/grid the banner is stretched to
+     * fill the white branding area exactly — height derived from the composite's own dimensions
+     * using the same ratios as [combinePhotoStrip]/[combinePhotoGrid], so it covers the area
+     * regardless of the banner asset's own aspect ratio. For STANDARD the banner has no fixed
+     * white area, so it is scaled by width while keeping its aspect ratio as before.
      */
     internal fun bakeBanner(photo: Bitmap, banner: PhotoboxBanner, mode: PhotoboxMode): Bitmap {
         val bannerBitmap = bannerBitmap(banner.drawableRes(mode))
@@ -189,12 +187,24 @@ class PhotoboxUploadRepository(
         val canvas = Canvas(result)
         val widthFraction = if (mode == PhotoboxMode.GRID_2X2) PHOTOBOX_GRID_BANNER_WIDTH_FRACTION else 1f
         val targetWidth = result.width * widthFraction
-        val scale = targetWidth / bannerBitmap.width
-        val bannerHeight = bannerBitmap.height * scale
+        val bannerHeight = if (mode == PhotoboxMode.STANDARD) {
+            bannerBitmap.height * (targetWidth / bannerBitmap.width)
+        } else {
+            whiteAreaHeight(result.height, mode)
+        }
         val left = (result.width - targetWidth) / 2f
         val destRect = RectF(left, result.height - bannerHeight, left + targetWidth, result.height.toFloat())
         canvas.drawBitmap(bannerBitmap, null, destRect, null)
         return result
+    }
+
+    // Derives the exact white branding area height from the composite height, inverting the
+    // layout ratios used by combinePhotoStrip/combinePhotoGrid.
+    private fun whiteAreaHeight(compositeHeight: Int, mode: PhotoboxMode): Float = when (mode) {
+        PhotoboxMode.STRIP -> compositeHeight * STRIP_BANNER_HEIGHT_FRACTION
+        PhotoboxMode.STRIP_1X4 -> compositeHeight * STRIP_1X4_BANNER_HEIGHT_FRACTION
+        PhotoboxMode.GRID_2X2 -> compositeHeight * GRID_2X2_BANNER_HEIGHT_FRACTION
+        PhotoboxMode.STANDARD -> compositeHeight.toFloat()
     }
 
     // Only ever called with a non-null banner while baking the Temi overlay for a standalone
