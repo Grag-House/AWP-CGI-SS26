@@ -62,11 +62,11 @@ class AppConfigRepository(
         it[webviewUrlKey] ?: BuildConfig.WEBVIEW_URL
     }
 
-    val masterKey = MasterKey.Builder(context)
+    private val masterKey = MasterKey.Builder(context)
         .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
         .build()
 
-    val encryptedPrefs = EncryptedSharedPreferences.create(
+    private val encryptedPrefs = EncryptedSharedPreferences.create(
         context,
         "webserver_credentials",
         masterKey,
@@ -147,8 +147,6 @@ class AppConfigRepository(
         dataStore.edit {
             enabled?.let { value -> it[webserverVerificationEnabledKey] = value }
         }
-        println("password:" + webserverPassword)
-        println("user" + webserverUser)
     }
 
     val isWebserverVerificationEnabled: Flow<Boolean> = dataStore.data.map {
