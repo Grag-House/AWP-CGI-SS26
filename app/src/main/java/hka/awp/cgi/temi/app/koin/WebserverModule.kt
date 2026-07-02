@@ -10,4 +10,3 @@ import org.koin.dsl.module
 val webserverModule = module {
     viewModel<WebserverViewModel> { WebserverViewModel(appConfigRepository = get()) }
 }
-w
