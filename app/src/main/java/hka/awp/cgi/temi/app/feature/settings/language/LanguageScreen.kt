@@ -1,6 +1,5 @@
 package hka.awp.cgi.temi.app.feature.settings.language
 
-import LanguageContent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
