@@ -17,6 +17,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import hka.awp.cgi.temi.app.R
 
+/**
+ * A header component for settings screens, featuring a back button and a title.
+ *
+ * @param title The text to display as the header title.
+ * @param onBackClick Callback invoked when the back button is clicked.
+ * @param modifier Modifier to be applied to the row container.
+ */
 @Composable
 fun SettingsHeader(
     title: String,
