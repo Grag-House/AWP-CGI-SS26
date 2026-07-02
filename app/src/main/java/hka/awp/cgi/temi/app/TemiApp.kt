@@ -4,8 +4,14 @@ import android.app.Application
 import android.util.Log
 import hka.awp.cgi.temi.app.feature.photobox.upload.PhotoboxUploadQueue
 import hka.awp.cgi.temi.app.koin.appModule
+import hka.awp.cgi.temi.app.koin.controllerModule
+import hka.awp.cgi.temi.app.koin.coreModule
+import hka.awp.cgi.temi.app.koin.hideAndSeekModule
 import hka.awp.cgi.temi.app.koin.navigationModule
-import hka.awp.cgi.temi.app.koin.temiVoiceRecognitionModule
+import hka.awp.cgi.temi.app.koin.patrolModule
+import hka.awp.cgi.temi.app.koin.photoboxModule
+import hka.awp.cgi.temi.app.koin.settingsModule
+import hka.awp.cgi.temi.app.koin.voiceRecognitionModule
 import hka.awp.cgi.temi.app.koin.weatherModule
 import hka.awp.cgi.temi.app.koin.webserverModule
 import org.koin.android.ext.koin.androidContext
@@ -16,15 +22,27 @@ import timber.log.Timber
  * Base [Application] class for the Temi CGI application.
  *
  * This class is responsible for global application state and the initialization of
- * the Koin dependency injection framework, providing the [appModule] to the
- * application context.
+ * the Koin dependency injection framework.
  */
 class TemiApp : Application() {
     override fun onCreate() {
         super.onCreate()
+
         GlobalContext.startKoin {
             androidContext(this@TemiApp)
-            modules(appModule, weatherModule, navigationModule, webserverModule, temiVoiceRecognitionModule)
+            modules(
+                coreModule,
+                appModule,
+                weatherModule,
+                navigationModule,
+                webserverModule,
+                voiceRecognitionModule,
+                settingsModule,
+                photoboxModule,
+                patrolModule,
+                hideAndSeekModule,
+                controllerModule
+            )
         }
 
         // Resumes any Photobox uploads that were still cached on disk when the process last
