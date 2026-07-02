@@ -10,12 +10,26 @@ import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import kotlin.random.Random
 
+/**
+ * Orchestrates the timing of robotic patrol missions based on [PatrolSettings].
+ * * This class runs in a provided [CoroutineScope] and manages the lifecycle
+ * of the patrol execution cycles. It supports both randomized intervals and
+ * fixed hourly scheduling.
+ *
+ * @param scope The [CoroutineScope] in which the scheduling jobs will run.
+ * @param onTriggerPatrol A suspend callback triggered when a patrol mission is due.
+ */
 class PatrolScheduler(
     private val scope: CoroutineScope,
     private val onTriggerPatrol: suspend (List<String>) -> Unit
 ) {
     private var schedulerJob: Job? = null
 
+    /**
+     * Updates the active patrol schedule, canceling any existing jobs.
+     * If [PatrolSettings.isEnabled] is false or the route is empty,
+     * the scheduler stops.
+     */
     fun updateSchedule(settings: PatrolSettings) {
         schedulerJob?.cancel()
 

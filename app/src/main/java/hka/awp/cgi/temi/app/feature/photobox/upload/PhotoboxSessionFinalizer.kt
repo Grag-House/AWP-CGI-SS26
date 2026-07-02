@@ -49,11 +49,6 @@ internal class PhotoboxSessionFinalizer(
         onFinalImageReady: (finalImage: Bitmap, needsOverlayBakeAtUpload: Boolean) -> Unit
     ) {
         scope.launch {
-            // Combining the strip and baking the per-frame overlay are pure CPU/bitmap work with
-            // no need for the main thread — running them inline on viewModelScope
-            // (Dispatchers.Main) would freeze the UI for the duration, which can be long enough
-            // for a stray touch (e.g. on the sidebar) to queue up and fire once the main thread
-            // frees up again.
             val (finalImage, needsOverlayBakeAtUpload) = withContext(Dispatchers.Default) {
                 buildFinalImage(mode, shots, options.withOverlay, options.overlay.position)
             }
@@ -109,10 +104,6 @@ internal class PhotoboxSessionFinalizer(
         }
     }
 
-    // For a strip/grid, Temi is baked into each individual frame before combining — overlaying
-    // it once on the whole composite would put a single oversized Temi next to it instead of on
-    // each photo. Standard mode keeps the existing behavior: shown live via a separate Compose
-    // layer, baked in only at upload time (needsOverlayBakeAtUpload = withOverlay).
     private fun buildFinalImage(
         mode: PhotoboxMode,
         shots: List<Bitmap>,
@@ -121,8 +112,6 @@ internal class PhotoboxSessionFinalizer(
     ): Pair<Bitmap, Boolean> {
         if (mode == PhotoboxMode.STANDARD) return shots.first() to withOverlay
 
-        // The banner is only ever baked in later, at upload time (see upload) — so there's
-        // nothing for Temi to avoid overlapping with here.
         val perFrameOptions = PhotoboxOverlayOptions(overlayPosition, banner = null, mode = mode)
         val frames = if (withOverlay) shots.map { uploadRepository.bakeOverlay(it, perFrameOptions) } else shots
         val combined = if (mode == PhotoboxMode.GRID_2X2) {

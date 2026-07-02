@@ -35,11 +35,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import hka.awp.cgi.temi.app.R
 
+/** UI state for the hiding spot filter: the full list of known locations and which are enabled. */
 data class HidingSpotFilterState(
     val allLocations: List<String> = emptyList(),
     val enabledSpots: Set<String> = emptySet()
 )
 
+/** Interaction callbacks for [HidingSpotFilterContent], grouped to keep its parameter list short. */
 data class HidingSpotFilterCallbacks(
     val onToggle: (String) -> Unit,
     val onSelectAll: () -> Unit,

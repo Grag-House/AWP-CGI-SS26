@@ -10,20 +10,13 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
-@Immutable
-data class CustomDesignTokens(
-    val sidepanel: Color,
-    val sidepanelHighlight: Color
-)
-
-val LocalCustomColors =
-    staticCompositionLocalOf {
-        CustomDesignTokens(
-            sidepanel = Color.Unspecified,
-            sidepanelHighlight = Color.Unspecified
-        )
-    }
-
+/**
+ * A custom theme implementation for the CGI application, extending [MaterialTheme]
+ * with bespoke design tokens via [LocalCustomColors].
+ *
+ * @param darkTheme Whether the theme should use dark mode colors. Defaults to system settings.
+ * @param content The composable content to be styled with this theme.
+ */
 @Composable
 fun CgiTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
@@ -66,13 +59,22 @@ fun CgiTheme(
     CompositionLocalProvider(LocalCustomColors provides customColors) {
         MaterialTheme(
             colorScheme = colorScheme,
+            typography = AppTypography,
             content = content
         )
     }
 }
 
-object AppTheme {
-    val customColors: CustomDesignTokens
-        @Composable
-        get() = LocalCustomColors.current
-}
+@Immutable
+data class CustomDesignTokens(
+    val sidepanel: Color,
+    val sidepanelHighlight: Color
+)
+
+val LocalCustomColors =
+    staticCompositionLocalOf {
+        CustomDesignTokens(
+            sidepanel = Color.Unspecified,
+            sidepanelHighlight = Color.Unspecified
+        )
+    }

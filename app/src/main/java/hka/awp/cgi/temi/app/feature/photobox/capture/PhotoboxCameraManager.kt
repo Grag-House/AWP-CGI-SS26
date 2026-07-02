@@ -31,17 +31,8 @@ import kotlin.math.roundToInt
 
 enum class PhotoboxCameraState { UNINITIALIZED, BINDING, READY, UNAVAILABLE }
 
-// Caps the captured bitmap's long edge for performance; does not affect field of view/aspect,
-// unlike constraining ImageCapture's own resolution selector (which made it crop differently
-// from the unconstrained live Preview).
 private const val MAX_OUTPUT_LONG_EDGE = 1600
 
-// The device's (legacy) camera HAL defaults to its maximum sensor resolution (12+ MP) for
-// ImageCapture, which can take several seconds to encode to JPEG — long enough to blow past
-// CameraX's internal "jpeg callback" timeout and leave the request hanging indefinitely. Capping
-// the requested resolution keeps capture fast and reliable. Safe to combine with the shared
-// ViewPort below: that already keeps Preview/ImageCapture cropped consistently regardless of
-// whichever resolution gets picked here.
 private const val CAPTURE_TARGET_WIDTH = 1920
 private const val CAPTURE_TARGET_HEIGHT = 1080
 private val CAPTURE_TARGET_SIZE = Size(CAPTURE_TARGET_WIDTH, CAPTURE_TARGET_HEIGHT)
@@ -68,6 +59,7 @@ class PhotoboxCameraManager(private val context: Context) {
         )
         .build()
     private var cameraProvider: ProcessCameraProvider? = null
+    private var isFrontCamera = false
 
     private val shutterSoundPool = SoundPool.Builder()
         .setMaxStreams(1)
@@ -101,9 +93,6 @@ class PhotoboxCameraManager(private val context: Context) {
             }
             try {
                 provider.unbindAll()
-                // Sharing a ViewPort makes ImageCapture crop to exactly what Preview shows —
-                // without it, the two use cases can independently pick different aspect ratios,
-                // so the captured photo ends up cropped differently than what was previewed live.
                 val useCaseGroup = UseCaseGroup.Builder()
                     .addUseCase(preview)
                     .addUseCase(imageCapture)
@@ -111,6 +100,7 @@ class PhotoboxCameraManager(private val context: Context) {
                     .build()
                 provider.bindToLifecycle(lifecycleOwner, cameraSelector, useCaseGroup)
                 cameraProvider = provider
+                isFrontCamera = useFrontCamera
                 _cameraState.value = PhotoboxCameraState.READY
             } catch (e: IllegalStateException) {
                 Timber.e(e, "Camera binding failed")
@@ -134,9 +124,6 @@ class PhotoboxCameraManager(private val context: Context) {
                 override fun onCaptureSuccess(image: ImageProxy) {
                     val rawBitmap = image.toBitmap()
                     val cropRect = image.cropRect
-                    // The ViewPort crop is metadata on the ImageProxy, not baked into the raw
-                    // buffer — toBitmap() returns the full, uncropped sensor frame, so we have to
-                    // crop to cropRect ourselves or the uncropped margin shows up as a black band.
                     val bitmap = if (cropRect.width() != rawBitmap.width || cropRect.height() != rawBitmap.height) {
                         Bitmap.createBitmap(rawBitmap, cropRect.left, cropRect.top, cropRect.width(), cropRect.height())
                     } else {
@@ -144,10 +131,7 @@ class PhotoboxCameraManager(private val context: Context) {
                     }
                     val rotation = image.imageInfo.rotationDegrees
                     image.close()
-                    // Temi's camera faces the user like a selfie cam regardless of how Android
-                    // classifies the lens, so the saved photo is always mirrored to match what
-                    // was shown live (see scaleX in PhotoboxScreen's CameraPreviewView).
-                    var result = mirroredBitmap(rotatedBitmap(bitmap, rotation))
+                    var result = rotatedBitmap(bitmap, rotation, mirror = isFrontCamera)
                     result = downscaledIfNeeded(result)
                     onResult(Result.success(result))
                 }
@@ -166,14 +150,12 @@ class PhotoboxCameraManager(private val context: Context) {
         _cameraState.value = PhotoboxCameraState.UNINITIALIZED
     }
 
-    private fun rotatedBitmap(bitmap: Bitmap, degrees: Int): Bitmap {
-        if (degrees == 0) return bitmap
-        val matrix = Matrix().apply { postRotate(degrees.toFloat()) }
-        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
-    }
-
-    private fun mirroredBitmap(bitmap: Bitmap): Bitmap {
-        val matrix = Matrix().apply { postScale(-1f, 1f) }
+    private fun rotatedBitmap(bitmap: Bitmap, degrees: Int, mirror: Boolean): Bitmap {
+        if (degrees == 0 && !mirror) return bitmap
+        val matrix = Matrix().apply {
+            postRotate(degrees.toFloat())
+            if (mirror) postScale(-1f, 1f)
+        }
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
     }
 

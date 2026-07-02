@@ -61,6 +61,11 @@ import hka.awp.cgi.temi.app.feature.photobox.upload.PHOTOBOX_OVERLAY_HEIGHT_FRAC
 
 private val OVERLAY_HIDDEN_PHASES = setOf(PhotoboxPhase.MODE_SELECT, PhotoboxPhase.PREVIEW)
 
+/**
+ * Root composable for the Photobox feature. Renders the live camera feed and layers the
+ * appropriate UI for the current [PhotoboxPhase] — mode selection, idle, countdown, capture
+ * flash, or the post-capture preview with upload controls.
+ */
 @Composable
 fun PhotoboxScreen(
     modifier: Modifier = Modifier,
@@ -217,15 +222,6 @@ private fun CameraPreviewView(
         factory = { ctx ->
             PreviewView(ctx).apply {
                 scaleType = PreviewView.ScaleType.FILL_CENTER
-                // SurfaceView (the PERFORMANCE default) ignores scaleX since it's composited as
-                // its own layer outside the normal View pipeline — switch to TextureView so the
-                // mirroring below actually has an effect.
-                implementationMode = PreviewView.ImplementationMode.COMPATIBLE
-                // Temi's camera faces the user like a selfie cam regardless of how Android
-                // classifies the lens, so the live feed is always mirrored — otherwise moving
-                // your head left makes the preview look like you moved right, the opposite of
-                // how a mirror (or a selfie cam) works.
-                scaleX = -1f
                 // Deferred to post() so the view is laid out and viewPort reflects its real size.
                 post { onBindCamera(lifecycleOwner, surfaceProvider, viewPort) }
             }
@@ -260,6 +256,7 @@ internal fun BoxScope.TemiOverlayImage(position: TemiOverlayPosition, bottomInse
     )
 }
 
+/** Frosted-glass bottom sheet used across Photobox overlays for controls and status. */
 @Composable
 internal fun BottomBar(
     modifier: Modifier = Modifier,

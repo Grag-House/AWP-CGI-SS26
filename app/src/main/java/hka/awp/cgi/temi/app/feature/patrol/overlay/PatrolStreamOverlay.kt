@@ -18,6 +18,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import hka.awp.cgi.temi.app.R
 
+/**
+ * An overlay displaying the live camera stream from the robot during a patrol.
+ * * It includes navigation controls to exit the view or terminate the patrol session.
+ *
+ * @param videoFrame The latest [Bitmap] frame from the camera stream, or null if unavailable.
+ * @param onBackClick Callback invoked when the back button is clicked.
+ * @param onStopPatrol Callback invoked when the stop patrol button is clicked.
+ */
 @Composable
 fun PatrolStreamOverlay(
     videoFrame: Bitmap?,
@@ -25,6 +33,7 @@ fun PatrolStreamOverlay(
     onStopPatrol: () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
+        // Display camera feed
         videoFrame?.let { frame ->
             Image(
                 bitmap = frame.asImageBitmap(),
@@ -34,6 +43,7 @@ fun PatrolStreamOverlay(
             )
         }
 
+        // Control buttons overlay
         Row(
             modifier = Modifier
                 .fillMaxWidth()

@@ -1,3 +1,5 @@
+package hka.awp.cgi.temi.app.feature.settings.language
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -83,7 +85,7 @@ fun LanguageContent(
                         )
                         Spacer(modifier = Modifier.padding(8.dp))
                         Text(
-                            text = locale.displayLanguage,
+                            text = locale.getDisplayLanguage(locale).replaceFirstChar { it.uppercase() },
                             style = MaterialTheme.typography.bodyLarge
                         )
                     }
