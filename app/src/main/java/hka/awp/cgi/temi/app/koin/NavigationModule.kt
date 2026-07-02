@@ -32,8 +32,8 @@ val navigationModule = module {
 
     single {
         MqttManager(
-            robot = get(),
-            client = get()
+            client = get(),
+            robot = get()
         )
     }
 

@@ -37,7 +37,10 @@ class TemiBatteryMonitor(robot: Robot?, private val mqttManager: MqttManager) : 
 
     fun publishBatteryLevel(batteryData: BatteryData?) {
         CoroutineScope(Dispatchers.IO).launch {
-            mqttManager.publishStatus(MqttManager.BATTERY_TOPIC, batteryData?.level?.toString() ?: "unknown")
+            mqttManager.publishStatus(
+                status = batteryData?.level?.toString() ?: "unknown",
+                topic = MqttManager.BATTERY_TOPIC
+            )
         }
     }
 }
