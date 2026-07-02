@@ -47,7 +47,7 @@ class EncryptedWebserverCredentialStore(context: Context) : WebserverCredentialS
             .build(),
         EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-                                                         )
+    )
 
     override fun getUser(): String = prefs.getString(KEY_USER, "") ?: ""
     override fun getPassword(): String = prefs.getString(KEY_PASSWORD, "") ?: ""
@@ -87,7 +87,7 @@ class FakeWebserverCredentialStore : WebserverCredentialStore {
 class AppConfigRepository private constructor(
     private val dataStore: DataStore<Preferences>,
     private val credentialStore: WebserverCredentialStore
-                                             ) {
+) {
     companion object {
         const val ROUTE_SEPARATOR = "|"
         const val COMMA_SEPARATOR = ","
@@ -109,6 +109,7 @@ class AppConfigRepository private constructor(
         operator fun invoke(dataStore: DataStore<Preferences>, credentialStore: WebserverCredentialStore) =
             AppConfigRepository(dataStore, credentialStore)
     }
+
     private val webviewUrlKey = stringPreferencesKey("webview_url")
     private val latitudeKey = doublePreferencesKey("latitude")
     private val longitudeKey = doublePreferencesKey("longitude")
@@ -215,9 +216,10 @@ class AppConfigRepository private constructor(
         credentialStore.saveUser(user)
         _webserverUser.value = user
     }
+
     suspend fun updateWebserverVerification(
         enabled: Boolean? = null
-                                           ) {
+    ) {
         dataStore.edit {
             enabled?.let { value -> it[webserverVerificationEnabledKey] = value }
         }
@@ -282,7 +284,7 @@ class AppConfigRepository private constructor(
         minMin: Int,
         maxMin: Int,
         hours: Set<Int>
-                                    ) {
+    ) {
         dataStore.edit {
             it[keyIsPatrolEnabled] = isEnabled
             it[keyPatrolMode] = mode.name
@@ -309,7 +311,7 @@ class AppConfigRepository private constructor(
     suspend fun updateSpeakerVerification(
         enabled: Boolean? = null,
         threshold: Double? = null
-                                         ) {
+    ) {
         dataStore.edit {
             enabled?.let { value -> it[speakerVerificationEnabledKey] = value }
             threshold?.let { value ->

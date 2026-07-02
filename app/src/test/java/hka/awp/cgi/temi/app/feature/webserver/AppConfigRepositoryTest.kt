@@ -1,7 +1,10 @@
-package hka.awp.cgi.temi.app.utils
+package hka.awp.cgi.temi.app.feature.webserver
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import hka.awp.cgi.temi.app.BuildConfig
+import hka.awp.cgi.temi.app.utils.AppConfigRepository
+import hka.awp.cgi.temi.app.utils.FakeWebserverCredentialStore
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -9,6 +12,7 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.io.File
+import java.nio.file.Path
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.deleteRecursively
@@ -17,13 +21,14 @@ class AppConfigRepositoryTest {
 
     @OptIn(ExperimentalPathApi::class)
     private fun createTestRepository(
-        scope: kotlinx.coroutines.CoroutineScope
-                                    ): Pair<AppConfigRepository, java.nio.file.Path> {
+        scope: CoroutineScope
+    ): Pair<AppConfigRepository, Path> {
         val tmpDir = createTempDirectory(prefix = "app-config-test")
         val file = File(tmpDir.toString(), "preferences.preferences_pb")
         val dataStore = PreferenceDataStoreFactory.create(scope = scope, produceFile = { file })
         // FakeWebserverCredentialStore avoids EncryptedSharedPreferences — no Context needed
-        return AppConfigRepository(dataStore = dataStore, credentialStore = FakeWebserverCredentialStore()) to tmpDir
+        return AppConfigRepository
+            .Companion(dataStore = dataStore, credentialStore = FakeWebserverCredentialStore())to tmpDir
     }
 
     @OptIn(ExperimentalPathApi::class)
@@ -51,7 +56,7 @@ class AppConfigRepositoryTest {
         val tmpDir = createTempDirectory(prefix = "app-config-creds-test")
         val file = File(tmpDir.toString(), "preferences.preferences_pb")
         val dataStore = PreferenceDataStoreFactory.create(scope = this, produceFile = { file })
-        val repository = AppConfigRepository(dataStore = dataStore, credentialStore = fake)
+        val repository = AppConfigRepository.Companion(dataStore = dataStore, credentialStore = fake)
 
         repository.updateWebserverUser("alice")
         repository.updateWebserverPassword("s3cr3t")
@@ -86,7 +91,7 @@ class AppConfigRepositoryTest {
             val tmpDir = createTempDirectory(prefix = "app-config-init-test")
             val file = File(tmpDir.toString(), "preferences.preferences_pb")
             val dataStore = PreferenceDataStoreFactory.create(scope = this, produceFile = { file })
-            val repository = AppConfigRepository(dataStore = dataStore, credentialStore = fake)
+            val repository = AppConfigRepository.Companion(dataStore = dataStore, credentialStore = fake)
 
             assertEquals("bob", repository.webserverUser.first())
             assertEquals("hunter2", repository.webserverPassword.first())
@@ -101,7 +106,8 @@ class AppConfigRepositoryTest {
         val tmpDir = createTempDirectory(prefix = "app-config-test")
         val file = File(tmpDir.toString(), "preferences.preferences_pb")
         val dataStore = PreferenceDataStoreFactory.create(scope = this, produceFile = { file })
-        val repository = AppConfigRepository(dataStore = dataStore, credentialStore = FakeWebserverCredentialStore())
+        val repository =
+            AppConfigRepository.Companion(dataStore = dataStore, credentialStore = FakeWebserverCredentialStore())
 
         repository.updateUrl("https://example.com/custom")
         repository.updateAdminPassword("super-secret")
@@ -110,7 +116,7 @@ class AppConfigRepositoryTest {
         assertEquals(
             repository.hashPassword(BuildConfig.DEFAULT_ADMIN_PASSWORD),
             repository.adminPasswordHash.first()
-                    )
+        )
 
         tmpDir.deleteRecursively()
     }

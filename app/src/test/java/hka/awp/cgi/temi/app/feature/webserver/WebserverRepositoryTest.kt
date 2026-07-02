@@ -1,4 +1,4 @@
-package hka.awp.cgi.temi.app.utils
+package hka.awp.cgi.temi.app.feature.webserver
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
@@ -7,6 +7,8 @@ import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.preferencesOf
 import androidx.datastore.preferences.core.stringPreferencesKey
 import hka.awp.cgi.temi.app.BuildConfig
+import hka.awp.cgi.temi.app.utils.AppConfigRepository
+import hka.awp.cgi.temi.app.utils.FakeWebserverCredentialStore
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.unmockkAll
@@ -30,7 +32,8 @@ class WebserverRepositoryTest {
     fun setup() {
         datastore = mockk<DataStore<Preferences>>(relaxed = true)
         every { datastore.data } returns flowOf(emptyPreferences())
-        repository = AppConfigRepository(dataStore = datastore, credentialStore = FakeWebserverCredentialStore())
+        repository =
+            AppConfigRepository.Companion(dataStore = datastore, credentialStore = FakeWebserverCredentialStore())
     }
 
     @AfterEach
@@ -48,7 +51,8 @@ class WebserverRepositoryTest {
         val key = stringPreferencesKey("webview_url")
         val value = "https://example.com"
         every { datastore.data } returns flowOf(preferencesOf(key to value))
-        repository = AppConfigRepository(dataStore = datastore, credentialStore = FakeWebserverCredentialStore())
+        repository =
+            AppConfigRepository.Companion(dataStore = datastore, credentialStore = FakeWebserverCredentialStore())
 
         assertEquals(value, repository.currentUrl.first())
     }
@@ -60,7 +64,8 @@ class WebserverRepositoryTest {
         val tmpDir = createTempDirectory(prefix = "datastore-test")
         val file = File(tmpDir.toString(), "preferences.preferences_pb")
         val dataStore = PreferenceDataStoreFactory.create(scope = this, produceFile = { file })
-        val repository = AppConfigRepository(dataStore = dataStore, credentialStore = FakeWebserverCredentialStore())
+        val repository =
+            AppConfigRepository.Companion(dataStore = dataStore, credentialStore = FakeWebserverCredentialStore())
 
         assertEquals(BuildConfig.WEBVIEW_URL, repository.currentUrl.first())
 
