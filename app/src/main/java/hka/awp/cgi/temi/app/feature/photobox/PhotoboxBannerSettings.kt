@@ -9,6 +9,11 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+/**
+ * Branding banner variant burned into the bottom of Photobox photos. Each variant carries
+ * separate assets for standalone, strip, and grid layouts because the branding area's aspect
+ * ratio differs across modes.
+ */
 enum class PhotoboxBanner(
     private val standardDrawableRes: Int,
     private val stripDrawableRes: Int,
@@ -38,15 +43,8 @@ enum class PhotoboxBanner(
 
 private val DEFAULT_BANNER = PhotoboxBanner.CGI_LAB
 
-// The grid composite is roughly twice as wide as a single photo, so a full-width banner there
-// looks oversized — both the live preview and the actual bake scale it down to this fraction of
-// the grid's width instead.
-internal const val PHOTOBOX_GRID_BANNER_WIDTH_FRACTION = 0.6f
+internal const val PHOTOBOX_GRID_BANNER_WIDTH_FRACTION = 1.0f
 
-// Both banner PNGs share this width:height ratio (4400x327) — used to approximate, in the
-// preview screen's live Compose layer, how tall the already-baked banner renders so Temi's live
-// overlay can be shifted to sit above it (see PhotoboxPreviewOverlay). The actual bake
-// (PhotoboxUploadRepository) reads the real decoded bitmap instead, so this is preview-only.
 const val PHOTOBOX_BANNER_ASPECT_RATIO = 4400f / 327f
 
 /** Whether/which branding banner is burned into Photobox photos, backed by [AppConfigRepository]. */

@@ -53,14 +53,8 @@ import androidx.compose.foundation.lazy.grid.items as gridItems
 private const val GRIDCELL_COUNT = 3
 
 /**
- * The main content view for the Navigation screen.
- *
- * This component displays the current location status and a grid of destination options.
- * It is designed to match the Figma prototype, featuring vertical cards, CGI Red accents,
- * and a fixed layout that fits on a single screen without scrolling.
- *
- * @param modifier The [Modifier] to be applied to the root layout.
- * @param viewModel The [NavigationViewModel] used to manage the state and actions of this screen.
+ * Root composable for the Navigation feature. Shows the current location status and a grid of
+ * destination cards the user can tap to send Temi to a waypoint.
  */
 @Composable
 fun NavigationContent(
@@ -180,8 +174,7 @@ private fun MapDialogErrorContent(savedLocations: List<String>, onNavigateTo: (S
     Column {
         if (savedLocations.isEmpty()) {
             Text(text = stringResource(R.string.show_map_failed), style = MaterialTheme.typography.bodyMedium)
-        }
-        if (savedLocations.isNotEmpty()) {
+        } else {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = stringResource(R.string.saved_locations, savedLocations.size),
@@ -343,7 +336,7 @@ private fun MapButton(onClick: () -> Unit) {
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(8.dp),
-        color = Color(color = 0xFFF3F5F7)
+        color = MaterialTheme.colorScheme.surfaceVariant
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 7.dp, vertical = 7.dp),

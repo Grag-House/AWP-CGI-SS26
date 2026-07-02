@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+/** Position of the Temi cutout on Photobox photos: left, center, or right of the frame. */
 enum class TemiOverlayPosition { LEFT, CENTER, RIGHT }
 
 private val DEFAULT_OVERLAY_POSITION = TemiOverlayPosition.RIGHT

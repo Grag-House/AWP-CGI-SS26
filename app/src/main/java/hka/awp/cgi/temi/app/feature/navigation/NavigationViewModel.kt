@@ -56,9 +56,8 @@ data class NavigationUiState(
 )
 
 /**
- * ViewModel responsible for managing navigation logic and map data for the robot.
- *
- * This class tracks the robot's real-time position, determines the nearest saved location
+ * ViewModel for the Navigation feature. Tracks the robot's real-time position, manages map data,
+ * and drives MQTT publishing for navigation events and ASR results.
  */
 @Suppress("TooManyFunctions")
 class NavigationViewModel(
@@ -108,7 +107,6 @@ class NavigationViewModel(
     }
 
     override fun onCleared() {
-        super.onCleared()
         pendingTerminalPublishJob?.cancel()
         pendingTerminalPublishJob = null
         robot?.removeOnRobotReadyListener(this)
@@ -160,7 +158,6 @@ class NavigationViewModel(
             }
         }
 
-        // Return to wake-word listening after Temi ASR command handling.
         temiVoiceListener.resumeWakeWordListening()
     }
 
@@ -263,9 +260,6 @@ class NavigationViewModel(
         }
     }
 
-    /**
-     * Loads the map from the robot and waits for the SDK callback.
-     */
     private suspend fun awaitMapLoad(): Boolean {
         val maps = withContext(Dispatchers.IO) {
             runCatching { robot?.getMapList().orEmpty() }
