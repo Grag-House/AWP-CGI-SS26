@@ -22,7 +22,6 @@ import hka.awp.cgi.temi.app.feature.settings.display.DisplayViewModel
 import hka.awp.cgi.temi.app.feature.voiceRecognition.TemiVoiceRecognitionViewModel
 import hka.awp.cgi.temi.app.ui.shell.MainShell
 import hka.awp.cgi.temi.app.ui.theme.CgiTheme
-import hka.awp.cgi.temi.app.utils.LanguageHelper
 import hka.awp.cgi.temi.app.utils.hideTopBar
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.compose.viewmodel.koinViewModel
@@ -40,41 +39,33 @@ import kotlin.math.abs
 class MainActivity : ComponentActivity() {
 
     private val controllerViewModel: ControllerViewModel by viewModel()
-    private val cameraPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission(),
-    ) { isGranted ->
-        Timber.d("Camera permission granted: $isGranted")
-    }
+    private val temiVoiceRecognitionViewModel: TemiVoiceRecognitionViewModel by viewModel()
 
     private lateinit var soundPool: SoundPool
     private var hornSoundId: Int = -1
 
-    private val temiVoiceRecognitionViewModel: TemiVoiceRecognitionViewModel by viewModel()
+    private val requestPermissionsLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val cameraGranted = permissions[Manifest.permission.CAMERA] ?: false
+        val micGranted = permissions[Manifest.permission.RECORD_AUDIO] ?: false
 
-    private val requestPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted: Boolean ->
-        if (isGranted) {
+        Timber.d("Permissions -> Camera: $cameraGranted, Mic: $micGranted")
+
+        if (micGranted) {
             initTemiVoiceRecognition()
-        } else {
-            Timber.w("Microphone permission denied. Voice recognition will not work.")
         }
     }
 
-    /**
-     * Initializes the activity, configures system UI, requests necessary permissions,
-     * and sets the Compose content.
-     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        requestCameraPermissionIfNeeded()
+
+        checkAndRequestPermissions()
 
         hideTopBar(window)
         enableEdgeToEdge()
 
         initSoundPool()
-
-        checkMicrophonePermission()
 
         setContent {
             val displayViewModel: DisplayViewModel = koinViewModel()
@@ -85,34 +76,28 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun requestCameraPermissionIfNeeded() {
-        val isGranted = ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.CAMERA,
-        ) == PackageManager.PERMISSION_GRANTED
+    private fun checkAndRequestPermissions() {
+        val permissionsToRequest = mutableListOf<String>()
 
-        if (!isGranted) {
-            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            permissionsToRequest.add(Manifest.permission.CAMERA)
+        }
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            permissionsToRequest.add(Manifest.permission.RECORD_AUDIO)
+        } else {
+            initTemiVoiceRecognition()
+        }
+
+        if (permissionsToRequest.isNotEmpty()) {
+            requestPermissionsLauncher.launch(permissionsToRequest.toTypedArray())
         }
     }
 
     private fun initTemiVoiceRecognition() {
         temiVoiceRecognitionViewModel.initializeVoiceAi()
-    }
-
-    private fun checkMicrophonePermission() {
-        when {
-            ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.RECORD_AUDIO
-            ) == PackageManager.PERMISSION_GRANTED -> {
-                initTemiVoiceRecognition()
-            }
-
-            else -> {
-                requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-            }
-        }
     }
 
     private fun initSoundPool() {
@@ -128,20 +113,16 @@ class MainActivity : ComponentActivity() {
         hornSoundId = soundPool.load(this, R.raw.horn, 1)
     }
 
-    /**
-     * Sets the locale context based on saved application settings before the
-     * activity base configuration is loaded.
-     */
     override fun attachBaseContext(newBase: Context) {
+        // SharedPreferences-based language lookup for early bootstrap
+        val prefs = newBase.getSharedPreferences("Settings", MODE_PRIVATE)
+        val langCode = prefs.getString("lang", "de") ?: "de"
+
         val config = Configuration(newBase.resources.configuration)
-        config.setLocale(Locale.forLanguageTag(LanguageHelper.getLocale(newBase)))
+        config.setLocale(Locale(langCode))
         super.attachBaseContext(newBase.createConfigurationContext(config))
     }
 
-    /**
-     * Intercepts generic motion events (like joystick inputs) and delegates
-     * them to the [ControllerViewModel].
-     */
     override fun dispatchGenericMotionEvent(event: MotionEvent): Boolean {
         if (!event.isFromGameController()) return super.dispatchGenericMotionEvent(event)
 
@@ -152,10 +133,6 @@ class MainActivity : ComponentActivity() {
         return true
     }
 
-    /**
-     * Reacts to key events, specifically from game controllers, to trigger
-     * steering commands or audio feedback (horn).
-     */
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         if (event?.isFromGameController() != true) return super.onKeyDown(keyCode, event)
 
@@ -167,7 +144,6 @@ class MainActivity : ComponentActivity() {
                     soundPool.play(hornSoundId, 1f, 1f, 1, 0, 1f)
                 }
             }
-
             else -> {
                 Timber.d("Ignored controller keyCode=$keyCode")
                 return true
@@ -176,16 +152,10 @@ class MainActivity : ComponentActivity() {
         return true
     }
 
-    /**
-     * Monitors the release of game controller buttons.
-     */
     override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
         return if (event?.isFromGameController() == true) true else super.onKeyUp(keyCode, event)
     }
 
-    /**
-     * Releases resources (like SoundPool) to prevent memory leaks.
-     */
     override fun onDestroy() {
         soundPool.release()
         super.onDestroy()
