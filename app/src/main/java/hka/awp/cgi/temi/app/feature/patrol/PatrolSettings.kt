@@ -1,10 +1,26 @@
 package hka.awp.cgi.temi.app.feature.patrol
 
+/**
+ * Defines the operational modes for the robot's patrol behavior.
+ */
 enum class PatrolMode {
+    /** Patrols locations in a non-deterministic order. */
     RANDOM,
+
+    /** Patrols locations in the pre-defined order of the route. */
     FIXED
 }
 
+/**
+ * Represents the configuration settings for the robot's patrol functionality.
+ *
+ * @property isEnabled Whether the automated patrol system is currently active.
+ * @property mode The [PatrolMode] determining how locations are selected.
+ * @property minMinutes The minimum time interval (in minutes) between patrol sessions.
+ * @property maxMinutes The maximum time interval (in minutes) between patrol sessions.
+ * @property hours The specific hours of the day (0-23) during which patrols are permitted.
+ * @property route The list of location names that define the patrol path.
+ */
 data class PatrolSettings(
     val isEnabled: Boolean = false,
     val mode: PatrolMode = PatrolMode.RANDOM,

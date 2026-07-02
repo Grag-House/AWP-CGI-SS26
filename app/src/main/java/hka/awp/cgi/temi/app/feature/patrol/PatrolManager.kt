@@ -12,7 +12,18 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import kotlin.time.Duration.Companion.milliseconds
 
+/**
+ * Orchestrates the robot's patrol operations.
+ *
+ * This class acts as the central state machine for patrols, managing navigation,
+ * scanning cycles, and emergency responses via [PatrolAnalysisHandler].
+ *
+ * @param robot The Temi SDK [Robot] instance.
+ * @param cameraStreamManager Manager for the patrol camera stream.
+ * @param mqttManager Interface for sending patrol notifications and TTS prompts.
+ */
 @Suppress("TooManyFunctions")
 class PatrolManager(
     private val robot: Robot?,
@@ -27,23 +38,26 @@ class PatrolManager(
     private var activeRoute: List<String> = emptyList()
     private var activeIndex = 0
     private val _isRunning = MutableStateFlow(false)
+
+    /** Indicates whether a patrol is currently active. */
     val isRunning: StateFlow<Boolean> = _isRunning.asStateFlow()
+
     private var scanJob: Job? = null
     private var activeCameraTiltAngle = 0
     private val analysisHandler = PatrolAnalysisHandler(
         robot = robot,
         scope = scope,
         cameraStreamManager = cameraStreamManager,
-        onEmergencyDetected = {
-            pausePatrolForEmergency()
-        },
-        onObservationFinished = {
-            resumePatrolAfterEmergency()
-        }
+        onEmergencyDetected = { pausePatrolForEmergency() },
+        onObservationFinished = { resumePatrolAfterEmergency() }
     )
+
     private val _countdownSeconds = MutableStateFlow<Int?>(null)
     private var ignoreAbortUntilMs = 0L
+
+    /** Returns the current countdown value if a patrol is scheduled to start. */
     val countdownSeconds: StateFlow<Int?> = _countdownSeconds.asStateFlow()
+
     private companion object {
         private const val PATROL_COUNTDOWN_SECONDS = 30
         private const val ANNOUNCEMENT_TIMEOUT_MS = 12_000L
@@ -51,21 +65,28 @@ class PatrolManager(
         private const val STABILIZATION_DELAY_MS = 700L
         private const val STABILIZATION_REPEATS = 3
         private const val DEFAULT_CAMERA_ANGLE = 0
-
         private const val AUTOMATIC_PATROL_DELAY = 1_000L
+        private const val ABORT_IGNORE_WINDOW_MS = 3_000L
     }
 
     init {
         robot?.addOnGoToLocationStatusChangedListener(this)
     }
 
+    /**
+     * Initiates a manual, immediate patrol sequence.
+     *
+     * @param route The list of location names to navigate to.
+     * @param cameraTiltAngle The desired camera tilt during movement.
+     * @return True if the patrol started successfully, false if already running or invalid.
+     */
     fun startImmediatePatrol(route: List<String>, cameraTiltAngle: Int = 0): Boolean {
         if (route.isEmpty()) {
-            Timber.w("Keine Kontrollroute konfiguriert.")
+            Timber.w("No patrol route configured.")
             return false
         }
         if (_isRunning.value) {
-            Timber.w("Kontrollfahrt läuft bereits.")
+            Timber.w("Patrol is already running.")
             return false
         }
         _countdownSeconds.value = null
@@ -81,7 +102,7 @@ class PatrolManager(
         _isRunning.value = true
         activeCameraTiltAngle = cameraTiltAngle
 
-        Timber.i("Starte Kontrollfahrt: $activeRoute")
+        Timber.i("Starting patrol: %s", activeRoute)
         cameraStreamManager.startStream()
         analysisHandler.start()
 
@@ -90,28 +111,24 @@ class PatrolManager(
     }
 
     private suspend fun announcePatrolStart() {
-        Timber.d("Sende Patrol Announcement Prompt über MQTT")
+        Timber.d("Sending patrol announcement prompt via MQTT")
         mqttManager.publishPatrolAnnouncementPrompt()
-
         mqttManager.waitForTtsCompleted(timeoutMs = ANNOUNCEMENT_TIMEOUT_MS)
-
         robot?.finishConversation()
     }
 
     private suspend fun startAutomaticPatrol(route: List<String>) {
         for (seconds in PATROL_COUNTDOWN_SECONDS downTo 1) {
             _countdownSeconds.value = seconds
-            delay(AUTOMATIC_PATROL_DELAY)
+            delay(AUTOMATIC_PATROL_DELAY.milliseconds)
         }
-
         _countdownSeconds.value = null
-
         startImmediatePatrol(route, cameraTiltAngle = 0)
     }
 
     private fun moveToCurrentLocation() {
         val location = activeRoute.getOrNull(activeIndex) ?: return
-        Timber.d("Fahre zu Kontrollpunkt ${activeIndex + 1}/${activeRoute.size}: $location")
+        Timber.d("Moving to patrol point %d/%d: %s", activeIndex + 1, activeRoute.size, location)
         robot?.goTo(location)
     }
 
@@ -126,21 +143,19 @@ class PatrolManager(
         when (status.lowercase()) {
             "complete" -> {
                 if (analysisHandler.isObserving) {
-                    Timber.d("Complete während Lying-Beobachtung ignoriert.")
+                    Timber.d("Ignored 'complete' status during emergency observation.")
                     return
                 }
-
-                Timber.d("Kontrollpunkt erreicht: $location")
+                Timber.d("Patrol point reached: %s", location)
                 stabilizeCameraAndScan()
             }
 
             "abort", "cancel", "cancelled" -> {
                 if (analysisHandler.isObserving || System.currentTimeMillis() < ignoreAbortUntilMs) {
-                    Timber.w("GoTo-Abbruch wegen Lying/Emergency ignoriert.")
+                    Timber.w("Ignored navigation abort due to emergency/observation.")
                     return
                 }
-
-                Timber.w("Kontrollfahrt abgebrochen bei $location.")
+                Timber.w("Patrol aborted at: %s", location)
                 stopPatrol()
             }
         }
@@ -151,9 +166,8 @@ class PatrolManager(
         scanJob = scope.launch {
             repeat(STABILIZATION_REPEATS) {
                 robot?.tiltAngle(degrees = DEFAULT_CAMERA_ANGLE, speed = CAMERA_TILT_SPEED)
-                delay(STABILIZATION_DELAY_MS)
+                delay(STABILIZATION_DELAY_MS.milliseconds)
             }
-
             scanAtCurrentPoint()
         }
     }
@@ -162,35 +176,29 @@ class PatrolManager(
         scanJob?.cancel()
         scanJob = scope.launch {
             val currentLoc = activeRoute[activeIndex]
-
             scanner.executeScanSequence {
                 cameraStreamManager.sendPatrolPointReached(currentLoc)
             }
-
             goToNextLocation()
         }
     }
 
-    @Suppress("MagicNumber")
     private fun pausePatrolForEmergency() {
-        Timber.w("Kontrollfahrt pausiert wegen Lying-Erkennung.")
-
+        Timber.w("Patrol paused due to emergency detection.")
         scanJob?.cancel()
         scanJob = null
-
-        ignoreAbortUntilMs = System.currentTimeMillis() + 3_000L
+        ignoreAbortUntilMs = System.currentTimeMillis() + ABORT_IGNORE_WINDOW_MS
         robot?.stopMovement()
         scope.launch {
             repeat(STABILIZATION_REPEATS) {
                 robot?.tiltAngle(degrees = DEFAULT_CAMERA_ANGLE, speed = CAMERA_TILT_SPEED)
-                delay(STABILIZATION_DELAY_MS)
+                delay(STABILIZATION_DELAY_MS.milliseconds)
             }
         }
     }
 
     private fun resumePatrolAfterEmergency() {
-        Timber.i("Lying-Beobachtung beendet. Setze Kontrollfahrt fort.")
-
+        Timber.i("Emergency observation finished. Resuming patrol.")
         if (!_isRunning.value) return
         moveToCurrentLocation()
     }
@@ -198,17 +206,19 @@ class PatrolManager(
     private fun goToNextLocation() {
         activeIndex++
         if (activeIndex >= activeRoute.size) {
-            Timber.i("Kontrollfahrt abgeschlossen.")
+            Timber.i("Patrol completed.")
             stopPatrol()
             return
         }
         moveToCurrentLocation()
     }
 
+    /** Updates the automated patrol schedule configuration. */
     fun updateSchedule(settings: PatrolSettings) {
         scheduler.updateSchedule(settings)
     }
 
+    /** Stops the patrol, resets state, and cleans up resources. */
     fun stopPatrol() {
         scanJob?.cancel()
         scanJob = null

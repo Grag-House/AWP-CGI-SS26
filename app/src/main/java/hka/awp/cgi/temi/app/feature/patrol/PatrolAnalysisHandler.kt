@@ -8,7 +8,19 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import kotlin.time.Duration.Companion.milliseconds
 
+/**
+ * Monitors the patrol camera feed for emergency states (e.g., "lying").
+ * * This handler processes incoming stream messages and manages the confirmation lifecycle
+ * to avoid false positives, including observation timers and alarm triggering.
+ *
+ * @param robot The Temi SDK [Robot] instance.
+ * @param scope Coroutine scope for running observation and alarm timers.
+ * @param cameraStreamManager The source of incoming camera state messages.
+ * @param onEmergencyDetected Callback to pause patrol movement when a threat is identified.
+ * @param onObservationFinished Callback to resume patrol once observation or alarms conclude.
+ */
 class PatrolAnalysisHandler(
     private val robot: Robot?,
     private val scope: CoroutineScope,
@@ -18,25 +30,26 @@ class PatrolAnalysisHandler(
 ) {
     private var observationJob: Job? = null
     private var latestState: String? = null
-
     private var collectJob: Job? = null
 
     private var lyingCountAfterFirstDetection = 0
     private var isObservingLying = false
     private var ignoreNewLyingUntilMs = 0L
     private var finalAlarmTriggered = false
+
     val isObserving: Boolean
         get() = isObservingLying
 
+    /** Starts the flow collection of camera stream state messages. */
     fun start() {
         if (collectJob?.isActive == true) return
 
-        Timber.d("PatrolAnalysisHandler gestartet")
+        Timber.d("PatrolAnalysisHandler started")
 
         collectJob = scope.launch {
             cameraStreamManager.textMessages.collectLatest { message ->
                 val state = message.trim().lowercase()
-                Timber.d("PatrolAnalysisHandler Nachricht erhalten: $state")
+                Timber.d("PatrolAnalysisHandler received message: %s", state)
                 latestState = state
                 if (state == LYING_STATE) {
                     handleLyingDetected()
@@ -49,12 +62,12 @@ class PatrolAnalysisHandler(
         val now = System.currentTimeMillis()
 
         if (!isObservingLying && now < ignoreNewLyingUntilMs) {
-            Timber.d("Lying ignoriert wegen Cooldown.")
+            Timber.d("Lying state ignored due to cooldown.")
             return
         }
 
         if (finalAlarmTriggered) {
-            Timber.d("Lying ignoriert, finaler Alarm läuft bereits.")
+            Timber.d("Lying state ignored, final alarm already in progress.")
             return
         }
 
@@ -62,7 +75,7 @@ class PatrolAnalysisHandler(
             isObservingLying = true
             lyingCountAfterFirstDetection = 0
 
-            Timber.w("Lying erstmals erkannt. Stoppe Temi und starte Beobachtung.")
+            Timber.w("Lying state detected for the first time. Stopping patrol and starting observation.")
 
             onEmergencyDetected()
             speak("ALARM")
@@ -74,7 +87,7 @@ class PatrolAnalysisHandler(
         lyingCountAfterFirstDetection++
 
         Timber.w(
-            "Lying weiterhin erkannt: %s/%s",
+            "Lying state confirmed again: %d/%d",
             lyingCountAfterFirstDetection,
             REQUIRED_LYING_CONFIRMATIONS
         )
@@ -87,12 +100,12 @@ class PatrolAnalysisHandler(
     private fun startObservationTimer() {
         observationJob?.cancel()
         observationJob = scope.launch {
-            delay(OBSERVATION_TIME_MS)
+            delay(OBSERVATION_TIME_MS.milliseconds)
 
             if (isObservingLying && lyingCountAfterFirstDetection >= REQUIRED_LYING_CONFIRMATIONS) {
                 triggerFinalAlarm()
             } else {
-                Timber.d("Beobachtungszeit vorbei, aber Lying nicht oft genug bestätigt.")
+                Timber.d("Observation time elapsed, but lying state was not confirmed sufficiently.")
             }
 
             resetLyingObservation()
@@ -104,13 +117,13 @@ class PatrolAnalysisHandler(
         if (finalAlarmTriggered) return
         finalAlarmTriggered = true
 
-        Timber.w("Lying bestätigt. Starte finalen Alarm.")
+        Timber.w("Lying state confirmed. Triggering final alarm.")
 
         observationJob?.cancel()
 
         scope.launch {
-            speak("ALARM, Arbeitsverweigerer erkannt, ALARM!")
-            delay(FINAL_ALARM_DELAY_MS)
+            speak("ALARM, unauthorized worker detected, ALARM!")
+            delay(FINAL_ALARM_DELAY_MS.milliseconds)
 
             resetLyingObservation()
             onObservationFinished()
@@ -135,6 +148,7 @@ class PatrolAnalysisHandler(
         )
     }
 
+    /** Stops collection and resets all internal observation states. */
     fun stop() {
         collectJob?.cancel()
         collectJob = null
