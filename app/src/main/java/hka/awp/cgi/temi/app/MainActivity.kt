@@ -40,24 +40,21 @@ import kotlin.math.abs
 class MainActivity : ComponentActivity() {
 
     private val controllerViewModel: ControllerViewModel by viewModel()
-    private val cameraPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission(),
-    ) { isGranted ->
-        Timber.d("Camera permission granted: $isGranted")
-    }
+    private val temiVoiceRecognitionViewModel: TemiVoiceRecognitionViewModel by viewModel()
 
     private lateinit var soundPool: SoundPool
     private var hornSoundId: Int = -1
 
-    private val temiVoiceRecognitionViewModel: TemiVoiceRecognitionViewModel by viewModel()
+    private val requestPermissionsLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val cameraGranted = permissions[Manifest.permission.CAMERA] ?: false
+        val micGranted = permissions[Manifest.permission.RECORD_AUDIO] ?: false
 
-    private val requestPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted: Boolean ->
-        if (isGranted) {
+        Timber.d("Permissions -> Camera: $cameraGranted, Mic: $micGranted")
+
+        if (micGranted) {
             initTemiVoiceRecognition()
-        } else {
-            Timber.w("Microphone permission denied. Voice recognition will not work.")
         }
     }
 
@@ -67,14 +64,13 @@ class MainActivity : ComponentActivity() {
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        requestCameraPermissionIfNeeded()
+
+        checkAndRequestPermissions()
 
         hideTopBar(window)
         enableEdgeToEdge()
 
         initSoundPool()
-
-        checkMicrophonePermission()
 
         setContent {
             val displayViewModel: DisplayViewModel = koinViewModel()
@@ -85,34 +81,29 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun requestCameraPermissionIfNeeded() {
-        val isGranted = ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.CAMERA,
-        ) == PackageManager.PERMISSION_GRANTED
+    private fun checkAndRequestPermissions() {
+        val permissionsToRequest = mutableListOf<String>()
 
-        if (!isGranted) {
-            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            permissionsToRequest.add(Manifest.permission.CAMERA)
+        }
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            permissionsToRequest.add(Manifest.permission.RECORD_AUDIO)
+        } else {
+            // Already have mic permission
+            initTemiVoiceRecognition()
+        }
+
+        if (permissionsToRequest.isNotEmpty()) {
+            requestPermissionsLauncher.launch(permissionsToRequest.toTypedArray())
         }
     }
 
     private fun initTemiVoiceRecognition() {
         temiVoiceRecognitionViewModel.initializeVoiceAi()
-    }
-
-    private fun checkMicrophonePermission() {
-        when {
-            ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.RECORD_AUDIO
-            ) == PackageManager.PERMISSION_GRANTED -> {
-                initTemiVoiceRecognition()
-            }
-
-            else -> {
-                requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-            }
-        }
     }
 
     private fun initSoundPool() {
@@ -167,7 +158,6 @@ class MainActivity : ComponentActivity() {
                     soundPool.play(hornSoundId, 1f, 1f, 1, 0, 1f)
                 }
             }
-
             else -> {
                 Timber.d("Ignored controller keyCode=$keyCode")
                 return true
