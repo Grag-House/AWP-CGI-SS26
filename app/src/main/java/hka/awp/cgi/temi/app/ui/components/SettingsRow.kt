@@ -15,6 +15,16 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
+/**
+ * A standardized row component for settings screens, displaying an icon, a title,
+ * an optional subtitle, and an optional action composable (e.g., a switch or button).
+ *
+ * @param modifier Modifier to be applied to the row container.
+ * @param icon The [ImageVector] to display at the start of the row.
+ * @param title The primary text label for the setting.
+ * @param subtitle Optional descriptive text displayed below the title.
+ * @param action Optional composable to be placed at the end of the row (e.g., a Switch).
+ */
 @Composable
 fun SettingsRow(
     modifier: Modifier = Modifier,

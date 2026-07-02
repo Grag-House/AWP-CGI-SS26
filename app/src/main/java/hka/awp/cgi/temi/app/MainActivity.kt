@@ -33,9 +33,9 @@ import kotlin.math.abs
 /**
  * The main entry point of the application.
  *
- * This activity is responsible for:
- * - Configuring system UI visibility, such as hiding the status bar for a full-screen experience.
- * - Setting up the Jetpack Compose UI layout within the [CgiTheme].
+ * This activity acts as the primary container for the Jetpack Compose UI,
+ * manages hardware interfaces (game controller inputs, audio effects),
+ * and handles runtime permissions.
  */
 class MainActivity : ComponentActivity() {
 
@@ -61,6 +61,10 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    /**
+     * Initializes the activity, configures system UI, requests necessary permissions,
+     * and sets the Compose content.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestCameraPermissionIfNeeded()
@@ -124,12 +128,20 @@ class MainActivity : ComponentActivity() {
         hornSoundId = soundPool.load(this, R.raw.horn, 1)
     }
 
+    /**
+     * Sets the locale context based on saved application settings before the
+     * activity base configuration is loaded.
+     */
     override fun attachBaseContext(newBase: Context) {
         val config = Configuration(newBase.resources.configuration)
         config.setLocale(Locale.forLanguageTag(LanguageHelper.getLocale(newBase)))
         super.attachBaseContext(newBase.createConfigurationContext(config))
     }
 
+    /**
+     * Intercepts generic motion events (like joystick inputs) and delegates
+     * them to the [ControllerViewModel].
+     */
     override fun dispatchGenericMotionEvent(event: MotionEvent): Boolean {
         if (!event.isFromGameController()) return super.dispatchGenericMotionEvent(event)
 
@@ -140,6 +152,10 @@ class MainActivity : ComponentActivity() {
         return true
     }
 
+    /**
+     * Reacts to key events, specifically from game controllers, to trigger
+     * steering commands or audio feedback (horn).
+     */
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         if (event?.isFromGameController() != true) return super.onKeyDown(keyCode, event)
 
@@ -160,10 +176,16 @@ class MainActivity : ComponentActivity() {
         return true
     }
 
+    /**
+     * Monitors the release of game controller buttons.
+     */
     override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
         return if (event?.isFromGameController() == true) true else super.onKeyUp(keyCode, event)
     }
 
+    /**
+     * Releases resources (like SoundPool) to prevent memory leaks.
+     */
     override fun onDestroy() {
         soundPool.release()
         super.onDestroy()

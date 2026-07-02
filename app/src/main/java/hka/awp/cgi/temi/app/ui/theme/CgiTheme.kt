@@ -21,7 +21,7 @@ import androidx.compose.ui.graphics.Color
 fun CgiTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
-            ) {
+) {
     val colorScheme =
         if (darkTheme) {
             darkColorScheme(
@@ -31,7 +31,7 @@ fun CgiTheme(
                 surface = DarkSurface,
                 onSurface = Color.White,
                 surfaceVariant = DarkSurfaceVariant
-                           )
+            )
         } else {
             lightColorScheme(
                 primary = primary,
@@ -40,7 +40,7 @@ fun CgiTheme(
                 surface = SidepanelColor,
                 onSurface = OnSurface,
                 surfaceVariant = LightSurfaceVariant
-                            )
+            )
         }
 
     val customColors =
@@ -48,12 +48,12 @@ fun CgiTheme(
             CustomDesignTokens(
                 sidepanel = DarkSidepanel,
                 sidepanelHighlight = DarkSidepanelHighlight
-                              )
+            )
         } else {
             CustomDesignTokens(
                 sidepanel = SidepanelColor,
                 sidepanelHighlight = SidepanelHighlight
-                              )
+            )
         }
 
     CompositionLocalProvider(LocalCustomColors provides customColors) {
@@ -61,7 +61,7 @@ fun CgiTheme(
             colorScheme = colorScheme,
             typography = AppTypography,
             content = content
-                     )
+        )
     }
 }
 
