@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.vosk.Recognizer
@@ -77,32 +76,19 @@ class TemiVoiceListener(
                 voiceProfileRepository.voiceProfiles,
                 generalConfigRepository.isSpeakerVerificationEnabled,
                 generalConfigRepository.speakerVerificationThreshold,
-            ) { profiles, enabled, threshold ->
+                enrollment.isActive
+            ) { profiles, enabled, threshold, _ ->
                 voiceProfiles = profiles
                 isSpeakerVerificationEnabled = enabled
                 speakerVerificationThreshold = threshold
-            }.first()
-
-            isInitialized = true
-            Timber.d("TemiVoiceListener ready. Profiles: %d", voiceProfiles.size)
-
-            listenerScope.launch {
-                robot?.addWakeupWordListener(internalListener)
+            }.collect {
+                if (!isInitialized) {
+                    isInitialized = true
+                    Timber.d("TemiVoiceListener ready. Profiles: %d", voiceProfiles.size)
+                    robot?.addWakeupWordListener(internalListener)
+                }
                 syncRuntimeState()
             }
-        }
-
-        listenerScope.launch(Dispatchers.IO) {
-            voiceProfileRepository.voiceProfiles.collect { voiceProfiles = it }
-        }
-        listenerScope.launch(Dispatchers.IO) {
-            generalConfigRepository.isSpeakerVerificationEnabled.collect { enabled ->
-                isSpeakerVerificationEnabled = enabled
-                listenerScope.launch { syncRuntimeState() }
-            }
-        }
-        listenerScope.launch(Dispatchers.IO) {
-            generalConfigRepository.speakerVerificationThreshold.collect { speakerVerificationThreshold = it }
         }
     }
 
