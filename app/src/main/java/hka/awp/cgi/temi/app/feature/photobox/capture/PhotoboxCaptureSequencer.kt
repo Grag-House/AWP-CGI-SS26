@@ -13,9 +13,6 @@ import kotlin.time.Duration.Companion.seconds
 
 private val TICK = 1.seconds
 
-// Some camera HALs (notably legacy/compatibility ones) can occasionally fail to deliver a
-// takePicture() result at all — neither success nor error. Without a timeout on our side, that
-// leaves the session stuck forever waiting for a callback that never comes.
 private val CAPTURE_TIMEOUT = 8.seconds
 
 /** The callbacks a [PhotoboxCaptureSequencer] reports session progress through. */

@@ -62,8 +62,7 @@ class PhotoboxUploadRepository(
     client: OkHttpClient,
     private val appConfigRepository: AppConfigRepository
 ) {
-    // Uploading a JPEG over a possibly slow/flaky WiFi connection can take longer than
-    // OkHttp's default timeouts.
+
     private val uploadClient = client.newBuilder()
         .connectTimeout(UPLOAD_TIMEOUT_SECONDS, TimeUnit.SECONDS)
         .writeTimeout(UPLOAD_TIMEOUT_SECONDS, TimeUnit.SECONDS)
@@ -166,9 +165,6 @@ class PhotoboxUploadRepository(
         return result
     }
 
-    // Keyed by drawable resource rather than by PhotoboxBanner directly since each banner has a
-    // separate asset per mode (see PhotoboxBanner.drawableRes) — decoded on first use and reused
-    // for the rest of the process, since a session can bake more than one photo.
     private val bannerBitmaps = mutableMapOf<Int, Bitmap>()
 
     private fun bannerBitmap(drawableRes: Int): Bitmap =
@@ -198,8 +194,6 @@ class PhotoboxUploadRepository(
         return result
     }
 
-    // Derives the exact white branding area height from the composite height, inverting the
-    // layout ratios used by combinePhotoStrip/combinePhotoGrid.
     private fun whiteAreaHeight(compositeHeight: Int, mode: PhotoboxMode): Float = when (mode) {
         PhotoboxMode.STRIP -> compositeHeight * STRIP_BANNER_HEIGHT_FRACTION
         PhotoboxMode.STRIP_1X4 -> compositeHeight * STRIP_1X4_BANNER_HEIGHT_FRACTION
@@ -207,9 +201,6 @@ class PhotoboxUploadRepository(
         PhotoboxMode.STANDARD -> compositeHeight.toFloat()
     }
 
-    // Only ever called with a non-null banner while baking the Temi overlay for a standalone
-    // photo at upload time (see PhotoboxSessionFinalizer) — strip/grid bake Temi per-frame, before
-    // the banner exists, so mode here is always STANDARD in practice.
     private fun bannerHeightPx(photoWidth: Int, banner: PhotoboxBanner, mode: PhotoboxMode): Float {
         val bannerBitmap = bannerBitmap(banner.drawableRes(mode))
         return bannerBitmap.height * (photoWidth.toFloat() / bannerBitmap.width)

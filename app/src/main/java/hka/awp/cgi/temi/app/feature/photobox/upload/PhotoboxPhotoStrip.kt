@@ -7,27 +7,17 @@ import androidx.core.graphics.createBitmap
 import androidx.core.graphics.scale
 import kotlin.math.roundToInt
 
-// Proportions derived from a reference strip layout (528x396 photos, 36px side margin,
-// 100px top margin, 60px gaps between photos, 392px bottom branding area), expressed as
-// ratios so spacing scales sensibly regardless of the camera's actual photo resolution.
 private const val SIDE_MARGIN_RATIO = 36f / 528f
 private const val TOP_MARGIN_RATIO = 100f / 396f
 private const val GAP_RATIO = 60f / 396f
 private const val BOTTOM_MARGIN_RATIO = 392f / 396f
 
-// Proportions for the 2x2 grid, derived from a reference layout (520x390 photos, 40px side
-// margins, 40px top margin, 40px gaps between photos, 260px bottom branding area). Horizontal
-// and vertical spacing are expressed separately since they scale against different photo
-// dimensions (width vs. height).
 private const val GRID_SIDE_MARGIN_RATIO = 40f / 520f
 private const val GRID_HORIZONTAL_GAP_RATIO = 40f / 520f
 private const val GRID_TOP_MARGIN_RATIO = 40f / 390f
 private const val GRID_VERTICAL_GAP_RATIO = 40f / 390f
 private const val GRID_BOTTOM_MARGIN_RATIO = 260f / 390f
 
-// Fraction of the total composite height that is the blank branding area at the bottom.
-// Derived by inverting the layout ratios above: bottomMargin / totalCompositeHeight.
-// Used by PhotoboxUploadRepository and PhotoboxPreviewOverlay to size the banner dynamically.
 internal const val STRIP_BANNER_HEIGHT_FRACTION = 392f / 1800f
 internal const val STRIP_1X4_BANNER_HEIGHT_FRACTION = 392f / 2256f
 internal const val GRID_2X2_BANNER_HEIGHT_FRACTION = 260f / 1120f
@@ -70,8 +60,6 @@ internal fun combinePhotoStrip(shots: List<Bitmap>): Bitmap {
         y += shot.height
         if (index < scaledShots.lastIndex) y += gap
     }
-    // The bottomMargin below the last shot stays blank/white — the canvas was already filled
-    // white above.
 
     return strip
 }
@@ -114,8 +102,6 @@ internal fun combinePhotoGrid(shots: List<Bitmap>, columns: Int): Bitmap {
         val y = topMargin + (index / columns) * (cellHeight + verticalGap)
         canvas.drawBitmap(shot, x.toFloat(), y.toFloat(), null)
     }
-    // The bottomMargin below the last row stays blank/white — the canvas was already filled
-    // white above.
 
     return grid
 }
