@@ -3,7 +3,7 @@ package hka.awp.cgi.temi.app.feature.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.robotemi.sdk.Robot
-import hka.awp.cgi.temi.app.data.repository.RobotInfo
+import hka.awp.cgi.temi.app.data.model.RobotInfo
 import hka.awp.cgi.temi.app.data.repository.RobotRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow

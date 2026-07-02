@@ -17,6 +17,8 @@ import hka.awp.cgi.temi.app.feature.mqtt.MqttManager
 import hka.awp.cgi.temi.app.utils.NetworkManager
 import hka.awp.cgi.temi.app.utils.TemiBatteryMonitor
 import hka.awp.cgi.temi.app.utils.TemiMovementController
+import hka.awp.cgi.temi.app.utils.security.PasswordHasher
+import hka.awp.cgi.temi.app.utils.security.Sha256PasswordHasher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -47,7 +49,8 @@ val coreModule = module {
     single { GeneralConfigRepository(dataStore = get()) }
     single { PatrolConfigRepository(dataStore = get()) }
     single { PhotoboxConfigRepository(dataStore = get()) }
-    single { SecurityConfigRepository(dataStore = get()) }
+    single<PasswordHasher> { Sha256PasswordHasher() }
+    single { SecurityConfigRepository(dataStore = get(), passwordHasher = get()) }
 
     // Robot & Temi SDK
     single { RobotRepository() }

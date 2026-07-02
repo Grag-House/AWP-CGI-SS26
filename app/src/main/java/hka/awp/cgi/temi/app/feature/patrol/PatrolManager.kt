@@ -2,6 +2,7 @@ package hka.awp.cgi.temi.app.feature.patrol
 
 import com.robotemi.sdk.Robot
 import com.robotemi.sdk.listeners.OnGoToLocationStatusChangedListener
+import hka.awp.cgi.temi.app.data.model.PatrolSettings
 import hka.awp.cgi.temi.app.feature.mqtt.MqttManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
