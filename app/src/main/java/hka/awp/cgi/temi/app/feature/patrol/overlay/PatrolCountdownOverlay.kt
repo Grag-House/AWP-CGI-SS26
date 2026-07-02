@@ -13,6 +13,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import hka.awp.cgi.temi.app.R
 
+/**
+ * An overlay component displaying a countdown timer before an automated patrol begins.
+ *
+ * @param seconds The current remaining time in seconds to be displayed in the message.
+ */
 @Composable
 fun PatrolCountdownOverlay(seconds: Int) {
     Box(
