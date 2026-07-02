@@ -28,7 +28,7 @@ class AppConfigRepositoryTest {
         val dataStore = PreferenceDataStoreFactory.create(scope = scope, produceFile = { file })
         // FakeWebserverCredentialStore avoids EncryptedSharedPreferences — no Context needed
         return AppConfigRepository
-            .Companion(dataStore = dataStore, credentialStore = FakeWebserverCredentialStore())to tmpDir
+            .Companion(dataStore = dataStore, credentialStore = FakeWebserverCredentialStore()) to tmpDir
     }
 
     @OptIn(ExperimentalPathApi::class)

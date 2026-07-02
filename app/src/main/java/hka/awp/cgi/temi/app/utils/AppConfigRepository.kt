@@ -12,10 +12,13 @@ import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import hka.awp.cgi.temi.app.BuildConfig
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.dialogs.AdminPanelPatrolSettingsDialog
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.security.MessageDigest
 
@@ -38,6 +41,9 @@ interface WebserverCredentialStore {
  * Production implementation backed by [EncryptedSharedPreferences].
  * Keys and values are encrypted at rest using AES256.
  */
+
+// We use EncryptedSharedPreferences for simplicity, even though it's deprecated in favor of Jetpack Security Crypto.
+@Suppress("DEPRECATION")
 class EncryptedWebserverCredentialStore(context: Context) : WebserverCredentialStore {
     private val prefs = EncryptedSharedPreferences.create(
         context,
@@ -52,11 +58,15 @@ class EncryptedWebserverCredentialStore(context: Context) : WebserverCredentialS
     override fun getUser(): String = prefs.getString(KEY_USER, "") ?: ""
     override fun getPassword(): String = prefs.getString(KEY_PASSWORD, "") ?: ""
     override fun saveUser(user: String) {
-        prefs.edit().putString(KEY_USER, user).apply()
+        CoroutineScope(Dispatchers.IO).launch {
+            prefs.edit().putString(KEY_USER, user).apply()
+        }
     }
 
     override fun savePassword(password: String) {
-        prefs.edit().putString(KEY_PASSWORD, password).apply()
+        CoroutineScope(Dispatchers.IO).launch {
+            prefs.edit().putString(KEY_PASSWORD, password).apply()
+        }
     }
 
     companion object {

@@ -55,7 +55,7 @@ fun WebViewScreen(
         }
 
         if (!isUrlBlocked(sanitizedUrl)) {
-            if (isVerificationEnabled && webserverUser.isNotEmpty()) {
+            if (isVerificationEnabled && webserverUser.isNotEmpty() && webserverPassword.isNotEmpty()) {
                 val credentials = "$webserverUser:$webserverPassword"
                 val encodedCredentials = Base64.encodeToString(
                     credentials.toByteArray(Charsets.UTF_8),
