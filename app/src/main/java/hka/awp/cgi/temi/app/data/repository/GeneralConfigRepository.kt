@@ -23,6 +23,7 @@ class GeneralConfigRepository(
     private val latitudeKey = doublePreferencesKey("latitude")
     private val longitudeKey = doublePreferencesKey("longitude")
     private val languageKey = stringPreferencesKey("app_language")
+    private val darkModeKey = booleanPreferencesKey("dark_mode")
     private val speakerVerificationEnabledKey = booleanPreferencesKey("speaker_verification_enabled")
     private val speakerVerificationThresholdKey = doublePreferencesKey("speaker_verification_threshold")
 
@@ -113,6 +114,22 @@ class GeneralConfigRepository(
      */
     suspend fun updateLanguage(languageCode: String) {
         dataStore.edit { it[languageKey] = languageCode }
+    }
+
+    /**
+     * Flow indicating whether the dark mode UI theme should be applied.
+     */
+    val isDarkMode: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[darkModeKey] ?: false
+    }
+
+    /**
+     * Toggles the application's dark mode setting.
+     *
+     * @param enabled Set to `true` to activate dark mode.
+     */
+    suspend fun toggleDarkMode(enabled: Boolean) {
+        dataStore.edit { it[darkModeKey] = enabled }
     }
 
     companion object {

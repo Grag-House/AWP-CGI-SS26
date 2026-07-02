@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.robotemi.sdk.Robot
 import hka.awp.cgi.temi.app.BuildConfig
+import hka.awp.cgi.temi.app.data.model.PatrolMode
+import hka.awp.cgi.temi.app.data.model.PatrolSettings
 import hka.awp.cgi.temi.app.data.repository.GeneralConfigRepository
 import hka.awp.cgi.temi.app.data.repository.PatrolConfigRepository
 import hka.awp.cgi.temi.app.data.repository.SecurityConfigRepository
@@ -14,9 +16,6 @@ import hka.awp.cgi.temi.app.feature.mqtt.MqttManager
 import hka.awp.cgi.temi.app.feature.mqtt.MqttTrafficEvent
 import hka.awp.cgi.temi.app.feature.patrol.PatrolCameraStreamManager
 import hka.awp.cgi.temi.app.feature.patrol.PatrolManager
-import hka.awp.cgi.temi.app.feature.patrol.PatrolMode
-import hka.awp.cgi.temi.app.feature.patrol.PatrolSettings
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.dialogs.AdminPanelPatrolSettingsDialog
 import hka.awp.cgi.temi.app.feature.voiceRecognition.SpeakerVector
 import hka.awp.cgi.temi.app.feature.voiceRecognition.TemiVoiceRecognitionViewModel
 import hka.awp.cgi.temi.app.feature.voiceRecognition.VoiceProfileRepository
@@ -156,7 +155,7 @@ class AdminPanelViewModel(
         val voiceProfiles = args[2] as Map<String, SpeakerVector>
         val isEnrollmentActive = args[3] as Boolean
         val isEnabled = args[4] as Boolean
-        val mode = args[5] as AdminPanelPatrolSettingsDialog
+        val mode = args[5] as PatrolMode
         val min = args[6] as Int
         val max = args[7] as Int
         val hours = args[8] as Set<Int>
@@ -348,7 +347,7 @@ class AdminPanelViewModel(
     /** Saves patrol settings and updates the active patrol schedule. */
     fun onSavePatrolSettings(
         isEnabled: Boolean,
-        mode: AdminPanelPatrolSettingsDialog,
+        mode: PatrolMode,
         minMin: Int,
         maxMin: Int,
         hours: Set<Int>
@@ -359,10 +358,7 @@ class AdminPanelViewModel(
             patrolManager.updateSchedule(
                 PatrolSettings(
                     isEnabled = isEnabled,
-                    mode = when (mode) {
-                        AdminPanelPatrolSettingsDialog.RANDOM -> PatrolMode.RANDOM
-                        AdminPanelPatrolSettingsDialog.FIXED -> PatrolMode.FIXED
-                    },
+                    mode = mode,
                     minMinutes = minMin,
                     maxMinutes = maxMin,
                     hours = hours,
@@ -390,10 +386,7 @@ class AdminPanelViewModel(
             patrolManager.updateSchedule(
                 PatrolSettings(
                     isEnabled = state.isPatrolEnabled,
-                    mode = when (state.patrolMode) {
-                        AdminPanelPatrolSettingsDialog.RANDOM -> PatrolMode.RANDOM
-                        AdminPanelPatrolSettingsDialog.FIXED -> PatrolMode.FIXED
-                    },
+                    mode = state.patrolMode,
                     minMinutes = state.minMinutes,
                     maxMinutes = state.maxMinutes,
                     hours = state.selectedHours,
@@ -475,7 +468,7 @@ sealed interface AdminPanelAction {
     /** Saves patrol timing and mode settings. */
     data class SavePatrolSettings(
         val isEnabled: Boolean,
-        val mode: AdminPanelPatrolSettingsDialog,
+        val mode: PatrolMode,
         val minMinutes: Int,
         val maxMinutes: Int,
         val hours: Set<Int>,
@@ -532,7 +525,7 @@ data class AdminPanelState(
     val savedLocations: List<String> = emptyList(),
     val patrolRoute: List<String> = emptyList(),
     val isPatrolEnabled: Boolean = false,
-    val patrolMode: AdminPanelPatrolSettingsDialog = AdminPanelPatrolSettingsDialog.RANDOM,
+    val patrolMode: PatrolMode = PatrolMode.RANDOM,
     val videoFrame: Bitmap? = null,
     val isPatrolStreaming: Boolean = false,
     val minMinutes: Int = 40,

@@ -6,7 +6,6 @@ import hka.awp.cgi.temi.app.feature.settings.battery.BatteryViewModel
 import hka.awp.cgi.temi.app.feature.settings.display.DisplayViewModel
 import hka.awp.cgi.temi.app.feature.settings.language.LanguageViewModel
 import hka.awp.cgi.temi.app.feature.settings.photobox.PhotoboxSettingsViewModel
-import org.koin.android.ext.koin.androidApplication
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
@@ -15,7 +14,7 @@ import org.koin.dsl.module
  */
 val settingsModule = module {
     viewModel { SettingsViewModel(get(), robot = get()) }
-    viewModel { DisplayViewModel(androidApplication(), get()) }
+    viewModel { DisplayViewModel(get()) }
     viewModel { LanguageViewModel(get()) }
     viewModel {
         AdminPanelViewModel(
