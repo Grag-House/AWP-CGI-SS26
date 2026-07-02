@@ -1,6 +1,6 @@
 package hka.awp.cgi.temi.app.feature.photobox
 
-import hka.awp.cgi.temi.app.utils.AppConfigRepository
+import hka.awp.cgi.temi.app.data.repository.PhotoboxConfigRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -8,26 +8,40 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-/** Position of the Temi cutout on Photobox photos: left, center, or right of the frame. */
+/**
+ * Position of the Temi cutout on Photobox photos.
+ */
 enum class TemiOverlayPosition { LEFT, CENTER, RIGHT }
 
 private val DEFAULT_OVERLAY_POSITION = TemiOverlayPosition.RIGHT
 
-/** Whether/where the Temi cutout is shown on Photobox photos, backed by [AppConfigRepository]. */
+/**
+ * Manages whether and where the Temi cutout is shown on Photobox photos.
+ *
+ * @property photoboxConfigRepository Repository for persisting overlay settings.
+ * @property scope Coroutine scope for updates.
+ */
 internal class PhotoboxOverlaySettings(
-    private val appConfigRepository: AppConfigRepository,
+    private val photoboxConfigRepository: PhotoboxConfigRepository,
     private val scope: CoroutineScope
 ) {
-    val enabled: StateFlow<Boolean> = appConfigRepository.photoboxOverlayEnabled
+    /** Whether the overlay is enabled. */
+    val enabled: StateFlow<Boolean> = photoboxConfigRepository.photoboxOverlayEnabled
         .stateIn(scope, SharingStarted.Eagerly, false)
 
-    val position: StateFlow<TemiOverlayPosition> = appConfigRepository.photoboxOverlayPosition
+    /** The current horizontal position of the overlay. */
+    val position: StateFlow<TemiOverlayPosition> = photoboxConfigRepository.photoboxOverlayPosition
         .map { raw -> runCatching { TemiOverlayPosition.valueOf(raw) }.getOrDefault(DEFAULT_OVERLAY_POSITION) }
         .stateIn(scope, SharingStarted.Eagerly, DEFAULT_OVERLAY_POSITION)
 
+    /**
+     * Updates the horizontal position of the overlay.
+     *
+     * @param position The new position.
+     */
     fun setPosition(position: TemiOverlayPosition) {
         scope.launch {
-            appConfigRepository.setPhotoboxOverlay(enabled.value, position.name)
+            photoboxConfigRepository.setPhotoboxOverlay(enabled.value, position.name)
         }
     }
 }

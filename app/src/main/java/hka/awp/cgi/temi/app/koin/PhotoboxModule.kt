@@ -9,13 +9,16 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
+/**
+ * Koin module for photobox-related dependencies.
+ */
 val photoboxModule = module {
     single { PhotoboxCameraManager(androidContext()) }
     single {
         PhotoboxUploadRepository(
             context = androidContext(),
             client = get(),
-            appConfigRepository = get()
+            photoboxConfigRepository = get()
         )
     }
     single { PhotoboxPendingUploadStore(androidContext()) }
@@ -23,7 +26,7 @@ val photoboxModule = module {
     viewModel {
         PhotoboxViewModel(
             cameraManager = get(),
-            appConfigRepository = get(),
+            photoboxConfigRepository = get(),
             uploadRepository = get(),
             uploadQueue = get()
         )

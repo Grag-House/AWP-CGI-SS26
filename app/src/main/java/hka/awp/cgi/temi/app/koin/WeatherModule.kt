@@ -23,7 +23,7 @@ val weatherModule = module {
     viewModel<WeatherViewModel> {
         WeatherViewModel(
             repository = get(),
-            appConfigRepository = get(),
+            generalConfigRepository = get(),
             clock = get()
         )
     }

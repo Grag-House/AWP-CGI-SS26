@@ -11,6 +11,9 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
+/**
+ * Koin module for voice recognition and speaker verification dependencies.
+ */
 val voiceRecognitionModule = module {
     single { androidContext().voiceDataStore }
     single { VoiceProfileRepository(get()) }
@@ -20,14 +23,14 @@ val voiceRecognitionModule = module {
             voiceManager = get(),
             robot = get(),
             voiceProfileRepository = get(),
-            appConfigRepository = get()
+            generalConfigRepository = get()
         )
     }
     viewModel {
         TemiVoiceRecognitionViewModel(
             voiceManager = get(),
             temiVoiceListener = get(),
-            appConfigRepository = get()
+            generalConfigRepository = get()
         )
     }
 }

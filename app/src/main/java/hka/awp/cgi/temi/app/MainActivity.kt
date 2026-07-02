@@ -22,7 +22,6 @@ import hka.awp.cgi.temi.app.feature.settings.display.DisplayViewModel
 import hka.awp.cgi.temi.app.feature.voiceRecognition.TemiVoiceRecognitionViewModel
 import hka.awp.cgi.temi.app.ui.shell.MainShell
 import hka.awp.cgi.temi.app.ui.theme.CgiTheme
-import hka.awp.cgi.temi.app.utils.LanguageHelper
 import hka.awp.cgi.temi.app.utils.hideTopBar
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.compose.viewmodel.koinViewModel
@@ -58,10 +57,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    /**
-     * Initializes the activity, configures system UI, requests necessary permissions,
-     * and sets the Compose content.
-     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -93,7 +88,6 @@ class MainActivity : ComponentActivity() {
         ) {
             permissionsToRequest.add(Manifest.permission.RECORD_AUDIO)
         } else {
-            // Already have mic permission
             initTemiVoiceRecognition()
         }
 
@@ -119,20 +113,16 @@ class MainActivity : ComponentActivity() {
         hornSoundId = soundPool.load(this, R.raw.horn, 1)
     }
 
-    /**
-     * Sets the locale context based on saved application settings before the
-     * activity base configuration is loaded.
-     */
     override fun attachBaseContext(newBase: Context) {
+        // SharedPreferences-based language lookup for early bootstrap
+        val prefs = newBase.getSharedPreferences("Settings", MODE_PRIVATE)
+        val langCode = prefs.getString("lang", "de") ?: "de"
+
         val config = Configuration(newBase.resources.configuration)
-        config.setLocale(Locale.forLanguageTag(LanguageHelper.getLocale(newBase)))
+        config.setLocale(Locale(langCode))
         super.attachBaseContext(newBase.createConfigurationContext(config))
     }
 
-    /**
-     * Intercepts generic motion events (like joystick inputs) and delegates
-     * them to the [ControllerViewModel].
-     */
     override fun dispatchGenericMotionEvent(event: MotionEvent): Boolean {
         if (!event.isFromGameController()) return super.dispatchGenericMotionEvent(event)
 
@@ -143,10 +133,6 @@ class MainActivity : ComponentActivity() {
         return true
     }
 
-    /**
-     * Reacts to key events, specifically from game controllers, to trigger
-     * steering commands or audio feedback (horn).
-     */
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         if (event?.isFromGameController() != true) return super.onKeyDown(keyCode, event)
 
@@ -166,16 +152,10 @@ class MainActivity : ComponentActivity() {
         return true
     }
 
-    /**
-     * Monitors the release of game controller buttons.
-     */
     override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
         return if (event?.isFromGameController() == true) true else super.onKeyUp(keyCode, event)
     }
 
-    /**
-     * Releases resources (like SoundPool) to prevent memory leaks.
-     */
     override fun onDestroy() {
         soundPool.release()
         super.onDestroy()
