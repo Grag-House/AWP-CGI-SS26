@@ -8,5 +8,5 @@ import org.koin.dsl.module
  * Koin module definition for the Webserver feature.
  */
 val webserverModule = module {
-    viewModel<WebserverViewModel> { WebserverViewModel(appConfigRepository = get()) }
+    viewModel<WebserverViewModel> { WebserverViewModel(generalConfigRepository = get()) }
 }

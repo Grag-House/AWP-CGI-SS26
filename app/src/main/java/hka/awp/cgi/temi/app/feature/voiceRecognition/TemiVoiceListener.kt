@@ -2,7 +2,7 @@ package hka.awp.cgi.temi.app.feature.voiceRecognition
 
 import com.robotemi.sdk.Robot
 import com.robotemi.sdk.voice.WakeupOrigin
-import hka.awp.cgi.temi.app.utils.AppConfigRepository
+import hka.awp.cgi.temi.app.data.repository.GeneralConfigRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -21,14 +21,19 @@ import org.vosk.android.SpeechService
 import timber.log.Timber
 import java.io.IOException
 
+/**
+ * Listener class that integrates Temi's voice SDK with Vosk offline recognition.
+ * Handles wake-word detection, speaker verification, and enrollment.
+ */
 class TemiVoiceListener(
     private val voiceManager: TemiVoiceManager,
     private val robot: Robot?,
     private val voiceProfileRepository: VoiceProfileRepository,
-    private val appConfigRepository: AppConfigRepository,
+    private val generalConfigRepository: GeneralConfigRepository,
 ) {
 
     companion object {
+        /** The sample rate required by the Vosk model. */
         private const val SAMPLE_RATE = 16000.0f
     }
 
@@ -36,12 +41,15 @@ class TemiVoiceListener(
     private val listenerScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     private val _verifiedCommandFlow = MutableSharedFlow<String>(extraBufferCapacity = 1)
+
+    /** Flow of voice commands that have been verified to come from a known speaker. */
     val verifiedCommandFlow: SharedFlow<String> = _verifiedCommandFlow.asSharedFlow()
 
     private val gate = SpeakerGate(listenerScope)
     private val enrollment = VoiceEnrollmentManager(listenerScope, voiceProfileRepository) { syncRuntimeState() }
     private val verification = SpeakerVerificationManager(listenerScope, robot, _verifiedCommandFlow)
 
+    /** State flow indicating if the listener is currently in enrollment mode. */
     val isEnrollmentActive: StateFlow<Boolean> = enrollment.isActive
 
     @Volatile
@@ -51,7 +59,7 @@ class TemiVoiceListener(
     private var isSpeakerVerificationEnabled: Boolean = false
 
     @Volatile
-    private var speakerVerificationThreshold: Double = AppConfigRepository.DEFAULT_SPEAKER_VERIFICATION_THRESHOLD
+    private var speakerVerificationThreshold: Double = GeneralConfigRepository.DEFAULT_SPEAKER_VERIFICATION_THRESHOLD
 
     @Volatile
     private var isInitialized = false
@@ -67,8 +75,8 @@ class TemiVoiceListener(
         listenerScope.launch(Dispatchers.IO) {
             combine(
                 voiceProfileRepository.voiceProfiles,
-                appConfigRepository.isSpeakerVerificationEnabled,
-                appConfigRepository.speakerVerificationThreshold,
+                generalConfigRepository.isSpeakerVerificationEnabled,
+                generalConfigRepository.speakerVerificationThreshold,
             ) { profiles, enabled, threshold ->
                 voiceProfiles = profiles
                 isSpeakerVerificationEnabled = enabled
@@ -88,13 +96,13 @@ class TemiVoiceListener(
             voiceProfileRepository.voiceProfiles.collect { voiceProfiles = it }
         }
         listenerScope.launch(Dispatchers.IO) {
-            appConfigRepository.isSpeakerVerificationEnabled.collect { enabled ->
+            generalConfigRepository.isSpeakerVerificationEnabled.collect { enabled ->
                 isSpeakerVerificationEnabled = enabled
                 listenerScope.launch { syncRuntimeState() }
             }
         }
         listenerScope.launch(Dispatchers.IO) {
-            appConfigRepository.speakerVerificationThreshold.collect { speakerVerificationThreshold = it }
+            generalConfigRepository.speakerVerificationThreshold.collect { speakerVerificationThreshold = it }
         }
     }
 
@@ -119,6 +127,9 @@ class TemiVoiceListener(
         }
     }
 
+    /**
+     * Starts the Vosk offline recognition service.
+     */
     fun startListening() {
         if (!isInitialized || speechService != null) return
 
@@ -135,12 +146,18 @@ class TemiVoiceListener(
         }
     }
 
+    /**
+     * Stops the Vosk offline recognition service.
+     */
     fun stopListening() {
         speechService?.stop()
         speechService = null
         Timber.v("Vosk stopped")
     }
 
+    /**
+     * Releases all resources and listeners.
+     */
     fun release() {
         stopListening()
         robot?.removeWakeupWordListener(internalListener)
@@ -151,15 +168,24 @@ class TemiVoiceListener(
         listenerScope.cancel()
     }
 
+    /**
+     * Enables or disables enrollment mode for a speaker.
+     */
     fun setEnrollmentMode(active: Boolean, name: String? = null) {
         if (active) enrollment.start(name) else enrollment.stop()
     }
 
+    /**
+     * Checks if a Temi ASR result should be allowed through based on speaker verification.
+     */
     fun allowTemiAsrResult(): Boolean {
         if (!isSpeakerVerificationEnabled) return true
         return gate.consume()
     }
 
+    /**
+     * Resumes listening for the wake-word.
+     */
     fun resumeWakeWordListening() {
         if (shouldUseVoskOnly()) startListening()
     }

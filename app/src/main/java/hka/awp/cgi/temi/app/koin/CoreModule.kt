@@ -8,9 +8,12 @@ import com.hivemq.client.mqtt.mqtt5.Mqtt5Client
 import com.hivemq.client.mqtt.mqtt5.message.auth.Mqtt5SimpleAuth
 import com.robotemi.sdk.Robot
 import hka.awp.cgi.temi.app.BuildConfig
+import hka.awp.cgi.temi.app.data.repository.GeneralConfigRepository
+import hka.awp.cgi.temi.app.data.repository.PatrolConfigRepository
+import hka.awp.cgi.temi.app.data.repository.PhotoboxConfigRepository
 import hka.awp.cgi.temi.app.data.repository.RobotRepository
+import hka.awp.cgi.temi.app.data.repository.SecurityConfigRepository
 import hka.awp.cgi.temi.app.feature.mqtt.MqttManager
-import hka.awp.cgi.temi.app.utils.AppConfigRepository
 import hka.awp.cgi.temi.app.utils.NetworkManager
 import hka.awp.cgi.temi.app.utils.TemiBatteryMonitor
 import hka.awp.cgi.temi.app.utils.TemiMovementController
@@ -41,7 +44,10 @@ val coreModule = module {
 
     // Data Storage
     single<DataStore<Preferences>> { androidContext().appDataStore }
-    single { AppConfigRepository(dataStore = get()) }
+    single { GeneralConfigRepository(dataStore = get()) }
+    single { PatrolConfigRepository(dataStore = get()) }
+    single { PhotoboxConfigRepository(dataStore = get()) }
+    single { SecurityConfigRepository(dataStore = get()) }
 
     // Robot & Temi SDK
     single { RobotRepository() }

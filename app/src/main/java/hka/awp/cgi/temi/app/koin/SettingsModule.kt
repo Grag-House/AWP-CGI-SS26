@@ -10,22 +10,27 @@ import org.koin.android.ext.koin.androidApplication
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
+/**
+ * Koin module for settings-related view models.
+ */
 val settingsModule = module {
     viewModel { SettingsViewModel(get(), robot = get()) }
     viewModel { DisplayViewModel(androidApplication(), get()) }
-    viewModel { LanguageViewModel() }
+    viewModel { LanguageViewModel(get()) }
     viewModel {
         AdminPanelViewModel(
-            appConfigRepository = get(),
+            generalConfigRepository = get(),
+            patrolConfigRepository = get(),
+            securityConfigRepository = get(),
             mqttManager = get(),
             voiceProfileRepository = get(),
             voiceRecognitionViewModel = get(),
             robot = get(),
             hidingSpotRepository = get(),
-            patrolCameraStreamManager = get(),
-            patrolManager = get()
+            patrolManager = get(),
+            patrolCameraStreamManager = get()
         )
     }
     viewModel { BatteryViewModel(get()) }
-    viewModel { PhotoboxSettingsViewModel(appConfigRepository = get()) }
+    viewModel { PhotoboxSettingsViewModel(get()) }
 }

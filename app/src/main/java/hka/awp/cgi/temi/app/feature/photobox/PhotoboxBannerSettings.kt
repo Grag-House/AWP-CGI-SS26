@@ -1,7 +1,7 @@
 package hka.awp.cgi.temi.app.feature.photobox
 
 import hka.awp.cgi.temi.app.R
-import hka.awp.cgi.temi.app.utils.AppConfigRepository
+import hka.awp.cgi.temi.app.data.repository.PhotoboxConfigRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -10,9 +10,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /**
- * Branding banner variant burned into the bottom of Photobox photos. Each variant carries
- * separate assets for standalone, strip, and grid layouts because the branding area's aspect
- * ratio differs across modes.
+ * Branding banner variant burned into the bottom of Photobox photos.
  */
 enum class PhotoboxBanner(
     private val standardDrawableRes: Int,
@@ -30,10 +28,9 @@ enum class PhotoboxBanner(
         R.drawable.banner_cgi_lab_2x2grid
     );
 
-    /** The standalone-photo banner is wide and thin; strip/grid composites get a banner cropped
-     * for their narrower branding area instead, since the wide one looked out of place there. The
-     * 2x2 grid uses its own asset rather than the strip one since its branding area has a
-     * different aspect ratio. */
+    /**
+     * Returns the appropriate drawable resource for the given mode.
+     */
     fun drawableRes(mode: PhotoboxMode): Int = when (mode) {
         PhotoboxMode.STANDARD -> standardDrawableRes
         PhotoboxMode.GRID_2X2 -> grid2x2DrawableRes
@@ -47,27 +44,44 @@ internal const val PHOTOBOX_GRID_BANNER_WIDTH_FRACTION = 1.0f
 
 const val PHOTOBOX_BANNER_ASPECT_RATIO = 4400f / 327f
 
-/** Whether/which branding banner is burned into Photobox photos, backed by [AppConfigRepository]. */
+/**
+ * Manages photobox banner settings, backed by [PhotoboxConfigRepository].
+ *
+ * @property photoboxConfigRepository The repository for storing banner settings.
+ * @property scope Coroutine scope for launching updates.
+ */
 internal class PhotoboxBannerSettings(
-    private val appConfigRepository: AppConfigRepository,
+    private val photoboxConfigRepository: PhotoboxConfigRepository,
     private val scope: CoroutineScope
 ) {
-    val enabled: StateFlow<Boolean> = appConfigRepository.photoboxBannerEnabled
+    /** Whether the banner is currently enabled. */
+    val enabled: StateFlow<Boolean> = photoboxConfigRepository.photoboxBannerEnabled
         .stateIn(scope, SharingStarted.Eagerly, false)
 
-    val banner: StateFlow<PhotoboxBanner> = appConfigRepository.photoboxBanner
+    /** The currently selected banner variant. */
+    val banner: StateFlow<PhotoboxBanner> = photoboxConfigRepository.photoboxBanner
         .map { raw -> runCatching { PhotoboxBanner.valueOf(raw) }.getOrDefault(DEFAULT_BANNER) }
         .stateIn(scope, SharingStarted.Eagerly, DEFAULT_BANNER)
 
+    /**
+     * Updates the enabled state of the banner.
+     *
+     * @param enabled True to enable, false to disable.
+     */
     fun setEnabled(enabled: Boolean) {
         scope.launch {
-            appConfigRepository.setPhotoboxBanner(enabled, banner.value.name)
+            photoboxConfigRepository.setPhotoboxBanner(enabled, banner.value.name)
         }
     }
 
+    /**
+     * Updates the selected banner variant.
+     *
+     * @param banner The new banner variant.
+     */
     fun setBanner(banner: PhotoboxBanner) {
         scope.launch {
-            appConfigRepository.setPhotoboxBanner(enabled.value, banner.name)
+            photoboxConfigRepository.setPhotoboxBanner(enabled.value, banner.name)
         }
     }
 }

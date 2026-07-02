@@ -6,6 +6,7 @@ import androidx.camera.core.ViewPort
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import hka.awp.cgi.temi.app.data.repository.PhotoboxConfigRepository
 import hka.awp.cgi.temi.app.feature.photobox.capture.PhotoboxCameraManager
 import hka.awp.cgi.temi.app.feature.photobox.capture.PhotoboxCameraState
 import hka.awp.cgi.temi.app.feature.photobox.capture.PhotoboxCaptureCallbacks
@@ -17,7 +18,6 @@ import hka.awp.cgi.temi.app.feature.photobox.upload.PhotoboxSessionFinalizer
 import hka.awp.cgi.temi.app.feature.photobox.upload.PhotoboxUploadOutcomeHandler
 import hka.awp.cgi.temi.app.feature.photobox.upload.PhotoboxUploadQueue
 import hka.awp.cgi.temi.app.feature.photobox.upload.PhotoboxUploadRepository
-import hka.awp.cgi.temi.app.utils.AppConfigRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -50,9 +50,6 @@ data class PhotoboxUiState(
     val isBetweenShots: Boolean = false,
     val shotsTaken: Int = 0,
     val capturedBitmap: Bitmap? = null,
-    // The banner the photo was actually captured with, frozen at capture time (see startSession)
-    // — not baked into capturedBitmap, so the live preview can render it as a layer that's
-    // unaffected by selectedFilter (the real bake order is the same, see PhotoboxSessionFinalizer).
     val capturedBanner: PhotoboxBanner? = null,
     val uploadState: PhotoboxUploadState = PhotoboxUploadState.NONE,
     val uploadedPhotoUrl: String? = null,
@@ -67,25 +64,38 @@ private const val DEFAULT_DURATION = 3
 private const val DEFAULT_STRIP_DELAY = 10
 
 /**
- * ViewModel for the Photobox feature. Owns the camera lifecycle, the capture sequencer, and
- * the upload pipeline, and exposes a single [uiState] flow for [PhotoboxScreen] to render.
+ * ViewModel for the Photobox feature.
+ *
+ * Manages the camera lifecycle, the capture sequencer, and the upload pipeline.
+ *
+ * @property cameraManager Manager for camera hardware interactions.
+ * @property photoboxConfigRepository Repository for retrieving photobox settings.
+ * @property uploadRepository Repository for photo uploads.
+ * @property uploadQueue Queue for handling background photo uploads.
  */
 class PhotoboxViewModel(
     private val cameraManager: PhotoboxCameraManager,
-    appConfigRepository: AppConfigRepository,
+    private val photoboxConfigRepository: PhotoboxConfigRepository,
     uploadRepository: PhotoboxUploadRepository,
     uploadQueue: PhotoboxUploadQueue
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(PhotoboxUiState())
+
+    /** The current UI state for the Photobox. */
     val uiState: StateFlow<PhotoboxUiState> = _uiState.asStateFlow()
 
+    /** The current state of the camera. */
     val cameraState: StateFlow<PhotoboxCameraState> = cameraManager.cameraState
 
-    internal val overlaySettings = PhotoboxOverlaySettings(appConfigRepository, viewModelScope)
+    internal val overlaySettings = PhotoboxOverlaySettings(photoboxConfigRepository, viewModelScope)
+
+    /** Flow indicating if the overlay is enabled. */
     val overlayEnabled: StateFlow<Boolean> = overlaySettings.enabled
+
+    /** Flow of the current overlay position. */
     val overlayPosition: StateFlow<TemiOverlayPosition> = overlaySettings.position
 
-    internal val bannerSettings = PhotoboxBannerSettings(appConfigRepository, viewModelScope)
+    internal val bannerSettings = PhotoboxBannerSettings(photoboxConfigRepository, viewModelScope)
 
     private val captureSequencer = PhotoboxCaptureSequencer(cameraManager, viewModelScope)
     private val sessionFinalizer = PhotoboxSessionFinalizer(uploadRepository, uploadQueue, viewModelScope)
@@ -94,26 +104,32 @@ class PhotoboxViewModel(
     internal val pendingUploadController =
         PhotoboxPendingUploadController(sessionFinalizer, _uiState, uploadOutcomeHandler::handle)
 
+    /** Binds the camera to a lifecycle and surface provider. */
     fun bindCamera(lifecycleOwner: LifecycleOwner, surfaceProvider: Preview.SurfaceProvider, viewPort: ViewPort?) {
         cameraManager.bindToLifecycle(lifecycleOwner, surfaceProvider, viewPort)
     }
 
+    /** Sets the current capture mode. */
     fun selectMode(mode: PhotoboxMode) {
         _uiState.update { it.copy(mode = mode, phase = PhotoboxPhase.IDLE) }
     }
 
+    /** Returns to the mode selection phase. */
     fun backToModeSelect() {
         _uiState.update { it.copy(phase = PhotoboxPhase.MODE_SELECT) }
     }
 
+    /** Sets the countdown duration. */
     fun setDuration(seconds: Int) {
         _uiState.update { it.copy(selectedDuration = seconds, countdownRemaining = seconds) }
     }
 
+    /** Sets the delay between shots in strip mode. */
     fun setStripDelay(seconds: Int) {
         _uiState.update { it.copy(stripDelaySeconds = seconds) }
     }
 
+    /** Starts the capture session. */
     fun startSession() {
         val state = _uiState.value
         captureSequencer.start(
@@ -172,7 +188,7 @@ class PhotoboxViewModel(
         )
     }
 
-    // Resets back to the mode/duration picker — used both for "take another photo" and "cancel".
+    /** Resets the Photobox session to the default state. */
     fun reset() {
         captureSequencer.cancel()
         uploadOutcomeHandler.cancel()
@@ -187,12 +203,13 @@ class PhotoboxViewModel(
         }
     }
 
-    /** Called when the Photobox tab is left (e.g. the user switches to another tab). */
+    /** Called when the Photobox screen is stopped. */
     fun onScreenStopped() {
         reset()
         cameraManager.unbind()
     }
 
+    /** Toggles the visibility of the QR code for a successfully uploaded photo. */
     fun setQrCodeVisible(visible: Boolean) {
         if (visible && _uiState.value.uploadedPhotoUrl == null) return
         _uiState.update { it.copy(showQrCode = visible) }
