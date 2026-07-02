@@ -7,6 +7,10 @@ private const val PREFS_NAME = "hiding_spot_filter"
 private const val KEY_HAS_FILTER = "has_filter"
 private const val KEY_ENABLED_SPOTS = "enabled_spots"
 
+/**
+ * Persists the user's hiding spot filter selection across app restarts via SharedPreferences.
+ * A null result from [loadEnabledSpots] means no filter is active (all locations are allowed).
+ */
 class HidingSpotRepository(private val context: Context) {
 
     fun loadEnabledSpots(): Set<String>? {

@@ -24,8 +24,10 @@ private const val MAX_SEARCH_MINUTES = 10
 private const val SECONDS_PER_MINUTE = 60
 private const val MIN_HIDING_DISTANCE_METERS = 4f
 
+/** Current phase of a Hide & Seek game session. */
 enum class GameState { SETUP, HIDING, WAITING, WON, LOST }
 
+/** Complete UI state for the Hide & Seek feature, observed by [HideAndSeekScreen]. */
 data class HideAndSeekUiState(
     val gameState: GameState = GameState.SETUP,
     val searchTimeMinutes: Int = DEFAULT_SEARCH_MINUTES,
@@ -36,6 +38,10 @@ data class HideAndSeekUiState(
     val navigationError: Boolean = false
 )
 
+/**
+ * ViewModel for the Hide & Seek feature. Manages the game state machine, the hiding countdown,
+ * the search timer, and Temi's navigation to a randomly selected hiding spot.
+ */
 @Suppress("TooManyFunctions")
 class HideAndSeekViewModel(
     private val robot: Robot?,
@@ -61,7 +67,6 @@ class HideAndSeekViewModel(
         navigator.release()
         robot?.removeOnGoToLocationStatusChangedListener(this)
         robot?.removeOnDistanceToLocationChangedListener(this)
-        super.onCleared()
     }
 
     override fun onDistanceToLocationChanged(distances: Map<String, Float>) {
@@ -137,7 +142,7 @@ class HideAndSeekViewModel(
         }
     }
 
-    fun transitionToWaiting() {
+    private fun transitionToWaiting() {
         timerJob?.cancel()
         val totalSearch = _uiState.value.searchTimeMinutes * SECONDS_PER_MINUTE
         _uiState.update {

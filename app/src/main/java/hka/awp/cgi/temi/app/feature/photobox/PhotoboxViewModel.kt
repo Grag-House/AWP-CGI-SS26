@@ -23,11 +23,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
+/** Current phase of the Photobox session, determining which overlay is shown on screen. */
 enum class PhotoboxPhase { MODE_SELECT, IDLE, COUNTDOWN, CAPTURE, PREVIEW }
 
 private const val STRIP_SHOT_COUNT = 3
 private const val FOUR_SHOT_COUNT = 4
 
+/** Capture mode determining how many shots are taken and how they are composed into the final image. */
 enum class PhotoboxMode(val shotCount: Int) {
     STANDARD(1),
     STRIP(STRIP_SHOT_COUNT),
@@ -35,8 +37,10 @@ enum class PhotoboxMode(val shotCount: Int) {
     GRID_2X2(FOUR_SHOT_COUNT)
 }
 
+/** Upload state of the current session's photo, reflected live in the preview screen. */
 enum class PhotoboxUploadState { NONE, UPLOADING, SUCCESS, FAILED, QUEUED }
 
+/** Complete UI state for the Photobox feature, observed by [PhotoboxScreen]. */
 data class PhotoboxUiState(
     val phase: PhotoboxPhase = PhotoboxPhase.MODE_SELECT,
     val mode: PhotoboxMode = PhotoboxMode.STANDARD,
@@ -62,6 +66,10 @@ data class PhotoboxUiState(
 private const val DEFAULT_DURATION = 3
 private const val DEFAULT_STRIP_DELAY = 10
 
+/**
+ * ViewModel for the Photobox feature. Owns the camera lifecycle, the capture sequencer, and
+ * the upload pipeline, and exposes a single [uiState] flow for [PhotoboxScreen] to render.
+ */
 class PhotoboxViewModel(
     private val cameraManager: PhotoboxCameraManager,
     appConfigRepository: AppConfigRepository,
@@ -193,6 +201,5 @@ class PhotoboxViewModel(
     override fun onCleared() {
         captureSequencer.cancel()
         cameraManager.unbind()
-        super.onCleared()
     }
 }
