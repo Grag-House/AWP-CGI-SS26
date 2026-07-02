@@ -11,13 +11,10 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
-val temiVoiceRecognitionModule = module {
+val voiceRecognitionModule = module {
     single { androidContext().voiceDataStore }
-
     single { VoiceProfileRepository(get()) }
-
     single { TemiVoiceManager(androidContext()) }
-
     single {
         TemiVoiceListener(
             voiceManager = get(),
@@ -26,7 +23,6 @@ val temiVoiceRecognitionModule = module {
             appConfigRepository = get()
         )
     }
-
     viewModel {
         TemiVoiceRecognitionViewModel(
             voiceManager = get(),
