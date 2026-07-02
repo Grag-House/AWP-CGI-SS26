@@ -29,7 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import hka.awp.cgi.temi.app.R
-import hka.awp.cgi.temi.app.data.repository.RobotInfo
+import hka.awp.cgi.temi.app.data.model.RobotInfo
 import hka.awp.cgi.temi.app.feature.settings.SettingsItem
 
 /**

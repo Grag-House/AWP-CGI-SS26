@@ -1,15 +1,4 @@
-package hka.awp.cgi.temi.app.feature.patrol
-
-/**
- * Defines the operational modes for the robot's patrol behavior.
- */
-enum class PatrolMode {
-    /** Patrols locations in a non-deterministic order. */
-    RANDOM,
-
-    /** Patrols locations in the pre-defined order of the route. */
-    FIXED
-}
+package hka.awp.cgi.temi.app.data.model
 
 /**
  * Represents the configuration settings for the robot's patrol functionality.

@@ -7,11 +7,11 @@ import android.graphics.Canvas
 import android.graphics.RectF
 import android.util.Base64
 import hka.awp.cgi.temi.app.R
+import hka.awp.cgi.temi.app.data.repository.PhotoboxConfigRepository
 import hka.awp.cgi.temi.app.feature.photobox.PHOTOBOX_GRID_BANNER_WIDTH_FRACTION
 import hka.awp.cgi.temi.app.feature.photobox.PhotoboxBanner
 import hka.awp.cgi.temi.app.feature.photobox.PhotoboxMode
 import hka.awp.cgi.temi.app.feature.photobox.TemiOverlayPosition
-import hka.awp.cgi.temi.app.utils.AppConfigRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -30,21 +30,20 @@ import java.util.concurrent.TimeUnit
 private const val JPEG_QUALITY = 90
 private const val UPLOAD_TIMEOUT_SECONDS = 30L
 
-// Kept in sync with PhotoboxScreen's TemiOverlayImage so the uploaded file matches what was
-// shown on screen.
+// Kept in sync with PhotoboxScreen's TemiOverlayImage
 internal const val PHOTOBOX_OVERLAY_HEIGHT_FRACTION = 0.68f
 
 /**
- * Result of a successful upload. [expiresAtMillis] is the backend's own enforcement of how long
- * [viewUrl] stays reachable — today that's a signed token checked by the Apps Script webhook, but
- * the contract (a URL good only until a point in time) is written so it still holds if the
- * backend is ever swapped for something with native expiring links (e.g. S3 presigned URLs).
+ * Result of a successful upload.
+ *
+ * @property viewUrl The URL to view the uploaded photo.
+ * @property expiresAtMillis The timestamp when the view URL expires.
  */
 data class PhotoboxUploadResult(val viewUrl: String, val expiresAtMillis: Long)
 
-/** [position] and [banner] of the Temi cutout/branding banner plus the capture [mode], grouped
- * since `bakeOverlay` and `bakeBanner` are needed together wherever a final photo gets decorated,
- * and both need [mode] to pick the right banner asset/size. */
+/**
+ * Groups overlay options like position, banner, and capture mode.
+ */
 internal data class PhotoboxOverlayOptions(
     val position: TemiOverlayPosition,
     val banner: PhotoboxBanner?,
@@ -52,15 +51,16 @@ internal data class PhotoboxOverlayOptions(
 )
 
 /**
- * Uploads Photobox photos to a Google Drive folder via a Google Apps Script web app acting as a
- * webhook — the app never needs Google credentials, it just POSTs the image as base64 JSON.
- * Both the target folder and the webhook URL are read fresh from [AppConfigRepository] on every
- * upload, so they can be changed in settings without a rebuild.
+ * Uploads Photobox photos to a Google Drive folder.
+ * Fresh configuration is read from [PhotoboxConfigRepository] for every upload.
+ *
+ * @property context Application context for resource access.
+ * @property photoboxConfigRepository Repository for retrieving upload URL and folder link.
  */
 class PhotoboxUploadRepository(
     private val context: Context,
     client: OkHttpClient,
-    private val appConfigRepository: AppConfigRepository
+    private val photoboxConfigRepository: PhotoboxConfigRepository
 ) {
 
     private val uploadClient = client.newBuilder()
@@ -70,15 +70,15 @@ class PhotoboxUploadRepository(
         .build()
 
     /**
-     * Uploads a photo that's already in its final form (overlay/banner baked in, strip combined,
-     * if applicable) — used both by [PhotoboxSessionFinalizer.upload] and by
-     * [PhotoboxUploadWorker] when retrying a photo that was cached to disk after a failed first
-     * attempt.
+     * Uploads a final decorated photo to Google Drive.
+     *
+     * @param finalBitmap The bitmap to upload.
+     * @return A [Result] containing the upload result or an error.
      */
     suspend fun uploadFinalPhoto(finalBitmap: Bitmap): Result<PhotoboxUploadResult> = withContext(Dispatchers.IO) {
         try {
-            val webhookUrl = appConfigRepository.driveUploadUrl.first()
-            val folderLink = appConfigRepository.driveFolderLink.first()
+            val webhookUrl = photoboxConfigRepository.driveUploadUrl.first()
+            val folderLink = photoboxConfigRepository.driveFolderLink.first()
             val folderId = extractDriveFolderId(folderLink)
 
             if (webhookUrl.isBlank()) {
@@ -100,8 +100,6 @@ class PhotoboxUploadRepository(
                 if (!response.isSuccessful) {
                     return@withContext Result.failure(IOException("Upload failed with code ${response.code}"))
                 }
-                // The Apps Script web app always answers with HTTP 200, even on failure — the
-                // actual outcome is in the JSON body.
                 val responseJson = JSONObject(response.body.string())
                 if (!responseJson.optBoolean("success", false)) {
                     val error = responseJson.optString("error", "Unknown upload error")
@@ -134,15 +132,10 @@ class PhotoboxUploadRepository(
         return Base64.encodeToString(outputStream.toByteArray(), Base64.NO_WRAP)
     }
 
-    // Decoded once and reused — a strip bakes this into 3 frames per session.
     private val overlayBitmap by lazy { BitmapFactory.decodeResource(context.resources, R.drawable.temi_photo) }
 
     /**
-     * Burns the Temi cutout into [photo] itself (e.g. so each strip frame carries its own copy).
-     * If [PhotoboxOverlayOptions.banner] is set, Temi is shifted up to sit above the banner
-     * instead of overlapping it — the banner is assumed to already be baked into [photo] at its
-     * default (non-grid) size, which is the only case where Temi and the banner could collide
-     * (strip/grid bake Temi per-frame, well before the banner is added to the combined image).
+     * Burns the Temi cutout into [photo].
      */
     internal fun bakeOverlay(photo: Bitmap, overlayOptions: PhotoboxOverlayOptions): Bitmap {
         val overlay = overlayBitmap
@@ -171,11 +164,7 @@ class PhotoboxUploadRepository(
         bannerBitmaps.getOrPut(drawableRes) { BitmapFactory.decodeResource(context.resources, drawableRes) }
 
     /**
-     * Draws [banner] centered against the bottom edge. For strip/grid the banner is stretched to
-     * fill the white branding area exactly — height derived from the composite's own dimensions
-     * using the same ratios as [combinePhotoStrip]/[combinePhotoGrid], so it covers the area
-     * regardless of the banner asset's own aspect ratio. For STANDARD the banner has no fixed
-     * white area, so it is scaled by width while keeping its aspect ratio as before.
+     * Draws [banner] centered against the bottom edge.
      */
     internal fun bakeBanner(photo: Bitmap, banner: PhotoboxBanner, mode: PhotoboxMode): Bitmap {
         val bannerBitmap = bannerBitmap(banner.drawableRes(mode))
@@ -207,6 +196,12 @@ class PhotoboxUploadRepository(
     }
 }
 
+/**
+ * Extracts the Google Drive folder ID from a link.
+ *
+ * @param link The full Google Drive folder link.
+ * @return The extracted folder ID, or null if invalid.
+ */
 internal fun extractDriveFolderId(link: String): String? {
     val trimmed = link.trim()
     if (trimmed.isEmpty()) return null

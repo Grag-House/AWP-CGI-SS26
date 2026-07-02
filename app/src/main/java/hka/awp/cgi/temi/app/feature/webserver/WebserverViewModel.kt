@@ -3,7 +3,7 @@ package hka.awp.cgi.temi.app.feature.webserver
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import hka.awp.cgi.temi.app.BuildConfig
-import hka.awp.cgi.temi.app.utils.AppConfigRepository
+import hka.awp.cgi.temi.app.data.repository.GeneralConfigRepository
 import hka.awp.cgi.temi.app.utils.extractHostSafely
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -17,23 +17,34 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.net.InetAddress
 
-class WebserverViewModel(appConfigRepository: AppConfigRepository) : ViewModel() {
+/**
+ * ViewModel for monitoring the web server status.
+ *
+ * This ViewModel periodically pings the configured WebView URL to check if the server is reachable.
+ *
+ * @property generalConfigRepository Repository providing the current URL configuration.
+ */
+class WebserverViewModel(generalConfigRepository: GeneralConfigRepository) : ViewModel() {
     private val _serverState = MutableStateFlow(ServerState())
+
+    /** Current state of the server (reachability and IP address). */
     val serverState = _serverState.asStateFlow()
-    val urlState: StateFlow<String> = appConfigRepository.currentUrl.stateIn(
+
+    /** Flow of the current WebView URL from settings. */
+    val urlState: StateFlow<String> = generalConfigRepository.currentUrl.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(SUBSCRIPTION_TIMEOUT),
         BuildConfig.WEBVIEW_URL
     )
 
     companion object {
-        // The interval at which the server status is checked (in milliseconds)
+        /** The interval at which the server status is checked (in milliseconds). */
         private const val POLLING_INTERVALL: Long = 10000
 
-        // The timeout for the server ping operation (in milliseconds)
+        /** The timeout for the server ping operation (in milliseconds). */
         private const val TIMEOUT: Int = 2000
 
-        // The time to wait after the last subscriber disappeared before stopping the upstream flow (in milliseconds)
+        /** Time to wait before stopping the flow after the last subscriber disappeared. */
         private const val SUBSCRIPTION_TIMEOUT = 5000L
     }
 
@@ -45,7 +56,7 @@ class WebserverViewModel(appConfigRepository: AppConfigRepository) : ViewModel()
                     val address = InetAddress.getByName(extractHostSafely(urlState.value))
                     val ip = address.hostAddress
 
-                    // ping
+                    // Ping
                     val reachable = address.isReachable(TIMEOUT)
 
                     if (ip == null) {

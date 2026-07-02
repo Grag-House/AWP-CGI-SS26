@@ -2,8 +2,6 @@ package hka.awp.cgi.temi.app.feature.voiceRecognition
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.descriptors.PrimitiveKind
-import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
@@ -13,6 +11,7 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonEncoder
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.float
 import kotlinx.serialization.json.jsonPrimitive
 import kotlin.math.sqrt
 
@@ -39,7 +38,7 @@ data class SpeakerVector(val values: FloatArray) {
     /**
      * Calculates cosine similarity with another speaker vector.
      * Range: 0.0 (completely different) to 1.0 (identical)
-     * Typical verification threshold: 0.82
+     * Typical verification threshold: 0.6
      * see: https://en.wikipedia.org/wiki/Cosine_similarity
      */
     infix fun cosineSimilarityWith(other: SpeakerVector): Double {
@@ -81,36 +80,29 @@ data class SpeakerVector(val values: FloatArray) {
  * Not as: "spk" : { "values": [...] }
  */
 data object SpeakerVectorSerializer : KSerializer<SpeakerVector> {
-    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor(
-        "SpeakerVector",
-        PrimitiveKind.STRING
-    )
+    override val descriptor: SerialDescriptor = JsonElement.serializer().descriptor
 
     override fun serialize(encoder: Encoder, value: SpeakerVector) {
         check(encoder is JsonEncoder) { "Only JSON format supported" }
-        val jsonArray = JsonArray(value.values.map { JsonPrimitive(it) })
-        encoder.encodeJsonElement(JsonObject(mapOf("values" to jsonArray)))
+        // Serialize as object with "values" key for DataStore compatibility
+        val valuesArray = JsonArray(value.values.map { JsonPrimitive(it) })
+        encoder.encodeJsonElement(JsonObject(mapOf("values" to valuesArray)))
     }
 
     override fun deserialize(decoder: Decoder): SpeakerVector {
         check(decoder is JsonDecoder) { "Only JSON format supported" }
 
-        return when (val element = decoder.decodeJsonElement()) {
-            is JsonArray -> {
-                // Vosk sends: [-0.905, 0.228, ...]
-                val array = element.map { it.jsonPrimitive.content.toFloat() }.toFloatArray()
-                SpeakerVector(array)
-            }
+        val floatList = when (val element = decoder.decodeJsonElement()) {
+            is JsonArray -> element.map { it.jsonPrimitive.float }
             is JsonObject -> {
-                // DataStore format: {"values":[...]} for backward compatibility
-                val valuesElement: JsonElement = element["values"]
-                    ?: throw IllegalArgumentException("SpeakerVector JSON object missing 'values'")
-                val valuesArray = valuesElement as? JsonArray
-                    ?: throw IllegalArgumentException("SpeakerVector 'values' must be JSON array")
-                val array = valuesArray.map { it.jsonPrimitive.content.toFloat() }.toFloatArray()
-                SpeakerVector(array)
+                val valuesElement = element["values"] as? JsonArray
+                    ?: throw IllegalArgumentException("SpeakerVector object missing 'values' array")
+                valuesElement.map { it.jsonPrimitive.float }
             }
-            else -> throw IllegalArgumentException("Expected JSON array for spk, got ${element::class.simpleName}")
+
+            else -> throw IllegalArgumentException("Unexpected JSON for SpeakerVector: $element")
         }
+
+        return SpeakerVector(floatList.toFloatArray())
     }
 }

@@ -1,5 +1,7 @@
 package hka.awp.cgi.temi.app.feature.patrol
 
+import hka.awp.cgi.temi.app.data.model.PatrolMode
+import hka.awp.cgi.temi.app.data.model.PatrolSettings
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
