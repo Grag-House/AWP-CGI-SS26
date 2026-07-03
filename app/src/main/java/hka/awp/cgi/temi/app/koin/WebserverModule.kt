@@ -1,6 +1,14 @@
 package hka.awp.cgi.temi.app.koin
 
+import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStore
+import hka.awp.cgi.temi.app.feature.webserver.EncryptedWebserverCredentialStore
+import hka.awp.cgi.temi.app.feature.webserver.WebserverConfigRepository
+import hka.awp.cgi.temi.app.feature.webserver.WebserverCredentialStore
 import hka.awp.cgi.temi.app.feature.webserver.WebserverViewModel
+import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
@@ -10,13 +18,18 @@ import org.koin.dsl.module
 val webserverModule = module {
     single<DataStore<Preferences>> { androidContext().dataStore }
 
-    single<AppConfigRepository> {
-        AppConfigRepository(
-            context = androidContext(),
-            dataStore = get()
+    single<WebserverCredentialStore> {
+        EncryptedWebserverCredentialStore(androidContext())
+    }
+
+    single<WebserverConfigRepository> {
+        WebserverConfigRepository(
+            dataStore = get(),
+            credentialStore = get()
         )
     }
 
-    viewModel<WebserverViewModel> { WebserverViewModel(appConfigRepository = get()) }
-    viewModel<WebserverViewModel> { WebserverViewModel(generalConfigRepository = get()) }
+    viewModel<WebserverViewModel> { WebserverViewModel(webserverConfigRepository = get()) }
 }
+
+private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "webserver_settings")

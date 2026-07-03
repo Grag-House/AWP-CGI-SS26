@@ -21,7 +21,6 @@ class SecurityConfigRepository(
     private val passwordHasher: PasswordHasher
 ) {
     private val adminPanelPasswordHashKey = stringPreferencesKey("admin_panel_password_hash")
-    private val webserverPasswordHashKey = stringPreferencesKey("webserver_password_hash")
     private val adminPasswordHashKey = stringPreferencesKey("admin_password_hash")
     private val adminPasswordLegacyKey = stringPreferencesKey("admin_password")
 
@@ -37,13 +36,6 @@ class SecurityConfigRepository(
     }
 
     /**
-     * Flow of the hashed password for the webserver.
-     */
-    val webserverPasswordHash: Flow<String> = dataStore.data.map { preferences ->
-        preferences[webserverPasswordHashKey] ?: passwordHasher.hashPassword(BuildConfig.DEFAULT_ADMIN_PASSWORD)
-    }
-
-    /**
      * Updates the admin panel password.
      * Hashes the plain text password before storing it and removes legacy keys.
      *
@@ -54,17 +46,6 @@ class SecurityConfigRepository(
             preferences[adminPanelPasswordHashKey] = passwordHasher.hashPassword(password)
             preferences.remove(adminPasswordHashKey)
             preferences.remove(adminPasswordLegacyKey)
-        }
-    }
-
-    /**
-     * Updates the webserver password.
-     *
-     * @param password The new plain text password.
-     */
-    suspend fun updateWebserverPassword(password: String) {
-        dataStore.edit { preferences ->
-            preferences[webserverPasswordHashKey] = passwordHasher.hashPassword(password)
         }
     }
 

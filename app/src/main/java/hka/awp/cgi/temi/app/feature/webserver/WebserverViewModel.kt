@@ -3,7 +3,6 @@ package hka.awp.cgi.temi.app.feature.webserver
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import hka.awp.cgi.temi.app.BuildConfig
-import hka.awp.cgi.temi.app.utils.AppConfigRepository
 import hka.awp.cgi.temi.app.utils.extractHostSafely
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -22,37 +21,37 @@ import java.net.InetAddress
  *
  * This ViewModel periodically pings the configured WebView URL to check if the server is reachable.
  *
- * @property generalConfigRepository Repository providing the current URL configuration.
+ * @property webserverConfigRepository Repository providing the current URL configuration.
  */
-class WebserverViewModel(generalConfigRepository: GeneralConfigRepository) : ViewModel() { //TODO cange to new repo
+class WebserverViewModel(webserverConfigRepository: WebserverConfigRepository) : ViewModel() {
     private val _serverState = MutableStateFlow(ServerState())
 
     /** Current state of the server (reachability and IP address). */
     val serverState = _serverState.asStateFlow()
 
     /** Flow of the current WebView URL from settings. */
-    val urlState: StateFlow<String> = generalConfigRepository.currentUrl.stateIn(
+    val urlState: StateFlow<String> = webserverConfigRepository.currentUrl.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(SUBSCRIPTION_TIMEOUT),
         BuildConfig.WEBVIEW_URL
     )
 
     /** StateFlow indicating whether credential verification is actively required to connect to the server. */
-    val isVerificationEnabled: StateFlow<Boolean> = appConfigRepository.isWebserverVerificationEnabled.stateIn(
+    val isVerificationEnabled: StateFlow<Boolean> = webserverConfigRepository.isWebserverVerificationEnabled.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(SUBSCRIPTION_TIMEOUT),
         false
     )
 
     /** StateFlow emitting the currently configured unencrypted webserver username string. */
-    val webserverUser: StateFlow<String> = appConfigRepository.webserverUser.stateIn(
+    val webserverUser: StateFlow<String> = webserverConfigRepository.webserverUser.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(SUBSCRIPTION_TIMEOUT),
         ""
     )
 
     /** StateFlow emitting the currently configured unencrypted webserver password string. */
-    val webserverPassword: StateFlow<String> = appConfigRepository.webserverPassword.stateIn(
+    val webserverPassword: StateFlow<String> = webserverConfigRepository.webserverPassword.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(SUBSCRIPTION_TIMEOUT),
         ""

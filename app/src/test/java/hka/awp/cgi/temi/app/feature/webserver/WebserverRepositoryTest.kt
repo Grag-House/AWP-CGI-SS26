@@ -7,7 +7,6 @@ import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.preferencesOf
 import androidx.datastore.preferences.core.stringPreferencesKey
 import hka.awp.cgi.temi.app.BuildConfig
-import hka.awp.cgi.temi.app.data.repository.GeneralConfigRepository
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.unmockkAll
@@ -24,16 +23,16 @@ import kotlin.io.path.createTempDirectory
 import kotlin.io.path.deleteRecursively
 
 class WebserverRepositoryTest {
-    private lateinit var repository: GeneralConfigRepository
+    private lateinit var repository: WebserverConfigRepository
     private lateinit var datastore: DataStore<Preferences>
 
     @BeforeEach
     fun setup() {
         datastore = mockk<DataStore<Preferences>>(relaxed = true)
         every { datastore.data } returns flowOf(emptyPreferences())
-        repository = GeneralConfigRepository(dataStore = datastore)
+        repository = WebserverConfigRepository(dataStore = datastore)
         repository =
-            AppConfigRepository.Companion(dataStore = datastore, credentialStore = FakeWebserverCredentialStore())
+            WebserverConfigRepository.Companion(dataStore = datastore, credentialStore = FakeWebserverCredentialStore())
     }
 
     @AfterEach
@@ -52,7 +51,7 @@ class WebserverRepositoryTest {
         val value = "https://example.com"
         every { datastore.data } returns flowOf(preferencesOf(key to value))
         repository =
-            AppConfigRepository.Companion(dataStore = datastore, credentialStore = FakeWebserverCredentialStore())
+            WebserverConfigRepository.Companion(dataStore = datastore, credentialStore = FakeWebserverCredentialStore())
 
         assertEquals(value, repository.currentUrl.first())
     }
@@ -65,9 +64,7 @@ class WebserverRepositoryTest {
         val file = File(tmpDir.toString(), "preferences.preferences_pb")
         val dataStore = PreferenceDataStoreFactory.create(scope = this, produceFile = { file })
         val repository =
-            AppConfigRepository.Companion(dataStore = dataStore, credentialStore = FakeWebserverCredentialStore())
-
-        val repository = GeneralConfigRepository(dataStore)
+            WebserverConfigRepository.Companion(dataStore = dataStore, credentialStore = FakeWebserverCredentialStore())
 
         repository.updateUrl("https://example.com/path")
 

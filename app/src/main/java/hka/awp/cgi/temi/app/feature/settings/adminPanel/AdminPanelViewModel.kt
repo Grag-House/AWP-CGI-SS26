@@ -19,6 +19,7 @@ import hka.awp.cgi.temi.app.feature.patrol.PatrolManager
 import hka.awp.cgi.temi.app.feature.voiceRecognition.SpeakerVector
 import hka.awp.cgi.temi.app.feature.voiceRecognition.TemiVoiceRecognitionViewModel
 import hka.awp.cgi.temi.app.feature.voiceRecognition.VoiceProfileRepository
+import hka.awp.cgi.temi.app.feature.webserver.WebserverConfigRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -51,6 +52,7 @@ class AdminPanelViewModel(
     private val generalConfigRepository: GeneralConfigRepository,
     private val patrolConfigRepository: PatrolConfigRepository,
     private val securityConfigRepository: SecurityConfigRepository,
+    private val webserverConfigRepository: WebserverConfigRepository,
     private val mqttManager: MqttManager,
     private val voiceProfileRepository: VoiceProfileRepository,
     private val voiceRecognitionViewModel: TemiVoiceRecognitionViewModel,
@@ -110,11 +112,11 @@ class AdminPanelViewModel(
     }
 
     private val baseConfigFlow = combine(
-        generalConfigRepository.currentUrl,
+        webserverConfigRepository.currentUrl,
         generalConfigRepository.latitude,
         generalConfigRepository.longitude,
         generalConfigRepository.isSpeakerVerificationEnabled,
-        appConfigRepository.isWebserverVerificationEnabled
+        webserverConfigRepository.isWebserverVerificationEnabled
     ) { url, lat, lon, speakerEnabled, basicAuthEnabled ->
         AdminPanelFlows(
             url = url,
@@ -246,12 +248,12 @@ class AdminPanelViewModel(
                 _events.emit(AdminPanelEvent.PasswordChanged)
             }
             is AdminPanelAction.ChangeWebserverPassword -> viewModelScope.launch {
-                securityConfigRepository.updateWebserverPassword(action.password)
-                appConfigRepository.updateWebserverUser(action.user)
+                webserverConfigRepository.updateWebserverPassword(action.password)
+                webserverConfigRepository.updateWebserverUser(action.user)
                 _events.emit(AdminPanelEvent.WebserverPasswordChanged)
             }
             is AdminPanelAction.ToggleWebserverVerification -> viewModelScope.launch {
-                appConfigRepository.updateWebserverVerification(enabled = action.enabled)
+                webserverConfigRepository.updateWebserverVerification(enabled = action.enabled)
             }
             else -> Unit
         }
@@ -259,7 +261,7 @@ class AdminPanelViewModel(
 
     private fun checkWebserverPassword(input: String) {
         viewModelScope.launch {
-            val currentHash = securityConfigRepository.webserverPasswordHash.first()
+            val currentHash = webserverConfigRepository.webserverPasswordHash.first()
             val isValid = securityConfigRepository.isValidPassword(input, currentHash)
 
             _passwordError.value = !isValid
@@ -452,11 +454,11 @@ sealed interface AdminPanelAction {
 
     /** Updates the admin password. */
     data class ChangeAdminPassword(val password: String) : AdminPanelAction
-    data class ToggleWebserverVerification(val enabled: Boolean) : AdminPanelAction
-    data class ChangeWebserverPassword(val password: String, val user: String) : AdminPanelAction
 
+    /** Toggles webserver basic auth verification. */
+    data class ToggleWebserverVerification(val enabled: Boolean) : AdminPanelAction
     /** Updates the webserver password. */
-    data class ChangeWebserverPassword(val password: String) : AdminPanelAction
+    data class ChangeWebserverPassword(val password: String, val user: String) : AdminPanelAction
 
     /** Toggles speaker verification. */
     data class ToggleSpeakerVerification(val enabled: Boolean) : AdminPanelAction
