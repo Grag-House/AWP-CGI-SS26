@@ -37,6 +37,8 @@
     <string name="settings_location_subtitle">Location services and navigation</string>
     <string name="settings_about_title">About</string>
     <string name="settings_about_subtitle">System information</string>
+    <string name="settings_photobox_title">Photobox</string>
+    <string name="settings_photobox_subtitle">Theme &amp; Overlay</string>
     <string name="display_brightness">Screen brightness</string>
     <string name="display_screensaver">Screensaver</string>
     <string name="display_screensaver_after">Starts after %1$s of inactivity</string>
@@ -87,6 +89,7 @@
     <string name="notifications_description">Notifications</string>
     <string name="cgi">CGI</string>
     <string name="toggle_sidebar_description">Toggle sidebar</string>
+    <string name="back_description">Back</string>
 
     <string name="admin_panel">Admin Panel</string>
     <string name="admin_panel_description">Advanced settings for weather, webserver, MQTT</string>
@@ -94,8 +97,8 @@
     <string name="admin_panel_appversion">App Version</string>
     <string name="admin_panel_mqtt_reports">MQTT Reports</string>
     <string name="admin_panel_mqtt_reports_subtitle">Current reports</string>
-    <string name="admin_panel_webserver_password">Webserver Password</string>
-    <string name="admin_panel_webserver_password_change">Change webserver password</string>
+    <string name="admin_panel_webserver_password">Webserver Credentials</string>
+    <string name="admin_panel_webserver_password_change">Change webserver credentials</string>
     <string name="admin_panel_weather_coordinates">Weather coordinates</string>
     <string name="admin_panel_webserver_coordiantes_change">Change coordinates</string>
     <string name="admin_panel_webserver_url_change">Change URL</string>
@@ -103,6 +106,7 @@
     <string name="admin_panel_header">Admin Panel</string>
     <string name="admin_panel_latitude">"Latitude: "</string>
     <string name="admin_panel_longitude">Longitude:</string>
+    <string name="admin_panel_coordinates_format">Longitude: %1$s Latitude: %2$s</string>
     <string name="admin_panel_confirm">Confirm</string>
     <string name="admin_panel_reset_defaults">Default</string>
     <string name="admin_panel_latitude_error">Range: -90 to 90</string>
@@ -110,6 +114,7 @@
     <string name="admin_panel_cancel">Cancel</string>
     <string name="admin_panel_change_password_title">Change webserver password</string>
     <string name="admin_panel_new_password">New webserver password:</string>
+    <string name="admin_panel_new_user">New webserver-user:</string>
     <string name="admin_panel_webserver_defaults_reset">Reset URL and password</string>
     <string name="admin_panel_webserver_defaults_reset_done">Webserver defaults reset.</string>
     <string name="admin_panel_mqtt_reports_topics_title">Observed topics</string>
@@ -120,6 +125,39 @@
     <string name="admin_panel_mqtt_reports_direction_out">OUT</string>
     <string name="admin_panel_mqtt_reports_clear">Clear</string>
     <string name="admin_panel_close">Close</string>
+    <string name="admin_panel_close_app">Close app</string>
+    <string name="admin_panel_close_app_subtitle">The app will shut down</string>
+    <string name="admin_panel_close_app_confirm_text">Do you really want to close the app?</string>
+    <string name="admin_panel_confirm_close_app">Close app</string>
+    <string name="admin_panel_admin_password">Admin password</string>
+    <string name="admin_panel_admin_password_change">Change admin password</string>
+    <string name="admin_panel_new_admin_password">New admin password:</string>
+    <string name="admin_panel_patrol_settings">Automatic patrols</string>
+    <string name="admin_panel_patrol_route">Patrol route configuration</string>
+    <string name="admin_panel_active_prefix">Active: %1$s</string>
+    <string name="admin_panel_patrol_disabled">Disabled</string>
+    <string name="admin_panel_no_route_selected_title">No route selected</string>
+    <string name="admin_panel_no_route_selected_text">Please select a route so the patrol can start.</string>
+
+    <!-- Patrol Route/Settings Dialogs -->
+    <string name="save">Save</string>
+    <string name="patrol_route_dialog_title">Set patrol route</string>
+    <string name="patrol_route_dialog_subtitle">Choose the places Temi should visit during a patrol.</string>
+    <string name="patrol_settings_dialog_title">Configure patrols</string>
+    <string name="patrol_settings_dialog_subtitle">Choose how the automatic well-being check rounds should be scheduled.</string>
+    <string name="patrol_settings_enable_label">Enable automatic patrols</string>
+    <string name="patrol_settings_trigger_now_button">Start a patrol now</string>
+    <string name="patrol_settings_mode_label">Scheduling mode</string>
+    <string name="patrol_settings_mode_random">Random interval (e.g. every 40–60 min)</string>
+    <string name="patrol_settings_mode_fixed">Fixed hours (every selected hour)</string>
+    <string name="patrol_settings_interval_bounds_label">Interval bounds (minutes)</string>
+    <string name="patrol_settings_min_distance">Minimum interval: %1$d min.</string>
+    <string name="patrol_settings_max_distance">Maximum interval: %1$d min.</string>
+    <string name="patrol_settings_select_hours_label">Select times (whole hours)</string>
+    <string name="patrol_stream_content_description">Patrol video stream</string>
+    <string name="patrol_stream_back_button">Back</string>
+    <string name="patrol_countdown_message">Patrol starts in %1$d seconds</string>
+    <string name="patrol_stream_stop_button">Stop patrol</string>
     <string name="admin_panel_speaker_verification">Speaker Verification</string>
     <string name="admin_panel_speaker_verification_subtitle">Only authorized voices can wake up the robot</string>
 
@@ -198,6 +236,8 @@
     <string name="controller_connect">Connect</string>
     <string name="controller_delete">Remove</string>
     <string name="controller_isNotBonded">Not paired</string>
+    <string name="controller_status_label">Status: %1$s</string>
+    <string name="controller_bottom_text">Bluetooth Controller</string>
 
     <string name="hide_and_seek">Hide and Seek</string>
     <string name="hide_and_seek_sub">Find Temi!</string>
@@ -223,6 +263,8 @@
     <string name="hide_and_seek_lost_location_unknown">will be revealed later</string>
     <string name="hide_and_seek_play_again">Play again</string>
     <string name="hide_and_seek_to_dashboard">To dashboard</string>
+    <string name="hide_and_seek_navigation_error_title">Something went wrong</string>
+    <string name="hide_and_seek_navigation_error_message">I couldn\'t reach my hiding spot. Let\'s try again!</string>
     <string name="hiding_spot_filter_button">Edit hiding spots</string>
     <string name="hiding_spot_filter_button_active">Filter active</string>
     <string name="hiding_spot_filter_title">Select hiding spots</string>
@@ -233,8 +275,6 @@
     <string name="hiding_spot_filter_count">%1$d of %2$d places activated</string>
     <string name="hiding_spot_filter_cancel">Cancel</string>
     <string name="hiding_spot_filter_save">Save</string>
-    <string name="admin_panel_hiding_spots">Hiding Spot Configuration</string>
-    <string name="admin_panel_hiding_spots_subtitle">Manage allowed hiding spots</string>
     <string name="admin_panel_restart_app">Restart App</string>
     <string name="admin_panel_restart_app_subtitle">Restart once if experiencing issues</string>
     <string name="admin_panel_restart_confirm_title">Restart app?</string>
@@ -243,4 +283,69 @@
     <string name="admin_panel_password_input">Admin area protected, please enter password.</string>
     <string name="admin_panel_enter_password">Enter password</string>
     <string name="password_wrong">Incorrect password</string>
+    <string name="admin_panel_hiding_spots">Hiding Spot Configuration</string>
+    <string name="admin_panel_hiding_spots_subtitle">Manage allowed hiding spots</string>
+
+    <!-- Photobox -->
+    <string name="photobox">Photo Booth</string>
+    <string name="photobox_sub">Use Temi as a photo booth</string>
+    <string name="photobox_description">Photo booth camera icon</string>
+    <string name="photobox_intro_text">Stand in front of Temi and smile at the camera. The countdown starts automatically.</string>
+    <string name="photobox_countdown_label">COUNTDOWN DURATION</string>
+    <string name="photobox_start_button">Let\'s go!</string>
+    <string name="photobox_smile_label">Say cheese!</string>
+    <string name="photobox_cancel">Cancel</string>
+    <string name="photobox_click_text">Click!</string>
+    <string name="photobox_preview_title">Looking great!</string>
+    <string name="photobox_preview_message">Stand in front of Temi again when you\'re ready for the next photo.</string>
+    <string name="photobox_camera_permission_required">I can\'t see you without camera access.</string>
+    <string name="photobox_camera_unavailable">My camera isn\'t available right now.</string>
+    <string name="photobox_overlay_title">Temi Overlay</string>
+    <string name="photobox_overlay_description">Places an image of Temi over the captured photo, so it looks like Temi is standing next to you.</string>
+    <string name="photobox_banner_title">Banner</string>
+    <string name="photobox_banner_description">Shows a banner at the bottom of the photo.</string>
+    <string name="photobox_banner_50_years_cgi">50 Years of CGI</string>
+    <string name="photobox_banner_cgi_lab">CGI Lab</string>
+    <string name="photobox_upload_section_title">Photo upload</string>
+    <string name="photobox_drive_folder_label">Google Drive folder link</string>
+    <string name="photobox_drive_upload_url_label">Upload webhook URL</string>
+    <string name="photobox_upload_save_button">Save</string>
+    <string name="photobox_upload_description">Photos are automatically uploaded to this Drive folder after they are taken.</string>
+    <string name="photobox_show_qr_button">Show QR code</string>
+    <string name="photobox_upload_in_progress">Uploading your photo …</string>
+    <string name="photobox_upload_failed">Upload failed</string>
+    <string name="photobox_upload_queued">No internet – your photo will upload automatically once you\'re back online.</string>
+    <string name="photobox_generate_qr_button">Share photo</string>
+    <string name="photobox_filter_none">Original</string>
+    <string name="photobox_filter_grayscale">Black &amp; White</string>
+    <string name="photobox_filter_sepia">Sepia</string>
+    <string name="photobox_filter_vintage">Vintage</string>
+    <string name="photobox_qr_dialog_title">Your photo</string>
+    <string name="photobox_qr_dialog_subtitle">Scan the QR code to view and download the photo.</string>
+    <string name="photobox_qr_dialog_expiry">This link is only valid for 30 minutes.</string>
+    <string name="photobox_mode_select_title">Welcome to the Photobox!</string>
+    <string name="photobox_mode_select_subtitle">Choose how you\'d like your photo taken.</string>
+    <string name="photobox_mode_standard_title">Standard</string>
+    <string name="photobox_mode_standard_description">A single photo</string>
+    <string name="photobox_mode_strip_title">3-photo strip</string>
+    <string name="photobox_mode_strip_description">3 photos on one strip</string>
+    <string name="photobox_mode_strip4_title">4-photo strip</string>
+    <string name="photobox_mode_strip4_description">4 photos on one strip</string>
+    <string name="photobox_mode_grid_title">2x2 grid</string>
+    <string name="photobox_mode_grid_description">4 photos in a grid</string>
+    <string name="photobox_overlay_position_label">TEMI POSITION</string>
+    <string name="photobox_overlay_position_left">Left</string>
+    <string name="photobox_overlay_position_center">Center</string>
+    <string name="photobox_overlay_position_right">Right</string>
+    <string name="photobox_change_mode_button">Change mode</string>
+    <string name="photobox_strip_delay_label">PAUSE BETWEEN PHOTOS</string>
+    <string name="photobox_change_pose_label">Change your pose!</string>
+    <string name="photobox_shot_progress">Photo %1$d of %2$d</string>
+    <string name="photobox_new_photo_button">New Photo</string>
+    <string name="photobox_to_dashboard">To Dashboard</string>
+    <string name="photobox_photo_count">%1$d photos taken</string>
+    <string name="photobox_photo_number">Photo #%1$d</string>
+    <string name="photobox_duration_seconds">%1$d s</string>
+    <string name="admin_panel_webserver_verification">Webserver Authentification</string>
+    <string name="admin_panel_webserver_verification_subtitle">Utilises Basic Auth to sign in with the webserver</string>
 </resources>

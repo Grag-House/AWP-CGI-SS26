@@ -1,6 +1,5 @@
 package hka.awp.cgi.temi.app.feature.voiceRecognition
 
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.SpeakerVector
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

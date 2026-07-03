@@ -22,6 +22,18 @@ import hka.awp.cgi.temi.app.ui.components.SettingsCard
 import hka.awp.cgi.temi.app.ui.components.SettingsHeader
 import hka.awp.cgi.temi.app.ui.components.SettingsRow
 
+/**
+ * Renders the main content screen for the battery settings section.
+ *
+ * This component displays the current battery level percentage using a visual progress bar
+ * and contextual text coloration (e.g., shifts to red when low). It also outlines the
+ * system's active power status, distinguishing whether the hardware is running on battery mode
+ * or actively charging.
+ *
+ * @param batteryLevel The current charge percentage of the battery (expected range: 0 to 100).
+ * @param isCharging A boolean flag indicating whether the device is connected to a power supply.
+ * @param onBackClick Fired when the user interacts with the navigation back button in the header.
+ */
 @Composable
 fun BatteryContent(
     batteryLevel: Int,

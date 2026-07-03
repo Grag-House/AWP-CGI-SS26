@@ -1,5 +1,6 @@
 package hka.awp.cgi.temi.app.ui.shell
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -9,6 +10,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -20,6 +22,11 @@ import hka.awp.cgi.temi.app.feature.hideandseek.HideAndSeekScreen
 import hka.awp.cgi.temi.app.feature.hideandseek.HideAndSeekViewModel
 import hka.awp.cgi.temi.app.feature.navigation.NavigationContent
 import hka.awp.cgi.temi.app.feature.navigation.NavigationViewModel
+import hka.awp.cgi.temi.app.feature.patrol.overlay.PatrolCountdownOverlay
+import hka.awp.cgi.temi.app.feature.patrol.overlay.PatrolOverlayViewModel
+import hka.awp.cgi.temi.app.feature.patrol.overlay.PatrolStreamOverlay
+import hka.awp.cgi.temi.app.feature.photobox.PhotoboxScreen
+import hka.awp.cgi.temi.app.feature.photobox.PhotoboxViewModel
 import hka.awp.cgi.temi.app.feature.settings.SettingsNavigationEvent
 import hka.awp.cgi.temi.app.feature.settings.SettingsViewModel
 import hka.awp.cgi.temi.app.feature.settings.about.SettingsScreen
@@ -27,6 +34,7 @@ import hka.awp.cgi.temi.app.feature.settings.adminPanel.AdminPanelScreen
 import hka.awp.cgi.temi.app.feature.settings.battery.BatteryScreen
 import hka.awp.cgi.temi.app.feature.settings.display.DisplayScreen
 import hka.awp.cgi.temi.app.feature.settings.language.LanguageScreen
+import hka.awp.cgi.temi.app.feature.settings.photobox.PhotoboxSettingsScreen
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherContent
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherState
 import hka.awp.cgi.temi.app.feature.weatherscreen.WeatherViewModel
@@ -58,7 +66,9 @@ fun MainShell(
     navigationViewModel: NavigationViewModel = koinViewModel(),
     webserverViewModel: WebserverViewModel = koinViewModel(),
     weatherViewModel: WeatherViewModel = koinViewModel(),
-    hideAndSeekViewModel: HideAndSeekViewModel = koinViewModel()
+    hideAndSeekViewModel: HideAndSeekViewModel = koinViewModel(),
+    photoboxViewModel: PhotoboxViewModel = koinViewModel(),
+    patrolOverlayViewModel: PatrolOverlayViewModel = koinViewModel()
 ) {
     val wifiLevel by appViewModel.wifiLevel.collectAsStateWithLifecycle()
     val currentTime by appViewModel.currentTime.collectAsStateWithLifecycle()
@@ -67,6 +77,17 @@ fun MainShell(
     val serverState by webserverViewModel.serverState.collectAsStateWithLifecycle()
     val currentTemperatureState by weatherViewModel.uiState.collectAsStateWithLifecycle()
     val webserverUrlState by webserverViewModel.urlState.collectAsStateWithLifecycle()
+
+    val videoFrame by patrolOverlayViewModel.videoFrame.collectAsStateWithLifecycle()
+    val isPatrolRunning by patrolOverlayViewModel.isRunning.collectAsStateWithLifecycle()
+    val isOverlayVisible by patrolOverlayViewModel.isOverlayVisible.collectAsStateWithLifecycle()
+    val countdownSeconds by patrolOverlayViewModel.countdownSeconds.collectAsStateWithLifecycle()
+
+    LaunchedEffect(isPatrolRunning) {
+        if (isPatrolRunning) {
+            patrolOverlayViewModel.showOverlay()
+        }
+    }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -80,38 +101,60 @@ fun MainShell(
             )
         }
     ) { paddingValues ->
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
+        Box(
+            modifier = Modifier.fillMaxSize()
         ) {
-            Sidebar(
-                isExpanded = appViewModel.isSidebarExpanded,
-                selectedRoute = appViewModel.selectedRoute,
-                onRouteSelected = { screen -> appViewModel.onRouteSelect(screen) },
-                onSidebarToggle = { appViewModel.onSideBarToggle() },
-                modifier = Modifier.width(260.dp)
-            )
-
             Row(
                 modifier = Modifier
-                    .weight(1f)
-                    .padding(top = 12.dp, bottom = 12.dp, end = 12.dp)
-                    .clip(RoundedCornerShape(24.dp))
+                    .fillMaxSize()
+                    .padding(paddingValues)
             ) {
-                RenderSelectedRoute(
+                Sidebar(
+                    isExpanded = appViewModel.isSidebarExpanded,
                     selectedRoute = appViewModel.selectedRoute,
-                    routeDeps = MainShellRouteDeps(
-                        appViewModel = appViewModel,
-                        settingsViewModel = settingsViewModel,
-                        navigationViewModel = navigationViewModel,
-                        weatherViewModel = weatherViewModel,
-                        hideAndSeekViewModel = hideAndSeekViewModel,
-                        serverState = serverState,
-                        currentTemperatureState = currentTemperatureState,
-                        webserverUrlState = webserverUrlState
-                    ),
-                    modifier = Modifier.weight(1f)
+                    onRouteSelected = { screen ->
+                        if (screen == Screen.Photobox) {
+                            photoboxViewModel.reset()
+                        }
+                        appViewModel.onRouteSelect(screen)
+                    },
+                    onSidebarToggle = { appViewModel.onSideBarToggle() },
+                    modifier = Modifier.width(260.dp)
+                )
+
+                Row(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(top = 12.dp, bottom = 12.dp, end = 12.dp)
+                        .clip(RoundedCornerShape(24.dp))
+                ) {
+                    RenderSelectedRoute(
+                        selectedRoute = appViewModel.selectedRoute,
+                        routeDeps = MainShellRouteDeps(
+                            appViewModel = appViewModel,
+                            settingsViewModel = settingsViewModel,
+                            navigationViewModel = navigationViewModel,
+                            weatherViewModel = weatherViewModel,
+                            hideAndSeekViewModel = hideAndSeekViewModel,
+                            photoboxViewModel = photoboxViewModel,
+                            serverState = serverState,
+                            currentTemperatureState = currentTemperatureState,
+                            webserverUrlState = webserverUrlState
+                        ),
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+
+            countdownSeconds?.let { seconds ->
+                PatrolCountdownOverlay(seconds = seconds)
+            }
+
+            if (isPatrolRunning && isOverlayVisible) {
+                PatrolStreamOverlay(
+                    videoFrame = videoFrame,
+                    onBackClick = patrolOverlayViewModel::hideOverlay,
+                    onStopPatrol = patrolOverlayViewModel::stopPatrol
                 )
             }
         }
@@ -151,20 +194,13 @@ private fun RenderSelectedRoute(
             SettingsScreen(modifier = modifier, viewModel = routeDeps.settingsViewModel)
         }
 
-        Screen.DisplaySettings.route -> DisplayScreen(
-            onBackClick = { routeDeps.appViewModel.onRouteSelect(Screen.Settings) }
-        )
-
-        Screen.BatterySettings.route -> BatteryScreen(
-            onBackClick = { routeDeps.appViewModel.onRouteSelect(Screen.Settings) }
-        )
-
-        Screen.AdminPanel.route -> AdminPanelScreen(
-            onBackClick = { routeDeps.appViewModel.onRouteSelect(Screen.Settings) }
-        )
-
-        Screen.LanguageSettings.route -> LanguageScreen(
-            onBackClick = { routeDeps.appViewModel.onRouteSelect(Screen.Settings) }
+        Screen.DisplaySettings.route,
+        Screen.BatterySettings.route,
+        Screen.AdminPanel.route,
+        Screen.LanguageSettings.route,
+        Screen.PhotoboxSettings.route -> RenderSettingsSubRoute(
+            selectedRoute = selectedRoute,
+            onNavigateBack = { routeDeps.appViewModel.onRouteSelect(Screen.Settings) }
         )
 
         Screen.Weather.route -> WeatherContent(viewModel = routeDeps.weatherViewModel)
@@ -172,6 +208,12 @@ private fun RenderSelectedRoute(
         Screen.HideAndSeek.route -> HideAndSeekScreen(
             modifier = modifier,
             viewModel = routeDeps.hideAndSeekViewModel,
+            onNavigateToDashboard = { routeDeps.appViewModel.onRouteSelect(Screen.Dashboard) }
+        )
+
+        Screen.Photobox.route -> PhotoboxScreen(
+            modifier = modifier,
+            viewModel = routeDeps.photoboxViewModel,
             onNavigateToDashboard = { routeDeps.appViewModel.onRouteSelect(Screen.Dashboard) }
         )
 
@@ -187,12 +229,24 @@ private fun RenderSelectedRoute(
     }
 }
 
+@Composable
+private fun RenderSettingsSubRoute(selectedRoute: String, onNavigateBack: () -> Unit) {
+    when (selectedRoute) {
+        Screen.DisplaySettings.route -> DisplayScreen(onBackClick = onNavigateBack)
+        Screen.BatterySettings.route -> BatteryScreen(onBackClick = onNavigateBack)
+        Screen.AdminPanel.route -> AdminPanelScreen(onBackClick = onNavigateBack)
+        Screen.PhotoboxSettings.route -> PhotoboxSettingsScreen(onBackClick = onNavigateBack)
+        else -> LanguageScreen(onBackClick = onNavigateBack)
+    }
+}
+
 private data class MainShellRouteDeps(
     val appViewModel: AppViewModel,
     val settingsViewModel: SettingsViewModel,
     val navigationViewModel: NavigationViewModel,
     val weatherViewModel: WeatherViewModel,
     val hideAndSeekViewModel: HideAndSeekViewModel,
+    val photoboxViewModel: PhotoboxViewModel,
     val serverState: ServerState,
     val currentTemperatureState: WeatherState,
     val webserverUrlState: String
@@ -210,6 +264,7 @@ private fun HandleSettingsNavigationEvents(
                 is SettingsNavigationEvent.NavigateToBattery -> onNavigate(Screen.BatterySettings)
                 is SettingsNavigationEvent.NavigateToAdminPanel -> onNavigate(Screen.AdminPanel)
                 is SettingsNavigationEvent.NavigateToLanguage -> onNavigate(Screen.LanguageSettings)
+                is SettingsNavigationEvent.NavigateToPhotobox -> onNavigate(Screen.PhotoboxSettings)
             }
         }
     }
@@ -230,5 +285,20 @@ private fun DashboardRouteContent(
         serverState = serverState,
         // TODO add utility method or catch the exception
         Integer.parseInt(currentTemperatureState.hourlyForecast[0].temp)
+    )
+}
+
+@Composable
+fun WebserverHostScreen(viewModel: WebserverViewModel) {
+    val url by viewModel.urlState.collectAsState()
+    val isVerificationEnabled by viewModel.isVerificationEnabled.collectAsState()
+    val webserverUser by viewModel.webserverUser.collectAsState()
+    val webserverPassword by viewModel.webserverPassword.collectAsState()
+
+    WebViewScreen(
+        url = url,
+        isVerificationEnabled = isVerificationEnabled,
+        webserverUser = webserverUser,
+        webserverPassword = webserverPassword
     )
 }

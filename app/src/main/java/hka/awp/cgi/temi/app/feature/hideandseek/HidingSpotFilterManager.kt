@@ -6,6 +6,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
+/**
+ * Manages the transient UI state of the hiding spot filter sheet and persists changes via
+ * [HidingSpotRepository]. [savedEnabledSpots] is null when no filter is active (all spots allowed).
+ */
 class HidingSpotFilterManager(
     private val robot: Robot?,
     private val repository: HidingSpotRepository
@@ -16,15 +20,11 @@ class HidingSpotFilterManager(
     private val _isOpen = MutableStateFlow(false)
     val isOpen: StateFlow<Boolean> = _isOpen.asStateFlow()
 
-    private val _hasActiveFilter = MutableStateFlow(false)
-    val hasActiveFilter: StateFlow<Boolean> = _hasActiveFilter.asStateFlow()
-
     var savedEnabledSpots: Set<String>? = null
         private set
 
     init {
         savedEnabledSpots = repository.loadEnabledSpots()
-        _hasActiveFilter.value = savedEnabledSpots != null
     }
 
     fun open() {
@@ -58,7 +58,6 @@ class HidingSpotFilterManager(
         val allEnabled = state.allLocations.isNotEmpty() && state.enabledSpots.containsAll(state.allLocations)
         savedEnabledSpots = if (allEnabled) null else state.enabledSpots.toSet()
         repository.saveEnabledSpots(savedEnabledSpots)
-        _hasActiveFilter.value = savedEnabledSpots != null
         _isOpen.value = false
     }
 }
