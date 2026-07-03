@@ -18,22 +18,20 @@ import timber.log.Timber
 import java.net.InetAddress
 
 /**
- * Architecture [ViewModel] responsible for monitoring the background web server status
- * and exposing relevant configuration configurations to the UI layer.
- * * It coordinates with the [AppConfigRepository] to stream server verification states,
- * credentials, and target network URLs, while periodically executing lightweight background pings
- * to evaluate server reachability.
+ * ViewModel for monitoring the web server status.
  *
- * @param appConfigRepository The central application configuration repository containing the data streams.
+ * This ViewModel periodically pings the configured WebView URL to check if the server is reachable.
+ *
+ * @property generalConfigRepository Repository providing the current URL configuration.
  */
-class WebserverViewModel(appConfigRepository: AppConfigRepository) : ViewModel() {
+class WebserverViewModel(generalConfigRepository: GeneralConfigRepository) : ViewModel() { //TODO cange to new repo
     private val _serverState = MutableStateFlow(ServerState())
 
-    /** Public read-only stream representing the current connection details and reachability status of the server. */
+    /** Current state of the server (reachability and IP address). */
     val serverState = _serverState.asStateFlow()
 
-    /** StateFlow emitting the active Webview URL string, mapped and kept active via the UI scope. */
-    val urlState: StateFlow<String> = appConfigRepository.currentUrl.stateIn(
+    /** Flow of the current WebView URL from settings. */
+    val urlState: StateFlow<String> = generalConfigRepository.currentUrl.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(SUBSCRIPTION_TIMEOUT),
         BuildConfig.WEBVIEW_URL
@@ -67,8 +65,7 @@ class WebserverViewModel(appConfigRepository: AppConfigRepository) : ViewModel()
         /** The timeout threshold for the server ping/reachability operation (in milliseconds). */
         private const val TIMEOUT: Int = 2000
 
-        /** The time to wait after the last subscriber leaves before pausing the upstream state flows (in milliseconds).
-         */
+        /** Time to wait before stopping the flow after the last subscriber disappeared. */
         private const val SUBSCRIPTION_TIMEOUT = 5000L
     }
 
@@ -85,7 +82,7 @@ class WebserverViewModel(appConfigRepository: AppConfigRepository) : ViewModel()
                     val address = InetAddress.getByName(extractHostSafely(urlState.value))
                     val ip = address.hostAddress
 
-                    // ping
+                    // Ping
                     val reachable = address.isReachable(TIMEOUT)
 
                     if (ip == null) {

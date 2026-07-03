@@ -5,19 +5,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.robotemi.sdk.Robot
 import hka.awp.cgi.temi.app.BuildConfig
+import hka.awp.cgi.temi.app.data.model.PatrolMode
+import hka.awp.cgi.temi.app.data.model.PatrolSettings
+import hka.awp.cgi.temi.app.data.repository.GeneralConfigRepository
+import hka.awp.cgi.temi.app.data.repository.PatrolConfigRepository
+import hka.awp.cgi.temi.app.data.repository.SecurityConfigRepository
 import hka.awp.cgi.temi.app.feature.hideandseek.HidingSpotFilterManager
 import hka.awp.cgi.temi.app.feature.hideandseek.HidingSpotRepository
 import hka.awp.cgi.temi.app.feature.mqtt.MqttManager
 import hka.awp.cgi.temi.app.feature.mqtt.MqttTrafficEvent
 import hka.awp.cgi.temi.app.feature.patrol.PatrolCameraStreamManager
 import hka.awp.cgi.temi.app.feature.patrol.PatrolManager
-import hka.awp.cgi.temi.app.feature.patrol.PatrolMode
-import hka.awp.cgi.temi.app.feature.patrol.PatrolSettings
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.dialogs.AdminPanelPatrolSettingsDialog
 import hka.awp.cgi.temi.app.feature.voiceRecognition.SpeakerVector
 import hka.awp.cgi.temi.app.feature.voiceRecognition.TemiVoiceRecognitionViewModel
 import hka.awp.cgi.temi.app.feature.voiceRecognition.VoiceProfileRepository
-import hka.awp.cgi.temi.app.utils.AppConfigRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -34,10 +35,22 @@ import kotlin.math.round
 /**
  * ViewModel for the Admin Panel, managing security, configuration, voice profiles,
  * and robot patrol settings.
+ *
+ * @property generalConfigRepository Handles URL, coordinates, and general settings.
+ * @property patrolConfigRepository Handles patrol timing, modes, and routes.
+ * @property securityConfigRepository Handles password verification and updates.
+ * @property mqttManager Manages MQTT communication and event logging.
+ * @property voiceProfileRepository Manages speaker voice profiles.
+ * @property voiceRecognitionViewModel Manages voice recognition state and enrollment.
+ * @property robot The [Robot] instance for hardware interaction.
+ * @property patrolManager Logic for executing and scheduling patrols.
+ * @property patrolCameraStreamManager Manages the video stream during patrol.
  */
 @Suppress("LongParameterList", "TooManyFunctions")
 class AdminPanelViewModel(
-    private val appConfigRepository: AppConfigRepository,
+    private val generalConfigRepository: GeneralConfigRepository,
+    private val patrolConfigRepository: PatrolConfigRepository,
+    private val securityConfigRepository: SecurityConfigRepository,
     private val mqttManager: MqttManager,
     private val voiceProfileRepository: VoiceProfileRepository,
     private val voiceRecognitionViewModel: TemiVoiceRecognitionViewModel,
@@ -47,20 +60,28 @@ class AdminPanelViewModel(
     private val patrolCameraStreamManager: PatrolCameraStreamManager
 ) : ViewModel() {
 
+    /** Manager for filtering locations during hide and seek. */
     val filterManager = HidingSpotFilterManager(robot, hidingSpotRepository)
 
     private val _events = MutableSharedFlow<AdminPanelEvent>()
+
+    /** Stream of events (e.g., password changes, restarts) for the UI to handle. */
     val events = _events.asSharedFlow()
 
     private val _isAuthorized = MutableStateFlow(false)
+
+    /** Whether the user is currently authorized to access protected Admin Panel settings. */
     val isAuthorized = _isAuthorized.asStateFlow()
 
     private val _passwordError = MutableStateFlow(false)
+
+    /** Whether a password check failed. */
     val passwordError = _passwordError.asStateFlow()
 
     private val patrolRouteSettings = MutableStateFlow(PatrolRouteSettingsState())
     private val patrolLocationPrefix = "patrol_"
 
+    /** Current video frame bitmap from the patrol camera. */
     val videoFrame: StateFlow<Bitmap?> = patrolCameraStreamManager.videoFrame
 
     private data class PatrolRouteSettingsState(
@@ -76,6 +97,7 @@ class AdminPanelViewModel(
         val basicAuthEnabled: Boolean,
     )
 
+    /** Loads locations from the robot that match the patrol prefix. */
     fun loadPatrolLocations() {
         patrolRouteSettings.update {
             it.copy(
@@ -88,10 +110,10 @@ class AdminPanelViewModel(
     }
 
     private val baseConfigFlow = combine(
-        appConfigRepository.currentUrl,
-        appConfigRepository.latitude,
-        appConfigRepository.longitude,
-        appConfigRepository.isSpeakerVerificationEnabled,
+        generalConfigRepository.currentUrl,
+        generalConfigRepository.latitude,
+        generalConfigRepository.longitude,
+        generalConfigRepository.isSpeakerVerificationEnabled,
         appConfigRepository.isWebserverVerificationEnabled
     ) { url, lat, lon, speakerEnabled, basicAuthEnabled ->
         AdminPanelFlows(
@@ -99,31 +121,35 @@ class AdminPanelViewModel(
             latitude = lat,
             longitude = lon,
             speakerEnabled = speakerEnabled,
-            speakerThreshold = AppConfigRepository.DEFAULT_SPEAKER_VERIFICATION_THRESHOLD,
+            speakerThreshold = GeneralConfigRepository.DEFAULT_SPEAKER_VERIFICATION_THRESHOLD,
             basicAuthEnabled = basicAuthEnabled,
         )
     }
 
     private val configWithThresholdFlow = combine(
         baseConfigFlow,
-        appConfigRepository.speakerVerificationThreshold,
+        generalConfigRepository.speakerVerificationThreshold,
     ) { config, threshold ->
         config.copy(speakerThreshold = threshold)
     }
 
+    /**
+     * The unified UI state for the Admin Panel, combining settings, MQTT traffic,
+     * voice profiles, and patrol status.
+     */
     @Suppress("UNCHECKED_CAST", "MagicNumber")
     val uiState: StateFlow<AdminPanelState> = combine(
         configWithThresholdFlow,
         mqttManager.trafficEvents,
         voiceProfileRepository.voiceProfiles,
         voiceRecognitionViewModel.isEnrollmentActive,
-        appConfigRepository.isPatrolEnabled,
-        appConfigRepository.patrolMode,
-        appConfigRepository.minPatrolMinutes,
-        appConfigRepository.maxPatrolMinutes,
-        appConfigRepository.selectedPatrolHours,
+        patrolConfigRepository.isPatrolEnabled,
+        patrolConfigRepository.patrolMode,
+        patrolConfigRepository.minPatrolMinutes,
+        patrolConfigRepository.maxPatrolMinutes,
+        patrolConfigRepository.selectedPatrolHours,
         patrolRouteSettings,
-        appConfigRepository.patrolRoute,
+        patrolConfigRepository.patrolRoute,
         videoFrame,
         patrolManager.isRunning,
     ) { args ->
@@ -132,7 +158,7 @@ class AdminPanelViewModel(
         val voiceProfiles = args[2] as Map<String, SpeakerVector>
         val isEnrollmentActive = args[3] as Boolean
         val isEnabled = args[4] as Boolean
-        val mode = args[5] as AdminPanelPatrolSettingsDialog
+        val mode = args[5] as PatrolMode
         val min = args[6] as Int
         val max = args[7] as Int
         val hours = args[8] as Set<Int>
@@ -170,6 +196,11 @@ class AdminPanelViewModel(
         initialValue = AdminPanelState()
     )
 
+    /**
+     * Handles UI actions dispatched from the Admin Panel.
+     *
+     * @param action The action to perform.
+     */
     fun onAction(action: AdminPanelAction) {
         when (action) {
             is AdminPanelAction.CheckWebserverPassword,
@@ -211,11 +242,11 @@ class AdminPanelViewModel(
                 _passwordError.value = false
             }
             is AdminPanelAction.ChangeAdminPassword -> viewModelScope.launch {
-                appConfigRepository.updateAdminPanelPassword(action.password)
+                securityConfigRepository.updateAdminPanelPassword(action.password)
                 _events.emit(AdminPanelEvent.PasswordChanged)
             }
             is AdminPanelAction.ChangeWebserverPassword -> viewModelScope.launch {
-                appConfigRepository.updateWebserverPassword(action.password)
+                securityConfigRepository.updateWebserverPassword(action.password)
                 appConfigRepository.updateWebserverUser(action.user)
                 _events.emit(AdminPanelEvent.WebserverPasswordChanged)
             }
@@ -228,8 +259,8 @@ class AdminPanelViewModel(
 
     private fun checkWebserverPassword(input: String) {
         viewModelScope.launch {
-            val currentHash = appConfigRepository.webserverPasswordHash.first()
-            val isValid = appConfigRepository.isValidPassword(input, currentHash)
+            val currentHash = securityConfigRepository.webserverPasswordHash.first()
+            val isValid = securityConfigRepository.isValidPassword(input, currentHash)
 
             _passwordError.value = !isValid
             if (isValid) {
@@ -240,8 +271,8 @@ class AdminPanelViewModel(
 
     private fun checkAdminPassword(input: String) {
         viewModelScope.launch {
-            val currentHash = appConfigRepository.adminPanelPasswordHash.first()
-            val isValid = appConfigRepository.isValidPassword(input, currentHash)
+            val currentHash = securityConfigRepository.adminPanelPasswordHash.first()
+            val isValid = securityConfigRepository.isValidPassword(input, currentHash)
 
             _passwordError.value = !isValid
             if (isValid) {
@@ -254,10 +285,13 @@ class AdminPanelViewModel(
         when (action) {
             is AdminPanelAction.EditCoordinates -> updateCoordinates(action.latitude, action.longitude)
             is AdminPanelAction.EditWebserverUrl -> viewModelScope.launch {
-                appConfigRepository.updateUrl(action.url)
+                generalConfigRepository.updateUrl(action.url)
             }
             AdminPanelAction.ResetCoordinates -> viewModelScope.launch {
-                appConfigRepository.updateCoordinates(DEFAULT_LATITUDE, DEFAULT_LONGITUDE)
+                generalConfigRepository.updateCoordinates(
+                    GeneralConfigRepository.DEFAULT_LATITUDE,
+                    GeneralConfigRepository.DEFAULT_LONGITUDE
+                )
             }
             AdminPanelAction.OpenMqttReports -> viewModelScope.launch {
                 _events.emit(AdminPanelEvent.OpenMqttReports)
@@ -276,10 +310,10 @@ class AdminPanelViewModel(
     private fun handleVoiceAction(action: AdminPanelAction) {
         when (action) {
             is AdminPanelAction.ToggleSpeakerVerification -> viewModelScope.launch {
-                appConfigRepository.updateSpeakerVerification(enabled = action.enabled)
+                generalConfigRepository.updateSpeakerVerification(enabled = action.enabled)
             }
             is AdminPanelAction.EditSpeakerVerificationThreshold -> viewModelScope.launch {
-                appConfigRepository.updateSpeakerVerification(threshold = action.threshold)
+                generalConfigRepository.updateSpeakerVerification(threshold = action.threshold)
             }
             AdminPanelAction.ResetVoiceProfiles -> viewModelScope.launch {
                 voiceProfileRepository.clearAllProfiles()
@@ -315,27 +349,25 @@ class AdminPanelViewModel(
         val roundedLon = round(longitude * COORDINATE_PRECISION) / COORDINATE_PRECISION
 
         viewModelScope.launch {
-            appConfigRepository.updateCoordinates(roundedLat, roundedLon)
+            generalConfigRepository.updateCoordinates(roundedLat, roundedLon)
         }
     }
 
+    /** Saves patrol settings and updates the active patrol schedule. */
     fun onSavePatrolSettings(
         isEnabled: Boolean,
-        mode: AdminPanelPatrolSettingsDialog,
+        mode: PatrolMode,
         minMin: Int,
         maxMin: Int,
         hours: Set<Int>
     ) {
         viewModelScope.launch {
-            appConfigRepository.updatePatrolSettings(isEnabled, mode, minMin, maxMin, hours)
+            patrolConfigRepository.updatePatrolSettings(isEnabled, mode, minMin, maxMin, hours)
 
             patrolManager.updateSchedule(
                 PatrolSettings(
                     isEnabled = isEnabled,
-                    mode = when (mode) {
-                        AdminPanelPatrolSettingsDialog.RANDOM -> PatrolMode.RANDOM
-                        AdminPanelPatrolSettingsDialog.FIXED -> PatrolMode.FIXED
-                    },
+                    mode = mode,
                     minMinutes = minMin,
                     maxMinutes = maxMin,
                     hours = hours,
@@ -345,6 +377,7 @@ class AdminPanelViewModel(
         }
     }
 
+    /** Triggers an immediate patrol run. */
     fun onTriggerImmediatePatrol() {
         val success = patrolManager.startImmediatePatrol(uiState.value.patrolRoute)
         if (!success) {
@@ -352,19 +385,17 @@ class AdminPanelViewModel(
         }
     }
 
+    /** Saves the patrol route and updates the active patrol schedule. */
     fun onSavePatrolRoute(route: List<String>) {
         viewModelScope.launch {
-            appConfigRepository.updatePatrolRoute(route)
+            patrolConfigRepository.updatePatrolRoute(route)
 
             val state = uiState.value
 
             patrolManager.updateSchedule(
                 PatrolSettings(
                     isEnabled = state.isPatrolEnabled,
-                    mode = when (state.patrolMode) {
-                        AdminPanelPatrolSettingsDialog.RANDOM -> PatrolMode.RANDOM
-                        AdminPanelPatrolSettingsDialog.FIXED -> PatrolMode.FIXED
-                    },
+                    mode = state.patrolMode,
                     minMinutes = state.minMinutes,
                     maxMinutes = state.maxMinutes,
                     hours = state.selectedHours,
@@ -374,14 +405,13 @@ class AdminPanelViewModel(
         }
     }
 
+    /** Stops any currently running patrol. */
     fun onExitPatrol() {
         patrolManager.stopPatrol()
     }
 
     companion object {
         private const val STATE_TIMEOUT = 5000L
-        private const val DEFAULT_LATITUDE = 49.0138
-        private const val DEFAULT_LONGITUDE = 8.3573
         private const val COORDINATE_PRECISION = 10000.0
     }
 }
@@ -390,39 +420,78 @@ class AdminPanelViewModel(
  * Interface representing actions that can be performed in the Admin Panel.
  */
 sealed interface AdminPanelAction {
+    /** Clears the current password error state. */
     data object ClearPasswordError : AdminPanelAction
+
+    /** Resets the authorization status, requiring re-login. */
     data object ResetAuthorization : AdminPanelAction
 
+    /** Updates application coordinates. */
     data class EditCoordinates(val latitude: Double, val longitude: Double) : AdminPanelAction
+
+    /** Updates the main WebView URL. */
     data class EditWebserverUrl(val url: String) : AdminPanelAction
+
+    /** Resets coordinates to default values. */
     data object ResetCoordinates : AdminPanelAction
+
+    /** Triggers navigation to the MQTT report screen. */
     data object OpenMqttReports : AdminPanelAction
+
+    /** Clears the MQTT traffic log. */
     data object ClearMqttReports : AdminPanelAction
+
+    /** Requests an application restart. */
     data object RequestRestart : AdminPanelAction
 
+    /** Checks the webserver-specific password. */
     data class CheckWebserverPassword(val password: String) : AdminPanelAction
+
+    /** Checks the admin-specific password. */
     data class CheckAdminPassword(val password: String) : AdminPanelAction
+
+    /** Updates the admin password. */
     data class ChangeAdminPassword(val password: String) : AdminPanelAction
     data class ToggleWebserverVerification(val enabled: Boolean) : AdminPanelAction
     data class ChangeWebserverPassword(val password: String, val user: String) : AdminPanelAction
 
+    /** Updates the webserver password. */
+    data class ChangeWebserverPassword(val password: String) : AdminPanelAction
+
+    /** Toggles speaker verification. */
     data class ToggleSpeakerVerification(val enabled: Boolean) : AdminPanelAction
+
+    /** Updates the sensitivity threshold for speaker verification. */
     data class EditSpeakerVerificationThreshold(val threshold: Double) : AdminPanelAction
+
+    /** Deletes all enrolled voice profiles. */
     data object ResetVoiceProfiles : AdminPanelAction
+
+    /** Toggles enrollment mode for voice profiles. */
     data class ToggleEnrollment(val active: Boolean, val name: String? = null) : AdminPanelAction
+
+    /** Deletes a specific voice profile by name. */
     data class DeleteVoiceProfile(val name: String) : AdminPanelAction
+
+    /** Requests to close the application. */
     data object RequestCloseApp : AdminPanelAction
 
+    /** Saves patrol timing and mode settings. */
     data class SavePatrolSettings(
         val isEnabled: Boolean,
-        val mode: AdminPanelPatrolSettingsDialog,
+        val mode: PatrolMode,
         val minMinutes: Int,
         val maxMinutes: Int,
         val hours: Set<Int>,
     ) : AdminPanelAction
 
+    /** Saves the defined patrol route. */
     data class SavePatrolRoute(val route: List<String>) : AdminPanelAction
+
+    /** Starts a patrol immediately. */
     data object TriggerImmediatePatrol : AdminPanelAction
+
+    /** Stops the active patrol. */
     data object ExitPatrol : AdminPanelAction
 }
 
@@ -430,11 +499,22 @@ sealed interface AdminPanelAction {
  * Events emitted by the Admin Panel to the UI.
  */
 sealed interface AdminPanelEvent {
+    /** Request to open MQTT reports. */
     data object OpenMqttReports : AdminPanelEvent
+
+    /** Feedback that the webserver password was changed. */
     data object WebserverPasswordChanged : AdminPanelEvent
+
+    /** Feedback that the admin password was changed. */
     data object PasswordChanged : AdminPanelEvent
+
+    /** Feedback that an app restart was triggered. */
     data object RestartAppTriggered : AdminPanelEvent
+
+    /** Feedback that app closure was triggered. */
     data object CloseAppTriggered : AdminPanelEvent
+
+    /** Feedback that a patrol cannot start because no route is selected. */
     data object NoRouteSelected : AdminPanelEvent
 }
 
@@ -449,7 +529,7 @@ data class AdminPanelState(
     val mqttTrafficEvents: List<MqttTrafficEvent> = emptyList(),
     val coordinates: String = "",
     val isSpeakerVerificationEnabled: Boolean = false,
-    val speakerVerificationThreshold: Double = AppConfigRepository.DEFAULT_SPEAKER_VERIFICATION_THRESHOLD,
+    val speakerVerificationThreshold: Double = GeneralConfigRepository.DEFAULT_SPEAKER_VERIFICATION_THRESHOLD,
     val voiceProfileCount: Int = 0,
     val voiceProfiles: Map<String, SpeakerVector> = emptyMap(),
     val isEnrollmentActive: Boolean = false,
@@ -457,7 +537,7 @@ data class AdminPanelState(
     val savedLocations: List<String> = emptyList(),
     val patrolRoute: List<String> = emptyList(),
     val isPatrolEnabled: Boolean = false,
-    val patrolMode: AdminPanelPatrolSettingsDialog = AdminPanelPatrolSettingsDialog.RANDOM,
+    val patrolMode: PatrolMode = PatrolMode.RANDOM,
     val videoFrame: Bitmap? = null,
     val isPatrolStreaming: Boolean = false,
     val minMinutes: Int = 40,

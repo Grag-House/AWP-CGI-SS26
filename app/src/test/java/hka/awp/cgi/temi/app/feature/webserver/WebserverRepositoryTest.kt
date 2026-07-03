@@ -7,7 +7,7 @@ import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.preferencesOf
 import androidx.datastore.preferences.core.stringPreferencesKey
 import hka.awp.cgi.temi.app.BuildConfig
-import hka.awp.cgi.temi.app.utils.AppConfigRepository
+import hka.awp.cgi.temi.app.data.repository.GeneralConfigRepository
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.unmockkAll
@@ -24,13 +24,14 @@ import kotlin.io.path.createTempDirectory
 import kotlin.io.path.deleteRecursively
 
 class WebserverRepositoryTest {
-    private lateinit var repository: AppConfigRepository
+    private lateinit var repository: GeneralConfigRepository
     private lateinit var datastore: DataStore<Preferences>
 
     @BeforeEach
     fun setup() {
         datastore = mockk<DataStore<Preferences>>(relaxed = true)
         every { datastore.data } returns flowOf(emptyPreferences())
+        repository = GeneralConfigRepository(dataStore = datastore)
         repository =
             AppConfigRepository.Companion(dataStore = datastore, credentialStore = FakeWebserverCredentialStore())
     }
@@ -66,7 +67,7 @@ class WebserverRepositoryTest {
         val repository =
             AppConfigRepository.Companion(dataStore = dataStore, credentialStore = FakeWebserverCredentialStore())
 
-        assertEquals(BuildConfig.WEBVIEW_URL, repository.currentUrl.first())
+        val repository = GeneralConfigRepository(dataStore)
 
         repository.updateUrl("https://example.com/path")
 

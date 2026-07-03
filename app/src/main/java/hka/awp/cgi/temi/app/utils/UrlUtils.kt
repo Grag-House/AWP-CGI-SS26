@@ -5,41 +5,59 @@ import hka.awp.cgi.temi.app.BuildConfig
 import timber.log.Timber
 import java.net.URI
 
+/**
+ * Utility functions for URL validation and manipulation.
+ */
+
+/** The IP address allowed for HTTP communication even if other HTTP URLs are blocked. */
 const val ALLOWED_IP = BuildConfig.HTTP_ALLOWED_IP
 
 /**
- * Checks if a given URL is blocked based on its scheme and host.
- * - If the URL is null, it is considered blocked.
- * - If the host of the URL matches the allowed IP, it is not blocked.
- * - If the URL uses the "http" scheme, it is considered blocked.
- * - All other URLs are not blocked.
+ * Checks if a given URL should be blocked based on security policies.
  *
- * @param checkUrl The URL to check for blocking.
- * @return True if the URL is blocked, false otherwise.
+ * Policies:
+ * - Null URLs are blocked.
+ * - URLs matching [ALLOWED_IP] are permitted.
+ * - Plain "http" URLs (other than the allowed IP) are blocked to enforce HTTPS.
+ *
+ * @param checkUrl The URL string to validate.
+ * @return True if the URL is blocked, false if it is allowed.
  */
 fun isUrlBlocked(checkUrl: String?): Boolean {
     if (checkUrl == null) return true
 
-    val uri = checkUrl.toUri()
-    val host = uri.host
-
-    if (host == ALLOWED_IP) {
-        return false
-    }
-
-    if (uri.scheme == "http") {
-        Timber.w("%s was blocked", checkUrl)
+    val uri = try {
+        checkUrl.toUri()
+    } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+        Timber.e(e, "Failed to parse URL: %s", checkUrl)
         return true
     }
 
-    return false
+    val host = uri.host
+    val scheme = uri.scheme
+
+    return when {
+        // Explicitly allow communication with the internal/configured server IP
+        host == ALLOWED_IP -> false
+        // Block non-secure HTTP connections
+        scheme == "http" -> {
+            Timber.w("URL blocked due to non-secure scheme: %s", checkUrl)
+            true
+        }
+        else -> false
+    }
 }
 
 /**
- * Check for the host of a URL and return it. If the URL is malformed, return the input string itself.
+ * Safely extracts the host from a potentially malformed URL string.
+ * If the string doesn't have a scheme, "https://" is prefixed for parsing.
+ *
+ * @param input The raw input string.
+ * @return The extracted host name, or the original input if parsing fails.
  */
 fun extractHostSafely(input: String): String {
     val trimmedInput = input.trim()
+    if (trimmedInput.isEmpty()) return ""
 
     val urlToParse = if (!trimmedInput.startsWith("http://") && !trimmedInput.startsWith("https://")) {
         "https://$trimmedInput"

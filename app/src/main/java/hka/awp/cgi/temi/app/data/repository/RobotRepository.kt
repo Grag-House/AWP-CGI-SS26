@@ -1,10 +1,9 @@
 package hka.awp.cgi.temi.app.data.repository
 
-import android.content.Context
 import android.os.Build
-import androidx.core.content.edit
 import com.robotemi.sdk.Robot
 import hka.awp.cgi.temi.app.BuildConfig
+import hka.awp.cgi.temi.app.data.model.RobotInfo
 import timber.log.Timber
 import java.net.NetworkInterface
 import java.net.SocketException
@@ -12,17 +11,6 @@ import java.util.Collections
 
 private const val FALLBACK_IP_ADDRESS = "0.0.0.0"
 private const val NO_IP_FOUND_MESSAGE = "Keine IP gefunden"
-private const val PREFS_NAME = "settings"
-private const val DARK_MODE_KEY = "dark_mode"
-
-data class RobotInfo(
-    val ip: String,
-    val model: String,
-    val serial: String,
-    val appVersion: String,
-    val roboxVersion: String,
-    val launcherVersion: String,
-)
 
 class RobotRepository {
 
@@ -63,16 +51,4 @@ class RobotRepository {
     }
 
     fun getModelName(): String = Build.MODEL
-
-    fun saveDarkMode(enabled: Boolean, context: Context) {
-        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            .edit {
-                putBoolean(DARK_MODE_KEY, enabled)
-            }
-    }
-
-    fun getDarkMode(context: Context): Boolean {
-        return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            .getBoolean(DARK_MODE_KEY, false)
-    }
 }
