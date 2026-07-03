@@ -42,10 +42,10 @@ class WebserverViewModel(appConfigRepository: AppConfigRepository) : ViewModel()
     /** StateFlow indicating whether credential verification is actively required to connect to the server. */
     val isVerificationEnabled: StateFlow<Boolean> =
         appConfigRepository.webserver.isWebserverVerificationEnabled.stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(SUBSCRIPTION_TIMEOUT),
-        false
-    )
+            viewModelScope,
+            SharingStarted.WhileSubscribed(SUBSCRIPTION_TIMEOUT),
+            false
+                                                                            )
 
     /** StateFlow emitting the currently configured unencrypted webserver username string. */
     val webserverUser: StateFlow<String> = appConfigRepository.webserver.webserverUser.stateIn(

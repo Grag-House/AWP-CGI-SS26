@@ -121,7 +121,7 @@ class AppConfigRepository private constructor(
 /**
  * Contract for storing and retrieving plaintext webserver credentials.
  * Abstracted so [AppConfigRepository] can be unit-tested without Android instrumentation —
- * tests inject [FakeWebserverCredentialStore]; production wires [EncryptedWebserverCredentialStore].
+ * tests inject FakeWebserverCredentialStore (found in test classes); production wires [EncryptedWebserverCredentialStore].
  */
 interface WebserverCredentialStore {
     fun getUser(): String
