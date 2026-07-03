@@ -89,7 +89,7 @@ class WebserverConfigRepository private constructor(
          * Allows passing any [WebserverCredentialStore] implementation (e.g., test fakes).
          *
          * @param dataStore The [DataStore] instance for application configurations.
-         * @param credentialStore The credential storage implementation to use (e.g., [FakeWebserverCredentialStore]).
+         * @param credentialStore The credential storage implementation to use.
          */
         operator fun invoke(dataStore: DataStore<Preferences>, credentialStore: WebserverCredentialStore) =
             WebserverConfigRepository(dataStore, credentialStore)
