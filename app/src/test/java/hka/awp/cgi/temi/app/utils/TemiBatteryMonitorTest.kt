@@ -82,7 +82,10 @@ class TemiBatteryMonitorTest {
         assertFalse(temiBatteryMonitor.isCharging.value)
 
         coVerify(exactly = 1, timeout = 1000L) {
-            mqttManager.publishStatus("innovation_lab/karlsruhe/temi/temi_battery_level", "73")
+            mqttManager.publishStatus(
+                status = "73",
+                topic = "innovation_lab/karlsruhe/temi/temi_battery_level"
+            )
         }
     }
 }

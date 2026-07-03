@@ -1,8 +1,6 @@
 package hka.awp.cgi.temi.app.feature.controller
 
-import android.Manifest
 import android.bluetooth.BluetoothDevice
-import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
@@ -24,8 +22,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import hka.awp.cgi.temi.app.R
+import hka.awp.cgi.temi.app.utils.getBluetoothPermissions
 import org.koin.compose.viewmodel.koinViewModel
 
+/**
+ * Screen rendering configuration controls and the discovery list for remote Bluetooth controllers.
+ */
 @Composable
 fun ControllerScreen(
     modifier: Modifier = Modifier,
@@ -39,7 +41,6 @@ fun ControllerScreen(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
     ) { permissions ->
         val allGranted = permissions.values.all { it }
-
         if (allGranted) {
             viewModel.startBluetoothScan()
         }
@@ -52,9 +53,7 @@ fun ControllerScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(stringResource(R.string.controller_steering_active))
-
             Spacer(modifier = Modifier.weight(1f))
-
             Switch(
                 checked = controllerEnabled,
                 onCheckedChange = viewModel::setControllerEnabled,
@@ -95,24 +94,19 @@ fun ControllerScreen(
             devices.forEach { device ->
                 ControllerDeviceRow(
                     device = device,
-                    onPairClick = {
-                        viewModel.pairDevice(device.address)
-                    },
-                    onConnectClick = {
-                        viewModel.connectHidDevice(device.address)
-                    },
-                    onDisconnectClick = {
-                        viewModel.disconnectHidDevice(device.address)
-                    },
-                    onRemoveClick = {
-                        viewModel.removeBond(device.address)
-                    },
+                    onPairClick = { viewModel.pairDevice(device.address) },
+                    onConnectClick = { viewModel.connectHidDevice(device.address) },
+                    onDisconnectClick = { viewModel.disconnectHidDevice(device.address) },
+                    onRemoveClick = { viewModel.removeBond(device.address) },
                 )
             }
         }
     }
 }
 
+/**
+ * Lists details and actionable trigger states for a single controller device entity.
+ */
 @Composable
 private fun ControllerDeviceRow(
     device: ControllerDevice,
@@ -135,7 +129,7 @@ private fun ControllerDeviceRow(
         ) {
             Text(device.name)
             Text(device.address)
-            Text("Status: ${device.bondStateLabel()}")
+            Text(stringResource(R.string.controller_status_label, device.bondStateLabel()))
         }
 
         Button(
@@ -163,9 +157,7 @@ private fun ControllerDeviceRow(
         ) {
             Text(
                 if (device.isConnected) {
-                    stringResource(
-                        R.string.controller_disconnect
-                    )
+                    stringResource(R.string.controller_disconnect)
                 } else {
                     stringResource(R.string.controller_connect)
                 }
@@ -181,6 +173,9 @@ private fun ControllerDeviceRow(
     }
 }
 
+/**
+ * Resolves the string translation asset key mapping for the active device bond state.
+ */
 @Composable
 private fun ControllerDevice.bondStateLabel(): String {
     return when (bondState) {
@@ -188,18 +183,5 @@ private fun ControllerDevice.bondStateLabel(): String {
         BluetoothDevice.BOND_BONDING -> stringResource(R.string.controller_isBonding)
         BluetoothDevice.BOND_BONDED -> stringResource(R.string.controller_bond)
         else -> stringResource(R.string.unknown)
-    }
-}
-
-private fun getBluetoothPermissions(): Array<String> {
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        arrayOf(
-            Manifest.permission.BLUETOOTH_SCAN,
-            Manifest.permission.BLUETOOTH_CONNECT,
-        )
-    } else {
-        arrayOf(
-            Manifest.permission.ACCESS_FINE_LOCATION,
-        )
     }
 }

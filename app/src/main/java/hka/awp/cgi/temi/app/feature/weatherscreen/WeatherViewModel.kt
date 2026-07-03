@@ -2,7 +2,7 @@ package hka.awp.cgi.temi.app.feature.weatherscreen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import hka.awp.cgi.temi.app.utils.AppConfigRepository
+import hka.awp.cgi.temi.app.data.repository.GeneralConfigRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.currentCoroutineContext
@@ -29,15 +29,15 @@ import java.util.concurrent.atomic.AtomicLong
  * ViewModel for the weather screen that manages the UI state and handles periodic data fetching.
  *
  * This ViewModel interacts with the [WeatherRepository] to retrieve weather data every full hour.
- * It exposes the current state via a [StateFlow]
- * of [WeatherState], which includes loading status, weather data, and error messages.
+ * It exposes the current state via a [StateFlow] of [WeatherState].
  *
- * @property repository The repository used to fetch weather data from a data source.
- * @property appConfigRepository The repository used to fetch location coordinates.
+ * @property repository The repository used to fetch weather data.
+ * @property generalConfigRepository The repository providing location coordinates.
+ * @property clock The system clock for timing data refreshes.
  */
 class WeatherViewModel(
     private val repository: WeatherRepository,
-    private val appConfigRepository: AppConfigRepository,
+    private val generalConfigRepository: GeneralConfigRepository,
     private val clock: Clock,
 ) :
     ViewModel() {
@@ -62,7 +62,7 @@ class WeatherViewModel(
     }
 
     private fun refreshTriggerFlow(): Flow<Unit> = flow {
-        // emit something here so startWeatherRefreshPipeline will recognize this
+        // Emit something initially
         emit(Unit)
         while (currentCoroutineContext().isActive) {
             delay(delayUntilNextFullHourMillis())
@@ -73,7 +73,7 @@ class WeatherViewModel(
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun startWeatherRefreshPipeline() {
         viewModelScope.launch(Dispatchers.IO) {
-            combine(appConfigRepository.latitude, appConfigRepository.longitude) { lat, lon ->
+            combine(generalConfigRepository.latitude, generalConfigRepository.longitude) { lat, lon ->
                 lat to lon
             }
                 .distinctUntilChanged()
@@ -102,6 +102,7 @@ class WeatherViewModel(
     }
 
     companion object {
+        /** Offset in seconds added to the next full hour to ensure data is available on the server. */
         private const val FETCH_OFFSET_SECONDS = 3L
     }
 }

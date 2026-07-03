@@ -1,3 +1,5 @@
+package hka.awp.cgi.temi.app.feature.settings.language
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -24,6 +26,19 @@ import hka.awp.cgi.temi.app.ui.components.SettingsCard
 import hka.awp.cgi.temi.app.ui.components.SettingsHeader
 import java.util.Locale
 
+/**
+ * Renders the stateless layout content for the Language selection settings screen.
+ *
+ * This component displays a list of available system languages wrapped inside a specialized container card.
+ * The currently selected locale is visually distinguished using a container background color,
+ * while selecting any option emits an update event to adjust the user's localized app interface.
+ *
+ * @param selectedLocale The currently active runtime [Locale] chosen for the application.
+ * @param supportedLocales A collections list of all translation [Locale] entries available for selection.
+ * @param onLocaleChange Callback triggered when the user picks a different
+ * language, providing the newly targeted [Locale].
+ * @param onBackClick Executed when the user interacts with the navigation back button in the header.
+ */
 @Composable
 @Suppress("MaximumLineLength")
 fun LanguageContent(
@@ -70,7 +85,7 @@ fun LanguageContent(
                         )
                         Spacer(modifier = Modifier.padding(8.dp))
                         Text(
-                            text = locale.displayLanguage,
+                            text = locale.getDisplayLanguage(locale).replaceFirstChar { it.uppercase() },
                             style = MaterialTheme.typography.bodyLarge
                         )
                     }

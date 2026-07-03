@@ -37,6 +37,8 @@
     <string name="settings_location_subtitle">Servizi di localizzazione e navigazione</string>
     <string name="settings_about_title">Informazioni</string>
     <string name="settings_about_subtitle">Informazioni sul sistema</string>
+    <string name="settings_photobox_title">Photobox</string>
+    <string name="settings_photobox_subtitle">Tema e overlay</string>
     <string name="display_brightness">Luminosità schermo</string>
     <string name="display_screensaver">Salvaschermo</string>
     <string name="display_screensaver_after">Si avvia dopo %1$s di inattività</string>
@@ -86,6 +88,7 @@
     <string name="notifications_description">Notifiche</string>
     <string name="cgi">CGI</string>
     <string name="toggle_sidebar_description">Toggle barra laterale</string>
+    <string name="back_description">Indietro</string>
 
     <string name="admin_panel">Admin Panel</string>
     <string name="admin_panel_description">Impostazioni avanzate</string>
@@ -93,8 +96,8 @@
     <string name="admin_panel_appversion">Versione App</string>
     <string name="admin_panel_mqtt_reports">Report MQTT</string>
     <string name="admin_panel_mqtt_reports_subtitle">Report attuali</string>
-    <string name="admin_panel_webserver_password">Password Webserver</string>
-    <string name="admin_panel_webserver_password_change">Cambia password</string>
+    <string name="admin_panel_webserver_password">Credenziali di accesso al server web</string>
+    <string name="admin_panel_webserver_password_change">Modificare le credenziali di accesso</string>
     <string name="admin_panel_weather_coordinates">Coordinate meteo</string>
     <string name="admin_panel_webserver_coordiantes_change">Cambia coordinate</string>
     <string name="admin_panel_webserver_url_change">Cambia URL</string>
@@ -102,6 +105,7 @@
     <string name="admin_panel_header">Admin Panel</string>
     <string name="admin_panel_latitude">"Latitudine: "</string>
     <string name="admin_panel_longitude">Longitudine:</string>
+    <string name="admin_panel_coordinates_format">Longitudine: %1$s Latitudine: %2$s</string>
     <string name="admin_panel_confirm">Conferma</string>
     <string name="admin_panel_reset_defaults">Predefinito</string>
     <string name="admin_panel_latitude_error">Range: -90 a 90</string>
@@ -109,6 +113,7 @@
     <string name="admin_panel_cancel">Annulla</string>
     <string name="admin_panel_change_password_title">Cambia password</string>
     <string name="admin_panel_new_password">Nuova password:</string>
+    <string name="admin_panel_new_user">Nuovo utente del server web:</string>
     <string name="admin_panel_webserver_defaults_reset">Ripristina default</string>
     <string name="admin_panel_webserver_defaults_reset_done">Ripristinato.</string>
     <string name="admin_panel_mqtt_reports_topics_title">Argomenti osservati</string>
@@ -119,6 +124,39 @@
     <string name="admin_panel_mqtt_reports_direction_out">OUT</string>
     <string name="admin_panel_mqtt_reports_clear">Svuota</string>
     <string name="admin_panel_close">Chiudi</string>
+    <string name="admin_panel_close_app">Chiudi app</string>
+    <string name="admin_panel_close_app_subtitle">L\'app verrà chiusa</string>
+    <string name="admin_panel_close_app_confirm_text">Vuoi davvero chiudere l\'app?</string>
+    <string name="admin_panel_confirm_close_app">Chiudi app</string>
+    <string name="admin_panel_admin_password">Password amministratore</string>
+    <string name="admin_panel_admin_password_change">Cambia password amministratore</string>
+    <string name="admin_panel_new_admin_password">Nuova password amministratore:</string>
+    <string name="admin_panel_patrol_settings">Ronde automatiche</string>
+    <string name="admin_panel_patrol_route">Configurazione del percorso di ronda</string>
+    <string name="admin_panel_active_prefix">Attivo: %1$s</string>
+    <string name="admin_panel_patrol_disabled">Disattivato</string>
+    <string name="admin_panel_no_route_selected_title">Nessun percorso selezionato</string>
+    <string name="admin_panel_no_route_selected_text">Seleziona un percorso per poter avviare la ronda.</string>
+
+    <!-- Patrol Route/Settings Dialogs -->
+    <string name="save">Salva</string>
+    <string name="patrol_route_dialog_title">Imposta percorso di ronda</string>
+    <string name="patrol_route_dialog_subtitle">Scegli i luoghi che Temi deve visitare durante una ronda.</string>
+    <string name="patrol_settings_dialog_title">Configura le ronde</string>
+    <string name="patrol_settings_dialog_subtitle">Scegli come pianificare i giri automatici di controllo del benessere.</string>
+    <string name="patrol_settings_enable_label">Attiva le ronde automatiche</string>
+    <string name="patrol_settings_trigger_now_button">Avvia subito una ronda</string>
+    <string name="patrol_settings_mode_label">Modalità di pianificazione</string>
+    <string name="patrol_settings_mode_random">Intervallo casuale (es. ogni 40–60 min)</string>
+    <string name="patrol_settings_mode_fixed">Ore fisse (ogni ora selezionata)</string>
+    <string name="patrol_settings_interval_bounds_label">Limiti dell\'intervallo (minuti)</string>
+    <string name="patrol_settings_min_distance">Intervallo minimo: %1$d min.</string>
+    <string name="patrol_settings_max_distance">Intervallo massimo: %1$d min.</string>
+    <string name="patrol_settings_select_hours_label">Seleziona gli orari (ore intere)</string>
+    <string name="patrol_stream_content_description">Flusso video della ronda</string>
+    <string name="patrol_stream_back_button">Indietro</string>
+    <string name="patrol_countdown_message">La ronda inizia in %1$d secondi</string>
+    <string name="patrol_stream_stop_button">Interrompi la ronda</string>
     <string name="admin_panel_speaker_verification">Verifica del parlante</string>
     <string name="admin_panel_speaker_verification_subtitle">Solo le voci autorizzate possono svegliare il robot</string>
 
@@ -197,6 +235,8 @@
     <string name="controller_connect">Connetti</string>
     <string name="controller_delete">Rimuovi</string>
     <string name="controller_isNotBonded">Non accoppiato</string>
+    <string name="controller_status_label">Stato: %1$s</string>
+    <string name="controller_bottom_text">Controller Bluetooth</string>
 
     <string name="hide_and_seek">Nascondino</string>
     <string name="hide_and_seek_sub">Trova Temi!</string>
@@ -208,11 +248,11 @@
     <string name="hide_and_seek_start_button">Andiamo!</string>
     <string name="hide_and_seek_hiding_title">Temi sta giocando a nascondino</string>
     <string name="hide_and_seek_hiding_subtitle">Non seguirmi – vado nel mio nascondiglio!</string>
-    <string name="hide_and_seek_hiding_bystander_note">Non dare suggerimenti.</string>
+    <string name="hide_and_seek_hiding_bystander_note">Gli altri possono guardare, ma niente suggerimenti, per favore.</string>
     <string name="hide_and_seek_hiding_countdown_label">RICERCA IN</string>
     <string name="hide_and_seek_hiding_seconds">%1$d s</string>
     <string name="hide_and_seek_waiting_title">Trovami!</string>
-    <string name="hide_and_seek_found_button">Trovato!</string>
+    <string name="hide_and_seek_found_button">Ti ho trovato!</string>
     <string name="hide_and_seek_give_up">Rinuncia</string>
     <string name="hide_and_seek_cancel">Annulla</string>
     <string name="hide_and_seek_won_title">Trovato!</string>
@@ -222,6 +262,8 @@
     <string name="hide_and_seek_lost_location_unknown">rivelato più tardi</string>
     <string name="hide_and_seek_play_again">Gioca ancora</string>
     <string name="hide_and_seek_to_dashboard">Al cruscotto</string>
+    <string name="hide_and_seek_navigation_error_title">Qualcosa è andato storto</string>
+    <string name="hide_and_seek_navigation_error_message">Non sono riuscito a raggiungere il mio nascondiglio. Riproviamo!</string>
     <string name="hiding_spot_filter_button">Modifica nascondigli</string>
     <string name="hiding_spot_filter_button_active">Filtro attivo</string>
     <string name="hiding_spot_filter_title">Seleziona nascondigli</string>
@@ -234,6 +276,67 @@
     <string name="hiding_spot_filter_save">Salva</string>
     <string name="admin_panel_hiding_spots">Configurazione nascondigli</string>
     <string name="admin_panel_hiding_spots_subtitle">Gestisci i nascondigli consentiti</string>
+
+    <!-- Photobox -->
+    <string name="photobox">Fotobox</string>
+    <string name="photobox_sub">Usa Temi come fotobox</string>
+    <string name="photobox_description">Icona fotocamera fotobox</string>
+    <string name="photobox_intro_text">Mettiti davanti a Temi e sorridi alla fotocamera. Il conto alla rovescia parte automaticamente.</string>
+    <string name="photobox_countdown_label">DURATA CONTO ALLA ROVESCIA</string>
+    <string name="photobox_start_button">Si parte!</string>
+    <string name="photobox_smile_label">Sorridi!</string>
+    <string name="photobox_cancel">Annulla</string>
+    <string name="photobox_click_text">Click!</string>
+    <string name="photobox_preview_title">Che bella foto!</string>
+    <string name="photobox_preview_message">Torna davanti a Temi quando sei pronto per la prossima foto.</string>
+    <string name="photobox_camera_permission_required">Senza accesso alla fotocamera non riesco a vederti.</string>
+    <string name="photobox_camera_unavailable">La mia fotocamera non è disponibile al momento.</string>
+    <string name="photobox_overlay_title">Overlay di Temi</string>
+    <string name="photobox_overlay_description">Sovrappone un\'immagine di Temi alla foto scattata, in modo che sembri che Temi sia al tuo fianco.</string>
+    <string name="photobox_banner_title">Banner</string>
+    <string name="photobox_banner_description">Mostra un banner in fondo alla foto.</string>
+    <string name="photobox_banner_50_years_cgi">50 anni di CGI</string>
+    <string name="photobox_banner_cgi_lab">CGI Lab</string>
+    <string name="photobox_upload_section_title">Caricamento foto</string>
+    <string name="photobox_drive_folder_label">Link della cartella Google Drive</string>
+    <string name="photobox_drive_upload_url_label">URL webhook di caricamento</string>
+    <string name="photobox_upload_save_button">Salva</string>
+    <string name="photobox_upload_description">Le foto vengono caricate automaticamente in questa cartella Drive dopo lo scatto.</string>
+    <string name="photobox_show_qr_button">Mostra codice QR</string>
+    <string name="photobox_upload_in_progress">Caricamento della tua foto…</string>
+    <string name="photobox_upload_failed">Caricamento non riuscito</string>
+    <string name="photobox_upload_queued">Nessuna connessione – la tua foto verrà caricata automaticamente non appena torni online.</string>
+    <string name="photobox_generate_qr_button">Condividi la foto</string>
+    <string name="photobox_filter_none">Originale</string>
+    <string name="photobox_filter_grayscale">Bianco e nero</string>
+    <string name="photobox_filter_sepia">Seppia</string>
+    <string name="photobox_filter_vintage">Vintage</string>
+    <string name="photobox_qr_dialog_title">La tua foto</string>
+    <string name="photobox_qr_dialog_subtitle">Scansiona il codice QR per visualizzare e scaricare la foto.</string>
+    <string name="photobox_qr_dialog_expiry">Questo link è valido solo per 30 minuti.</string>
+    <string name="photobox_mode_select_title">Benvenuto nella fotobox!</string>
+    <string name="photobox_mode_select_subtitle">Scegli come vuoi scattare la tua foto.</string>
+    <string name="photobox_mode_standard_title">Standard</string>
+    <string name="photobox_mode_standard_description">Una singola foto</string>
+    <string name="photobox_mode_strip_title">Striscia da 3 foto</string>
+    <string name="photobox_mode_strip_description">3 foto su una striscia</string>
+    <string name="photobox_mode_strip4_title">Striscia da 4 foto</string>
+    <string name="photobox_mode_strip4_description">4 foto su una striscia</string>
+    <string name="photobox_mode_grid_title">Griglia 2x2</string>
+    <string name="photobox_mode_grid_description">4 foto in griglia</string>
+    <string name="photobox_overlay_position_label">POSIZIONE TEMI</string>
+    <string name="photobox_overlay_position_left">Sinistra</string>
+    <string name="photobox_overlay_position_center">Centro</string>
+    <string name="photobox_overlay_position_right">Destra</string>
+    <string name="photobox_change_mode_button">Cambia modalità</string>
+    <string name="photobox_strip_delay_label">PAUSA TRA LE FOTO</string>
+    <string name="photobox_change_pose_label">Cambia posa!</string>
+    <string name="photobox_shot_progress">Foto %1$d di %2$d</string>
+    <string name="photobox_new_photo_button">Nuova foto</string>
+    <string name="photobox_to_dashboard">Al dashboard</string>
+    <string name="photobox_photo_count">%1$d foto scattate</string>
+    <string name="photobox_photo_number">Foto #%1$d</string>
+    <string name="photobox_duration_seconds">%1$d s</string>
     <string name="admin_panel_restart_app">Riavvia app</string>
     <string name="admin_panel_restart_app_subtitle">Riavviare in caso di problemi</string>
     <string name="admin_panel_restart_confirm_title">Riavviare l\'app?</string>
@@ -242,4 +345,6 @@
     <string name="admin_panel_enter_password">Inserisci la password</string>
     <string name="admin_panel_password_input">Area admin protetta, inserisci la password.</string>
     <string name="password_wrong">Password errata</string>
+    <string name="admin_panel_webserver_verification">Autenticazione del server web</string>
+    <string name="admin_panel_webserver_verification_subtitle">Utilizza la Basic Auth per autenticarsi sul server web</string>
 </resources>

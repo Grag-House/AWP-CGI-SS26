@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
-import android.bluetooth.BluetoothProfile
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -14,60 +13,53 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import timber.log.Timber
 
-@Suppress("TooManyFunctions")
+/**
+ * Central infrastructure manager for controlling Bluetooth input peripherals (gamepads/controllers).
+ *
+ * This class encapsulates low-level interactions with the [BluetoothAdapter] and processes
+ * asynchronous hardware events via an internal [BroadcastReceiver]. The active state
+ * (discovered devices, scanning status) is exposed via reactive [StateFlow] pipelines for UI consumption.
+ * The actual HID profile connection sequence is delegated directly to the [BluetoothHidConnector].
+ *
+ * @property context The application context used for registering system broadcast receivers.
+ */
 class BluetoothControllerManager(
-    private val context: Context,
+    private val context: Context
 ) {
     private val bluetoothAdapter: BluetoothAdapter? =
         context.getSystemService(BluetoothManager::class.java)?.adapter
+    private val hidConnector = BluetoothHidConnector(context, bluetoothAdapter)
+
     private val _devices = MutableStateFlow<List<ControllerDevice>>(emptyList())
+
+    /**
+     * An observable reactive data stream providing the currently known, paired, and discovered
+     * Bluetooth controllers in the environment, sorted alphabetically by name.
+     */
     val devices: StateFlow<List<ControllerDevice>> = _devices.asStateFlow()
 
     private val _isScanning = MutableStateFlow(false)
+
+    /**
+     * An observable reactive data stream indicating whether the Bluetooth radio is currently
+     * actively scanning for nearby peripherals.
+     */
     val isScanning: StateFlow<Boolean> = _isScanning.asStateFlow()
 
-    private fun Intent.getBluetoothDeviceExtra(): BluetoothDevice? {
-        return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            getParcelableExtra(
-                BluetoothDevice.EXTRA_DEVICE,
-                BluetoothDevice::class.java,
-            )
-        } else {
-            @Suppress("DEPRECATION")
-            getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
-        }
-    }
-
+    /**
+     * Internal receiver handling system-wide Bluetooth broadcasts.
+     * Reacts to discovered devices, bond state mutations, and active ACL connection events.
+     */
     private val receiver = object : BroadcastReceiver() {
-        private fun updateConnectionState(
-            address: String,
-            isConnected: Boolean,
-        ) {
-            _devices.value = _devices.value.map {
-                if (it.address == address) {
-                    it.copy(isConnected = isConnected)
-                } else {
-                    it
-                }
-            }
-        }
         override fun onReceive(context: Context?, intent: Intent?) {
+            val device = intent?.getBluetoothDeviceExtra()
+
             when (intent?.action) {
-                BluetoothDevice.ACTION_FOUND -> {
-                    val device = intent.getBluetoothDeviceExtra()
+                BluetoothDevice.ACTION_FOUND -> device?.let { addOrUpdateDevice(it) }
 
-                    device?.let {
-                        addOrUpdateDevice(it)
-                    }
-                }
-
-                BluetoothDevice.ACTION_BOND_STATE_CHANGED -> {
-                    val device = intent.getBluetoothDeviceExtra()
-
-                    device?.let {
-                        addOrUpdateDevice(it)
-                        Timber.d("Bond state changed: ${it.safeName()} ${it.safeBondState()}")
-                    }
+                BluetoothDevice.ACTION_BOND_STATE_CHANGED -> device?.let {
+                    addOrUpdateDevice(it)
+                    Timber.d("Bond state changed: ${it.safeName()} ${it.safeBondState()}")
                 }
 
                 BluetoothAdapter.ACTION_DISCOVERY_FINISHED -> {
@@ -75,21 +67,9 @@ class BluetoothControllerManager(
                     Timber.d("Bluetooth discovery finished")
                 }
 
-                BluetoothDevice.ACTION_ACL_CONNECTED -> {
-                    val device = intent.getBluetoothDeviceExtra()
+                BluetoothDevice.ACTION_ACL_CONNECTED -> device?.let { updateConnectionState(it.address, true) }
 
-                    device?.let {
-                        updateConnectionState(it.address, true)
-                    }
-                }
-
-                BluetoothDevice.ACTION_ACL_DISCONNECTED -> {
-                    val device = intent.getBluetoothDeviceExtra()
-
-                    device?.let {
-                        updateConnectionState(it.address, false)
-                    }
-                }
+                BluetoothDevice.ACTION_ACL_DISCONNECTED -> device?.let { updateConnectionState(it.address, false) }
             }
         }
     }
@@ -102,135 +82,42 @@ class BluetoothControllerManager(
             addAction(BluetoothDevice.ACTION_ACL_CONNECTED)
             addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED)
         }
-
         context.registerReceiver(receiver, filter)
     }
 
-    @SuppressLint("MissingPermission")
-    private fun BluetoothDevice.safeBondState(): Int {
-        return try {
-            bondState
-        } catch (exception: SecurityException) {
-            Timber.e(exception, "Missing permission while reading bond state")
-            BluetoothDevice.BOND_NONE
-        }
-    }
+    /**
+     * Initiates a connection link to the Human Interface Device
+     * (HID) profile of the peripheral matching the specified MAC address.
+     *
+     * @param address The hardware MAC address of the targeted peripheral.
+     */
+    fun connectHidDevice(address: String) = hidConnector.connect(address)
 
-    @Suppress("TooGenericExceptionCaught")
-    fun connectHidDevice(address: String) {
-        try {
-            val adapter = bluetoothAdapter ?: return
-            val device = adapter.getRemoteDevice(address)
+    /**
+     * Tears down an active HID profile proxy channel targeting the designated hardware MAC address.
+     *
+     * @param address The hardware MAC address of the targeted peripheral.
+     */
+    fun disconnectHidDevice(address: String) = hidConnector.disconnect(address)
 
-            val getProfileProxyMethod = BluetoothAdapter::class.java.getMethod(
-                "getProfileProxy",
-                Context::class.java,
-                BluetoothProfile.ServiceListener::class.java,
-                Int::class.javaPrimitiveType,
-            )
-
-            val listener = object : BluetoothProfile.ServiceListener {
-                override fun onServiceConnected(profile: Int, proxy: BluetoothProfile) {
-                    Timber.d("Bluetooth profile connected: profile=$profile proxy=${proxy.javaClass.name}")
-
-                    try {
-                        val connectMethod = proxy.javaClass.getMethod(
-                            "connect",
-                            BluetoothDevice::class.java,
-                        )
-
-                        val result = connectMethod.invoke(proxy, device)
-
-                        Timber.d("HID connect result=$result for ${device.safeName()} ${device.address}")
-                    } catch (exception: Exception) {
-                        Timber.e(exception, "Failed to invoke HID connect")
-                    }
-                }
-
-                override fun onServiceDisconnected(profile: Int) {
-                    Timber.d("Bluetooth profile disconnected: profile=$profile")
-                }
-            }
-
-            val inputDeviceProfile = BLUETOOTH_PROFILE_HID_DEVICE
-
-            val result = getProfileProxyMethod.invoke(
-                adapter,
-                context,
-                listener,
-                inputDeviceProfile,
-            )
-
-            Timber.d("getProfileProxy HID result=$result for $address")
-        } catch (exception: SecurityException) {
-            Timber.e(exception, "Missing permission for HID connect")
-        } catch (exception: Exception) {
-            Timber.e(exception, "Failed to connect HID device via reflection")
-        }
-    }
-
-    @Suppress("TooGenericExceptionCaught")
-    fun disconnectHidDevice(address: String) {
-        try {
-            val adapter = bluetoothAdapter ?: return
-            val device = adapter.getRemoteDevice(address)
-
-            val listener = object : BluetoothProfile.ServiceListener {
-                override fun onServiceConnected(profile: Int, proxy: BluetoothProfile) {
-                    try {
-                        val disconnectMethod = proxy.javaClass.getMethod(
-                            "disconnect",
-                            BluetoothDevice::class.java,
-                        )
-
-                        val result = disconnectMethod.invoke(proxy, device)
-                        Timber.d("HID disconnect result=$result for ${device.safeName()} ${device.address}")
-                    } catch (exception: Exception) {
-                        Timber.e(exception, "Failed to invoke HID disconnect")
-                    }
-                }
-
-                override fun onServiceDisconnected(profile: Int) {
-                    Timber.d("Bluetooth profile disconnected: profile=$profile")
-                }
-            }
-
-            val inputDeviceProfile = BLUETOOTH_PROFILE_HID_DEVICE
-
-            val result = adapter.getProfileProxy(
-                context,
-                listener,
-                inputDeviceProfile,
-            )
-
-            Timber.d("getProfileProxy HID disconnect result=$result for $address")
-        } catch (exception: SecurityException) {
-            Timber.e(exception, "Missing permission for HID disconnect")
-        } catch (exception: Exception) {
-            Timber.e(exception, "Failed to disconnect HID device")
-        }
-    }
-
+    /**
+     * Removes the bond pairing record associated with the designated hardware address from the host OS.
+     *
+     * Halts any active radio discovery sweeps beforehand to avoid system transaction conflicts,
+     * and clears the target model instance from the internal state flow collection upon completion.
+     *
+     * @param address The unique hardware MAC address key matching the paired peripheral targeted for removal.
+     */
     @Suppress("TooGenericExceptionCaught")
     fun removeBond(address: String) {
         try {
-            val device = bluetoothAdapter?.getRemoteDevice(address)
-
-            if (device == null) {
-                Timber.e("Bluetooth device not found for address=$address")
-                return
-            }
-
+            val device = bluetoothAdapter?.getRemoteDevice(address) ?: return
             stopDiscovery()
 
             val removeBondMethod = device.javaClass.getMethod("removeBond")
-            val result = removeBondMethod.invoke(device)
+            removeBondMethod.invoke(device)
 
-            Timber.d("removeBond result=$result for ${device.safeName()} ${device.address}")
-
-            _devices.value = _devices.value.filterNot {
-                it.address == address
-            }
+            _devices.value = _devices.value.filterNot { it.address == address }
         } catch (exception: SecurityException) {
             Timber.e(exception, "Missing permission while removing bond")
         } catch (exception: Exception) {
@@ -238,63 +125,33 @@ class BluetoothControllerManager(
         }
     }
 
-    @SuppressLint("MissingPermission")
-    fun logPairedDevices() {
-        try {
-            bluetoothAdapter?.bondedDevices?.forEach { device ->
-                Timber.d(
-                    "Paired Bluetooth device: name=${device.safeName()}, " +
-                        "address=${device.address}, bondState=${device.bondState}"
-                )
-            }
-        } catch (exception: SecurityException) {
-            Timber.e(exception, "Missing Bluetooth permission while reading paired devices")
-        }
-    }
-
-    @SuppressLint("MissingPermission")
-    fun loadPairedDevices() {
-        try {
-            val pairedDevices = bluetoothAdapter
-                ?.bondedDevices
-                ?.map { it.toControllerDevice() }
-                .orEmpty()
-
-            _devices.value = pairedDevices
-
-            pairedDevices.forEach {
-                Timber.d("Loaded paired device: $it")
-            }
-        } catch (exception: SecurityException) {
-            Timber.e(exception, "Missing Bluetooth permission while loading paired devices")
-        }
-    }
-
+    /**
+     * Initiates an active asynchronous OTA radio scanning loop to trace non-bonded remote peripherals.
+     *
+     * Clears the current device history state, reloads bonded devices, and cancels any ongoing
+     * system discovery sweeps beforehand to cleanly reset radio state cycles.
+     */
     @SuppressLint("MissingPermission")
     fun startDiscovery() {
         try {
-            if (bluetoothAdapter?.isEnabled != true) {
-                Timber.e("Bluetooth is not enabled")
-                return
-            }
+            if (bluetoothAdapter?.isEnabled != true) return
 
             _devices.value = emptyList()
             loadPairedDevices()
-            logPairedDevices()
 
             if (bluetoothAdapter.isDiscovering) {
                 bluetoothAdapter.cancelDiscovery()
             }
 
-            val started = bluetoothAdapter.startDiscovery()
-            _isScanning.value = started
-
-            Timber.d("Bluetooth discovery started=$started")
+            _isScanning.value = bluetoothAdapter.startDiscovery()
         } catch (exception: SecurityException) {
             Timber.e(exception, "Missing Bluetooth permission while starting discovery")
         }
     }
 
+    /**
+     * Requests an explicit termination intercept signal to halt ongoing host radio discovery sweeps.
+     */
     @SuppressLint("MissingPermission")
     fun stopDiscovery() {
         try {
@@ -305,30 +162,42 @@ class BluetoothControllerManager(
         }
     }
 
+    /**
+     * Dispatches an asynchronous cryptographic pairing request sequence to a specified target MAC endpoint.
+     * Cancels active discovery searches beforehand to maximize link stability during key exchanges.
+     *
+     * @param address The unique target hardware MAC endpoint address string to initialize authentications with.
+     */
     @SuppressLint("MissingPermission")
     fun pairDevice(address: String) {
         try {
-            val device = bluetoothAdapter?.getRemoteDevice(address)
-
-            if (device == null) {
-                Timber.e("Bluetooth device not found for address=$address")
-                return
-            }
-
+            val device = bluetoothAdapter?.getRemoteDevice(address) ?: return
             stopDiscovery()
-
-            val started = device.createBond()
-            Timber.d("Pairing started=$started for ${device.safeName()} $address")
+            device.createBond()
         } catch (exception: SecurityException) {
             Timber.e(exception, "Missing Bluetooth permission while pairing device")
-        } catch (exception: IllegalArgumentException) {
-            Timber.e(exception, "Invalid Bluetooth address=$address")
         }
     }
 
+    /**
+     * Queries cached local radio data structures to load bonded system elements directly
+     * into the mutable [_devices] state flow pipeline.
+     */
+    @SuppressLint("MissingPermission")
+    fun loadPairedDevices() {
+        try {
+            _devices.value = bluetoothAdapter?.bondedDevices?.map { it.toControllerDevice() }.orEmpty()
+        } catch (exception: SecurityException) {
+            Timber.e(exception, "Missing Bluetooth permission while loading paired devices")
+        }
+    }
+
+    /**
+     * Disposes and unbinds resource references, halting discovery passes and unregistering
+     * the internal broadcast receiver instance to prevent platform-level memory leaks.
+     */
     fun release() {
         stopDiscovery()
-
         try {
             context.unregisterReceiver(receiver)
         } catch (exception: IllegalArgumentException) {
@@ -336,40 +205,25 @@ class BluetoothControllerManager(
         }
     }
 
-    @SuppressLint("MissingPermission")
+    /**
+     * Updates the internal tracking connection state flow topology
+     * (ACL layer) matching a specific hardware target signature.
+     */
+    private fun updateConnectionState(address: String, isConnected: Boolean) {
+        _devices.value = _devices.value.map {
+            if (it.address == address) it.copy(isConnected = isConnected) else it
+        }
+    }
+
+    /**
+     * Intercepts a newly discovered device model, filters existing duplicate entries out from
+     * current data history flow states, and performs an alphabetical sort pass by name.
+     */
     private fun addOrUpdateDevice(device: BluetoothDevice) {
         val controllerDevice = device.toControllerDevice()
-
-        Timber.d(
-            "Found Bluetooth device: name=${controllerDevice.name}, " +
-                "address=${controllerDevice.address}, bondState=${controllerDevice.bondState}"
-        )
-
         _devices.value = _devices.value
             .filterNot { it.address == controllerDevice.address }
             .plus(controllerDevice)
             .sortedBy { it.name }
     }
-
-    @SuppressLint("MissingPermission")
-    private fun BluetoothDevice.toControllerDevice(): ControllerDevice {
-        return ControllerDevice(
-            name = safeName(),
-            address = address,
-            bondState = safeBondState(),
-        )
-    }
-
-    @SuppressLint("MissingPermission")
-    private fun BluetoothDevice.safeName(): String {
-        return try {
-            name ?: UNKNOWN_BLUETOOTH_DEVICE_NAME
-        } catch (exception: SecurityException) {
-            Timber.e(exception, "Missing permission while reading Bluetooth device name")
-            UNKNOWN_BLUETOOTH_DEVICE_NAME
-        }
-    }
 }
-
-private const val BLUETOOTH_PROFILE_HID_DEVICE = 4
-private const val UNKNOWN_BLUETOOTH_DEVICE_NAME = "Unbekanntes Gerät"

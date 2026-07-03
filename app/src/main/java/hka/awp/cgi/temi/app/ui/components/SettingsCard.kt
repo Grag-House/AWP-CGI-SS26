@@ -13,6 +13,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 
+/**
+ * A reusable card component used for displaying settings sections.
+ * It provides a consistent surface appearance with rounded corners and optional click handling.
+ *
+ * @param modifier The modifier to be applied to the card.
+ * @param onClick An optional callback to be invoked when the card is clicked.
+ * @param content The composable content to be displayed inside the card's column.
+ */
 @Composable
 fun SettingsCard(
     modifier: Modifier = Modifier,

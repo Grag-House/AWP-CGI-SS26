@@ -2,12 +2,9 @@ package hka.awp.cgi.temi.app.feature.voiceRecognition
 
 import com.robotemi.sdk.Robot
 import com.robotemi.sdk.TtsRequest
-import hka.awp.cgi.temi.app.feature.settings.adminPanel.SpeakerVector
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
@@ -99,16 +96,16 @@ class SpeakerVerificationManager(
     ): Boolean = withContext(Dispatchers.Default) {
         if (profiles.isEmpty()) return@withContext true
 
-        // Parallel processing of profiles for speed
-        val results = profiles.map { (name, reference) ->
-            async {
-                val similarity = vector cosineSimilarityWith reference
-                name to similarity
-            }
-        }.awaitAll()
+        var bestName: String? = null
+        var bestScore = Double.NEGATIVE_INFINITY
 
-        val (bestName, bestScore) = results.maxByOrNull { it.second }
-            ?: (null to Double.NEGATIVE_INFINITY)
+        for ((name, reference) in profiles) {
+            val similarity = vector cosineSimilarityWith reference
+            if (similarity > bestScore) {
+                bestScore = similarity
+                bestName = name
+            }
+        }
 
         val authorized = bestScore >= threshold
         if (authorized) {

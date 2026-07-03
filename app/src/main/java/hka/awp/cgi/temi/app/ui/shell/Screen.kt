@@ -7,6 +7,7 @@ import androidx.compose.material.icons.rounded.BatteryFull
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Language
 import androidx.compose.material.icons.rounded.Navigation
+import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.SportsEsports
 import androidx.compose.material.icons.rounded.Storage
@@ -36,7 +37,9 @@ sealed class Screen(
     val isCustomIcon: Boolean = false
 ) {
     companion object {
-        val navScreens by lazy { listOf(Dashboard, Webserver, Weather, Navigation, Controller, HideAndSeek, Settings) }
+        val navScreens by lazy {
+            listOf(Dashboard, Webserver, Weather, Navigation, Controller, HideAndSeek, Photobox, Settings)
+        }
     }
 
     data object Dashboard : Screen(
@@ -120,5 +123,19 @@ sealed class Screen(
         title = R.string.admin_panel,
         icon = Icons.Rounded.AdminPanelSettings,
         contentDescription = R.string.admin_panel_description,
+    )
+
+    data object Photobox : Screen(
+        route = "photobox",
+        title = R.string.photobox,
+        icon = Icons.Rounded.PhotoCamera,
+        contentDescription = R.string.photobox_description
+    )
+
+    data object PhotoboxSettings : Screen(
+        route = "photobox_settings",
+        title = R.string.settings_photobox_title,
+        icon = Icons.Rounded.PhotoCamera,
+        contentDescription = R.string.settings_photobox_subtitle
     )
 }

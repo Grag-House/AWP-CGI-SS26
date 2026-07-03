@@ -18,6 +18,18 @@ import hka.awp.cgi.temi.app.ui.components.SettingsCard
 import hka.awp.cgi.temi.app.ui.components.SettingsHeader
 import hka.awp.cgi.temi.app.ui.components.SettingsRow
 
+/**
+ * Renders the stateless layout content for the Display settings screen.
+ *
+ * This component provides a dedicated user interface for adjusting visual theme preferences,
+ * featuring a standalone settings row with a dynamic icon, descriptive status labels,
+ * and an interactive theme switch toggle for dark mode configurations.
+ *
+ * @param onBackClick Executed when the user interacts with the back navigation button in the header.
+ * @param isDarkMode Boolean flag specifying whether the dark theme layout mode is currently active.
+ * @param onDarkModeChange Callback triggered when the state switch is toggled,
+ * supplying the new preferred boolean value.
+ */
 @Suppress("LongParameterList", "MagicNumber")
 @Composable
 fun DisplayContent(

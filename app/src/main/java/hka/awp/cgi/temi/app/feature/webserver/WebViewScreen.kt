@@ -1,6 +1,7 @@
 package hka.awp.cgi.temi.app.feature.webserver
 
 import android.annotation.SuppressLint
+import android.util.Base64
 import android.view.ViewGroup
 import android.webkit.WebView
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,10 +18,18 @@ import hka.awp.cgi.temi.app.utils.isUrlBlocked
  * wrapping a standard [WebView].
  *
  * @param url The string URL of the web page to be loaded and displayed.
+ * @param isVerificationEnabled Whether Basic Auth credentials should be attached to the request.
+ * @param webserverUser The plaintext username used for Basic Auth, when enabled.
+ * @param webserverPassword The plaintext password used for Basic Auth, when enabled.
  */
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
-fun WebViewScreen(url: String) {
+fun WebViewScreen(
+    url: String,
+    isVerificationEnabled: Boolean = false,
+    webserverUser: String = "",
+    webserverPassword: String = ""
+) {
     val context = LocalContext.current
     val view =
         remember {
@@ -38,7 +47,7 @@ fun WebViewScreen(url: String) {
             }
         }
 
-    LaunchedEffect(url) {
+    LaunchedEffect(url, isVerificationEnabled, webserverUser, webserverPassword) {
         val sanitizedUrl = if (!url.startsWith("http") && !url.startsWith("file")) {
             "https://$url"
         } else {
@@ -46,7 +55,19 @@ fun WebViewScreen(url: String) {
         }
 
         if (!isUrlBlocked(sanitizedUrl)) {
-            view.loadUrl(sanitizedUrl)
+            if (isVerificationEnabled && webserverUser.isNotEmpty() && webserverPassword.isNotEmpty()) {
+                val credentials = "$webserverUser:$webserverPassword"
+                val encodedCredentials = Base64.encodeToString(
+                    credentials.toByteArray(Charsets.UTF_8),
+                    Base64.NO_WRAP
+                )
+                view.loadUrl(
+                    sanitizedUrl,
+                    mapOf(BASIC_AUTH_HEADER to "Basic $encodedCredentials")
+                )
+            } else {
+                view.loadUrl(sanitizedUrl)
+            }
         } else {
             view.loadDataWithBaseURL(
                 null,
@@ -60,6 +81,8 @@ fun WebViewScreen(url: String) {
 
     AndroidView(factory = { view }, modifier = Modifier.fillMaxSize())
 }
+
+private const val BASIC_AUTH_HEADER = "Authorization"
 
 private const val STYLED_ERROR = """
     <!DOCTYPE html>

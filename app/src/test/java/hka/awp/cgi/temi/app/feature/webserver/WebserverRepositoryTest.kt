@@ -7,7 +7,6 @@ import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.preferencesOf
 import androidx.datastore.preferences.core.stringPreferencesKey
 import hka.awp.cgi.temi.app.BuildConfig
-import hka.awp.cgi.temi.app.utils.AppConfigRepository
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.unmockkAll
@@ -24,70 +23,75 @@ import kotlin.io.path.createTempDirectory
 import kotlin.io.path.deleteRecursively
 
 class WebserverRepositoryTest {
-    private lateinit var repository: AppConfigRepository
+    private lateinit var repository: WebserverConfigRepository
     private lateinit var datastore: DataStore<Preferences>
 
     @BeforeEach
     fun setup() {
         datastore = mockk<DataStore<Preferences>>(relaxed = true)
         every { datastore.data } returns flowOf(emptyPreferences())
-        repository = AppConfigRepository(dataStore = datastore)
+        repository =
+            WebserverConfigRepository.Companion(dataStore = datastore, credentialStore = FakeWebserverCredentialStore())
     }
 
     @AfterEach
     fun tearDown() {
-        // clear all mocks after each test to avoid interference between tests
         unmockkAll()
     }
 
     @Test
     fun `when DataStore is empty, it returns the BuildConfig fallback URL`() = runTest {
-        val expected = BuildConfig.WEBVIEW_URL
-        val result = repository.currentUrl.first()
-        assertEquals(expected, result)
+        assertEquals(BuildConfig.WEBVIEW_URL, repository.currentUrl.first())
     }
 
     @Test
-    fun `when DataStore has a valid URL, it returns the host of that URL`() = runTest {
+    fun `when DataStore has a stored URL, it returns that URL`() = runTest {
         val key = stringPreferencesKey("webview_url")
         val value = "https://example.com"
-
-        datastore = mockk<DataStore<Preferences>>(relaxed = true)
         every { datastore.data } returns flowOf(preferencesOf(key to value))
-        repository = AppConfigRepository(dataStore = datastore)
+        repository =
+            WebserverConfigRepository.Companion(dataStore = datastore, credentialStore = FakeWebserverCredentialStore())
 
         assertEquals(value, repository.currentUrl.first())
     }
 
-    // we use a real  DataStore here, since it is too annoying to mock the edit function
+    // Real DataStore used here — mocking DataStore.edit() is too fragile
     @OptIn(ExperimentalPathApi::class)
     @Test
-    fun `when the URL in DataStore is  updated, it returns the new host`() = runTest {
-        // temp file + dir
+    fun `when the URL in DataStore is updated, the flow emits the new value`() = runTest {
         val tmpDir = createTempDirectory(prefix = "datastore-test")
         val file = File(tmpDir.toString(), "preferences.preferences_pb")
+        val dataStore = PreferenceDataStoreFactory.create(scope = this, produceFile = { file })
+        val repository =
+            WebserverConfigRepository.Companion(dataStore = dataStore, credentialStore = FakeWebserverCredentialStore())
 
-        // create a real Preferences DataStore that the test controls via the test scope
-        val dataStore = PreferenceDataStoreFactory.create(
-            scope = this,
-            produceFile = { file }
-        )
+        repository.updateUrl("https://example.com/path")
 
-        val repository = AppConfigRepository(dataStore)
+        assertEquals("https://example.com/path", repository.currentUrl.first())
 
-        // initial: should read fallback from BuildConfig
-        val expectedFallback = BuildConfig.WEBVIEW_URL
-        assertEquals(expectedFallback, repository.currentUrl.first())
-
-        val newValue = "https://example.com/path"
-
-        // update the value
-        repository.updateUrl(newValue)
-
-        // DataStore will persist and emit the new value
-        assertEquals(newValue, repository.currentUrl.first())
-
-        // cleanup
         tmpDir.deleteRecursively()
+    }
+
+    @Test
+    fun `webserverVerificationEnabled defaults to false when DataStore is empty`() = runTest {
+        assertEquals(false, repository.isWebserverVerificationEnabled.first())
+    }
+}
+
+/**
+ * In-memory fake for unit tests — no Android runtime or encryption needed.
+ */
+class FakeWebserverCredentialStore : WebserverCredentialStore {
+    private var user: String = ""
+    private var password: String = ""
+
+    override fun getUser(): String = user
+    override fun getPassword(): String = password
+    override fun saveUser(user: String) {
+        this.user = user
+    }
+
+    override fun savePassword(password: String) {
+        this.password = password
     }
 }
