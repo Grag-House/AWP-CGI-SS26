@@ -21,7 +21,7 @@ import java.security.MessageDigest
 /**
  * Contract for storing and retrieving plaintext webserver credentials.
  * Abstracted so WebserverConfigReopsitory can be unit-tested without Android instrumentation —
- * tests inject FakeWebserverCredentialStore (from the test classes); production wires
+ * tests inject FakeWebserverCredentialStore (from the test class); production wires
  * [EncryptedWebserverCredentialStore].
  */
 interface WebserverCredentialStore {
