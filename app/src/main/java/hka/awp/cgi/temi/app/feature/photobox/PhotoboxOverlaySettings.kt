@@ -18,16 +18,16 @@ internal class PhotoboxOverlaySettings(
     private val appConfigRepository: AppConfigRepository,
     private val scope: CoroutineScope
 ) {
-    val enabled: StateFlow<Boolean> = appConfigRepository.photoboxOverlayEnabled
+    val enabled: StateFlow<Boolean> = appConfigRepository.photobox.photoboxOverlayEnabled
         .stateIn(scope, SharingStarted.Eagerly, false)
 
-    val position: StateFlow<TemiOverlayPosition> = appConfigRepository.photoboxOverlayPosition
+    val position: StateFlow<TemiOverlayPosition> = appConfigRepository.photobox.photoboxOverlayPosition
         .map { raw -> runCatching { TemiOverlayPosition.valueOf(raw) }.getOrDefault(DEFAULT_OVERLAY_POSITION) }
         .stateIn(scope, SharingStarted.Eagerly, DEFAULT_OVERLAY_POSITION)
 
     fun setPosition(position: TemiOverlayPosition) {
         scope.launch {
-            appConfigRepository.setPhotoboxOverlay(enabled.value, position.name)
+            appConfigRepository.photobox.setPhotoboxOverlay(enabled.value, position.name)
         }
     }
 }

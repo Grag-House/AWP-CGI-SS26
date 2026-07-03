@@ -12,6 +12,14 @@ import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import hka.awp.cgi.temi.app.BuildConfig
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.dialogs.AdminPanelPatrolSettingsDialog
+import hka.awp.cgi.temi.app.utils.AppConfigRepository.Companion.COMMA_SEPARATOR
+import hka.awp.cgi.temi.app.utils.AppConfigRepository.Companion.DEFAULT_LATITUDE
+import hka.awp.cgi.temi.app.utils.AppConfigRepository.Companion.DEFAULT_LONGITUDE
+import hka.awp.cgi.temi.app.utils.AppConfigRepository.Companion.DEFAULT_MAX_MINUTES
+import hka.awp.cgi.temi.app.utils.AppConfigRepository.Companion.DEFAULT_MIN_MINUTES
+import hka.awp.cgi.temi.app.utils.AppConfigRepository.Companion.DEFAULT_PATROL_ENABLED
+import hka.awp.cgi.temi.app.utils.AppConfigRepository.Companion.DEFAULT_SPEAKER_VERIFICATION_THRESHOLD
+import hka.awp.cgi.temi.app.utils.AppConfigRepository.Companion.ROUTE_SEPARATOR
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -24,6 +32,91 @@ import java.security.MessageDigest
 
 private const val DEFAULT_DRIVE_FOLDER_LINK = BuildConfig.DEFAULT_DRIVE_FOLDER_LINK
 private const val DEFAULT_DRIVE_UPLOAD_URL = BuildConfig.DEFAULT_DRIVE_UPLOAD_URL
+
+/**
+ * Central repository for managing and persisting application configurations.
+ *
+ * Uses Jetpack [DataStore] for general settings (e.g., routes, password hashes, webviews)
+ * and a [WebserverCredentialStore] for sensitive plaintext data (e.g., server login credentials).
+ *
+ * @property dataStore The [DataStore] instance used for persistent key-value pairs.
+ * @property credentialStore The encrypted or fake storage backend for sensitive credentials.
+ */
+class AppConfigRepository private constructor(
+    private val dataStore: DataStore<Preferences>,
+    private val credentialStore: WebserverCredentialStore
+                                             ) {
+    val webview = WebviewConfig(dataStore)
+    val location = LocationConfig(dataStore)
+    val adminPanel = AdminPanelConfig(dataStore)
+    val webserver = WebserverConfig(dataStore, credentialStore)
+    val patrol = PatrolConfig(dataStore)
+    val speakerVerification = SpeakerVerificationConfig(dataStore)
+    val photobox = PhotoboxConfig(dataStore)
+
+    companion object {
+        const val ROUTE_SEPARATOR = "|"
+        const val COMMA_SEPARATOR = ","
+
+        const val DEFAULT_LATITUDE = 49.0138
+        const val DEFAULT_LONGITUDE = 8.3573
+
+        const val DEFAULT_PATROL_ENABLED = false
+        const val DEFAULT_MIN_MINUTES = 40
+        const val DEFAULT_MAX_MINUTES = 60
+
+        const val DEFAULT_SPEAKER_VERIFICATION_THRESHOLD = 0.82
+
+        /**
+         * Creates a production instance of the repository using an [EncryptedWebserverCredentialStore].
+         *
+         * @param context The Android context required to initialize encrypted shared preferences.
+         * @param dataStore The [DataStore] instance for application configurations.
+         */
+        operator fun invoke(context: Context, dataStore: DataStore<Preferences>) =
+            AppConfigRepository(dataStore, EncryptedWebserverCredentialStore(context))
+
+        /**
+         * Creates a test instance of the repository.
+         * Allows passing any [WebserverCredentialStore] implementation (e.g., test fakes).
+         *
+         * @param dataStore The [DataStore] instance for application configurations.
+         * @param credentialStore The credential storage implementation to use.
+         */
+        operator fun invoke(dataStore: DataStore<Preferences>, credentialStore: WebserverCredentialStore) =
+            AppConfigRepository(dataStore, credentialStore)
+    }
+
+    /**
+     * Checks if an entered plaintext password matches a given hash.
+     * @param plainPassword The plaintext password to check.
+     * @param currentHash The target hash to compare against.
+     * @return `true` if the hashes match, `false` otherwise.
+     */
+    fun isValidPassword(plainPassword: String, currentHash: String): Boolean {
+        return hashPassword(plainPassword) == currentHash
+    }
+
+    /**
+     * Hashes a given string using **SHA-256**.
+     * @param password The text string (e.g., a password) to hash.
+     * @return The generated hex string representation of the hash.
+     */
+    fun hashPassword(password: String): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        return digest.digest(password.toByteArray()).joinToString(separator = "") { byte ->
+            "%02x".format(byte)
+        }
+    }
+
+    /**
+     * Irrevocably clears all settings currently saved inside the [DataStore] instance.
+     */
+    @Suppress("unused")
+    suspend fun clear() {
+        dataStore.edit { it.clear() }
+    }
+}
 
 /**
  * Contract for storing and retrieving plaintext webserver credentials.
@@ -41,7 +134,6 @@ interface WebserverCredentialStore {
  * Production implementation backed by [EncryptedSharedPreferences].
  * Keys and values are encrypted at rest using AES256.
  */
-
 // We use EncryptedSharedPreferences for simplicity, even though it's deprecated in favor of Jetpack Security Crypto.
 @Suppress("DEPRECATION")
 class EncryptedWebserverCredentialStore(context: Context) : WebserverCredentialStore {
@@ -75,119 +167,23 @@ class EncryptedWebserverCredentialStore(context: Context) : WebserverCredentialS
     }
 }
 
-/**
- * Central repository for managing and persisting application configurations.
- *
- * Uses Jetpack [DataStore] for general settings (e.g., routes, password hashes, webviews)
- * and a [WebserverCredentialStore] for sensitive plaintext data (e.g., server login credentials).
- *
- * @property dataStore The [DataStore] instance used for persistent key-value pairs.
- * @property credentialStore The encrypted or fake storage backend for sensitive credentials.
- */
-@Suppress("TooManyFunctions")
-class AppConfigRepository private constructor(
-    private val dataStore: DataStore<Preferences>,
-    private val credentialStore: WebserverCredentialStore
-) {
-    companion object {
-        const val ROUTE_SEPARATOR = "|"
-        const val COMMA_SEPARATOR = ","
-
-        const val DEFAULT_LATITUDE = 49.0138
-        const val DEFAULT_LONGITUDE = 8.3573
-
-        const val DEFAULT_PATROL_ENABLED = false
-        const val DEFAULT_MIN_MINUTES = 40
-        const val DEFAULT_MAX_MINUTES = 60
-
-        const val DEFAULT_SPEAKER_VERIFICATION_THRESHOLD = 0.82
-
-        /**
-         * Creates a production instance of the repository using an [EncryptedWebserverCredentialStore].
-         *
-         * @param context The Android context required to initialize encrypted shared preferences.
-         * @param dataStore The [DataStore] instance for application configurations.
-         */
-        operator fun invoke(context: Context, dataStore: DataStore<Preferences>) =
-            AppConfigRepository(dataStore, EncryptedWebserverCredentialStore(context))
-
-        /**
-         * Creates a test instance of the repository.
-         * Allows passing any [WebserverCredentialStore] implementation (e.g., test fakes).
-         *
-         * @param dataStore The [DataStore] instance for application configurations.
-         * @param credentialStore The credential storage implementation to use (e.g., [FakeWebserverCredentialStore]).
-         */
-        operator fun invoke(dataStore: DataStore<Preferences>, credentialStore: WebserverCredentialStore) =
-            AppConfigRepository(dataStore, credentialStore)
-    }
-
-    private val webviewUrlKey = stringPreferencesKey("webview_url")
-    private val latitudeKey = doublePreferencesKey("latitude")
-    private val longitudeKey = doublePreferencesKey("longitude")
-
-    private val adminPanelPasswordHashKey = stringPreferencesKey("admin_panel_password_hash")
-
-    private val webserverVerificationEnabledKey = booleanPreferencesKey("webserver_verification_enabled")
-    private val webserverPasswordHashKey = stringPreferencesKey("webserver_password_hash")
-
-    private val webserverUserHashKey = stringPreferencesKey("webserver_user_hash")
-
-    private val keyIsPatrolEnabled = booleanPreferencesKey("is_patrol_enabled")
-    private val keyPatrolMode = stringPreferencesKey("patrol_mode")
-    private val keyMinMinutes = intPreferencesKey("min_minutes")
-    private val keyMaxMinutes = intPreferencesKey("max_minutes")
-    private val keySelectedHours = stringPreferencesKey("selected_hours")
-    private val keyPatrolRoute = stringPreferencesKey("patrol_route")
-
-    private val adminPasswordHashKey = stringPreferencesKey("admin_password_hash")
-    private val adminPasswordLegacyKey = stringPreferencesKey("admin_password")
-
-    private val photoboxOverlayEnabledKey = booleanPreferencesKey("photobox_overlay_enabled")
-    private val photoboxOverlayPositionKey = stringPreferencesKey("photobox_overlay_position")
-    private val photoboxBannerEnabledKey = booleanPreferencesKey("photobox_banner_enabled")
-    private val photoboxBannerKey = stringPreferencesKey("photobox_banner")
-    private val driveFolderLinkKey = stringPreferencesKey("photobox_drive_folder_link")
-    private val driveUploadUrlKey = stringPreferencesKey("photobox_drive_upload_url")
-
-    private val speakerVerificationEnabledKey = booleanPreferencesKey("speaker_verification_enabled")
-    private val speakerVerificationThresholdKey = doublePreferencesKey("speaker_verification_threshold")
-
-    /** Stream of the currently configured Webview URL. Falls back to the build default if not set. */
-    val currentUrl: Flow<String> = dataStore.data.map {
-        it[webviewUrlKey] ?: BuildConfig.WEBVIEW_URL
-    }
-
-    private val _webserverUser = MutableStateFlow(credentialStore.getUser())
-
-    /** Stream of the unencrypted webserver username. */
-    val webserverUser: Flow<String> = _webserverUser.asStateFlow()
-
-    private val _webserverPassword = MutableStateFlow(credentialStore.getPassword())
-
-    /** Stream of the unencrypted webserver password. */
-    val webserverPassword: Flow<String> = _webserverPassword.asStateFlow()
+class WebviewConfig(private val dataStore: DataStore<Preferences>) {
+    val currentUrl: Flow<String> = dataStore.data.map { it[key] ?: BuildConfig.WEBVIEW_URL }
 
     /**
      * Updates the Webview URL in the [DataStore].
      * @param newUrl The new target URL for the webview.
      */
     suspend fun updateUrl(newUrl: String) {
-        dataStore.edit {
-            it[webviewUrlKey] = newUrl
-        }
+        dataStore.edit { it[key] = newUrl }
     }
 
-    /** Stream of the latitude configuration for positioning. */
-    val latitude: Flow<Double> = dataStore.data.map {
-        it[latitudeKey] ?: DEFAULT_LATITUDE
+    private companion object {
+        val key = stringPreferencesKey("webview_url")
     }
+}
 
-    /** Stream of the longitude configuration for positioning. */
-    val longitude: Flow<Double> = dataStore.data.map {
-        it[longitudeKey] ?: DEFAULT_LONGITUDE
-    }
-
+class LocationConfig(private val dataStore: DataStore<Preferences>) {
     /**
      * Updates the geographic coordinates.
      * @param latitude The new latitude value.
@@ -200,22 +196,32 @@ class AppConfigRepository private constructor(
         }
     }
 
+    private val latitudeKey = doublePreferencesKey("latitude")
+    private val longitudeKey = doublePreferencesKey("longitude")
+
+    /** Stream of the latitude configuration for positioning. */
+    val latitude: Flow<Double> = dataStore.data.map {
+        it[latitudeKey] ?: DEFAULT_LATITUDE
+    }
+
+    /** Stream of the longitude configuration for positioning. */
+    val longitude: Flow<Double> = dataStore.data.map {
+        it[longitudeKey] ?: DEFAULT_LONGITUDE
+    }
+}
+
+class AdminPanelConfig(private val dataStore: DataStore<Preferences>) {
+
+    private val adminPanelPasswordHashKey = stringPreferencesKey("admin_panel_password_hash")
+    private val adminPasswordHashKey = stringPreferencesKey("admin_password_hash")
+    private val adminPasswordLegacyKey = stringPreferencesKey("admin_password")
+
     /** Stream of the SHA-256 hash of the admin panel password, taking legacy keys into account. */
     val adminPanelPasswordHash: Flow<String> = dataStore.data.map {
         it[adminPanelPasswordHashKey]
             ?: it[adminPasswordHashKey]
             ?: it[adminPasswordLegacyKey]?.let(::hashPassword)
             ?: hashPassword(BuildConfig.DEFAULT_ADMIN_PASSWORD)
-    }
-
-    /** Stream of the SHA-256 hash of the webserver password. */
-    val webserverPasswordHash: Flow<String> = dataStore.data.map {
-        it[webserverPasswordHashKey] ?: hashPassword(BuildConfig.DEFAULT_ADMIN_PASSWORD)
-    }
-
-    /** Stream of the SHA-256 hash of the webserver username. */
-    val webserverUserHash: Flow<String> = dataStore.data.map {
-        it[webserverUserHashKey] ?: ""
     }
 
     /** Alias for [adminPanelPasswordHash]. */
@@ -236,6 +242,50 @@ class AppConfigRepository private constructor(
     /** Alias for [updateAdminPanelPassword]. */
     suspend fun updateAdminPassword(password: String) {
         updateAdminPanelPassword(password)
+    }
+
+    /**
+     * Hashes a given string using **SHA-256**.
+     * @param password The text string (e.g., a password) to hash.
+     * @return The generated hex string representation of the hash.
+     */
+    fun hashPassword(password: String): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        return digest.digest(password.toByteArray()).joinToString(separator = "") { byte ->
+            "%02x".format(byte)
+        }
+    }
+}
+
+class WebserverConfig(
+    private val dataStore: DataStore<Preferences>,
+    private val credentialStore: WebserverCredentialStore
+                     ) {
+
+    private val webserverPasswordHashKey = stringPreferencesKey("webserver_password_hash")
+
+    private val webserverUserHashKey = stringPreferencesKey("webserver_user_hash")
+
+    private val webserverVerificationEnabledKey = booleanPreferencesKey("webserver_verification_enabled")
+
+    private val _webserverUser = MutableStateFlow(credentialStore.getUser())
+
+    /** Stream of the unencrypted webserver username. */
+    val webserverUser: Flow<String> = _webserverUser.asStateFlow()
+
+    private val _webserverPassword = MutableStateFlow(credentialStore.getPassword())
+
+    /** Stream of the unencrypted webserver password. */
+    val webserverPassword: Flow<String> = _webserverPassword.asStateFlow()
+
+    /** Stream of the SHA-256 hash of the webserver password. */
+    val webserverPasswordHash: Flow<String> = dataStore.data.map {
+        it[webserverPasswordHashKey] ?: hashPassword(BuildConfig.DEFAULT_ADMIN_PASSWORD)
+    }
+
+    /** Stream of the SHA-256 hash of the webserver username. */
+    val webserverUserHash: Flow<String> = dataStore.data.map {
+        it[webserverUserHashKey] ?: ""
     }
 
     /**
@@ -282,16 +332,6 @@ class AppConfigRepository private constructor(
     }
 
     /**
-     * Checks if an entered plaintext password matches a given hash.
-     * @param plainPassword The plaintext password to check.
-     * @param currentHash The target hash to compare against.
-     * @return `true` if the hashes match, `false` otherwise.
-     */
-    fun isValidPassword(plainPassword: String, currentHash: String): Boolean {
-        return hashPassword(plainPassword) == currentHash
-    }
-
-    /**
      * Hashes a given string using **SHA-256**.
      * @param password The text string (e.g., a password) to hash.
      * @return The generated hex string representation of the hash.
@@ -302,6 +342,16 @@ class AppConfigRepository private constructor(
             "%02x".format(byte)
         }
     }
+}
+
+class PatrolConfig(private val dataStore: DataStore<Preferences>) {
+
+    private val keyIsPatrolEnabled = booleanPreferencesKey("is_patrol_enabled")
+    private val keyPatrolMode = stringPreferencesKey("patrol_mode")
+    private val keyMinMinutes = intPreferencesKey("min_minutes")
+    private val keyMaxMinutes = intPreferencesKey("max_minutes")
+    private val keySelectedHours = stringPreferencesKey("selected_hours")
+    private val keyPatrolRoute = stringPreferencesKey("patrol_route")
 
     /** Stream indicating whether the patrol mode is globally enabled. */
     val isPatrolEnabled: Flow<Boolean> = dataStore.data.map {
@@ -382,6 +432,12 @@ class AppConfigRepository private constructor(
             it[keyPatrolRoute] = route.joinToString(ROUTE_SEPARATOR)
         }
     }
+}
+
+class SpeakerVerificationConfig(private val dataStore: DataStore<Preferences>) {
+
+    private val speakerVerificationEnabledKey = booleanPreferencesKey("speaker_verification_enabled")
+    private val speakerVerificationThresholdKey = doublePreferencesKey("speaker_verification_threshold")
 
     /** Stream indicating whether biometric speaker verification (audio) is enabled. */
     val isSpeakerVerificationEnabled: Flow<Boolean> = dataStore.data.map {
@@ -409,6 +465,16 @@ class AppConfigRepository private constructor(
             }
         }
     }
+}
+
+class PhotoboxConfig(private val dataStore: DataStore<Preferences>) {
+
+    private val photoboxOverlayEnabledKey = booleanPreferencesKey("photobox_overlay_enabled")
+    private val photoboxOverlayPositionKey = stringPreferencesKey("photobox_overlay_position")
+    private val photoboxBannerEnabledKey = booleanPreferencesKey("photobox_banner_enabled")
+    private val photoboxBannerKey = stringPreferencesKey("photobox_banner")
+    private val driveFolderLinkKey = stringPreferencesKey("photobox_drive_folder_link")
+    private val driveUploadUrlKey = stringPreferencesKey("photobox_drive_upload_url")
 
     /** Stream indicating whether the Photobox overlay graphic should be displayed. */
     val photoboxOverlayEnabled: Flow<Boolean> = dataStore.data.map {
@@ -474,13 +540,5 @@ class AppConfigRepository private constructor(
             folderLink?.let { value -> it[driveFolderLinkKey] = value }
             uploadUrl?.let { value -> it[driveUploadUrlKey] = value }
         }
-    }
-
-    /**
-     * Irrevocably clears all settings currently saved inside the [DataStore] instance.
-     */
-    @Suppress("unused")
-    suspend fun clear() {
-        dataStore.edit { it.clear() }
     }
 }

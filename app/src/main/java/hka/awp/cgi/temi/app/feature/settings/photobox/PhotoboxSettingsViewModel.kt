@@ -26,7 +26,7 @@ class PhotoboxSettingsViewModel(
     /**
      * An observable stream indicating whether picture frame image overlays should be displayed during captures.
      */
-    val overlayEnabled: StateFlow<Boolean> = appConfigRepository.photoboxOverlayEnabled
+    val overlayEnabled: StateFlow<Boolean> = appConfigRepository.photobox.photoboxOverlayEnabled
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     internal val bannerSettings = PhotoboxBannerSettings(appConfigRepository, viewModelScope)
@@ -34,13 +34,13 @@ class PhotoboxSettingsViewModel(
     /**
      * An observable stream representing the configured Google Drive target folder link.
      */
-    val driveFolderLink: StateFlow<String> = appConfigRepository.driveFolderLink
+    val driveFolderLink: StateFlow<String> = appConfigRepository.photobox.driveFolderLink
         .stateIn(viewModelScope, SharingStarted.Eagerly, "")
 
     /**
      * An observable stream representing the remote script or endpoint URL handling background media uploads.
      */
-    val driveUploadUrl: StateFlow<String> = appConfigRepository.driveUploadUrl
+    val driveUploadUrl: StateFlow<String> = appConfigRepository.photobox.driveUploadUrl
         .stateIn(viewModelScope, SharingStarted.Eagerly, "")
 
     /**
@@ -51,8 +51,8 @@ class PhotoboxSettingsViewModel(
      */
     fun setOverlayEnabled(enabled: Boolean) {
         viewModelScope.launch {
-            val position = appConfigRepository.photoboxOverlayPosition.first()
-            appConfigRepository.setPhotoboxOverlay(enabled, position)
+            val position = appConfigRepository.photobox.photoboxOverlayPosition.first()
+            appConfigRepository.photobox.setPhotoboxOverlay(enabled, position)
         }
     }
 
@@ -63,7 +63,7 @@ class PhotoboxSettingsViewModel(
      */
     fun setDriveFolderLink(link: String) {
         viewModelScope.launch {
-            appConfigRepository.setDriveSettings(folderLink = link)
+            appConfigRepository.photobox.setDriveSettings(folderLink = link)
         }
     }
 
@@ -74,7 +74,7 @@ class PhotoboxSettingsViewModel(
      */
     fun setDriveUploadUrl(url: String) {
         viewModelScope.launch {
-            appConfigRepository.setDriveSettings(uploadUrl = url)
+            appConfigRepository.photobox.setDriveSettings(uploadUrl = url)
         }
     }
 }

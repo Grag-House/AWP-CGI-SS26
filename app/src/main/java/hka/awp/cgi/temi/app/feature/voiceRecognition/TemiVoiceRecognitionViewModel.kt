@@ -18,7 +18,7 @@ class TemiVoiceRecognitionViewModel(
 
     init {
         viewModelScope.launch {
-            appConfigRepository.isSpeakerVerificationEnabled.collect { enabled ->
+            appConfigRepository.speakerVerification.isSpeakerVerificationEnabled.collect { enabled ->
                 if (enabled) {
                     initializeVoiceAi()
                 } else {

@@ -77,8 +77,8 @@ class PhotoboxUploadRepository(
      */
     suspend fun uploadFinalPhoto(finalBitmap: Bitmap): Result<PhotoboxUploadResult> = withContext(Dispatchers.IO) {
         try {
-            val webhookUrl = appConfigRepository.driveUploadUrl.first()
-            val folderLink = appConfigRepository.driveFolderLink.first()
+            val webhookUrl = appConfigRepository.photobox.driveUploadUrl.first()
+            val folderLink = appConfigRepository.photobox.driveFolderLink.first()
             val folderId = extractDriveFolderId(folderLink)
 
             if (webhookUrl.isBlank()) {

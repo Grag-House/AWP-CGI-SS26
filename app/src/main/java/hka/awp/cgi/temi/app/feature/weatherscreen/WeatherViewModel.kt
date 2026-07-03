@@ -73,7 +73,7 @@ class WeatherViewModel(
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun startWeatherRefreshPipeline() {
         viewModelScope.launch(Dispatchers.IO) {
-            combine(appConfigRepository.latitude, appConfigRepository.longitude) { lat, lon ->
+            combine(appConfigRepository.location.latitude, appConfigRepository.location.longitude) { lat, lon ->
                 lat to lon
             }
                 .distinctUntilChanged()

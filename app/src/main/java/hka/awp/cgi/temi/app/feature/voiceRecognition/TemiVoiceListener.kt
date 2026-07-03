@@ -67,8 +67,8 @@ class TemiVoiceListener(
         listenerScope.launch(Dispatchers.IO) {
             combine(
                 voiceProfileRepository.voiceProfiles,
-                appConfigRepository.isSpeakerVerificationEnabled,
-                appConfigRepository.speakerVerificationThreshold,
+                appConfigRepository.speakerVerification.isSpeakerVerificationEnabled,
+                appConfigRepository.speakerVerification.speakerVerificationThreshold,
             ) { profiles, enabled, threshold ->
                 voiceProfiles = profiles
                 isSpeakerVerificationEnabled = enabled
@@ -88,13 +88,15 @@ class TemiVoiceListener(
             voiceProfileRepository.voiceProfiles.collect { voiceProfiles = it }
         }
         listenerScope.launch(Dispatchers.IO) {
-            appConfigRepository.isSpeakerVerificationEnabled.collect { enabled ->
+            appConfigRepository.speakerVerification.isSpeakerVerificationEnabled.collect { enabled ->
                 isSpeakerVerificationEnabled = enabled
                 listenerScope.launch { syncRuntimeState() }
             }
         }
         listenerScope.launch(Dispatchers.IO) {
-            appConfigRepository.speakerVerificationThreshold.collect { speakerVerificationThreshold = it }
+            appConfigRepository.speakerVerification.speakerVerificationThreshold.collect {
+                speakerVerificationThreshold = it
+            }
         }
     }
 

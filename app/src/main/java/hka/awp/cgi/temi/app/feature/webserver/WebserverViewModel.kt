@@ -33,28 +33,29 @@ class WebserverViewModel(appConfigRepository: AppConfigRepository) : ViewModel()
     val serverState = _serverState.asStateFlow()
 
     /** StateFlow emitting the active Webview URL string, mapped and kept active via the UI scope. */
-    val urlState: StateFlow<String> = appConfigRepository.currentUrl.stateIn(
+    val urlState: StateFlow<String> = appConfigRepository.webview.currentUrl.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(SUBSCRIPTION_TIMEOUT),
         BuildConfig.WEBVIEW_URL
     )
 
     /** StateFlow indicating whether credential verification is actively required to connect to the server. */
-    val isVerificationEnabled: StateFlow<Boolean> = appConfigRepository.isWebserverVerificationEnabled.stateIn(
+    val isVerificationEnabled: StateFlow<Boolean> =
+        appConfigRepository.webserver.isWebserverVerificationEnabled.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(SUBSCRIPTION_TIMEOUT),
         false
     )
 
     /** StateFlow emitting the currently configured unencrypted webserver username string. */
-    val webserverUser: StateFlow<String> = appConfigRepository.webserverUser.stateIn(
+    val webserverUser: StateFlow<String> = appConfigRepository.webserver.webserverUser.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(SUBSCRIPTION_TIMEOUT),
         ""
     )
 
     /** StateFlow emitting the currently configured unencrypted webserver password string. */
-    val webserverPassword: StateFlow<String> = appConfigRepository.webserverPassword.stateIn(
+    val webserverPassword: StateFlow<String> = appConfigRepository.webserver.webserverPassword.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(SUBSCRIPTION_TIMEOUT),
         ""

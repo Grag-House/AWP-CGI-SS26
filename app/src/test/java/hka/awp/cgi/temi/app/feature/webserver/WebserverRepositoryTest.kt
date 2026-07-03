@@ -42,7 +42,7 @@ class WebserverRepositoryTest {
 
     @Test
     fun `when DataStore is empty, it returns the BuildConfig fallback URL`() = runTest {
-        assertEquals(BuildConfig.WEBVIEW_URL, repository.currentUrl.first())
+        assertEquals(BuildConfig.WEBVIEW_URL, repository.webview.currentUrl.first())
     }
 
     @Test
@@ -53,7 +53,7 @@ class WebserverRepositoryTest {
         repository =
             AppConfigRepository.Companion(dataStore = datastore, credentialStore = FakeWebserverCredentialStore())
 
-        assertEquals(value, repository.currentUrl.first())
+        assertEquals(value, repository.webview.currentUrl.first())
     }
 
     // Real DataStore used here — mocking DataStore.edit() is too fragile
@@ -66,17 +66,17 @@ class WebserverRepositoryTest {
         val repository =
             AppConfigRepository.Companion(dataStore = dataStore, credentialStore = FakeWebserverCredentialStore())
 
-        assertEquals(BuildConfig.WEBVIEW_URL, repository.currentUrl.first())
+        assertEquals(BuildConfig.WEBVIEW_URL, repository.webview.currentUrl.first())
 
-        repository.updateUrl("https://example.com/path")
+        repository.webview.updateUrl("https://example.com/path")
 
-        assertEquals("https://example.com/path", repository.currentUrl.first())
+        assertEquals("https://example.com/path", repository.webview.currentUrl.first())
 
         tmpDir.deleteRecursively()
     }
 
     @Test
     fun `webserverVerificationEnabled defaults to false when DataStore is empty`() = runTest {
-        assertEquals(false, repository.isWebserverVerificationEnabled.first())
+        assertEquals(false, repository.webserver.isWebserverVerificationEnabled.first())
     }
 }

@@ -88,11 +88,11 @@ class AdminPanelViewModel(
     }
 
     private val baseConfigFlow = combine(
-        appConfigRepository.currentUrl,
-        appConfigRepository.latitude,
-        appConfigRepository.longitude,
-        appConfigRepository.isSpeakerVerificationEnabled,
-        appConfigRepository.isWebserverVerificationEnabled
+        appConfigRepository.webview.currentUrl,
+        appConfigRepository.location.latitude,
+        appConfigRepository.location.longitude,
+        appConfigRepository.speakerVerification.isSpeakerVerificationEnabled,
+        appConfigRepository.webserver.isWebserverVerificationEnabled
     ) { url, lat, lon, speakerEnabled, basicAuthEnabled ->
         AdminPanelFlows(
             url = url,
@@ -106,7 +106,7 @@ class AdminPanelViewModel(
 
     private val configWithThresholdFlow = combine(
         baseConfigFlow,
-        appConfigRepository.speakerVerificationThreshold,
+        appConfigRepository.speakerVerification.speakerVerificationThreshold,
     ) { config, threshold ->
         config.copy(speakerThreshold = threshold)
     }
@@ -117,13 +117,13 @@ class AdminPanelViewModel(
         mqttManager.trafficEvents,
         voiceProfileRepository.voiceProfiles,
         voiceRecognitionViewModel.isEnrollmentActive,
-        appConfigRepository.isPatrolEnabled,
-        appConfigRepository.patrolMode,
-        appConfigRepository.minPatrolMinutes,
-        appConfigRepository.maxPatrolMinutes,
-        appConfigRepository.selectedPatrolHours,
+        appConfigRepository.patrol.isPatrolEnabled,
+        appConfigRepository.patrol.patrolMode,
+        appConfigRepository.patrol.minPatrolMinutes,
+        appConfigRepository.patrol.maxPatrolMinutes,
+        appConfigRepository.patrol.selectedPatrolHours,
         patrolRouteSettings,
-        appConfigRepository.patrolRoute,
+        appConfigRepository.patrol.patrolRoute,
         videoFrame,
         patrolManager.isRunning,
     ) { args ->
@@ -211,16 +211,16 @@ class AdminPanelViewModel(
                 _passwordError.value = false
             }
             is AdminPanelAction.ChangeAdminPassword -> viewModelScope.launch {
-                appConfigRepository.updateAdminPanelPassword(action.password)
+                appConfigRepository.adminPanel.updateAdminPanelPassword(action.password)
                 _events.emit(AdminPanelEvent.PasswordChanged)
             }
             is AdminPanelAction.ChangeWebserverPassword -> viewModelScope.launch {
-                appConfigRepository.updateWebserverPassword(action.password)
-                appConfigRepository.updateWebserverUser(action.user)
+                appConfigRepository.webserver.updateWebserverPassword(action.password)
+                appConfigRepository.webserver.updateWebserverUser(action.user)
                 _events.emit(AdminPanelEvent.WebserverPasswordChanged)
             }
             is AdminPanelAction.ToggleWebserverVerification -> viewModelScope.launch {
-                appConfigRepository.updateWebserverVerification(enabled = action.enabled)
+                appConfigRepository.webserver.updateWebserverVerification(enabled = action.enabled)
             }
             else -> Unit
         }
@@ -228,7 +228,7 @@ class AdminPanelViewModel(
 
     private fun checkWebserverPassword(input: String) {
         viewModelScope.launch {
-            val currentHash = appConfigRepository.webserverPasswordHash.first()
+            val currentHash = appConfigRepository.webserver.webserverPasswordHash.first()
             val isValid = appConfigRepository.isValidPassword(input, currentHash)
 
             _passwordError.value = !isValid
@@ -240,7 +240,7 @@ class AdminPanelViewModel(
 
     private fun checkAdminPassword(input: String) {
         viewModelScope.launch {
-            val currentHash = appConfigRepository.adminPanelPasswordHash.first()
+            val currentHash = appConfigRepository.adminPanel.adminPanelPasswordHash.first()
             val isValid = appConfigRepository.isValidPassword(input, currentHash)
 
             _passwordError.value = !isValid
@@ -254,10 +254,10 @@ class AdminPanelViewModel(
         when (action) {
             is AdminPanelAction.EditCoordinates -> updateCoordinates(action.latitude, action.longitude)
             is AdminPanelAction.EditWebserverUrl -> viewModelScope.launch {
-                appConfigRepository.updateUrl(action.url)
+                appConfigRepository.webview.updateUrl(action.url)
             }
             AdminPanelAction.ResetCoordinates -> viewModelScope.launch {
-                appConfigRepository.updateCoordinates(DEFAULT_LATITUDE, DEFAULT_LONGITUDE)
+                appConfigRepository.location.updateCoordinates(DEFAULT_LATITUDE, DEFAULT_LONGITUDE)
             }
             AdminPanelAction.OpenMqttReports -> viewModelScope.launch {
                 _events.emit(AdminPanelEvent.OpenMqttReports)
@@ -276,10 +276,10 @@ class AdminPanelViewModel(
     private fun handleVoiceAction(action: AdminPanelAction) {
         when (action) {
             is AdminPanelAction.ToggleSpeakerVerification -> viewModelScope.launch {
-                appConfigRepository.updateSpeakerVerification(enabled = action.enabled)
+                appConfigRepository.speakerVerification.updateSpeakerVerification(enabled = action.enabled)
             }
             is AdminPanelAction.EditSpeakerVerificationThreshold -> viewModelScope.launch {
-                appConfigRepository.updateSpeakerVerification(threshold = action.threshold)
+                appConfigRepository.speakerVerification.updateSpeakerVerification(threshold = action.threshold)
             }
             AdminPanelAction.ResetVoiceProfiles -> viewModelScope.launch {
                 voiceProfileRepository.clearAllProfiles()
@@ -315,7 +315,7 @@ class AdminPanelViewModel(
         val roundedLon = round(longitude * COORDINATE_PRECISION) / COORDINATE_PRECISION
 
         viewModelScope.launch {
-            appConfigRepository.updateCoordinates(roundedLat, roundedLon)
+            appConfigRepository.location.updateCoordinates(roundedLat, roundedLon)
         }
     }
 
@@ -327,7 +327,7 @@ class AdminPanelViewModel(
         hours: Set<Int>
     ) {
         viewModelScope.launch {
-            appConfigRepository.updatePatrolSettings(isEnabled, mode, minMin, maxMin, hours)
+            appConfigRepository.patrol.updatePatrolSettings(isEnabled, mode, minMin, maxMin, hours)
 
             patrolManager.updateSchedule(
                 PatrolSettings(
@@ -354,7 +354,7 @@ class AdminPanelViewModel(
 
     fun onSavePatrolRoute(route: List<String>) {
         viewModelScope.launch {
-            appConfigRepository.updatePatrolRoute(route)
+            appConfigRepository.patrol.updatePatrolRoute(route)
 
             val state = uiState.value
 

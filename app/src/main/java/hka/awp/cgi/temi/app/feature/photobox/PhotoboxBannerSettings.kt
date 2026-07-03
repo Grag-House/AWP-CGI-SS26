@@ -52,22 +52,22 @@ internal class PhotoboxBannerSettings(
     private val appConfigRepository: AppConfigRepository,
     private val scope: CoroutineScope
 ) {
-    val enabled: StateFlow<Boolean> = appConfigRepository.photoboxBannerEnabled
+    val enabled: StateFlow<Boolean> = appConfigRepository.photobox.photoboxBannerEnabled
         .stateIn(scope, SharingStarted.Eagerly, false)
 
-    val banner: StateFlow<PhotoboxBanner> = appConfigRepository.photoboxBanner
+    val banner: StateFlow<PhotoboxBanner> = appConfigRepository.photobox.photoboxBanner
         .map { raw -> runCatching { PhotoboxBanner.valueOf(raw) }.getOrDefault(DEFAULT_BANNER) }
         .stateIn(scope, SharingStarted.Eagerly, DEFAULT_BANNER)
 
     fun setEnabled(enabled: Boolean) {
         scope.launch {
-            appConfigRepository.setPhotoboxBanner(enabled, banner.value.name)
+            appConfigRepository.photobox.setPhotoboxBanner(enabled, banner.value.name)
         }
     }
 
     fun setBanner(banner: PhotoboxBanner) {
         scope.launch {
-            appConfigRepository.setPhotoboxBanner(enabled.value, banner.name)
+            appConfigRepository.photobox.setPhotoboxBanner(enabled.value, banner.name)
         }
     }
 }

@@ -36,11 +36,11 @@ class AppConfigRepositoryTest {
     fun `admin panel and webserver passwords are independent`() = runTest {
         val (repository, tmpDir) = createTestRepository(this)
 
-        repository.updateAdminPanelPassword("admin123")
-        repository.updateWebserverPassword("web456")
+        repository.adminPanel.updateAdminPanelPassword("admin123")
+        repository.webserver.updateWebserverPassword("web456")
 
-        val adminHash = repository.adminPanelPasswordHash.first()
-        val webHash = repository.webserverPasswordHash.first()
+        val adminHash = repository.adminPanel.adminPanelPasswordHash.first()
+        val webHash = repository.webserver.webserverPasswordHash.first()
 
         assertEquals(repository.hashPassword("admin123"), adminHash)
         assertEquals(repository.hashPassword("web456"), webHash)
@@ -58,20 +58,20 @@ class AppConfigRepositoryTest {
         val dataStore = PreferenceDataStoreFactory.create(scope = this, produceFile = { file })
         val repository = AppConfigRepository.Companion(dataStore = dataStore, credentialStore = fake)
 
-        repository.updateWebserverUser("alice")
-        repository.updateWebserverPassword("s3cr3t")
+        repository.webserver.updateWebserverUser("alice")
+        repository.webserver.updateWebserverPassword("s3cr3t")
 
         // Credential store holds plaintext for Basic Auth
         assertEquals("alice", fake.getUser())
         assertEquals("s3cr3t", fake.getPassword())
 
         // Flows emit the new values
-        assertEquals("alice", repository.webserverUser.first())
-        assertEquals("s3cr3t", repository.webserverPassword.first())
+        assertEquals("alice", repository.webserver.webserverUser.first())
+        assertEquals("s3cr3t", repository.webserver.webserverPassword.first())
 
         // DataStore holds only hashes — never plaintext
-        val userHash = repository.webserverUserHash.first()
-        val passwordHash = repository.webserverPasswordHash.first()
+        val userHash = repository.webserver.webserverUserHash.first()
+        val passwordHash = repository.webserver.webserverPasswordHash.first()
         assertEquals(repository.hashPassword("alice"), userHash)
         assertEquals(repository.hashPassword("s3cr3t"), passwordHash)
         assertNotEquals("alice", userHash)
@@ -93,8 +93,8 @@ class AppConfigRepositoryTest {
             val dataStore = PreferenceDataStoreFactory.create(scope = this, produceFile = { file })
             val repository = AppConfigRepository.Companion(dataStore = dataStore, credentialStore = fake)
 
-            assertEquals("bob", repository.webserverUser.first())
-            assertEquals("hunter2", repository.webserverPassword.first())
+            assertEquals("bob", repository.webserver.webserverUser.first())
+            assertEquals("hunter2", repository.webserver.webserverPassword.first())
 
             tmpDir.deleteRecursively()
         }
@@ -109,13 +109,13 @@ class AppConfigRepositoryTest {
         val repository =
             AppConfigRepository.Companion(dataStore = dataStore, credentialStore = FakeWebserverCredentialStore())
 
-        repository.updateUrl("https://example.com/custom")
-        repository.updateAdminPassword("super-secret")
+        repository.webview.updateUrl("https://example.com/custom")
+        repository.adminPanel.updateAdminPassword("super-secret")
 
-        assertEquals(BuildConfig.WEBVIEW_URL, repository.currentUrl.first())
+        assertEquals(BuildConfig.WEBVIEW_URL, repository.webview.currentUrl.first())
         assertEquals(
             repository.hashPassword(BuildConfig.DEFAULT_ADMIN_PASSWORD),
-            repository.adminPasswordHash.first()
+            repository.adminPanel.adminPasswordHash.first()
         )
 
         tmpDir.deleteRecursively()
