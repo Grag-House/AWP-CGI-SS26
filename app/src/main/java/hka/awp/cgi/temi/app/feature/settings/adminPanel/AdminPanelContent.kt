@@ -28,6 +28,7 @@ import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.cards.Speaker
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.cards.VoiceProfilesManagementCard
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.cards.WebserverPasswordCard
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.cards.WebserverUrlCard
+import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.cards.WebserverVerificationCard
 import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.dialogs.MqttReportsCard
 import hka.awp.cgi.temi.app.ui.components.SettingsHeader
 
@@ -43,6 +44,8 @@ import hka.awp.cgi.temi.app.ui.components.SettingsHeader
  * @param onBackClick Intercepts upper navigation buttons to move out of the console screen.
  * @param onEditUrl Triggers the input dialog workflow for modifying the remote backend web server path.
  * @param onOpenMqtt Displays the log tracking overlay for active MQTT broker telemetry traffic.
+ * @param onToggleWebserverAuthentication Toggles whether credential verification is actively enforced on the web server
+ * connection.
  * @param onUpdateWebserverPassword Displays the security prompt layout for changing remote synchronization access keys.
  * @param onChangeAdminPassword Displays the security prompt layout for modifying the local master access passphrase.
  * @param onEditCoordinates Triggers the decimal validation input modal for latitude/longitude geofence anchoring.
@@ -51,13 +54,13 @@ import hka.awp.cgi.temi.app.ui.components.SettingsHeader
  * (Random/Fixed).
  * @param onNavigateToPatrolRoute Dispatches views to adjust target sequence lists mapping custom checkpoint layouts.
  * @param onCloseRequest Displays a safety verification prompt to terminate and close out the active runtime process.
- * @param onOpenHidingSpotFilter Opens the filter settings overlay tracking applicable hiding-spot
- * location restrictions.
- * @param onToggleSpeakerVerification Toggles the global biometric validation block barrier for processing
- * voice commands.
+ * @param onOpenHidingSpotFilter Opens the filter settings overlay tracking applicable hiding-spot location
+ * restrictions.
+ * @param onToggleSpeakerVerification Toggles the global biometric validation block barrier for processing voice
+ * commands.
  * @param onEditSpeakerThreshold Displays the precision adjustment input text dialog for matching validation bounds.
- * @param onToggleEnrollment Initiates or prematurely aborts a recording pipeline capture phase to map fresh
- * speaker profiles.
+ * @param onToggleEnrollment Initiates or prematurely aborts a recording pipeline capture phase to map fresh speaker
+ * profiles.
  * @param onDeleteVoiceProfile Erases a single biometric profile entry row matching the forwarded identifier string.
  */
 @Composable
@@ -67,6 +70,7 @@ fun AdminPanelContent(
     onBackClick: () -> Unit,
     onEditUrl: () -> Unit,
     onOpenMqtt: () -> Unit,
+    onToggleWebserverAuthentication: (Boolean) -> Unit,
     onUpdateWebserverPassword: () -> Unit,
     onChangeAdminPassword: () -> Unit,
     onEditCoordinates: () -> Unit,
@@ -111,6 +115,11 @@ fun AdminPanelContent(
                 WebserverUrlCard(
                     url = uiState.webserverUrl,
                     onEdit = onEditUrl
+                )
+
+                WebserverVerificationCard(
+                    enabled = uiState.isWebserverVerificationEnabled,
+                    onToggle = onToggleWebserverAuthentication
                 )
 
                 WebserverPasswordCard(

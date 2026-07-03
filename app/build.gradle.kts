@@ -182,6 +182,7 @@ dependencies {
     implementation(libs.androidx.compose.foundation.layout)
     implementation(libs.androidx.lifecycle.process)
     implementation(libs.androidx.ui)
+    implementation(libs.core.ktx)
     implementation(libs.firebase.annotations)
     implementation(libs.koin.android)
     implementation(platform(libs.koin.bom))
@@ -203,6 +204,9 @@ dependencies {
 
     // mqtt
     implementation(libs.hivemq)
+
+    //andoid security
+    implementation(libs.androidx.security.crypto)
 
     // api call dependencies
     implementation(libs.okhttp)

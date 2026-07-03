@@ -18,14 +18,14 @@ import hka.awp.cgi.temi.app.feature.settings.adminPanel.components.dialogs.Resta
 
 /**
  * Internal conditional switch router that resolves and draws overlay alert dialogs based on the flags
- * mapped within [dialogState].
+ * mapped within [DialogState].
  *
- * @param uiState The active master telemetry snapshot used to initialize baseline configuration structures
- * inside child fields.
+ * @param uiState The active master telemetry snapshot used to initialize baseline configuration structures inside child
+ * fields.
  * @param onAction Dispatches system intent interactions back to the feature's architectural state engine.
  * @param dialogState The layout model snapshot tracking which specific popovers should be displayed.
- * @param onPatrolError Callback fired if a patrol execution sequence fails validation checks due to
- * an empty configuration.
+ * @param onPatrolError Callback fired if a patrol execution sequence fails validation checks due to an empty
+ * configuration.
  * @param onDismiss Universal cleanup trigger used to clear the active dialog layout state visibility fields.
  */
 @Composable
@@ -87,8 +87,8 @@ fun AdminPanelDialogs(
 
     if (dialogState.showWebserverPassword) {
         ChangeWebserverPasswordDialog(
-            {
-                onAction(AdminPanelAction.ChangeWebserverPassword(it))
+            { password, user ->
+                onAction(AdminPanelAction.ChangeWebserverPassword(password, user))
                 onDismiss()
             },
             onDismiss
@@ -204,6 +204,24 @@ fun AdminPanelDialogs(
 /**
  * An internal data class holding the visibility flag states for various alert and configuration sub-dialogs
  * rendered inside the administration dashboard context.
+ *
+ * @property showUrl Flag to control the visibility of the web server URL editing dialog.
+ * @property showCoordinate Flag to control the visibility of the coordinate preset configuration dialog.
+ * @property showThreshold Flag to control the visibility of the speaker verification threshold editing dialog.
+ * @property showAdminPassword Flag to control the visibility of the local master admin password change dialog.
+ * @property showWebserverPassword Flag to control the visibility of the web server password change dialog.
+ * @property showMqttReports Flag to control the visibility of the MQTT report traffic tracking dialog.
+ * @property showResetVoiceProfiles Flag to control the visibility of the speaker profiles factory reset confirmation
+ * dialog.
+ * @property showProfileName Flag to control the visibility of the voice identifier profile input dialog.
+ * @property showDeleteConfirm Flag to control the visibility of a profile deletion confirmation warning popup.
+ * @property showRestart Flag to control the visibility of the system application lifecycle restart alert.
+ * @property showClose Flag to control the visibility of the application process exit validation dialog.
+ * @property selectedProfileToDelete Holds the text reference key of the biometric voice profile targeted for deletion.
+ * @property showPatrolSettings Flag to control the visibility of the autonomous scheduler patrol behavior menu.
+ * @property showPatrolRoute Flag to control the visibility of the checkpoint waypoint route mapping overlay.
+ * @property showNoRouteDialog Flag to control the visibility of the error dialog displayed when launching an
+ * unconfigured route.
  */
 @Suppress("LongMethod")
 data class DialogState(

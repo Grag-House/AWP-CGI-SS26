@@ -2,6 +2,7 @@ package hka.awp.cgi.temi.app.feature.settings.language
 
 import android.app.Activity
 import android.content.Context
+import androidx.core.content.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import hka.awp.cgi.temi.app.data.repository.GeneralConfigRepository
@@ -53,6 +54,11 @@ class LanguageViewModel(
         _selectedLocale.value = newLocale
         viewModelScope.launch {
             generalConfigRepository.updateLanguage(languageCode)
+
+            // SharedPreferences for MainActivity attachBaseContext
+            val prefs = context.getSharedPreferences("Settings", Context.MODE_PRIVATE)
+            prefs.edit { putString("lang", languageCode) }
+
             (context as? Activity)?.recreate()
         }
     }

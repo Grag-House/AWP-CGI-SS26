@@ -96,8 +96,8 @@
     <string name="admin_panel_appversion">Versione App</string>
     <string name="admin_panel_mqtt_reports">Report MQTT</string>
     <string name="admin_panel_mqtt_reports_subtitle">Report attuali</string>
-    <string name="admin_panel_webserver_password">Password Webserver</string>
-    <string name="admin_panel_webserver_password_change">Cambia password</string>
+    <string name="admin_panel_webserver_password">Credenziali di accesso al server web</string>
+    <string name="admin_panel_webserver_password_change">Modificare le credenziali di accesso</string>
     <string name="admin_panel_weather_coordinates">Coordinate meteo</string>
     <string name="admin_panel_webserver_coordiantes_change">Cambia coordinate</string>
     <string name="admin_panel_webserver_url_change">Cambia URL</string>
@@ -113,6 +113,7 @@
     <string name="admin_panel_cancel">Annulla</string>
     <string name="admin_panel_change_password_title">Cambia password</string>
     <string name="admin_panel_new_password">Nuova password:</string>
+    <string name="admin_panel_new_user">Nuovo utente del server web:</string>
     <string name="admin_panel_webserver_defaults_reset">Ripristina default</string>
     <string name="admin_panel_webserver_defaults_reset_done">Ripristinato.</string>
     <string name="admin_panel_mqtt_reports_topics_title">Argomenti osservati</string>
@@ -344,4 +345,6 @@
     <string name="admin_panel_enter_password">Inserisci la password</string>
     <string name="admin_panel_password_input">Area admin protetta, inserisci la password.</string>
     <string name="password_wrong">Password errata</string>
+    <string name="admin_panel_webserver_verification">Autenticazione del server web</string>
+    <string name="admin_panel_webserver_verification_subtitle">Utilizza la Basic Auth per autenticarsi sul server web</string>
 </resources>

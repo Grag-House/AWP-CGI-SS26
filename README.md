@@ -20,6 +20,13 @@ Roboter-Funktionen.
 - **Modus-Auswahl:** Konfiguration der Hosting-Umgebung (Wechsel zwischen **On-Premise** und **IONOS Cloud**).
 - **Wetter:** Anzeige des örtlichen Wetters direkt in der Anwendung.
 - **Einstellungen:** Konfiguration der Anwendung und Einblick in Systemparameter.
+- **Admin-Panel:** Passwortgeschützter Bereich für erweiterte Systemkonfigurationen und Debugging-Tools.
+- **Photobox:** Erfassen von Fotos mit verschiedenen Filtern, Generierung von QR-Codes zum Teilen und automatischer Upload in die Cloud.
+- **Hide & Seek:** Interaktives Versteckspiel, bei dem der Roboter vordefinierte Orte anfährt und nach Personen sucht.
+- **Patrol-Modus:** Zeitgesteuerte Patrouillen mit Live-Kamerastreaming und Ereignisanalyse.
+- **Voice Recognition:** Offline-Spracherkennung und Sprecheridentifikation zur personalisierten Interaktion.
+- **Controller-Unterstützung:** Steuerung des Roboters über externe Bluetooth-Eingabegeräte (HID).
+- **MQTT-Integration:** Echtzeit-Kommunikation und Fernsteuerung über einen MQTT-Broker (HiveMQ).
 - **Sidebar Navigation:** Einfacher Wechsel zwischen den verschiedenen Screens (Dashboard, Settings, Navigation, etc.).
 - **Netzwerk-Status:** Anzeige der WLAN-Signalstärke und Verbindungsinformationen.
 - **Vollbild-Modus:** Optimierte UI für den Temi-Bildschirm durch Ausblenden der Systemleisten.
@@ -31,9 +38,19 @@ Roboter-Funktionen.
 - **Roboter-Schnittstelle:** [temi SDK](https://github.com/robotemi/sdk) 
 - **Dependency Injection:** [Koin](https://insert-koin.io/)
 - **Architektur:** MVVM (Model-View-ViewModel) mit einer Shell-basierten Navigationsstruktur.
+- **Spracherkennung:** [Vosk](https://alphacephei.com/vosk/) für Offline-Voice-to-Text.
+- **MQTT:** [HiveMQ](https://www.hivemq.com/) für die IoT-Kommunikation.
+- **Background Tasks:** [WorkManager](https://developer.android.com/topic/libraries/architecture/workmanager) für robuste Upload-Prozesse.
+- **QR-Codes:** [ZXing](https://github.com/zxing/zxing) zur Generierung von Sharing-Links.
 - **Testing:** [JUnit 5](https://junit.org/) & [MockK](https://mockk.io/) für Unit-Tests.
 - **Logging:** [Timber](https://github.com/JakeWharton/timber) für performantes loggen
 - **Design:** Custom "CgiTheme" basierend auf Material Design 3 und der CGi Corporate Identity
+
+## 📈 Qualitätssicherung & Dokumentation
+
+- **Statische Code-Analyse:** [Detekt](https://detekt.dev/) stellt die Einhaltung von Coding-Standards sicher.
+- **Dokumentation:** [Dokka](https://kotlinlang.org/docs/dokka-introduction.html) generiert HTML-Dokumentation aus dem Quellcode.
+- **Quality Check:** Ein kombinierter Gradle-Task (`./gradlew qualityCheck`) führt Analyse und Dokumentationserstellung aus.
 
 ## 📁 Projektstruktur
 

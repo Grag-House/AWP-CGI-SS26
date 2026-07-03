@@ -6,7 +6,7 @@ import androidx.compose.material.icons.rounded.AdminPanelSettings
 import androidx.compose.material.icons.rounded.BatteryFull
 import androidx.compose.material.icons.rounded.Brightness6
 import androidx.compose.material.icons.rounded.Info
-import androidx.compose.material.icons.rounded.Notifications
+import androidx.compose.material.icons.rounded.Language
 import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.ui.graphics.vector.ImageVector
 import hka.awp.cgi.temi.app.R
@@ -22,7 +22,7 @@ sealed class SettingsItem(
     companion object {
         val settingsItems by lazy {
             listOf(
-                Notifications,
+                Language,
                 Display,
                 Battery,
                 Photobox,
@@ -32,10 +32,10 @@ sealed class SettingsItem(
         }
     }
 
-    data object Notifications : SettingsItem(
+    data object Language : SettingsItem(
         titleRes = R.string.settings_languages_title,
         subtitleRes = R.string.settings_languages_subtitle,
-        icon = Icons.Rounded.Notifications
+        icon = Icons.Rounded.Language
     )
 
     data object Display : SettingsItem(

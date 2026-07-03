@@ -59,7 +59,7 @@ class SettingsViewModel(private val repository: RobotRepository, private val rob
                 _aboutInfo.value = repository.getFullDeviceInfo(robot)
             }
 
-            SettingsItem.Notifications -> {
+            SettingsItem.Language -> {
                 viewModelScope.launch {
                     _navigationEvent.emit(SettingsNavigationEvent.NavigateToLanguage)
                 }

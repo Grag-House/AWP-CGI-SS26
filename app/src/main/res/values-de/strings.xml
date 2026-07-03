@@ -108,8 +108,8 @@
     <string name="admin_panel_appversion">App Version</string>
     <string name="admin_panel_mqtt_reports">MQTT Reports</string>
     <string name="admin_panel_mqtt_reports_subtitle">Akutelle Reports</string>
-    <string name="admin_panel_webserver_password">Webserver-Passwort</string>
-    <string name="admin_panel_webserver_password_change">Webserver-Passwort ändern</string>
+    <string name="admin_panel_webserver_password">Webserver-Zugangsdaten</string>
+    <string name="admin_panel_webserver_password_change">Zugangsdaten ändern</string>
     <string name="admin_panel_weather_coordinates">Wetterkoordinaten</string>
     <string name="admin_panel_webserver_coordiantes_change">Koordinaten ändern</string>
     <string name="admin_panel_webserver_url_change">URL ändern</string>
@@ -125,6 +125,7 @@
     <string name="admin_panel_cancel">Abbrechen</string>
     <string name="admin_panel_change_password_title">Webserver-Passwort ändern</string>
     <string name="admin_panel_new_password">Neues Webserver-Passwort:</string>
+    <string name="admin_panel_new_user">Neuer Webserver-Benutzer:</string>
     <string name="admin_panel_webserver_defaults_reset">Webserver-URL und Webserver-Passwort zurücksetzen</string>
     <string name="admin_panel_webserver_defaults_reset_done">Webserver-Defaults wurden zurückgesetzt.</string>
     <string name="admin_panel_mqtt_reports_topics_title">Beobachtete Topics</string>
@@ -362,4 +363,6 @@
     <string name="photobox_photo_count">%1$d Fotos aufgenommen</string>
     <string name="photobox_photo_number">Foto #%1$d</string>
     <string name="photobox_duration_seconds">%1$d s</string>
+    <string name="admin_panel_webserver_verification">Webserver Authentifizierung</string>
+    <string name="admin_panel_webserver_verification_subtitle">Benutzt Basic Auth um sich beim Webserver zu authentifizieren</string>
 </resources>

@@ -3,7 +3,6 @@ package hka.awp.cgi.temi.app.feature.webserver
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import hka.awp.cgi.temi.app.BuildConfig
-import hka.awp.cgi.temi.app.data.repository.GeneralConfigRepository
 import hka.awp.cgi.temi.app.utils.extractHostSafely
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -22,32 +21,58 @@ import java.net.InetAddress
  *
  * This ViewModel periodically pings the configured WebView URL to check if the server is reachable.
  *
- * @property generalConfigRepository Repository providing the current URL configuration.
+ * @property webserverConfigRepository Repository providing the current URL configuration.
  */
-class WebserverViewModel(generalConfigRepository: GeneralConfigRepository) : ViewModel() {
+class WebserverViewModel(webserverConfigRepository: WebserverConfigRepository) : ViewModel() {
     private val _serverState = MutableStateFlow(ServerState())
 
     /** Current state of the server (reachability and IP address). */
     val serverState = _serverState.asStateFlow()
 
     /** Flow of the current WebView URL from settings. */
-    val urlState: StateFlow<String> = generalConfigRepository.currentUrl.stateIn(
+    val urlState: StateFlow<String> = webserverConfigRepository.currentUrl.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(SUBSCRIPTION_TIMEOUT),
         BuildConfig.WEBVIEW_URL
+    )
+
+    /** StateFlow indicating whether credential verification is actively required to connect to the server. */
+    val isVerificationEnabled: StateFlow<Boolean> = webserverConfigRepository.isWebserverVerificationEnabled.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(SUBSCRIPTION_TIMEOUT),
+        false
+    )
+
+    /** StateFlow emitting the currently configured unencrypted webserver username string. */
+    val webserverUser: StateFlow<String> = webserverConfigRepository.webserverUser.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(SUBSCRIPTION_TIMEOUT),
+        ""
+    )
+
+    /** StateFlow emitting the currently configured unencrypted webserver password string. */
+    val webserverPassword: StateFlow<String> = webserverConfigRepository.webserverPassword.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(SUBSCRIPTION_TIMEOUT),
+        ""
     )
 
     companion object {
         /** The interval at which the server status is checked (in milliseconds). */
         private const val POLLING_INTERVALL: Long = 10000
 
-        /** The timeout for the server ping operation (in milliseconds). */
+        /** The timeout threshold for the server ping/reachability operation (in milliseconds). */
         private const val TIMEOUT: Int = 2000
 
         /** Time to wait before stopping the flow after the last subscriber disappeared. */
         private const val SUBSCRIPTION_TIMEOUT = 5000L
     }
 
+    /**
+     * Spawns a background coroutine bound to [Dispatchers.IO] to continually poll the web server.
+     * Extracts the host address, resolves the DNS structure, checks reachability, and publishes updates
+     * to [_serverState].
+     */
     private fun startMonitoring() {
         viewModelScope.launch(Dispatchers.IO) {
             while (isActive) {

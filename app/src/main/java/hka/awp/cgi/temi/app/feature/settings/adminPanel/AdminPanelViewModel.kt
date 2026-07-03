@@ -19,6 +19,7 @@ import hka.awp.cgi.temi.app.feature.patrol.PatrolManager
 import hka.awp.cgi.temi.app.feature.voiceRecognition.SpeakerVector
 import hka.awp.cgi.temi.app.feature.voiceRecognition.TemiVoiceRecognitionViewModel
 import hka.awp.cgi.temi.app.feature.voiceRecognition.VoiceProfileRepository
+import hka.awp.cgi.temi.app.feature.webserver.WebserverConfigRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -51,6 +52,7 @@ class AdminPanelViewModel(
     private val generalConfigRepository: GeneralConfigRepository,
     private val patrolConfigRepository: PatrolConfigRepository,
     private val securityConfigRepository: SecurityConfigRepository,
+    private val webserverConfigRepository: WebserverConfigRepository,
     private val mqttManager: MqttManager,
     private val voiceProfileRepository: VoiceProfileRepository,
     private val voiceRecognitionViewModel: TemiVoiceRecognitionViewModel,
@@ -94,6 +96,7 @@ class AdminPanelViewModel(
         val longitude: Double,
         val speakerEnabled: Boolean,
         val speakerThreshold: Double,
+        val basicAuthEnabled: Boolean,
     )
 
     /** Loads locations from the robot that match the patrol prefix. */
@@ -109,17 +112,19 @@ class AdminPanelViewModel(
     }
 
     private val baseConfigFlow = combine(
-        generalConfigRepository.currentUrl,
+        webserverConfigRepository.currentUrl,
         generalConfigRepository.latitude,
         generalConfigRepository.longitude,
         generalConfigRepository.isSpeakerVerificationEnabled,
-    ) { url, lat, lon, speakerEnabled ->
+        webserverConfigRepository.isWebserverVerificationEnabled
+    ) { url, lat, lon, speakerEnabled, basicAuthEnabled ->
         AdminPanelFlows(
             url = url,
             latitude = lat,
             longitude = lon,
             speakerEnabled = speakerEnabled,
             speakerThreshold = GeneralConfigRepository.DEFAULT_SPEAKER_VERIFICATION_THRESHOLD,
+            basicAuthEnabled = basicAuthEnabled,
         )
     }
 
@@ -166,6 +171,7 @@ class AdminPanelViewModel(
 
         AdminPanelState(
             webserverUrl = config.url,
+            isWebserverVerificationEnabled = config.basicAuthEnabled,
             latitude = config.latitude,
             longitude = config.longitude,
             coordinates = "Länge: ${config.longitude} Breite: ${config.latitude}",
@@ -204,7 +210,8 @@ class AdminPanelViewModel(
             AdminPanelAction.ClearPasswordError,
             AdminPanelAction.ResetAuthorization,
             is AdminPanelAction.ChangeAdminPassword,
-            is AdminPanelAction.ChangeWebserverPassword -> handleSecurityAction(action)
+            is AdminPanelAction.ChangeWebserverPassword,
+            is AdminPanelAction.ToggleWebserverVerification -> handleSecurityAction(action)
 
             is AdminPanelAction.EditCoordinates,
             is AdminPanelAction.EditWebserverUrl,
@@ -241,8 +248,12 @@ class AdminPanelViewModel(
                 _events.emit(AdminPanelEvent.PasswordChanged)
             }
             is AdminPanelAction.ChangeWebserverPassword -> viewModelScope.launch {
-                securityConfigRepository.updateWebserverPassword(action.password)
+                webserverConfigRepository.updateWebserverPassword(action.password)
+                webserverConfigRepository.updateWebserverUser(action.user)
                 _events.emit(AdminPanelEvent.WebserverPasswordChanged)
+            }
+            is AdminPanelAction.ToggleWebserverVerification -> viewModelScope.launch {
+                webserverConfigRepository.updateWebserverVerification(enabled = action.enabled)
             }
             else -> Unit
         }
@@ -250,7 +261,7 @@ class AdminPanelViewModel(
 
     private fun checkWebserverPassword(input: String) {
         viewModelScope.launch {
-            val currentHash = securityConfigRepository.webserverPasswordHash.first()
+            val currentHash = webserverConfigRepository.webserverPasswordHash.first()
             val isValid = securityConfigRepository.isValidPassword(input, currentHash)
 
             _passwordError.value = !isValid
@@ -444,8 +455,11 @@ sealed interface AdminPanelAction {
     /** Updates the admin password. */
     data class ChangeAdminPassword(val password: String) : AdminPanelAction
 
+    /** Toggles webserver basic auth verification. */
+    data class ToggleWebserverVerification(val enabled: Boolean) : AdminPanelAction
+
     /** Updates the webserver password. */
-    data class ChangeWebserverPassword(val password: String) : AdminPanelAction
+    data class ChangeWebserverPassword(val password: String, val user: String) : AdminPanelAction
 
     /** Toggles speaker verification. */
     data class ToggleSpeakerVerification(val enabled: Boolean) : AdminPanelAction
@@ -512,6 +526,7 @@ sealed interface AdminPanelEvent {
  */
 data class AdminPanelState(
     val webserverUrl: String = BuildConfig.WEBVIEW_URL,
+    val isWebserverVerificationEnabled: Boolean = false,
     val appVersion: String = BuildConfig.VERSION_NAME,
     val mqttReportTopics: Set<String> = emptySet(),
     val mqttTrafficEvents: List<MqttTrafficEvent> = emptyList(),

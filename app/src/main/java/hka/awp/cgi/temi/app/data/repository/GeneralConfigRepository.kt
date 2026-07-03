@@ -6,7 +6,6 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
-import hka.awp.cgi.temi.app.BuildConfig
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -55,13 +54,6 @@ class GeneralConfigRepository(
             enabled?.let { preferences[speakerVerificationEnabledKey] = it }
             threshold?.let { preferences[speakerVerificationThresholdKey] = it.coerceIn(0.0, 1.0) }
         }
-    }
-
-    /**
-     * Flow of the current URL for the main WebView.
-     */
-    val currentUrl: Flow<String> = dataStore.data.map { preferences ->
-        preferences[webviewUrlKey] ?: BuildConfig.WEBVIEW_URL
     }
 
     /**

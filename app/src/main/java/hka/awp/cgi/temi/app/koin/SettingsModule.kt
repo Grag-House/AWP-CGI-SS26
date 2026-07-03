@@ -21,6 +21,7 @@ val settingsModule = module {
             generalConfigRepository = get(),
             patrolConfigRepository = get(),
             securityConfigRepository = get(),
+            webserverConfigRepository = get(),
             mqttManager = get(),
             voiceProfileRepository = get(),
             voiceRecognitionViewModel = get(),
