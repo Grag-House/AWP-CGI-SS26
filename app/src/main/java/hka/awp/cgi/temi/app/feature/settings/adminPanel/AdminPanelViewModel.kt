@@ -457,6 +457,7 @@ sealed interface AdminPanelAction {
 
     /** Toggles webserver basic auth verification. */
     data class ToggleWebserverVerification(val enabled: Boolean) : AdminPanelAction
+
     /** Updates the webserver password. */
     data class ChangeWebserverPassword(val password: String, val user: String) : AdminPanelAction
 
