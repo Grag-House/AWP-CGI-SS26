@@ -32,7 +32,7 @@ interface WebserverCredentialStore {
 }
 
 /**
- * Production implementation backed by [EncryptedSharedPreferences].
+ * Production implementation backed by [EncryptedSharedPreferences] .
  * Keys and values are encrypted at rest using AES256.
  */
 
