@@ -3,7 +3,7 @@ package hka.awp.cgi.temi.app.feature.webserver
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import hka.awp.cgi.temi.app.BuildConfig
 import hka.awp.cgi.temi.app.utils.AppConfigRepository
-import hka.awp.cgi.temi.app.utils.FakeWebserverCredentialStore
+import hka.awp.cgi.temi.app.utils.WebserverCredentialStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -119,5 +119,23 @@ class AppConfigRepositoryTest {
         )
 
         tmpDir.deleteRecursively()
+    }
+}
+
+/**
+ * In-memory fake for unit tests — no Android runtime or encryption needed.
+ */
+class FakeWebserverCredentialStore : WebserverCredentialStore {
+    private var user: String = ""
+    private var password: String = ""
+
+    override fun getUser(): String = user
+    override fun getPassword(): String = password
+    override fun saveUser(user: String) {
+        this.user = user
+    }
+
+    override fun savePassword(password: String) {
+        this.password = password
     }
 }

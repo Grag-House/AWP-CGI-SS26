@@ -76,31 +76,13 @@ class EncryptedWebserverCredentialStore(context: Context) : WebserverCredentialS
 }
 
 /**
- * In-memory fake for unit tests — no Android runtime or encryption needed.
- */
-class FakeWebserverCredentialStore : WebserverCredentialStore {
-    private var user: String = ""
-    private var password: String = ""
-
-    override fun getUser(): String = user
-    override fun getPassword(): String = password
-    override fun saveUser(user: String) {
-        this.user = user
-    }
-
-    override fun savePassword(password: String) {
-        this.password = password
-    }
-}
-
-/**
- * Central repository for managing and persisting application configurations[cite: 1].
+ * Central repository for managing and persisting application configurations.
  *
- * Uses Jetpack [DataStore] for general settings (e.g., routes, password hashes, webviews)[cite: 1]
- * and a [WebserverCredentialStore] for sensitive plaintext data (e.g., server login credentials)[cite: 1].
+ * Uses Jetpack [DataStore] for general settings (e.g., routes, password hashes, webviews)
+ * and a [WebserverCredentialStore] for sensitive plaintext data (e.g., server login credentials).
  *
- * @property dataStore The [DataStore] instance used for persistent key-value pairs[cite: 1].
- * @property credentialStore The encrypted or fake storage backend for sensitive credentials[cite: 1].
+ * @property dataStore The [DataStore] instance used for persistent key-value pairs.
+ * @property credentialStore The encrypted or fake storage backend for sensitive credentials.
  */
 @Suppress("TooManyFunctions")
 class AppConfigRepository private constructor(
@@ -121,19 +103,19 @@ class AppConfigRepository private constructor(
         const val DEFAULT_SPEAKER_VERIFICATION_THRESHOLD = 0.82
 
         /**
-         * Creates a production instance of the repository using an [EncryptedWebserverCredentialStore][cite: 1].
+         * Creates a production instance of the repository using an [EncryptedWebserverCredentialStore].
          *
-         * @param context The Android context required to initialize encrypted shared preferences[cite: 1].
-         * @param dataStore The [DataStore] instance for application configurations[cite: 1].
+         * @param context The Android context required to initialize encrypted shared preferences.
+         * @param dataStore The [DataStore] instance for application configurations.
          */
         operator fun invoke(context: Context, dataStore: DataStore<Preferences>) =
             AppConfigRepository(dataStore, EncryptedWebserverCredentialStore(context))
 
         /**
-         * Creates a test instance of the repository[cite: 1].
-         * Allows passing any [WebserverCredentialStore] implementation (e.g., test fakes)[cite: 1].
+         * Creates a test instance of the repository.
+         * Allows passing any [WebserverCredentialStore] implementation (e.g., test fakes).
          *
-         * @param dataStore The [DataStore] instance for application configurations[cite: 1].
+         * @param dataStore The [DataStore] instance for application configurations.
          * @param credentialStore The credential storage implementation to use (e.g., [FakeWebserverCredentialStore]).
          */
         operator fun invoke(dataStore: DataStore<Preferences>, credentialStore: WebserverCredentialStore) =
@@ -171,24 +153,24 @@ class AppConfigRepository private constructor(
     private val speakerVerificationEnabledKey = booleanPreferencesKey("speaker_verification_enabled")
     private val speakerVerificationThresholdKey = doublePreferencesKey("speaker_verification_threshold")
 
-    /** Stream of the currently configured Webview URL. Falls back to the build default if not set[cite: 1]. */
+    /** Stream of the currently configured Webview URL. Falls back to the build default if not set. */
     val currentUrl: Flow<String> = dataStore.data.map {
         it[webviewUrlKey] ?: BuildConfig.WEBVIEW_URL
     }
 
     private val _webserverUser = MutableStateFlow(credentialStore.getUser())
 
-    /** Stream of the unencrypted webserver username[cite: 1]. */
+    /** Stream of the unencrypted webserver username. */
     val webserverUser: Flow<String> = _webserverUser.asStateFlow()
 
     private val _webserverPassword = MutableStateFlow(credentialStore.getPassword())
 
-    /** Stream of the unencrypted webserver password[cite: 1]. */
+    /** Stream of the unencrypted webserver password. */
     val webserverPassword: Flow<String> = _webserverPassword.asStateFlow()
 
     /**
-     * Updates the Webview URL in the [DataStore][cite: 1].
-     * @param newUrl The new target URL for the webview[cite: 1].
+     * Updates the Webview URL in the [DataStore].
+     * @param newUrl The new target URL for the webview.
      */
     suspend fun updateUrl(newUrl: String) {
         dataStore.edit {
@@ -196,20 +178,20 @@ class AppConfigRepository private constructor(
         }
     }
 
-    /** Stream of the latitude configuration for positioning[cite: 1]. */
+    /** Stream of the latitude configuration for positioning. */
     val latitude: Flow<Double> = dataStore.data.map {
         it[latitudeKey] ?: DEFAULT_LATITUDE
     }
 
-    /** Stream of the longitude configuration for positioning[cite: 1]. */
+    /** Stream of the longitude configuration for positioning. */
     val longitude: Flow<Double> = dataStore.data.map {
         it[longitudeKey] ?: DEFAULT_LONGITUDE
     }
 
     /**
-     * Updates the geographic coordinates[cite: 1].
-     * @param latitude The new latitude value[cite: 1].
-     * @param longitude The new longitude value[cite: 1].
+     * Updates the geographic coordinates.
+     * @param latitude The new latitude value.
+     * @param longitude The new longitude value.
      */
     suspend fun updateCoordinates(latitude: Double, longitude: Double) {
         dataStore.edit {
@@ -218,7 +200,7 @@ class AppConfigRepository private constructor(
         }
     }
 
-    /** Stream of the SHA-256 hash of the admin panel password, taking legacy keys into account[cite: 1]. */
+    /** Stream of the SHA-256 hash of the admin panel password, taking legacy keys into account. */
     val adminPanelPasswordHash: Flow<String> = dataStore.data.map {
         it[adminPanelPasswordHashKey]
             ?: it[adminPasswordHashKey]
@@ -226,22 +208,22 @@ class AppConfigRepository private constructor(
             ?: hashPassword(BuildConfig.DEFAULT_ADMIN_PASSWORD)
     }
 
-    /** Stream of the SHA-256 hash of the webserver password[cite: 1]. */
+    /** Stream of the SHA-256 hash of the webserver password. */
     val webserverPasswordHash: Flow<String> = dataStore.data.map {
         it[webserverPasswordHashKey] ?: hashPassword(BuildConfig.DEFAULT_ADMIN_PASSWORD)
     }
 
-    /** Stream of the SHA-256 hash of the webserver username[cite: 1]. */
+    /** Stream of the SHA-256 hash of the webserver username. */
     val webserverUserHash: Flow<String> = dataStore.data.map {
         it[webserverUserHashKey] ?: ""
     }
 
-    /** Alias for [adminPanelPasswordHash][cite: 1]. */
+    /** Alias for [adminPanelPasswordHash]. */
     val adminPasswordHash: Flow<String> = adminPanelPasswordHash
 
     /**
-     * Updates the password for the admin panel and removes old legacy entries[cite: 1].
-     * @param password The new plaintext password[cite: 1].
+     * Updates the password for the admin panel and removes old legacy entries.
+     * @param password The new plaintext password.
      */
     suspend fun updateAdminPanelPassword(password: String) {
         dataStore.edit {
@@ -251,15 +233,15 @@ class AppConfigRepository private constructor(
         }
     }
 
-    /** Alias for [updateAdminPanelPassword][cite: 1]. */
+    /** Alias for [updateAdminPanelPassword]. */
     suspend fun updateAdminPassword(password: String) {
         updateAdminPanelPassword(password)
     }
 
     /**
      * Updates the webserver password. Stores the hash in the [DataStore] and the plaintext password in the
-     * [credentialStore][cite: 1].
-     * @param password The new plaintext webserver password[cite: 1].
+     * [credentialStore].
+     * @param password The new plaintext webserver password.
      */
     suspend fun updateWebserverPassword(password: String) {
         dataStore.edit {
@@ -271,8 +253,8 @@ class AppConfigRepository private constructor(
 
     /**
      * Updates the webserver username. Stores the hash in the [DataStore] and the plaintext username in the
-     * [credentialStore][cite: 1].
-     * @param user The new plaintext webserver username[cite: 1].
+     * [credentialStore].
+     * @param user The new plaintext webserver username.
      */
     suspend fun updateWebserverUser(user: String) {
         dataStore.edit {
@@ -283,8 +265,8 @@ class AppConfigRepository private constructor(
     }
 
     /**
-     * Enables or disables verification for the webserver[cite: 1].
-     * @param enabled `true` to enable, `false` to disable, `null` to ignore the change[cite: 1].
+     * Enables or disables verification for the webserver.
+     * @param enabled `true` to enable, `false` to disable, `null` to ignore the change.
      */
     suspend fun updateWebserverVerification(
         enabled: Boolean? = null
@@ -294,25 +276,25 @@ class AppConfigRepository private constructor(
         }
     }
 
-    /** Stream indicating whether webserver verification is enabled[cite: 1]. */
+    /** Stream indicating whether webserver verification is enabled. */
     val isWebserverVerificationEnabled: Flow<Boolean> = dataStore.data.map {
         it[webserverVerificationEnabledKey] ?: false
     }
 
     /**
-     * Checks if an entered plaintext password matches a given hash[cite: 1].
-     * @param plainPassword The plaintext password to check[cite: 1].
-     * @param currentHash The target hash to compare against[cite: 1].
-     * @return `true` if the hashes match, `false` otherwise[cite: 1].
+     * Checks if an entered plaintext password matches a given hash.
+     * @param plainPassword The plaintext password to check.
+     * @param currentHash The target hash to compare against.
+     * @return `true` if the hashes match, `false` otherwise.
      */
     fun isValidPassword(plainPassword: String, currentHash: String): Boolean {
         return hashPassword(plainPassword) == currentHash
     }
 
     /**
-     * Hashes a given string using **SHA-256**[cite: 1].
-     * @param password The text string (e.g., a password) to hash[cite: 1].
-     * @return The generated hex string representation of the hash[cite: 1].
+     * Hashes a given string using **SHA-256**.
+     * @param password The text string (e.g., a password) to hash.
+     * @return The generated hex string representation of the hash.
      */
     fun hashPassword(password: String): String {
         val digest = MessageDigest.getInstance("SHA-256")
@@ -321,7 +303,7 @@ class AppConfigRepository private constructor(
         }
     }
 
-    /** Stream indicating whether the patrol mode is globally enabled[cite: 1]. */
+    /** Stream indicating whether the patrol mode is globally enabled. */
     val isPatrolEnabled: Flow<Boolean> = dataStore.data.map {
         it[keyIsPatrolEnabled] ?: DEFAULT_PATROL_ENABLED
     }
@@ -340,17 +322,17 @@ class AppConfigRepository private constructor(
         }
     }
 
-    /** Stream for the minimum duration of a patrol sequence in minutes[cite: 1]. */
+    /** Stream for the minimum duration of a patrol sequence in minutes. */
     val minPatrolMinutes: Flow<Int> = dataStore.data.map {
         it[keyMinMinutes] ?: DEFAULT_MIN_MINUTES
     }
 
-    /** Stream for the maximum duration of a patrol sequence in minutes[cite: 1]. */
+    /** Stream for the maximum duration of a patrol sequence in minutes. */
     val maxPatrolMinutes: Flow<Int> = dataStore.data.map {
         it[keyMaxMinutes] ?: DEFAULT_MAX_MINUTES
     }
 
-    /** Stream of selected hours (times of day) scheduled for patrolling[cite: 1]. */
+    /** Stream of selected hours (times of day) scheduled for patrolling. */
     val selectedPatrolHours: Flow<Set<Int>> = dataStore.data.map {
         it[keySelectedHours]
             ?.split(COMMA_SEPARATOR)
@@ -359,7 +341,7 @@ class AppConfigRepository private constructor(
             ?: emptySet()
     }
 
-    /** Stream of the defined waypoints/locations making up the patrol route[cite: 1]. */
+    /** Stream of the defined waypoints/locations making up the patrol route. */
     val patrolRoute: Flow<List<String>> = dataStore.data.map {
         it[keyPatrolRoute]
             ?.split(ROUTE_SEPARATOR)
@@ -368,12 +350,12 @@ class AppConfigRepository private constructor(
     }
 
     /**
-     * Updates the core settings for the Temi robot patrol functionality[cite: 1].
-     * @param isEnabled Flag to globally toggle patrol mode[cite: 1].
-     * @param mode The selected behavior mode ([AdminPanelPatrolSettingsDialog])[cite: 1].
-     * @param minMin Minimum pause or driving duration in minutes[cite: 1].
-     * @param maxMin Maximum pause or driving duration in minutes[cite: 1].
-     * @param hours The set of active hours/intervals[cite: 1].
+     * Updates the core settings for the Temi robot patrol functionality.
+     * @param isEnabled Flag to globally toggle patrol mode.
+     * @param mode The selected behavior mode ([AdminPanelPatrolSettingsDialog]).
+     * @param minMin Minimum pause or driving duration in minutes.
+     * @param maxMin Maximum pause or driving duration in minutes.
+     * @param hours The set of active hours/intervals.
      */
     suspend fun updatePatrolSettings(
         isEnabled: Boolean,
@@ -392,8 +374,8 @@ class AppConfigRepository private constructor(
     }
 
     /**
-     * Compiles and saves a list of waypoints as a single separated string for the route[cite: 1].
-     * @param route The list of location names or waypoint identifiers[cite: 1].
+     * Compiles and saves a list of waypoints as a single separated string for the route.
+     * @param route The list of location names or waypoint identifiers.
      */
     suspend fun updatePatrolRoute(route: List<String>) {
         dataStore.edit {
@@ -401,19 +383,19 @@ class AppConfigRepository private constructor(
         }
     }
 
-    /** Stream indicating whether biometric speaker verification (audio) is enabled[cite: 1]. */
+    /** Stream indicating whether biometric speaker verification (audio) is enabled. */
     val isSpeakerVerificationEnabled: Flow<Boolean> = dataStore.data.map {
         it[speakerVerificationEnabledKey] ?: false
     }
 
-    /** Stream of the confidence threshold value required for successful speaker verification[cite: 1]. */
+    /** Stream of the confidence threshold value required for successful speaker verification. */
     val speakerVerificationThreshold: Flow<Double> = dataStore.data.map {
         it[speakerVerificationThresholdKey] ?: DEFAULT_SPEAKER_VERIFICATION_THRESHOLD
     }
 
     /**
-     * Updates the configuration parameters for speaker verification[cite: 1].
-     * @param enabled If provided, updates the activation status[cite: 1].
+     * Updates the configuration parameters for speaker verification.
+     * @param enabled If provided, updates the activation status.
      * @param threshold If provided, updates the confidence threshold (automatically coerced between `0.0` and `1.0`).
      */
     suspend fun updateSpeakerVerification(
@@ -428,20 +410,20 @@ class AppConfigRepository private constructor(
         }
     }
 
-    /** Stream indicating whether the Photobox overlay graphic should be displayed[cite: 1]. */
+    /** Stream indicating whether the Photobox overlay graphic should be displayed. */
     val photoboxOverlayEnabled: Flow<Boolean> = dataStore.data.map {
         it[photoboxOverlayEnabledKey] ?: false
     }
 
-    /** Stream of the layout position configuration string for the Photobox overlay[cite: 1]. */
+    /** Stream of the layout position configuration string for the Photobox overlay. */
     val photoboxOverlayPosition: Flow<String> = dataStore.data.map {
         it[photoboxOverlayPositionKey] ?: ""
     }
 
     /**
-     * Configures the visibility status and placement position of the Photobox overlay[cite: 1].
-     * @param enabled Visibility state of the overlay[cite: 1].
-     * @param position Position string identifier (e.g., "TOP_LEFT")[cite: 1].
+     * Configures the visibility status and placement position of the Photobox overlay.
+     * @param enabled Visibility state of the overlay.
+     * @param position Position string identifier (e.g., "TOP_LEFT").
      */
     suspend fun setPhotoboxOverlay(enabled: Boolean, position: String) {
         dataStore.edit {
@@ -450,20 +432,20 @@ class AppConfigRepository private constructor(
         }
     }
 
-    /** Stream indicating whether the promotional/informational Photobox banner is active[cite: 1]. */
+    /** Stream indicating whether the promotional/informational Photobox banner is active. */
     val photoboxBannerEnabled: Flow<Boolean> = dataStore.data.map {
         it[photoboxBannerEnabledKey] ?: false
     }
 
-    /** Stream of the content value or path linked to the Photobox banner[cite: 1]. */
+    /** Stream of the content value or path linked to the Photobox banner. */
     val photoboxBanner: Flow<String> = dataStore.data.map {
         it[photoboxBannerKey] ?: ""
     }
 
     /**
-     * Configures the operational state and content of the Photobox advertisement/info banner[cite: 1].
-     * @param enabled Activation state of the banner[cite: 1].
-     * @param banner Content string, ID, or URI for the banner asset[cite: 1].
+     * Configures the operational state and content of the Photobox advertisement/info banner.
+     * @param enabled Activation state of the banner.
+     * @param banner Content string, ID, or URI for the banner asset.
      */
     suspend fun setPhotoboxBanner(enabled: Boolean, banner: String) {
         dataStore.edit {
@@ -472,20 +454,20 @@ class AppConfigRepository private constructor(
         }
     }
 
-    /** Stream of the shared link pointing to the Photobox's Google Drive display folder[cite: 1]. */
+    /** Stream of the shared link pointing to the Photobox's Google Drive display folder. */
     val driveFolderLink: Flow<String> = dataStore.data.map {
         it[driveFolderLinkKey] ?: DEFAULT_DRIVE_FOLDER_LINK
     }
 
-    /** Stream of the API endpoint URL (e.g., Google Apps Script) used for handling image uploads[cite: 1]. */
+    /** Stream of the API endpoint URL (e.g., Google Apps Script) used for handling image uploads. */
     val driveUploadUrl: Flow<String> = dataStore.data.map {
         it[driveUploadUrlKey] ?: DEFAULT_DRIVE_UPLOAD_URL
     }
 
     /**
-     * Updates the cloud storage (Google Drive) setup configurations for the Photobox feature[cite: 1].
-     * @param folderLink The public URL linking to the viewing folder (optional)[cite: 1].
-     * @param uploadUrl The API backend endpoint for image transmission processing (optional)[cite: 1].
+     * Updates the cloud storage (Google Drive) setup configurations for the Photobox feature.
+     * @param folderLink The public URL linking to the viewing folder (optional).
+     * @param uploadUrl The API backend endpoint for image transmission processing (optional).
      */
     suspend fun setDriveSettings(folderLink: String? = null, uploadUrl: String? = null) {
         dataStore.edit {
@@ -495,7 +477,7 @@ class AppConfigRepository private constructor(
     }
 
     /**
-     * Irrevocably clears all settings currently saved inside the [DataStore] instance[cite: 1].
+     * Irrevocably clears all settings currently saved inside the [DataStore] instance.
      */
     @Suppress("unused")
     suspend fun clear() {

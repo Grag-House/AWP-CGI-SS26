@@ -165,6 +165,14 @@ fun WebserverPasswordCard(
     }
 }
 
+/**
+ * Renders a security configuration card for toggling remote web server credential verification.
+ *
+ * Provides a switch interface to enable or disable mandatory authentication handshake verification layout mechanisms.
+ *
+ * @param enabled Whether web server verification enforcement is currently active.
+ * @param onToggle Executed when the toggle switch state is changed by the user.
+ */
 @Composable
 fun WebserverVerificationCard(enabled: Boolean, onToggle: (Boolean) -> Unit) {
     ConfigCard {
