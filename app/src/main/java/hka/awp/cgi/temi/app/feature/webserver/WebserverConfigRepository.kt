@@ -47,7 +47,7 @@ class EncryptedWebserverCredentialStore(context: Context) : WebserverCredentialS
             .build(),
         EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-                                                         )
+    )
 
     override fun getUser(): String = prefs.getString(KEY_USER, "") ?: ""
     override fun getPassword(): String = prefs.getString(KEY_PASSWORD, "") ?: ""
@@ -72,7 +72,7 @@ class EncryptedWebserverCredentialStore(context: Context) : WebserverCredentialS
 class WebserverConfigRepository private constructor(
     private val dataStore: DataStore<Preferences>,
     private val credentialStore: WebserverCredentialStore
-                                                   ) {
+) {
 
     companion object {
         /**
@@ -164,7 +164,7 @@ class WebserverConfigRepository private constructor(
      */
     suspend fun updateWebserverVerification(
         enabled: Boolean? = null
-                                           ) {
+    ) {
         dataStore.edit {
             enabled?.let { value -> it[webserverVerificationEnabledKey] = value }
         }
