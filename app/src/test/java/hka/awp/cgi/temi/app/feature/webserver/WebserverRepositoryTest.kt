@@ -30,7 +30,6 @@ class WebserverRepositoryTest {
     fun setup() {
         datastore = mockk<DataStore<Preferences>>(relaxed = true)
         every { datastore.data } returns flowOf(emptyPreferences())
-        repository = WebserverConfigRepository(dataStore = datastore)
         repository =
             WebserverConfigRepository.Companion(dataStore = datastore, credentialStore = FakeWebserverCredentialStore())
     }
@@ -76,5 +75,23 @@ class WebserverRepositoryTest {
     @Test
     fun `webserverVerificationEnabled defaults to false when DataStore is empty`() = runTest {
         assertEquals(false, repository.isWebserverVerificationEnabled.first())
+    }
+}
+
+/**
+ * In-memory fake for unit tests — no Android runtime or encryption needed.
+ */
+class FakeWebserverCredentialStore : WebserverCredentialStore {
+    private var user: String = ""
+    private var password: String = ""
+
+    override fun getUser(): String = user
+    override fun getPassword(): String = password
+    override fun saveUser(user: String) {
+        this.user = user
+    }
+
+    override fun savePassword(password: String) {
+        this.password = password
     }
 }
