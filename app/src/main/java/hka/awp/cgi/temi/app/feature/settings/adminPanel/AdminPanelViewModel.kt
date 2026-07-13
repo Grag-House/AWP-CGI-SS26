@@ -302,6 +302,7 @@ class AdminPanelViewModel(
         when (action) {
             is AdminPanelAction.ToggleSpeakerVerification -> viewModelScope.launch {
                 generalConfigRepository.updateSpeakerVerification(enabled = action.enabled)
+                _events.emit(AdminPanelEvent.RestartAppTriggered)
             }
             is AdminPanelAction.EditSpeakerVerificationThreshold -> viewModelScope.launch {
                 generalConfigRepository.updateSpeakerVerification(threshold = action.threshold)

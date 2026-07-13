@@ -102,6 +102,7 @@ class NavigationViewModel(
                 }
                 Timber.i("🎙️ Verified Vosk command → MQTT: '%s'", command)
                 mqttManager.publishAsr(command)
+                temiVoiceListener.resumeWakeWordListening()
             }
         }
     }
