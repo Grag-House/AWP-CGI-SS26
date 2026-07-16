@@ -1,5 +1,6 @@
 package hka.awp.cgi.temi.app.data.repository
 
+import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -15,9 +16,12 @@ import kotlinx.coroutines.flow.map
  * Handles WebView URLs, location coordinates, and application language.
  *
  * @property dataStore The [DataStore] instance used for persisting general settings.
+ * @property context Application context used to mirror the language into
+ * the SharedPreferences read synchronously by `MainActivity.attachBaseContext`.
  */
 class GeneralConfigRepository(
-    private val dataStore: DataStore<Preferences>
+    private val dataStore: DataStore<Preferences>,
+    private val context: Context
 ) {
     private val webviewUrlKey = stringPreferencesKey("webview_url")
     private val latitudeKey = doublePreferencesKey("latitude")
@@ -114,6 +118,10 @@ class GeneralConfigRepository(
      */
     suspend fun updateLanguage(languageCode: String) {
         dataStore.edit { it[languageKey] = languageCode }
+        context.getSharedPreferences(SETTINGS_PREFS_NAME, Context.MODE_PRIVATE)
+            .edit()
+            .putString(LANGUAGE_PREF_KEY, languageCode)
+            .apply()
     }
 
     /**
@@ -137,5 +145,8 @@ class GeneralConfigRepository(
         const val DEFAULT_LONGITUDE = 8.3573
         const val DEFAULT_LANGUAGE = "de"
         const val DEFAULT_SPEAKER_VERIFICATION_THRESHOLD = 0.82
+
+        const val SETTINGS_PREFS_NAME = "Settings"
+        const val LANGUAGE_PREF_KEY = "lang"
     }
 }

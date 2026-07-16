@@ -277,9 +277,9 @@
     <string name="admin_panel_hiding_spots_subtitle">Gestisci i nascondigli consentiti</string>
 
     <!-- Photobox -->
-    <string name="photobox">Fotobox</string>
-    <string name="photobox_sub">Usa Temi come fotobox</string>
-    <string name="photobox_description">Icona fotocamera fotobox</string>
+    <string name="photobox">Photomaton</string>
+    <string name="photobox_sub">Usa Temi come Photomaton</string>
+    <string name="photobox_description">Icona fotocamera Photomaton</string>
     <string name="photobox_intro_text">Mettiti davanti a Temi e sorridi alla fotocamera. Il conto alla rovescia parte automaticamente.</string>
     <string name="photobox_countdown_label">DURATA CONTO ALLA ROVESCIA</string>
     <string name="photobox_start_button">Si parte!</string>
@@ -313,7 +313,7 @@
     <string name="photobox_qr_dialog_title">La tua foto</string>
     <string name="photobox_qr_dialog_subtitle">Scansiona il codice QR per visualizzare e scaricare la foto.</string>
     <string name="photobox_qr_dialog_expiry">Questo link è valido solo per 30 minuti.</string>
-    <string name="photobox_mode_select_title">Benvenuto nella fotobox!</string>
+    <string name="photobox_mode_select_title">Benvenuto nella Photomaton!</string>
     <string name="photobox_mode_select_subtitle">Scegli come vuoi scattare la tua foto.</string>
     <string name="photobox_mode_standard_title">Standard</string>
     <string name="photobox_mode_standard_description">Una singola foto</string>

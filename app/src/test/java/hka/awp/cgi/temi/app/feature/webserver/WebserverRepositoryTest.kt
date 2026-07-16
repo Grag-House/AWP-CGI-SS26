@@ -1,5 +1,7 @@
 package hka.awp.cgi.temi.app.feature.webserver
 
+import android.content.Context
+import android.content.SharedPreferences
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
@@ -26,12 +28,14 @@ import kotlin.io.path.deleteRecursively
 class WebserverRepositoryTest {
     private lateinit var repository: GeneralConfigRepository
     private lateinit var datastore: DataStore<Preferences>
+    private val context = mockk<Context>(relaxed = true)
 
     @BeforeEach
     fun setup() {
         datastore = mockk<DataStore<Preferences>>(relaxed = true)
         every { datastore.data } returns flowOf(emptyPreferences())
-        repository = GeneralConfigRepository(dataStore = datastore)
+        every { context.getSharedPreferences(any(), any()) } returns mockk<SharedPreferences>(relaxed = true)
+        repository = GeneralConfigRepository(dataStore = datastore, context = context)
     }
 
     @AfterEach
@@ -54,7 +58,7 @@ class WebserverRepositoryTest {
 
         datastore = mockk<DataStore<Preferences>>(relaxed = true)
         every { datastore.data } returns flowOf(preferencesOf(key to value))
-        repository = GeneralConfigRepository(dataStore = datastore)
+        repository = GeneralConfigRepository(dataStore = datastore, context = context)
 
         assertEquals(value, repository.currentUrl.first())
     }
@@ -73,7 +77,7 @@ class WebserverRepositoryTest {
             produceFile = { file }
         )
 
-        val repository = GeneralConfigRepository(dataStore)
+        val repository = GeneralConfigRepository(dataStore, context)
 
         // initial: should read fallback from BuildConfig
         val expectedFallback = BuildConfig.WEBVIEW_URL

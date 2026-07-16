@@ -17,6 +17,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.core.content.ContextCompat
+import hka.awp.cgi.temi.app.data.repository.GeneralConfigRepository
 import hka.awp.cgi.temi.app.feature.controller.ControllerViewModel
 import hka.awp.cgi.temi.app.feature.settings.display.DisplayViewModel
 import hka.awp.cgi.temi.app.feature.voiceRecognition.TemiVoiceRecognitionViewModel
@@ -114,12 +115,19 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun attachBaseContext(newBase: Context) {
-        // SharedPreferences-based language lookup for early bootstrap
-        val prefs = newBase.getSharedPreferences("Settings", MODE_PRIVATE)
-        val langCode = prefs.getString("lang", "de") ?: "de"
+        // SharedPreferences-based language lookup for early bootstrap, mirrored by
+        // GeneralConfigRepository.updateLanguage whenever the DataStore value changes.
+        val prefs = newBase.getSharedPreferences(
+            GeneralConfigRepository.SETTINGS_PREFS_NAME,
+            MODE_PRIVATE
+        )
+        val langCode = prefs.getString(
+            GeneralConfigRepository.LANGUAGE_PREF_KEY,
+            GeneralConfigRepository.DEFAULT_LANGUAGE
+        ) ?: GeneralConfigRepository.DEFAULT_LANGUAGE
 
         val config = Configuration(newBase.resources.configuration)
-        config.setLocale(Locale(langCode))
+        config.setLocale(Locale.Builder().setLanguage(langCode).build())
         super.attachBaseContext(newBase.createConfigurationContext(config))
     }
 

@@ -38,7 +38,7 @@ class LanguageViewModel(
     init {
         viewModelScope.launch {
             val langCode = generalConfigRepository.language.first()
-            _selectedLocale.value = Locale(langCode)
+            _selectedLocale.value = Locale.Builder().setLanguage(langCode).build()
         }
     }
 
@@ -49,7 +49,7 @@ class LanguageViewModel(
      * @param context The current context, expected to be an [Activity].
      */
     fun updateLocale(languageCode: String, context: Context) {
-        val newLocale = Locale(languageCode)
+        val newLocale = Locale.Builder().setLanguage(languageCode).build()
         _selectedLocale.value = newLocale
         viewModelScope.launch {
             generalConfigRepository.updateLanguage(languageCode)

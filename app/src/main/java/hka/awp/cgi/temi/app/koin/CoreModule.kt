@@ -46,7 +46,7 @@ val coreModule = module {
 
     // Data Storage
     single<DataStore<Preferences>> { androidContext().appDataStore }
-    single { GeneralConfigRepository(dataStore = get()) }
+    single { GeneralConfigRepository(dataStore = get(), context = androidContext()) }
     single { PatrolConfigRepository(dataStore = get()) }
     single { PhotoboxConfigRepository(dataStore = get()) }
     single<PasswordHasher> { Sha256PasswordHasher() }
