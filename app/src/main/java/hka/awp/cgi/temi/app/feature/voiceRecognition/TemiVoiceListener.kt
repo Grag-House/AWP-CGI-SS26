@@ -1,6 +1,7 @@
 package hka.awp.cgi.temi.app.feature.voiceRecognition
 
 import com.robotemi.sdk.Robot
+import com.robotemi.sdk.listeners.OnRobotReadyListener
 import com.robotemi.sdk.voice.WakeupOrigin
 import hka.awp.cgi.temi.app.data.repository.GeneralConfigRepository
 import kotlinx.coroutines.CoroutineScope
@@ -68,6 +69,7 @@ class TemiVoiceListener(
 
     init {
         setupStateFlows()
+        robot?.addOnRobotReadyListener(internalListener)
     }
 
     private fun setupStateFlows() {
@@ -96,7 +98,7 @@ class TemiVoiceListener(
         return isSpeakerVerificationEnabled && !enrollment.isActive.value
     }
 
-    private fun syncRuntimeState() {
+    fun syncRuntimeState() {
         if (!isInitialized) return
 
         val shouldDisableTemiWakeWord = enrollment.isActive.value || shouldUseVoskOnly()
@@ -110,6 +112,10 @@ class TemiVoiceListener(
             startListening()
         } else {
             stopListening()
+        }
+
+        if (!isSpeakerVerificationEnabled) {
+            gate.open()
         }
     }
 
@@ -147,6 +153,7 @@ class TemiVoiceListener(
     fun release() {
         stopListening()
         robot?.removeWakeupWordListener(internalListener)
+        robot?.removeOnRobotReadyListener(internalListener)
         setTemiWakeupWordDisabled(false)
         gate.release()
         enrollment.release()
@@ -185,7 +192,14 @@ class TemiVoiceListener(
         }
     }
 
-    private inner class InternalListener : RecognitionListener, Robot.WakeupWordListener {
+    private inner class InternalListener : RecognitionListener, Robot.WakeupWordListener, OnRobotReadyListener {
+        override fun onRobotReady(isReady: Boolean) {
+            if (isReady) {
+                Timber.i("Robot ready, syncing voice listener state")
+                syncRuntimeState()
+            }
+        }
+
         override fun onWakeupWord(wakeupWord: String, direction: Int, origin: WakeupOrigin) {
             Timber.v("Wake-Word: '%s'", wakeupWord)
             if (enrollment.isActive.value) return
@@ -224,7 +238,13 @@ class TemiVoiceListener(
 
         override fun onFinalResult(hypothesis: String) = Unit
 
-        override fun onError(e: Exception) = Timber.e(e, "Vosk error")
+        override fun onError(e: Exception) {
+            Timber.e(e, "Vosk error")
+            if (shouldUseVoskOnly()) {
+                stopListening()
+                startListening()
+            }
+        }
 
         override fun onTimeout() {
             if (shouldUseVoskOnly()) {

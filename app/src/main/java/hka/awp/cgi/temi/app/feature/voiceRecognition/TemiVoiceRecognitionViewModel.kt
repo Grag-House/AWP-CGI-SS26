@@ -47,14 +47,14 @@ class TemiVoiceRecognitionViewModel(
         viewModelScope.launch {
             if (voiceManager.isReady()) {
                 _isModelLoaded.value = true
-                temiVoiceListener.startListening()
+                temiVoiceListener.syncRuntimeState()
                 return@launch
             }
 
             val success = voiceManager.initModel()
             if (success) {
                 _isModelLoaded.value = true
-                temiVoiceListener.startListening()
+                temiVoiceListener.syncRuntimeState()
             }
         }
     }

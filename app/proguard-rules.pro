@@ -55,3 +55,14 @@
 -keep class org.vosk.** { *; }
 -keep interface org.vosk.** { *; }
 -dontwarn org.vosk.**
+
+# --- Room & WorkManager ---
+# Keep Room's generated implementations (used via reflection)
+-keep class * extends androidx.room.RoomDatabase {
+    <init>(...);
+}
+-keep class androidx.room.MultiInstanceInvalidationService
+
+# Keep WorkManager initializers (used by androidx.startup)
+-keep class androidx.work.WorkManagerInitializer { *; }
+-keep class * implements androidx.work.Configuration$Provider { *; }
