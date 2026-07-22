@@ -9,7 +9,6 @@ import com.robotemi.sdk.TtsRequest
 import com.robotemi.sdk.listeners.OnGoToLocationStatusChangedListener
 import com.robotemi.sdk.listeners.OnRobotReadyListener
 import com.robotemi.sdk.map.LOCATION
-import com.robotemi.sdk.map.OnLoadMapStatusChangedListener
 import com.robotemi.sdk.navigation.listener.OnCurrentPositionChangedListener
 import com.robotemi.sdk.navigation.listener.OnDistanceToLocationChangedListener
 import com.robotemi.sdk.navigation.model.Position
@@ -25,10 +24,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-import kotlin.coroutines.resume
 import kotlin.time.Duration.Companion.milliseconds
 
 /** Represents a location on the map with name and X/Y coordinates from Temi map data. */
@@ -63,7 +60,6 @@ data class NavigationUiState(
 class NavigationViewModel(
     private val robot: Robot?,
     private val mqttManager: MqttManager,
-    private val defaultMapName: String,
     private val temiVoiceListener: TemiVoiceListener
 ) : ViewModel(),
     OnRobotReadyListener,
@@ -224,7 +220,12 @@ class NavigationViewModel(
             }
     }
 
-    /** Starts loading the map and resets the dialog state. */
+    /**
+     * Shows the locations dialog using a read-only snapshot: the cached map markers if available,
+     * and always the plain saved-location list (from [Robot.locations]) as a safe fallback.
+     * Never calls [Robot.loadMap] - reading locations never mutates robot/map state, so this
+     * cannot delete or overwrite locations. Also used to retry after a failed fetch.
+     */
     fun showMap() {
         Timber.d("Showing map locations...")
         loadingJob?.cancel()
@@ -233,23 +234,7 @@ class NavigationViewModel(
                 it.copy(isMapLoading = true, hasMapError = false, mapLocations = emptyList())
             }
 
-            suspend fun fetch(): List<LocationMarker>? = withContext(Dispatchers.IO) {
-                runCatching {
-                    val mapData = robot?.getMapData() ?: return@runCatching null
-                    mapData.locations
-                        .filter { it.layerCategory == LOCATION }
-                        .mapNotNull { layer ->
-                            val pose = layer.layerPoses?.firstOrNull() ?: return@mapNotNull null
-                            LocationMarker(layer.layerId, pose.x, pose.y)
-                        }
-                        .ifEmpty { null }
-                }.onFailure { Timber.e(it, "Error fetching map data") }.getOrNull()
-            }
-
-            val markers = fetch() ?: run {
-                Timber.w("Direct marker fetch failed, attempting explicit map load...")
-                if (awaitMapLoad()) fetch() else null
-            }
+            val markers = fetchMarkersFromCache()
 
             _uiState.update {
                 it.copy(
@@ -261,54 +246,17 @@ class NavigationViewModel(
         }
     }
 
-    private suspend fun awaitMapLoad(): Boolean {
-        val maps = withContext(Dispatchers.IO) {
-            runCatching { robot?.getMapList().orEmpty() }
-                .getOrElse { emptyList() }
-        }
-
-        val target = maps.firstOrNull { it.name == defaultMapName }
-            ?: maps.firstOrNull() ?: return false
-
-        Timber.d("Loading map: %s (%s)", target.name, target.id)
-
-        return suspendCancellableCoroutine { cont ->
-            var triggeredRequestId: String? = null
-
-            val listener = object : OnLoadMapStatusChangedListener {
-                override fun onLoadMapStatusChanged(status: Int, requestId: String) {
-                    if (requestId != triggeredRequestId) return
-
-                    when (status) {
-                        OnLoadMapStatusChangedListener.COMPLETE -> {
-                            robot?.removeOnLoadMapStatusChangedListener(this)
-                            if (cont.isActive) cont.resume(true)
-                        }
-
-                        OnLoadMapStatusChangedListener.START -> Unit
-                        else -> {
-                            Timber.w("Map load failed with status: %s", status)
-                            robot?.removeOnLoadMapStatusChangedListener(this)
-                            if (cont.isActive) cont.resume(false)
-                        }
-                    }
+    private suspend fun fetchMarkersFromCache(): List<LocationMarker>? = withContext(Dispatchers.IO) {
+        runCatching {
+            val mapData = robot?.getMapData() ?: return@runCatching null
+            mapData.locations
+                .filter { it.layerCategory == LOCATION }
+                .mapNotNull { layer ->
+                    val pose = layer.layerPoses?.firstOrNull() ?: return@mapNotNull null
+                    LocationMarker(layer.layerId, pose.x, pose.y)
                 }
-            }
-
-            robot?.addOnLoadMapStatusChangedListener(listener)
-            val requestId = robot?.loadMap(target.id, withoutUI = true) ?: ""
-
-            if (requestId.isEmpty()) {
-                robot?.removeOnLoadMapStatusChangedListener(listener)
-                if (cont.isActive) cont.resume(false)
-            } else {
-                triggeredRequestId = requestId
-            }
-
-            cont.invokeOnCancellation {
-                robot?.removeOnLoadMapStatusChangedListener(listener)
-            }
-        }
+                .ifEmpty { null }
+        }.onFailure { Timber.e(it, "Error fetching map data") }.getOrNull()
     }
 
     /** Cancels ongoing load and resets map-related states. */

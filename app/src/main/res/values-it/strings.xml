@@ -216,7 +216,6 @@
     <string name="log_loading_map">Caricamento mappa: id=%1$s, nome=%2$s</string>
     <string name="log_no_maps_found">Nessuna mappa trovata</string>
     <string name="log_error_fetch_map_list">Errore lista mappe</string>
-    <string name="default_map_name">3_3</string>
     <string name="robox_version">Versione Robox</string>
     <string name="launcher_version">Versione Launcher</string>
 

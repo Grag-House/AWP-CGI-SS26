@@ -217,7 +217,6 @@
     <string name="log_loading_map">Loading map: id=%1$s, name=%2$s</string>
     <string name="log_no_maps_found">No maps found on robot</string>
     <string name="log_error_fetch_map_list">Error loading map list</string>
-    <string name="default_map_name">3_3</string>
     <string name="robox_version">Robox Version</string>
     <string name="launcher_version">Launcher Version</string>
 

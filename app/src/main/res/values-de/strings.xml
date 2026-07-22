@@ -231,7 +231,6 @@
     <string name="log_loading_map">Lade Karte: id=%1$s, name=%2$s</string>
     <string name="log_no_maps_found">Keine Karten auf dem Roboter gefunden</string>
     <string name="log_error_fetch_map_list">Fehler beim Laden der Kartenliste</string>
-    <string name="default_map_name">3_3</string>
     <string name="robox_version">Robox Version</string>
     <string name="launcher_version">Launcher Version</string>
 

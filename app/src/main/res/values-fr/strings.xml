@@ -216,7 +216,6 @@
     <string name="log_loading_map">Chargement carte : id=%1$s, nom=%2$s</string>
     <string name="log_no_maps_found">Aucune carte trouvée</string>
     <string name="log_error_fetch_map_list">Erreur liste cartes</string>
-    <string name="default_map_name">3_3</string>
     <string name="robox_version">Version Robox</string>
     <string name="launcher_version">Version Launcher</string>
 
