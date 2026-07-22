@@ -32,7 +32,11 @@ class PatrolCameraStreamManager(
     fun startStream() = baseStreamManager.startStream()
 
     fun stopStream() {
-        baseStreamManager.disconnect()
+        baseStreamManager.stopStream()
+    }
+
+    fun release() {
+        baseStreamManager.release()
     }
 
     fun sendPatrolPointReached(location: String) {

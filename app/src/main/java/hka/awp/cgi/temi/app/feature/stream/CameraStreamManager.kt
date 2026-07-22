@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory
 import android.graphics.ImageFormat
 import android.graphics.Rect
 import android.graphics.YuvImage
+import android.util.Size
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
@@ -23,203 +24,223 @@ import okhttp3.Request
 import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
+import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicBoolean
 
-/**
- * A core manager responsible for capturing real-time camera frames and streaming them via WebSockets.
- *
- * This class binds into the Jetpack CameraX lifecycle to capture frames from the default front camera,
- * processes them into optimized JPEG payloads, and sends them to a targeted WebSocket server.
- * It also handles bi-directional messaging, exposing incoming processed video frames as [Bitmap]s
- * and incoming server string data as reactive [SharedFlow] messages.
- *
- * All operations regarding connection throttling, backpressure handling, and hardware unbinding
- * are managed internally.
- */
 class CameraStreamManager(
     private val context: Context,
     private val serverUrl: String,
 ) {
-    private val client = OkHttpClient()
+    private val client = OkHttpClient.Builder().retryOnConnectionFailure(true).build()
+
+    // This executor remains alive across normal start/stop cycles.
     private val cameraExecutor = Executors.newSingleThreadExecutor()
-    private var webSocket: WebSocket? = null
-    private var imageAnalysis: ImageAnalysis? = null
-    private var isStreaming = false
     private val mainExecutor = ContextCompat.getMainExecutor(context)
-    private var lastFrameSentAt = 0L
-    private val _processedBitmap = MutableStateFlow<Bitmap?>(null)
-
-    /**
-     * Emits the latest processed frame returned by the server as a display-ready [Bitmap].
-     * Emits `null` if the stream is stopped or uninitialized.
-     */
-    val processedBitmap: StateFlow<Bitmap?> = _processedBitmap.asStateFlow()
-
-    private val _textMessages = MutableSharedFlow<String>(
-        extraBufferCapacity = 20
-    )
-
-    /**
-     * Hot stream emitting textual messages or event responses received from the server.
-     */
-    val textMessages: SharedFlow<String> = _textMessages.asSharedFlow()
 
     @Volatile
-    private var isWebSocketConnectingOrConnected = false
+    private var webSocket: WebSocket? = null
 
+    @Volatile
+    private var cameraProvider: ProcessCameraProvider? = null
+
+    @Volatile
+    private var imageAnalysis: ImageAnalysis? = null
+
+    @Volatile
+    private var isStreaming = false
+
+    @Volatile
+    private var isSocketOpen = false
+
+    private var lastFrameSentAt = 0L
+
+    // Prevents an unlimited backlog: only one frame is waiting for a server response.
+    private val frameInFlight = AtomicBoolean(false)
+
+    private val _processedBitmap = MutableStateFlow<Bitmap?>(null)
+    val processedBitmap: StateFlow<Bitmap?> = _processedBitmap.asStateFlow()
+
+    private val _textMessages = MutableSharedFlow<String>(extraBufferCapacity = 20)
+    val textMessages: SharedFlow<String> = _textMessages.asSharedFlow()
+
+    @Synchronized
     private fun connect() {
-        if (webSocket != null || isWebSocketConnectingOrConnected) return
-
-        isWebSocketConnectingOrConnected = true
+        if (!isStreaming || webSocket != null) return
 
         val request = Request.Builder().url(serverUrl).build()
 
-        webSocket = client.newWebSocket(
+        val newSocket = client.newWebSocket(
             request,
             object : WebSocketListener() {
                 override fun onOpen(webSocket: WebSocket, response: Response) {
-                    Timber.d("WebSocket connected: $serverUrl")
+                    if (this@CameraStreamManager.webSocket !== webSocket || !isStreaming) {
+                        webSocket.close(WEBSOCKET_CODE, "Obsolete stream session")
+                        return
+                    }
+
+                    isSocketOpen = true
+                    frameInFlight.set(false)
+                    Timber.d("WebSocket connected: %s", serverUrl)
                 }
 
                 override fun onMessage(webSocket: WebSocket, text: String) {
-                    Timber.d("Analysis: $text")
+                    if (this@CameraStreamManager.webSocket !== webSocket) return
+
+                    // A response means the server has handled the previous frame.
+                    frameInFlight.set(false)
+                    Timber.d("Analysis: %s", text)
                     _textMessages.tryEmit(text)
                 }
 
-                override fun onMessage(webSocket: WebSocket, bytes: okio.ByteString) {
-                    val kotlinBytes = bytes.toByteArray()
-                    val bitmap = BitmapFactory.decodeByteArray(kotlinBytes, 0, kotlinBytes.size)
+                override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
+                    if (this@CameraStreamManager.webSocket !== webSocket) return
 
+                    frameInFlight.set(false)
+
+                    val data = bytes.toByteArray()
+                    val bitmap = BitmapFactory.decodeByteArray(data, 0, data.size)
                     if (bitmap != null) {
-                        mainExecutor.execute {
-                            _processedBitmap.value = bitmap
-                        }
+                        _processedBitmap.value = bitmap
                     } else {
-                        Timber.w("Failed to decode received binary data into a Bitmap.")
+                        Timber.w("Received binary message could not be decoded as bitmap.")
                     }
                 }
 
                 override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-                    Timber.e(t, "WebSocket error - resetting connection status")
-
-                    isWebSocketConnectingOrConnected = false
-                    this@CameraStreamManager.webSocket = null
+                    Timber.e(t, "WebSocket error")
+                    clearSocketIfCurrent(webSocket)
                 }
 
                 override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-                    Timber.d("WebSocket closed: $code $reason")
-                    isWebSocketConnectingOrConnected = false
-                    this@CameraStreamManager.webSocket = null
+                    Timber.d("WebSocket closed: %d %s", code, reason)
+                    clearSocketIfCurrent(webSocket)
                 }
             }
         )
+
+        webSocket = newSocket
     }
 
-    /**
-     * Initializes and binds CameraX to the application's process lifecycle and begins capturing frames.
-     * The underlying WebSocket connection will automatically trigger upon receiving the initial camera frames.
-     * If streaming is already active, this call is safely ignored.
-     */
+    @Synchronized
+    private fun clearSocketIfCurrent(socket: WebSocket) {
+        // An old socket callback must never clear a newly opened socket.
+        if (webSocket === socket) {
+            webSocket = null
+            isSocketOpen = false
+            frameInFlight.set(false)
+
+            if (isStreaming) {
+                connect()
+            }
+        }
+    }
+
+    @Synchronized
     fun startStream() {
         if (isStreaming) return
+
         isStreaming = true
-        isWebSocketConnectingOrConnected = false
+        isSocketOpen = false
+        frameInFlight.set(false)
+        lastFrameSentAt = 0L
+        connect()
 
-        val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
-        cameraProviderFuture.addListener({
-            val cameraProvider = cameraProviderFuture.get()
+        val providerFuture = ProcessCameraProvider.getInstance(context)
+        providerFuture.addListener({
+            if (!isStreaming) return@addListener
 
-            imageAnalysis = ImageAnalysis.Builder()
-                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                .build()
-                .also { analysis ->
-                    analysis.setAnalyzer(cameraExecutor) { imageProxy ->
-                        handleFrame(imageProxy)
-                    }
-                }
+            val provider = providerFuture.get()
+            cameraProvider = provider
 
-            cameraProvider.unbindAll()
-            cameraProvider.bindToLifecycle(
+            val analysis = ImageAnalysis.Builder()
+                .setTargetResolution(Size(STREAM_WIDTH, STREAM_HEIGHT))
+                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST).build()
+
+            analysis.setAnalyzer(cameraExecutor, ::handleFrame)
+            imageAnalysis = analysis
+
+            // Only replace this manager's analysis use case, not every camera use case in the app.
+            provider.unbind(analysis)
+            provider.bindToLifecycle(
                 ProcessLifecycleOwner.get(),
                 CameraSelector.DEFAULT_FRONT_CAMERA,
-                imageAnalysis
+                analysis
             )
-        }, ContextCompat.getMainExecutor(context))
+        }, mainExecutor)
     }
 
+    @Suppress("ReturnCount")
     private fun handleFrame(imageProxy: ImageProxy) {
         try {
-            if (!isStreaming) return
+            if (!isStreaming || !isSocketOpen) return
 
             val now = System.currentTimeMillis()
-            if (now - lastFrameSentAt < FRAME_INTERVAL_MS) {
+            if (now - lastFrameSentAt < FRAME_INTERVAL_MS) return
+
+            val socket = webSocket ?: return
+
+            // Local network queue protection in addition to one-frame-in-flight control.
+            if (socket.queueSize() > MAX_SOCKET_QUEUE_BYTES) {
+                Timber.w("Dropping frame because WebSocket queue is too large: %d bytes", socket.queueSize())
                 return
             }
 
+            if (!frameInFlight.compareAndSet(false, true)) return
+
             lastFrameSentAt = now
+            val jpegBytes = imageProxy.toJpegBytes(JPEG_QUALITY)
 
-            if (!isWebSocketConnectingOrConnected) {
-                Timber.i("First camera frame received! Initiating WebSocket connection...")
-                connect()
+            if (!socket.send(jpegBytes.toByteString())) {
+                frameInFlight.set(false)
+                Timber.w("WebSocket rejected camera frame.")
             }
-
-            val currentWebSocket = webSocket
-            if (currentWebSocket != null) {
-                val jpegBytes = imageProxy.toJpegBytes(JPEG_QUALITY)
-                currentWebSocket.send(jpegBytes.toByteString())
-            }
-        } catch (e: IllegalStateException) {
-            Timber.e(e, "Error processing frame: ${e.message}")
+        } catch (@Suppress("TooGenericExceptionCaught") exception: Exception) {
+            frameInFlight.set(false)
+            Timber.e(exception, "Error processing camera frame")
         } finally {
             imageProxy.close()
         }
     }
 
-    /**
-     * Sends an arbitrary string message or JSON payload over the active WebSocket channel.
-     *
-     * @param text The data payload to transmit.
-     */
-    fun sendText(text: String) {
-        webSocket?.send(text)
-    }
+    fun sendText(text: String): Boolean = webSocket?.send(text) == true
 
-    /**
-     * Stops the active stream, unbinds all CameraX pipeline components, and gracefully closes
-     * the current WebSocket session.
-     */
+    @Synchronized
     fun stopStream() {
-        if (!isStreaming) return
+        if (!isStreaming && webSocket == null && imageAnalysis == null) return
+
         isStreaming = false
+        isSocketOpen = false
+        frameInFlight.set(false)
+        lastFrameSentAt = 0L
         _processedBitmap.value = null
-        isWebSocketConnectingOrConnected = false
 
-        val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
-        cameraProviderFuture.addListener({
-            cameraProviderFuture.get().unbindAll()
-            imageAnalysis = null
+        imageAnalysis?.clearAnalyzer()
+        imageAnalysis?.let { analysis -> cameraProvider?.unbind(analysis) }
+        imageAnalysis = null
 
-            webSocket?.close(WEBSOCKET_CODE, "Stream stopped")
-            webSocket = null
-        }, ContextCompat.getMainExecutor(context))
+        val socketToClose = webSocket
+        webSocket = null
+        socketToClose?.close(WEBSOCKET_CODE, "Stream stopped")
     }
 
-    /**
-     * Completely shuts down the streaming manager infrastructure, terminates background execution threads,
-     * and releases camera and socket holds.
-     */
-    fun disconnect() {
+    /** Call only when the manager itself is permanently destroyed. */
+    fun release() {
         stopStream()
         cameraExecutor.shutdown()
+        client.dispatcher.executorService.shutdown()
+        client.connectionPool.evictAll()
     }
 
     private companion object {
-        private const val JPEG_QUALITY = 60
-        private const val FRAME_INTERVAL_MS = 200L
-
+        private const val STREAM_WIDTH = 640
+        private const val STREAM_HEIGHT = 480
+        private const val JPEG_QUALITY = 45
+        private const val FRAME_INTERVAL_MS = 250L
+        private const val MAX_SOCKET_QUEUE_BYTES = 1_000_000L
         private const val WEBSOCKET_CODE = 1000
     }
 }
@@ -227,9 +248,10 @@ class CameraStreamManager(
 private fun ImageProxy.toJpegBytes(quality: Int): ByteArray {
     val nv21 = yuv420ToNv21(this)
     val yuvImage = YuvImage(nv21, ImageFormat.NV21, width, height, null)
-    val outputStream = ByteArrayOutputStream()
-    yuvImage.compressToJpeg(Rect(0, 0, width, height), quality, outputStream)
-    return outputStream.toByteArray()
+    return ByteArrayOutputStream().use { outputStream ->
+        yuvImage.compressToJpeg(Rect(0, 0, width, height), quality, outputStream)
+        outputStream.toByteArray()
+    }
 }
 
 private fun yuv420ToNv21(image: ImageProxy): ByteArray {
@@ -241,9 +263,9 @@ private fun yuv420ToNv21(image: ImageProxy): ByteArray {
     val uSize = uBuffer.remaining()
     val vSize = vBuffer.remaining()
 
-    val nv21 = ByteArray(ySize + uSize + vSize)
-    yBuffer.get(nv21, 0, ySize)
-    vBuffer.get(nv21, ySize, vSize)
-    uBuffer.get(nv21, ySize + vSize, uSize)
-    return nv21
+    return ByteArray(ySize + uSize + vSize).also { nv21 ->
+        yBuffer.get(nv21, 0, ySize)
+        vBuffer.get(nv21, ySize, vSize)
+        uBuffer.get(nv21, ySize + vSize, uSize)
+    }
 }
